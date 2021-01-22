@@ -1,0 +1,7 @@
+setup_kraley.do
+setup_joanna.do
+*.dta
+*.dat
+*.gz
+output/
+
