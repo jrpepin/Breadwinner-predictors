@@ -25,14 +25,15 @@ clear
 	
 forvalues wave=1/4 {
     use "$SIPP2014/pu2014w`wave'_compressed"
-	keep	swave  			einttype  		monthcode  		wpfinwgt  	ssuid  			pnum 			/// /* TECHNICAL */
-			epnpar1  		epnpar2  		epnspouse 		rfamrefwt2  eresidenceid 	shhadid  		///
-			erelrp  		epar1typ  		epar2typ   		rhnumper  	rhnumperwt2 	rhnumu18  		/// /* HOUSEHOLD */
-			rhnumu18wt2		rhnum65over  	rhnum65ovrt2 	rrel*  		rrel_pnum*		aroutingsrop	///
-			tftotinc 		thtotinc  																	/// /* FINANCIAL */
-			tst_intv  		ems  			eorigin  		erace  		esex  			tage   			/// /* DEMOGRAPHIC */
-			eeduc  			rged 			renroll  		eedgrade  	eedgrep  		rfoodr  		///
-			rfoods  		rhpov 			rhpovt2 		thincpov  	thincpovt2  
+	keep	swave einttype monthcode wpfinwgt ssuid pnum epnpar1 epnpar2 epnspouse rfamrefwt2 eresidenceid shhadid /// /* TECHNICAL */
+			erelrp epar1typ epar2typ rhnumper rhnumperwt2 rhnumu18 rhnumu18wt2 rhnum65over rhnum65ovrt2 rrel*	 /// /* HOUSEHOLD / CHILDREN */
+			rrel_pnum* rany5 rfamkind rfamkindwt2 tcbyr* tyear_fb												///
+			tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2													/// /* FINANCIAL */
+			tst_intv ems ems_ehc tyrcurrmarr tyrfirstmarr exmar eorigin erace esex tage tage_fb eeduc			/// /* DEMOGRAPHIC */
+			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_chearn1				/// /* EMPLOYMENT */
+			ejb*_chermn1 ejb*_chhour1 ejb*_chhomn1 ejb*_payhr*													///
+			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
+			tjb*_gamt* tjb*_msum tpearn
 	
 // Make the person number identifier numeric
 		 * destring pnum, replace /// Already numeric
