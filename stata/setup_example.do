@@ -5,7 +5,7 @@
 * STANDARD PROJECT MACROS-------------------------------------------------------
 global projcode 		"$homedir/github/Breadwinner-predictors"
 global logdir 			"$homedir/logs/breadwinner-predictors"
-global tempdir 			"$projcode/data/tmp"
+global tempdir 			"$homedir/data/tmp"
 
 // Where scripts and markdown documents that analyze data go
 global results 		    "$projcode/results"
@@ -15,6 +15,6 @@ global output 			"$homedir/projects/breadwinner-predictors/output"
 
 * PROJECT SPECIFIC MACROS-------------------------------------------------------
 // SIPP 2014
-global SIPP2014 		"/data/sipp/2014"
+global SIPP2014 		"$homedir/data/sipp/2014"
 global SIPP2014_code 	"$projcode/stata"
-global SIPP14keep 		"$homedir/projects/breadwinner-predictors/SIPP/data"
+global SIPP14keep 		"$homedir/projects/breadwinner-predictors/data"
