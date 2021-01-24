@@ -125,7 +125,7 @@ reshape long `change_variables' trans_bw50 trans_bw60 bw50L bw60L monthsobserved
 		
 * Create table describing full sample of mothers and analytical sample.
 
-putexcel set "$output/Descriptives60.xlsx", sheet(sample) replace
+putexcel set "$results/Descriptives60.xlsx", sheet(sample) replace
 putexcel A1:D1 = "Characteristics of full sample of mothers and analytical sample", merge border(bottom)
 putexcel B2 = ("All Mothers") D2 = ("Analytical sample"), border(bottom)
 putexcel B3 = ("percent") D3 = ("percent"), border(bottom)

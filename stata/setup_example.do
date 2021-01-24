@@ -7,11 +7,8 @@ global projcode 		"$homedir/github/Breadwinner-predictors"
 global logdir 			"$homedir/logs/breadwinner-predictors"
 global tempdir 			"$homedir/data/tmp"
 
-// Where scripts and markdown documents that analyze data go
-global results 		    "$projcode/results"
-
-// Where you want html or putdoc files to go (NOT SHARED)
-global output 			"$homedir/projects/breadwinner-predictors/output"
+// Where you want produced tables, html or putdoc output files to go (NOT SHARED)
+global results 			"$homedir/projects/breadwinner-predictors/results"
 
 * PROJECT SPECIFIC MACROS-------------------------------------------------------
 // SIPP 2014
