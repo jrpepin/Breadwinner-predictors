@@ -18,7 +18,9 @@
 //------------------------------------------------------------------------------
 
 * The current directory is assumed to be the stata directory within the NLSY sub-directory.
-* cd ".../Breadwinner/SIPP/stata" 
+* cd ".../Breadwinner-predictors/stata" 
+
+set maxvar 5500
 
 // Run the setup script
 	do "00_sipp14_setup_breadwinner_environment"
