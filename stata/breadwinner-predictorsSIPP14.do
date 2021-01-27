@@ -84,8 +84,8 @@ set maxvar 5500
 	do "$SIPP2014_code/08_sipp14_annualize.do"
 	log close
 
-// Create indicators of transitions into and out of breadwinning
-	log using "$logdir/bw_transitions.log", replace
-	do "$SIPP2014_code/09_sipp14_bw_transitions.do"
+// Create descriptive statistics
+	log using "$logdir/bw_descriptives.log", replace
+	do "$SIPP2014_code/09_sipp14_bw_descriptives.do"
 	log close
 

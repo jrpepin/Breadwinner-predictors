@@ -115,7 +115,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 		/// moth
 					start_spartner last_spartner start_spouse last_spouse		///
 					start_partner last_partner tage ageb1 tcbyr_1-tcbyr_7		///
 			(min) 	tage_fb durmom youngest_age first_wave						///
-			(max) 	 to_num* to_sex* to_age* to_race* to_educ*					/// other hh members char.
+			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*		/// other hh members char.
 			(sum) 	to_TPEARN* to_TMWKHRS* to_earnings*			 				///
 			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*						///
 			(firstnm) st_*														/// will cover all (mother + hh per recodes) 

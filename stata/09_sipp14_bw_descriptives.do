@@ -72,7 +72,7 @@ replace trans_bw60=. if year==2013
 drop nprevbw50 nprevbw60*	
 
 ********************************************************************************
-* Address missing data
+* Address missing data & some value labels that dropped off
 ********************************************************************************
 // 	Create a tempory unique person id variable
 	sort SSUID PNUM
@@ -115,11 +115,79 @@ label values st_employ end_employ employ
 
 replace birth=0 if birth==.
 
+
+#delimit ;
+label define arel 1 "Spouse"
+                  2 "Unmarried partner"
+                  3 "Biological parent"
+                  4 "Biological child"
+                  5 "Step parent"
+                  6 "Step child"
+                  7 "Adoptive parent"
+                  8 "Adoptive child"
+                  9 "Grandparent"
+                 10 "Grandchild"
+                 11 "Biological siblings"
+                 12 "Half siblings"
+                 13 "Step siblings"
+                 14 "Adopted siblings"
+                 15 "Other siblings"
+                 16 "In-law"
+                 17 "Aunt, Uncle, Niece, Nephew"
+                 18 "Other relationship"   
+                 19 "Foster parent/Child"
+                 20 "Other non-relative"
+                 99 "self" ;
+
+#delimit cr
+
+label values relationship* arel
+
 // Look at how many respondents first appeared in each wave
 tab first_wave wave 
 
 // Look at percent breadwinning (60%) by wave and years of motherhood
 table durmom wave, contents(mean bw60) format(%3.2g)
+
+********************************************************************************
+* Partner descriptive info
+********************************************************************************
+
+gen spousenum=.
+forvalues n=1/22{
+replace spousenum=`n' if relationship`n'==1
+}
+
+gen partnernum=.
+forvalues n=1/22{
+replace partnernum=`n' if relationship`n'==2
+}
+
+// gen check=.
+// replace check=1 if !missing(spousenum) & !missing(partnernum) // how many respondents have a spouse and unmarried partner in their HH = will use spouse. their marital status also changed over the year
+// drop check
+
+gen spart_num=spousenum
+replace spart_num=partnernum if spart_num==.
+
+foreach var in educ_sp race_sp employ_sp occ_sp age_sp earnings_sp earnings_a_sp tot_hrs_sp avg_hrs_sp{
+gen `var'=.
+}
+
+forvalues n=1/22{
+replace educ_sp=to_educ`n' if spart_num==`n'
+replace race_sp=to_race`n' if spart_num==`n'
+replace employ_sp=end_to_employ`n' if spart_num==`n'
+replace occ_sp=end_to_occ_1`n' if spart_num==`n'
+replace age_sp=to_age`n' if spart_num==`n'
+replace earnings_sp=to_TPEARN`n' if spart_num==`n'
+replace earnings_a_sp=to_earnings`n' if spart_num==`n'
+replace tot_hrs_sp=to_TMWKHRS`n' if spart_num==`n'
+replace avg_hrs_sp=avg_to_hrs`n' if spart_num==`n'
+}
+
+//check browse spart_num educ_sp to_educ* 
+
 
 ********************************************************************************
 * Create spreadsheet
@@ -129,8 +197,8 @@ table durmom wave, contents(mean bw60) format(%3.2g)
 
 putexcel set "$results/Descriptives60.xlsx", sheet(sample) replace
 putexcel A1:D1 = "Characteristics of full sample of mothers and analytical sample", merge border(bottom)
-putexcel B2 = ("All Mothers") D2 = ("Analytical sample"), border(bottom)
-putexcel B3 = ("percent") D3 = ("percent"), border(bottom)
+putexcel B2 = ("All Mothers") D2 = ("Analytical sample") F2 = ("Partners"), border(bottom)
+putexcel B3 = ("percent") D3 = ("percent") F3 = ("percent"), border(bottom)
 putexcel A4 = "Marital Status"
 putexcel A5 = " Spouse"
 putexcel A6 = " Partner"
@@ -171,7 +239,7 @@ putexcel A40 = "Military", txtindent(2)
 putexcel A41 = "Primary Earner (60%)"
 
 
-putexcel B42 = ("mean") D42= ("mean"), border(bottom)
+putexcel B42 = ("mean") D42= ("mean") F42= ("mean"), border(bottom)
 putexcel A43 = "age"
 putexcel A44 = "Years since first birth"
 putexcel A45 = "personal earnings"
@@ -195,6 +263,7 @@ putexcel A59 = "unweighted N (individuals)"
 * Fill in descriptive information
 ********************************************************************************
 
+*******************************************
 // Fill in table for full sample
 
 recode spouse (0=0) (.001/1=1)
@@ -297,7 +366,70 @@ local fs = obvsfs
 
 putexcel B59 = `fs'
 
+*******************************************
+// Fill in table for full samples' partners
 
+local race "white_sp black_sp asian_sp hispanic_sp other_sp"
+
+forvalues r=1/5 {
+   local re: word `r' of `race'
+   gen `re' = race_sp==`r' if !missing(race_sp)
+   mean `re' [aweight=wpfinwgt] 
+   matrix m`re' = 100*e(b)
+   local p`re' = m`re'[1,1]
+   local row = 10+`r'
+   putexcel F`row' = `p`re'', nformat(##.#)
+}
+
+local ed "lesshs_sp hs_sp somecol_sp univ_sp adv_sp"
+
+forvalues e=1/5 {
+   local educ : word `e' of `ed'
+   gen `educ' = educ_sp==`e' if !missing(educ_sp)
+   mean `educ' [aweight=wpfinwgt] 
+   matrix m`educ' = 100*e(b)
+   local p`educ' = m`educ'[1,1]
+   local row = 16+`e'
+   putexcel F`row' = `p`educ'', nformat(##.#)
+}
+
+local jobst "ft_sp pt_sp nwl_sp nwnl_sp"
+
+forvalues j=1/4 {
+   local job : word `j' of `jobst'
+   gen `job' = employ_sp==`j' if !missing(employ_sp)
+   mean `job' [aweight=wpfinwgt] 
+   matrix m`job' = 100*e(b)
+   local p`job' = m`job'[1,1]
+   local row = 22+`j'
+   putexcel F`row' = `p`job'', nformat(##.#)
+}
+
+local oc "mgmt_sp stem_sp educ_leg_sp health_sp serv_sp sales_sp off_sp farm_sp constr_sp main_sp prod_sp trans_sp mil_sp"
+
+forvalues o=1/13 {
+   local occ : word `o' of `oc'
+   gen `occ' = occ_sp==`o' if !missing(occ_sp)
+   mean `occ' [aweight=wpfinwgt] 
+   matrix m`occ' = 100*e(b)
+   local p`occ' = m`occ'[1,1]
+   local row = 27+`o'
+   putexcel F`row' = `p`occ'', nformat(##.#)
+}
+
+local means "age_sp earnings_sp earnings_a_sp tot_hrs_sp avg_hrs_sp"
+local rowval "43 45 48 49 50"
+
+forvalues m=1/5{
+    local var: word `m' of `means'
+    mean `var' [aweight=wpfinwgt] 
+    matrix m`var' = e(b)
+    local v`m' = m`var'[1,1]
+    local row: word `m' of `rowval'
+    putexcel F`row' = `v`m'', nformat(##.#)
+}
+
+*******************************************
 // keep only observations with data in the current waves
 keep if !missing(monthsobserved)
 
@@ -347,6 +479,8 @@ putexcel D7 = `gain_p', nformat(##.#)
 putexcel D8 = `lost_p', nformat(##.#)
 putexcel D9 = `birth', nformat(##.#)
 
+local race "white black asian hispanic other"
+
 forvalues r=1/5 {
    local re: word `r' of `race'
    mean `re' [aweight=wpfinwgt] 
@@ -357,6 +491,8 @@ forvalues r=1/5 {
 }
 
 
+local ed "lesshs hs somecol univ adv"
+
 forvalues e=1/5 {
    local educ : word `e' of `ed'
    mean `educ' [aweight=wpfinwgt] 
@@ -365,6 +501,8 @@ forvalues e=1/5 {
    local row = 16+`e'
    putexcel D`row' = `p`educ'', nformat(##.#)
 }
+
+local jobst "ft pt nwl nwnl"
 
 forvalues j=1/4 {
    local job : word `j' of `jobst'
@@ -375,6 +513,7 @@ forvalues j=1/4 {
    putexcel D`row' = `p`job'', nformat(##.#)
 }
 
+local oc "mgmt stem educ_leg health serv sales off farm constr main prod trans mil"
 
 forvalues o=1/13 {
    local occ : word `o' of `oc'
@@ -385,12 +524,12 @@ forvalues o=1/13 {
    putexcel D`row' = `p`occ'', nformat(##.#)
 }
 
-
 mean bw60 [aweight=wpfinwgt] 
 matrix mbw60 = 100*e(b)
 local pbw60 = mbw60[1,1]
 putexcel D41 = `pbw60'
 
+local means "tage durmom tpearn thearn earnings_ratio earnings tmwkhrs avg_hrs hhsize numearner minorchildren preschoolchildren youngest_age oldest_age tage_fb end_rmnumjobs"
 forvalues m=1/16{
     local var: word `m' of `means'
     mean `var' [aweight=wpfinwgt] 
