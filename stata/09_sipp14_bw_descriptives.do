@@ -14,9 +14,62 @@ di "$S_DATE"
 * It is restricted to mothers living with minor children.
 
 ********************************************************************************
-* Import data
+* Import data  & create breadwinning measures
 ********************************************************************************
 use "$SIPP14keep/annual_bw_status.dta", clear
+
+
+********************************************************************************
+* Create breadwinning measures
+********************************************************************************
+// Create a lagged measure of breadwinning
+
+gen bw50L=.
+replace bw50L=bw50[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
+replace bw50L=. if year==2013 // in wave 1 we have no measure of breadwinning in previous wave
+//browse SSUID PNUM year bw50 bw50L
+
+gen bw60L=.
+replace bw60L=bw60[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
+replace bw60L=. if year==2013 // in wave 1 we have no measure of breadwinning in previous wave
+
+gen monthsobservedL=.
+replace monthsobservedL=monthsobserved[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
+
+gen minorbiochildrenL=.
+replace minorbiochildrenL=minorbiochildren[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
+
+
+// Create an indicators for whether individual transitioned into breadwinning for the first time (1) 
+*  or has been observed breadwinning in the past (2). There is no measure for wave 1 because
+* we cant know whether those breadwinning at wave 1 transitioned or were continuing
+* in that status...except for women who became mothers in 2013, but there isn't a good
+* reason to adjust code just for duration 0.
+
+gen nprevbw50=0
+replace nprevbw50=nprevbw50[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) // in 2/-1 
+replace nprevbw50=nprevbw50+1 if bw50[_n-1]==1 & PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1)
+// browse SSUID PNUM year nprevbw50 bw50 bw50L
+
+gen nprevbw60=0
+replace nprevbw60=nprevbw60[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) // in 2/-1 
+replace nprevbw60=nprevbw60+1 if bw60[_n-1]==1 & PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1)
+
+gen trans_bw50=.
+replace trans_bw50=0 if bw50==0 & nprevbw50==0
+replace trans_bw50=1 if bw50==1 & nprevbw50==0
+replace trans_bw50=2 if nprevbw50 > 0
+replace trans_bw50=. if year==2013
+
+gen trans_bw60=.
+replace trans_bw60=0 if bw60==0 & nprevbw60==0
+replace trans_bw60=1 if bw60==1 & nprevbw60==0
+replace trans_bw60=2 if nprevbw60 > 0
+replace trans_bw60=. if year==2013
+
+// browse SSUID PNUM year nprevbw50 bw50 bw50L trans_bw50
+
+drop nprevbw50 nprevbw60*	
 
 ********************************************************************************
 * Address missing data
@@ -59,6 +112,8 @@ label values st_occ* end_occ* occupation
 
 label define employ 1 "Full Time" 2 "Part Time" 3 "Not Working - Looking" 4 "Not Working - Not Looking" // this is probably oversimplified at the moment
 label values st_employ end_employ employ
+
+replace birth=0 if birth==.
 
 // Look at how many respondents first appeared in each wave
 tab first_wave wave 
@@ -153,8 +208,23 @@ mean partner [aweight=wpfinwgt]
 matrix partner = 100*e(b)
 local ppartner = partner[1,1]
 
+mean gain_partner [aweight=wpfinwgt] 
+matrix gain_partner = 100*e(b)
+local gain_p = gain_partner[1,1]
+
+mean lost_partner [aweight=wpfinwgt] 
+matrix lost_partner = 100*e(b)
+local lost_p= lost_partner[1,1]
+
+mean birth [aweight=wpfinwgt] 
+matrix birth = 100*e(b)
+local birth = birth[1,1]
+
 putexcel B5 = `pspouse', nformat(##.#)
 putexcel B6 = `ppartner', nformat(##.#)
+putexcel B7 = `gain_p', nformat(##.#)
+putexcel B8 = `lost_p', nformat(##.#)
+putexcel B9 = `birth', nformat(##.#)
 
 ** Full sample
 
@@ -239,7 +309,7 @@ tab durmom
 
 // and the previous wave, the only cases where we know about a *transition*
 // except in year where woman becomes a mother. 
-keep if !missing(monthsobserved) | durmom==0 // was there supposed to be an L here? I maybe cut this out
+keep if !missing(monthsobservedL) | durmom==0 
 
 tab durmom
 
@@ -259,9 +329,23 @@ mean partner [aweight=wpfinwgt]
 matrix spartner = 100*e(b)
 local ppartner = spartner[1,1]
 
+mean gain_partner [aweight=wpfinwgt] 
+matrix gain_partner = 100*e(b)
+local gain_p = gain_partner[1,1]
+
+mean lost_partner [aweight=wpfinwgt] 
+matrix lost_partner = 100*e(b)
+local lost_p= lost_partner[1,1]
+
+mean birth [aweight=wpfinwgt] 
+matrix birth = 100*e(b)
+local birth = birth[1,1]
+
 putexcel D5 = `pspouse', nformat(##.#)
 putexcel D6 = `ppartner', nformat(##.#)
-
+putexcel D7 = `gain_p', nformat(##.#)
+putexcel D8 = `lost_p', nformat(##.#)
+putexcel D9 = `birth', nformat(##.#)
 
 forvalues r=1/5 {
    local re: word `r' of `race'
