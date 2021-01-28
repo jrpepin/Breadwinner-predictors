@@ -1,0 +1,27 @@
+The goal of this research is to examine the predictors of transitions into primary earning The motivation for this research stems from our earlier findings that a large majority of mothers will experience primary earning in their lifetimes. What we don't know is whether this is because women, including mothers, now have career opportunites that enable them to provide primary support for their families. Alternatively, it could be that high levels of single motherhood and precarious employment among fathers is the dominant pathway into primary earning. That is, we do not know whether the high levels of primary earning arise from growing economic opportunity for mothers or declining wages for men and high rates of family instability.
+
+<here begins a section of wrong-headed thinking>
+For the multivariate analyses studying the predictors of transitions into primary earniing, we are going to want a sample of mothers of at least one coresident child < 18 years old who are not primary earners and are observed in the following year.
+
+Our predictors will be partner status, education, mothers' employment, partner's employment, mothers earnings...wait, what?
+<end>
+
+Hold on, hold on, hold on. This doesn't make sense. What's the question that we really want to answer? We want to know what is the dominant pathway into primary earning. I think this is similar to a proximate determinants approach to studying fertility. If we are trying to understand a fertility decline, we might try to identify which oof the proximate determinants is the source of that decline. For example, was the decline in fertility because of a delay in marriage (exposure) or because of a rise in contraception (deliberate fertility control). We probably would not estimate a model where we used marriage and contraceptive use to predict fertility to answer the research question. Why not? Because we already know that marriage is positively associated with fertility and contraceptive use is negatively associated. The of the research point isn't to answer the question of whether having sex causes fertility. Similarly, our interest isn't to answer the question of whether getting a raise causes an increased change of being a primary earner. It is, nearly by definition.
+
+There are a set of necessary conditions to be a primary earniing mother:
+
+a) must have a coresident child age 18+
+b) must have earnings
+c) must not have other household members who make (collectively) more than two-thirds of what you earn.
+
+A parallel set of factors account for all transitions into primary earning:
+
+* transition to motherhood for women who are primary earners
+* increase in earnings
+* decrease in other household members' earnings either
+  - by them leaving the household or
+  - by them experiencing a decrease in earnings
+
+Our simplest question is which of these is the most common pathway. This is different from answering a question about what causes an entry into primary earning. Our "predictors" definitely cause primary earning by definition. The question is which of these circumstances is most common among women transitioning into primary earning.
+
+
