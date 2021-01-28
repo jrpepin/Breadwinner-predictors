@@ -10,4 +10,4 @@ set maxvar 5500
 
 // SIPP analysis
 cd ./stata
-do breadwinnerSIPP14.do
+do breadwinner-predictorsSIPP14.do
