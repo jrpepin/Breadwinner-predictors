@@ -79,18 +79,18 @@ save "$tempdir/rel_pairs_bymonth.dta", replace
 use "$SIPP14keep/allmonths14_rec.dta", clear
 
 // Select only necessary variables
-keep SSUID ERESIDENCEID PNUM panelmonth TAGE ESEX race educ employ TAGE_FB EMS TPEARN earnings TMWKHRS ft_pt occ*
+keep SSUID ERESIDENCEID PNUM panelmonth TAGE ESEX race educ employ TAGE_FB EMS TPEARN earnings TMWKHRS ft_pt occ* EINTTYPE whynowork leave_job*
 
 save "$tempdir/onehalf.dta", replace
 
-foreach var in PNUM TAGE ESEX race educ employ TAGE_FB EMS TPEARN earnings TMWKHRS ft_pt occ_1 occ_2 occ_3 occ_4 occ_5 occ_6 occ_7 {
+foreach var in PNUM TAGE ESEX race educ employ TAGE_FB EMS TPEARN earnings TMWKHRS ft_pt occ_1 occ_2 occ_3 occ_4 occ_5 occ_6 occ_7 EINTTYPE whynowork leave_job1 leave_job2 leave_job3 leave_job4 leave_job5 leave_job6 leave_job7 {
 rename `var' from_`var'
 }
 
 // Reshape the data
 joinby SSUID ERESIDENCEID panelmonth using "$tempdir/onehalf.dta" 
 
-foreach var in PNUM TAGE ESEX race educ employ TAGE_FB EMS TPEARN earnings TMWKHRS ft_pt occ_1 occ_2 occ_3 occ_4 occ_5 occ_6 occ_7 {
+foreach var in PNUM TAGE ESEX race educ employ TAGE_FB EMS TPEARN earnings TMWKHRS ft_pt occ_1 occ_2 occ_3 occ_4 occ_5 occ_6 occ_7 EINTTYPE whynowork leave_job1 leave_job2 leave_job3 leave_job4 leave_job5 leave_job6 leave_job7{
 rename `var' to_`var'
 }
 
@@ -105,7 +105,7 @@ rename to_ESEX to_sex
 
 // Organize the data to make it easier to see the merged results
 sort SSUID ERESIDENCEID panelmonth from_num to_num
-order  SSUID ERESIDENCEID panelmonth from_num to_num from_age to_age from_sex to_sex from_race to_race from_educ to_educ from_employ to_employ from_TAGE_FB to_TAGE_FB from_EMS to_EMS from_TPEARN to_TPEARN from_earnings to_earnings from_TMWKHRS to_TMWKHRS from_ft_pt to_ft_pt from_occ_1 to_occ_1 from_occ_2 to_occ_2 from_occ_3 to_occ_3 from_occ_4 to_occ_4 from_occ_5 to_occ_5 from_occ_6 to_occ_6 from_occ_7 to_occ_7
+order  SSUID ERESIDENCEID panelmonth from_num to_num from_age to_age from_sex to_sex from_race to_race from_educ to_educ from_employ to_employ from_TAGE_FB to_TAGE_FB from_EMS to_EMS from_TPEARN to_TPEARN from_earnings to_earnings from_TMWKHRS to_TMWKHRS from_ft_pt to_ft_pt from_occ_1 to_occ_1 from_occ_2 to_occ_2 from_occ_3 to_occ_3 from_occ_4 to_occ_4 from_occ_5 to_occ_5 from_occ_6 to_occ_6 from_occ_7 to_occ_7 from_EINTTYPE to_EINTTYPE from_whynowork to_whynowork from_leave_job1 to_leave_job1 from_leave_job2 to_leave_job2 from_leave_job3 to_leave_job3 from_leave_job4 to_leave_job4 from_leave_job5 to_leave_job5 from_leave_job6 to_leave_job6 from_leave_job7 to_leave_job7
 
 * browse // look at the results
 

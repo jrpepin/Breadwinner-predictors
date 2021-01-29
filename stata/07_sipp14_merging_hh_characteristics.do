@@ -7,7 +7,8 @@
 * and measures_and_sample.do
 
 ********************************************************************************
-* Create file that just retains partnered households
+* Create file that retains information for those who match
+* to a mother in final sample
 ********************************************************************************
 * To get relationships / attributes
 
@@ -17,7 +18,7 @@ drop RRELIG
 
 // reshape wide to_num relationship to_sex to_age to_race to_educ to_employ to_TAGE_FB to_EMS to_TPEARN to_earnings to_TMWKHRS to_ft_pt to_occ_1 to_occ_2 to_occ_3 to_occ_4 to_occ_5 to_occ_6 to_occ_7,i(SSUID ERESIDENCEID from_num panelmonth) j(lno) 
 
-reshape wide to_num relationship RREL to_sex from_age to_age pairtype from_sex from_race to_race from_educ to_educ from_employ to_employ from_TAGE_FB to_TAGE_FB from_EMS to_EMS from_TPEARN to_TPEARN from_earnings to_earnings from_TMWKHRS to_TMWKHRS from_ft_pt to_ft_pt from_occ_1 to_occ_1 from_occ_2 to_occ_2 from_occ_3 to_occ_3 from_occ_4 to_occ_4 from_occ_5 to_occ_5 from_occ_6 to_occ_6 from_occ_7 to_occ_7,i(SSUID ERESIDENCEID from_num panelmonth) j(lno)
+reshape wide to_num relationship RREL to_sex from_age to_age pairtype from_sex from_race to_race from_educ to_educ from_employ to_employ from_TAGE_FB to_TAGE_FB from_EMS to_EMS from_TPEARN to_TPEARN from_earnings to_earnings from_TMWKHRS to_TMWKHRS from_ft_pt to_ft_pt from_occ_1 to_occ_1 from_occ_2 to_occ_2 from_occ_3 to_occ_3 from_occ_4 to_occ_4 from_occ_5 to_occ_5 from_occ_6 to_occ_6 from_occ_7 to_occ_7 from_EINTTYPE to_EINTTYPE from_whynowork to_whynowork from_leave_job1 to_leave_job1 from_leave_job2 to_leave_job2 from_leave_job3 to_leave_job3 from_leave_job4 to_leave_job4 from_leave_job5 to_leave_job5 from_leave_job6 to_leave_job6 from_leave_job7 to_leave_job7,i(SSUID ERESIDENCEID from_num panelmonth) j(lno)
 
 rename from_num PNUM
 

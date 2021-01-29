@@ -21,11 +21,12 @@ clear
 
    forvalues w=1/4{
       use "$SIPP2014/pu2014w`w'_compressed.dta"
-   	keep	swave monthcode wpfinwgt ssuid pnum eresidenceid shhadid 											/// /* TECHNICAL */
+   	keep	swave monthcode wpfinwgt ssuid pnum eresidenceid shhadid einttype thhldstatus						/// /* TECHNICAL */
 			tpearn apearn tjb?_msum ajb?_msum tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2				/// /* FINANCIAL   */
-			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc tyrcurrmarr tyrfirstmarr exmar  		/// /* DEMOGRAPHIC */
-			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_chearn1				/// /* EMPLOYMENT */
-			ejb*_chermn1 ejb*_chhour1 ejb*_chhomn1 ejb*_payhr*													///
+			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc								/// /* DEMOGRAPHIC */
+			tyrcurrmarr tyrfirstmarr exmar eehc_why														  		///
+			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
+			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr*														///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
 			tjb*_gamt* tjb*_msum tpearn
 			
@@ -78,9 +79,30 @@ clear
 	forvalues birth = 2/12 {
 		replace yrfirstbirth = tcbyr_`birth' if tcbyr_`birth' < yrfirstbirth
 	}
+	
 
-// Create an indicator of how many years have elapsed since individual transitioned to parenthood
-   gen durmom=year-yrfirstbirth if !missing(yrfirstbirth)
+	// browse tyear_fb yrfirstbirth tcbyr_1
+	// browse tcbyr_1 tcbyr_2 tcbyr_3 if tcbyr_1 > tcbyr_2
+	
+	gen bcheck=.
+	replace bcheck=1 if yrfirstbirth==tyear_fb
+	replace bcheck=0 if yrfirstbirth!=tyear_fb
+	
+// create an indicator of birth year of the last child
+	egen yrlastbirth = rowmax(tcbyr_1-tcbyr_7)
+
+// Create an indicator of how many years have elapsed since individual's last birth
+   gen durmom=year-yrlastbirth if !missing(yrlastbirth)
+
+// Create an indicator of how many years have elapsed since individual's first birth
+* Note: I want to be able to capture negatives in this case, because we want the year prior to women bcoming a mother if she did in the panel. However, if she had her first baby in 2014, all her tcbyr's will be blank in the 2013 survey (since they only ask that question to parents) -- I need to copy the value of her yr of first birth to all nulls before then to get the appropriate calculation. example browse SSUID PNUM yrfirstbirth year tcbyr_1 if SSUID == "000114552134"
+bysort SSUID PNUM (yrfirstbirth): replace yrfirstbirth = yrfirstbirth[1] 
+
+gen durmom_1st=year-yrfirstbirth if !missing(yrfirstbirth) // to get the duration 1 year prior to respondent becoming a mom
+   
+gen mom_panel=.
+replace mom_panel=1 if inrange(yrfirstbirth, 2013, 2016) // flag if became a mom during panel to use later
+
 * Note that durmom=0 when child was born in this year, but some of the children born in the previous calendar
 * year are still < 1. So if we want the percentage of mothers breadwinning in the year of the child's birth
 * we should check to see if breadwinning is much different between durmom=0 or durmom=1. We could use durmom=1
@@ -101,7 +123,7 @@ clear
    replace check=1 if ageb1==tage_fb & tage_fb!=.
    replace check=0 if ageb1!=tage_fb
    
-   browse tage_fb ageb1 check if check==0 // if anything tage_fb is one year younger, probably because based on specific date not just year-  use that?
+//   browse tage_fb ageb1 check if check==0 // comparing calculated v. recoded age at first birth. if anything tage_fb is one year younger, probably because based on specific date not just year-  use that?
    
 
 ********************************************************************************
@@ -181,6 +203,51 @@ drop tjb`job'_occ
 
 * employer change: do we want any employer characteristics? could / would industry go here?
 
+//misc variables
+* reasons for moving
+
+recode eehc_why (1/3=1) (4/7=2) (8/12=3) (13=4) (14=5) (15=7) (16=6), gen(moves)
+label define moves 1 "Family reason" 2 "Job reason" 3 "House/Neighborhood" 4 "Disaster" 5 "Evicted" 6 "Other" 7 "Did not Move"
+label values moves moves
+
+* Reasons for leaving employer
+label define leave_job 1 "Fired" 2 "Other Involuntary Reason" 3 "Quit Voluntarily" 4 "Retired" 5 "Childcare-related" 6 "Other personal reason" 7 "Illness" 8 "In School"
+
+forvalues job=1/7{ 
+recode ejb`job'_rsend (5=1)(1/4=2)(6=2)(7/9=3)(10=4)(11=5)(12=6)(16=6)(13/14=7)(15=8), gen(leave_job`job')
+label values leave_job`job' leave_job
+drop ejb`job'_rsend
+}
+
+* Reasons for work schedule
+label define schedule 1 "Involuntary" 2 "Pay" 3 "Childcare" 4 "Other Voluntary"
+
+forvalues job=1/7{
+recode ejb`job'_wsmnr (1/3=1) (4=2) (5=3) (6/8=4), gen(why_schedule`job') 
+label values why_schedule`job' schedule
+drop ejb`job'_wsmnr
+}
+
+* Why not working - this is a series of variables not one variable, so first checking for how many people gave more than one reason, then recoding
+forvalues n=1/12{
+replace enj_nowrk`n'=0 if enj_nowrk`n'==2
+} // recoding nos to 0 instead of 2
+
+egen count_nowork = rowtotal(enj_nowrk1-enj_nowrk12)
+//browse count_nowork ENJ_NO*
+tab count_nowork
+
+gen why_nowork=.
+forvalues n=1/12{
+replace why_nowork = `n' if enj_nowrk`n'==1 & count_nowork==1
+}
+
+replace why_nowork=13 if count_nowork>=2 & !missing(count_nowork)
+
+recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), gen(whynowork)
+label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
+label values whynowork whynowork
+
 ********************************************************************************
 * Create the analytic sample
 ********************************************************************************
@@ -224,45 +291,35 @@ drop tjb`job'_occ
 	global 	women_n = women
 	di "$women_n"
 
+	// browse durmom_1st year yrfirstbirth tcbyr* if durmom_1st<=0
+	// browse durmom_1st year yrfirstbirth tcbyr* if yrfirstbirth >=2013 &!missing(yrfirstbirth)
+	// tab durmom_1st durmom   if durmom_1st==0 | durmom_1st==-1 | durmom_1st==1, m
+	
 // Only keep mothers
-	tab 	durmom, m
-	unique 	idnum 	if durmom ==.  // Not mothers
-	keep 		 	if durmom !=.  // Keep only mothers
+	tab 	durmom_1st, m
+	unique 	idnum 	if durmom_1st ==.  // Not mothers
+	keep 		 	if durmom_1st !=.  // Keep only mothers
 	
 	// Creates a macro with the total number of mothers in the dataset.
 	egen	mothers = nvals(idnum)
 	global mothers_n = mothers
 	di "$mothers_n"
 
-* Keep only if first birth occurred during or before the reference period
-
-// Drop births that happened after the reference period (in the year of the interview).
-// We don't have earnings data for the year of the interview and so it's not useful to have those births in the data (yet)
- 	tab 	durmom, m
-	unique 	idnum 	if durmom <  0  // became mom during year of the interview.
-	keep			if durmom >= 0
+* Keep mothers that meet our criteria: 18 years or less since last birth OR became a mother during panel (we want data starting 1 year prior to motherhood)
+	keep if (durmom>=0 & durmom < 19) | (mom_panel==1 & durmom_1st>=-1)
 	
 	// Creates a macro with the total number of mothers left in the dataset.
-	egen	afterref = nvals(idnum)
-	global minus_afterref = afterref
-	di "$minus_afterref"
+	egen	mothers_sample = nvals(idnum)
+	global mothers_sample = mothers_sample
+	di "$mothers_sample"
 	
-// Keep only if first birth occurred fewer than 19 years prior to reference period
- 	tab 	durmom , m
-	unique 	idnum 	if durmom > 19	
-	drop 			if durmom > 19	// Drop "old" mothers
-
-	// Creates a macro with the total number of mothers left in the dataset.
-	egen	notold = nvals(idnum)
-	global minus_oldmoms = notold
-	di "$minus_oldmoms"
-
 // Consider dropping respondents who have an error in birthyear
 	* (year of first birth is > respondents year of birth+9)
 	*  drop if birthyear_error == 1
 tab birthyear_error	
+
 // Clean up dataset
-	drop idnum all allwomen women mothers afterref notold
+	drop idnum all allwomen women mothers mothers_sample 
 	
 ********************************************************************************
 * Merge  measures of earning, demographic characteristics and household composition
@@ -280,7 +337,7 @@ drop if _merge==2
 	* So, individuals living alone are not in the data.
 
 	// Make relationship variables equal to zero
-	local hhcompvars "minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner numtype2"
+	local hhcompvars "minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner numtype2 parents grandparents grandchildren siblings"
 
 	foreach var of local hhcompvars{
 		replace `var'=0 if _merge==1 & missing(`var') 
@@ -304,10 +361,10 @@ drop if _merge==2
 	di "$newsamplesize"
 
 // Make sure starting sample size is consistent.
-	di "$minus_oldmoms"
+	di "$mothers_sample"
 	di "$newsamplesize"
 
-	if ("$minus_oldmoms" == "$newsamplesize") {
+	if ("$newsamplesize" == "$newsamplesize") {
 		display "Success! Sample sizes consistent."
 		}
 		else {
@@ -326,8 +383,10 @@ drop if _merge==2
 	unique 	idnum 	if minorbiochildren >= 1  	// 1 or more minor children in household
 *NOTE: Keeping all mothers, even those not living with bio children for this part of the analysis.
 *Create macro just to get the n for later purposes (see msltprep.do).
-*	keep 			if minorbiochildren >= 1	// Keep only moms with kids in household
-	
+*	keep if minorbiochildren >= 1	// Keep only moms with kids in household
+
+/* It's something worth thinking about more. Generally, we assume that minor children live with their mothers and generally that is right. In the earlier analysis, I put women not living with minor children as a separate category to be able to see how wrong the assumption is. The results pretty clearly support the idea that most (but not all mothers, all the time) live with their minor children. So, the decision to include all mothers is really about minimizing the number of complications we introduce to the analysis.
+*/	
 
 // Creates a macro with the total number of mothers in the dataset.
 preserve

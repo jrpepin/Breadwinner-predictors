@@ -93,4 +93,50 @@ drop TJB`job'_OCC
 
 * employer change: do we want any employer characteristics? could / would industry go here?
 
+//misc variables
+* reasons for moving
+
+recode EEHC_WHY (1/3=1) (4/7=2) (8/12=3) (13=4) (14=5) (15=7) (16=6), gen(moves)
+label define moves 1 "Family reason" 2 "Job reason" 3 "House/Neighborhood" 4 "Disaster" 5 "Evicted" 6 "Other" 7 "Did not Move"
+label values moves moves
+
+* Reasons for leaving employer
+label define leave_job 1 "Fired" 2 "Other Involuntary Reason" 3 "Quit Voluntarily" 4 "Retired" 5 "Childcare-related" 6 "Other personal reason" 7 "Illness" 8 "In School"
+
+forvalues job=1/7{ 
+recode EJB`job'_RSEND (5=1)(1/4=2)(6=2)(7/9=3)(10=4)(11=5)(12=6)(16=6)(13/14=7)(15=8), gen(leave_job`job')
+label values leave_job`job' leave_job
+drop EJB`job'_RSEND
+}
+
+* Reasons for work schedule
+label define schedule 1 "Involuntary" 2 "Pay" 3 "Childcare" 4 "Other Voluntary"
+
+forvalues job=1/7{
+recode EJB`job'_WSMNR (1/3=1) (4=2) (5=3) (6/8=4), gen(why_schedule`job') 
+label values why_schedule`job' schedule
+drop EJB`job'_WSMNR
+}
+
+* Why not working - this is a series of variables not one variable, so first checking for how many people gave more than one reason, then recoding
+forvalues n=1/12{
+replace ENJ_NOWRK`n'=0 if ENJ_NOWRK`n'==2
+} // recoding nos to 0 instead of 2
+
+egen count_nowork = rowtotal(ENJ_NOWRK1-ENJ_NOWRK12)
+//browse count_nowork ENJ_NO*
+tab count_nowork
+
+gen why_nowork=.
+forvalues n=1/12{
+replace why_nowork = `n' if ENJ_NOWRK`n'==1 & count_nowork==1
+}
+
+replace why_nowork=13 if count_nowork>=2 & !missing(count_nowork)
+
+recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), gen(whynowork)
+label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
+label values whynowork whynowork
+
+
 save "$SIPP14keep/allmonths14_rec.dta", replace
