@@ -46,3 +46,31 @@ tab hhsize if _merge==1 // confirming that the unmatched in master are all peopl
 drop from_* // just want to use the "to" attributes aka others in HH. Will use original file for respondent's characteristics. This will help simplify
 
 save "$SIPP14keep/sipp14tpearn_rel.dta", replace
+
+// union status recodes - compare these to using simplistic gain or lose partner / gain or lose spouse later on
+
+label define ems 1 "Married, spouse present" 2 "Married, spouse absent" 3 "Widowed" 4 "Divorced" 5 "Separated" 6 "Never Married"
+label values ems_ehc ems
+label values ems ems
+
+tab ems_ehc spouse // some people are "married - spouse absent" - currently not in "spouse" tally, (but they are also not SEPARATED according to them), do we consider them married?. some of these women also have unmarried partner living there
+tab ems_ehc partner
+// browse SSUID PNUM panelmonth ems_ehc ems spouse partner relationship* if ems_ehc==2
+
+gen marital_status=.
+replace marital_status=1 if inlist(ems_ehc,1,2) // for now - considered all married as married
+replace marital_status=2 if inlist(ems_ehc,3,4,5,6) & partner>=1 // for now, if married spouse absent and having a partner - considering you married and not counting here. Cohabiting will override if divorced / separated in given month
+replace marital_status=3 if ems_ehc==3 & partner==0
+replace marital_status=4 if inlist(ems_ehc,4,5) & partner==0
+replace marital_status=5 if ems_ehc==6 & partner==0
+
+label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-Unpartnered" 5 "Never Married- Not partnered"
+label values marital_status marital_status
+
+// earner status recodes
+gen other_earner=numearner if tpearn==.
+replace other_earner=(numearner-1) if tpearn!=.
+
+// browse panelmonth numearner other_earner tpearn to_TPEARN*
+
+save "$SIPP14keep/sipp14tpearn_rel.dta", replace
