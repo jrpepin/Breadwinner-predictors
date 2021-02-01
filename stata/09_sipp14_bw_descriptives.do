@@ -1,6 +1,6 @@
 *-------------------------------------------------------------------------------
 * BREADWINNER PROJECT
-* bw_transitions.do
+* bw_descriptives.do
 * Kelly Raley and Joanna Pepin
 *-------------------------------------------------------------------------------
 di "$S_DATE"
@@ -8,10 +8,11 @@ di "$S_DATE"
 ********************************************************************************
 * DESCRIPTION
 ********************************************************************************
-* Create basic descriptive statistics of sample as well as others in the HH
+* Create basic descriptive statistics of what events preceded breadwinning
+* for mothers who became breadwinners during the panel
 
 * The data file used in this script was produced by annualize.do
-* It is restricted to mothers living with minor children.
+* It is NOT restricted to mothers living with minor children.
 
 ********************************************************************************
 * Import data  & create breadwinning measures
@@ -84,7 +85,8 @@ drop nprevbw50 nprevbw60*
 	
 	unique 	idnum 
 	
-/* / Make sure starting sample size is consistent. // currently not working but I think this is because I edited things - revisit this later
+/*
+// Make sure starting sample size is consistent. // this will only work if everything run in one session
 	egen newsample2 = nvals(idnum) 
 	global newsamplesize2 = newsample2
 	di "$newsamplesize2"
@@ -114,6 +116,7 @@ label define employ 1 "Full Time" 2 "Part Time" 3 "Not Working - Looking" 4 "Not
 label values st_employ end_employ employ
 
 replace birth=0 if birth==.
+replace firstbirth=0 if firstbirth==.
 
 
 #delimit ;
@@ -150,395 +153,118 @@ tab first_wave wave
 table durmom wave, contents(mean bw60) format(%3.2g)
 
 ********************************************************************************
-* Partner descriptive info
+* Descriptives of characteristics of women who transitioned to breadwinning
 ********************************************************************************
+tab no_status_chg
+tab no_status_chg if trans_bw60==1 & year==2014
+tab no_status_chg if trans_bw60[_n+1]==1 & year[_n+1]==2014 // samples match when I do like this but with different distributions, and the sample for both matches those who became breadwinners in 2014 (578 at the moment) - which is what I want. However, now concerned that they are not necessarily the same people - hence below
+tab no_status_chg if trans_bw60[_n+1]==1 & year[_n+1]==2014 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] // we might not always have the year prior, so this makes sure we are still getting data for the same person? - sample drops, which is to be expected
 
-gen spousenum=.
-forvalues n=1/22{
-replace spousenum=`n' if relationship`n'==1
+// Marital status changes
+forvalues y=2014/2016{
+	foreach var in sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg{
+	tab `var' if trans_bw60==1 & year==`y'
+	tab `var' if trans_bw60[_n+1]==1 & year[_n+1]==`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+	}
 }
 
-gen partnernum=.
-forvalues n=1/22{
-replace partnernum=`n' if relationship`n'==2
+// Household changes
+forvalues y=2014/2016{
+	foreach var in hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non{
+	tab `var' if trans_bw60==1 & year==`y'
+	tab `var' if trans_bw60[_n+1]==1 & year[_n+1]==`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+	}
 }
 
-// gen check=.
-// replace check=1 if !missing(spousenum) & !missing(partnernum) // how many respondents have a spouse and unmarried partner in their HH = will use spouse. their marital status also changed over the year
-// drop check
+// Earnings changes
+	// Do we care who else’s earnings changed up or down? Or just that they did. Maybe do any change up or down, then spouse up or down (see code in descriptives file), then anyone NOT spouse -do as TOTAL CHANGE? or by person?
 
-gen spart_num=spousenum
-replace spart_num=partnernum if spart_num==.
+* First create a variable that indicates percent change YoY
+by SSUID PNUM (year), sort: gen earn_change = ((tpearn-tpearn[_n-1])/tpearn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	// testing a mean, then up over a threshold, down over a threshold
+	gen earn_up=0
+	replace earn_up = 1 if earn_change >=.2000000
+	replace earn_up=. if earn_change==.
+	gen earn_down=0
+	replace earn_down = 1 if earn_change <=-.2000000
+	replace earn_down=. if earn_change==.
+	// browse SSUID PNUM year tpearn earn_change earn_up earn_down
 
-foreach var in educ_sp race_sp employ_sp occ_sp age_sp earnings_sp earnings_a_sp tot_hrs_sp avg_hrs_sp{
-gen `var'=.
+* then doing for partner specifically
+* first get partner specific earnings
+	gen spousenum=.
+	forvalues n=1/22{
+	replace spousenum=`n' if relationship`n'==1
+	}
+
+	gen partnernum=.
+	forvalues n=1/22{
+	replace partnernum=`n' if relationship`n'==2
+	}
+
+	gen spart_num=spousenum
+	replace spart_num=partnernum if spart_num==.
+
+	gen earnings_sp=.
+	gen earnings_a_sp=.
+
+	forvalues n=1/22{
+	replace earnings_sp=to_TPEARN`n' if spart_num==`n'
+	replace earnings_a_sp=to_earnings`n' if spart_num==`n'
+	}
+
+	//check: browse spart_num earnings_sp to_TPEARN* 
+
+* then create variables
+by SSUID PNUM (year), sort: gen earn_change_sp = ((earnings_sp-earnings_sp[_n-1])/earnings_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	// testing a mean, then up over a threshold, down over a threshold
+	gen earn_up_sp=0
+	replace earn_up_sp = 1 if earn_change_sp >=.2000000
+	replace earn_up_sp=. if earn_change_sp==.
+	gen earn_down_sp=0
+	replace earn_down_sp = 1 if earn_change_sp <=-.2000000
+	replace earn_down_sp=. if earn_change_sp==.
+
+* Variable for all earnings in HH besides R
+gen hh_earn=thearn-tpearn
+by SSUID PNUM (year), sort: gen earn_change_hh = ((hh_earn-hh_earn[_n-1])/hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	// testing a mean, then up over a threshold, down over a threshold
+	gen earn_up_hh=0
+	replace earn_up_hh = 1 if earn_change_hh >=.2000000
+	replace earn_up_hh=. if earn_change_hh==.
+	gen earn_down_hh=0
+	replace earn_down_hh = 1 if earn_change_hh <=-.2000000
+	replace earn_down_hh=. if earn_change_hh==.
+
+* Variable for all earnings in HH besides R + partner
+gen other_earn=thearn-tpearn-earnings_sp
+by SSUID PNUM (year), sort: gen earn_change_oth = ((other_earn-other_earn[_n-1])/other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	// testing a mean, then up over a threshold, down over a threshold
+	gen earn_up_oth=0
+	replace earn_up_oth = 1 if earn_change_oth >=.2000000
+	replace earn_up_oth=. if earn_change_oth==.
+	gen earn_down_oth=0
+	replace earn_down_oth = 1 if earn_change_oth <=-.2000000
+	replace earn_down_oth=. if earn_change_oth==.
+//browse thearn tpearn earnings_sp hh_earn other_earn
+
+* then calculate changes
+forvalues y=2014/2016{
+	foreach var in earn_up earn_down earn_up_sp earn_down_sp earn_up_hh earn_down_hh earn_up_oth earn_down_oth{
+	tab `var' if trans_bw60==1 & year==`y'
+	tab `var' if trans_bw60[_n+1]==1 & year[_n+1]==`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+	}
+	foreach var in earn_change earn_change_sp earn_change_hh earn_change_oth{
+	tabstat `var' if trans_bw60==1 & year==`y'
+	}
 }
-
-forvalues n=1/22{
-replace educ_sp=to_educ`n' if spart_num==`n'
-replace race_sp=to_race`n' if spart_num==`n'
-replace employ_sp=end_to_employ`n' if spart_num==`n'
-replace occ_sp=end_to_occ_1`n' if spart_num==`n'
-replace age_sp=to_age`n' if spart_num==`n'
-replace earnings_sp=to_TPEARN`n' if spart_num==`n'
-replace earnings_a_sp=to_earnings`n' if spart_num==`n'
-replace tot_hrs_sp=to_TMWKHRS`n' if spart_num==`n'
-replace avg_hrs_sp=avg_to_hrs`n' if spart_num==`n'
-}
-
-//check browse spart_num educ_sp to_educ* 
-
-
-********************************************************************************
-* Create spreadsheet
-********************************************************************************
-
-* Create table describing full sample of mothers and analytical sample.
-
-putexcel set "$results/Descriptives60.xlsx", sheet(sample) replace
-putexcel A1:D1 = "Characteristics of full sample of mothers and analytical sample", merge border(bottom)
-putexcel B2 = ("All Mothers") D2 = ("Analytical sample") F2 = ("Partners"), border(bottom)
-putexcel B3 = ("percent") D3 = ("percent") F3 = ("percent"), border(bottom)
-putexcel A4 = "Marital Status"
-putexcel A5 = " Spouse"
-putexcel A6 = " Partner"
-putexcel A7 = "Gain Partner" // (gain_partner)
-putexcel A8 = "Lost Partner" // (lost_partner)
-putexcel A9 = "Additional Birth" // (birth)
-putexcel A10 = "Race/Ethnicity"
-putexcel A11 = " Non-Hispanic White", txtindent(2)
-putexcel A12 = " Black", txtindent(2)
-putexcel A13 = " Asian", txtindent(2)
-putexcel A14 = " Hispanic", txtindent(2)
-putexcel A15 = " Other", txtindent(2)
-putexcel A16 = "Education"
-putexcel A17 = "Less than High School", txtindent(2)
-putexcel A18 = "Diploma/GED", txtindent(2)
-putexcel A19 = "Some College", txtindent(2)
-putexcel A20 = "College Grad", txtindent(2)
-putexcel A21 = "Advanced Degree", txtindent(2)
-putexcel A22 = "Employment Status" // (will use end_employ for now)
-putexcel A23 = "Full Time", txtindent(2)
-putexcel A24 = "Part Time", txtindent(2)
-putexcel A25 = "Not Working - Looking", txtindent(2)
-putexcel A26 = "Not Working - Not Looking", txtindent(2)
-putexcel A27 = "Occupation" // (will use end_occ_1 to start)
-putexcel A28 = "Management", txtindent(2)
-putexcel A29 = "STEM", txtindent(2)
-putexcel A30 = "Education / Legal / Media", txtindent(2)
-putexcel A31 = "Healthcare", txtindent(2)
-putexcel A32 = "Service", txtindent(2)
-putexcel A33 = "Sales", txtindent(2)
-putexcel A34 = "Office / Admin", txtindent(2)
-putexcel A35 = "Farming", txtindent(2)
-putexcel A36 = "Construction", txtindent(2)
-putexcel A37 = "Maintenance", txtindent(2)
-putexcel A38 = "Production", txtindent(2)
-putexcel A39 = "Transportation", txtindent(2)
-putexcel A40 = "Military", txtindent(2)
-putexcel A41 = "Primary Earner (60%)"
-
-
-putexcel B42 = ("mean") D42= ("mean") F42= ("mean"), border(bottom)
-putexcel A43 = "age"
-putexcel A44 = "Years since first birth"
-putexcel A45 = "personal earnings"
-putexcel A46 = "household earnings"
-putexcel A47 = "personal to household earnings ratio"
-putexcel A48 = "alt earnings spec" // (earnings)
-putexcel A49 = "total hours worked" // (tmwkhrs)
-putexcel A50 = "average hours worked" // (avg_hrs)
-putexcel A51 = "household size" // (hhsize)
-putexcel A52 = "number of earners" // (numearners)
-putexcel A53 = "number of minor children" // (minorchildren)
-putexcel A54 = "number of preschool age children" // (preschoolchildren)
-putexcel A55 = "average age of youngest child" // (youngest_age)
-putexcel A56 = "average age of oldest child" // (oldest_age)
-putexcel A57 = "average age at first birth" // (tage_fb)
-putexcel A58 = "average number of jobs", border(bottom) // (end_rmnumjobs)
-
-putexcel A59 = "unweighted N (individuals)"
-
-********************************************************************************
-* Fill in descriptive information
-********************************************************************************
-
-*******************************************
-// Fill in table for full sample
-
-recode spouse (0=0) (.001/1=1)
-recode partner (0=0) (.001/1=1)
-
-mean spouse [aweight=wpfinwgt] 
-matrix spouse = 100*e(b)
-local pspouse = spouse[1,1]
-
-mean partner [aweight=wpfinwgt] 
-matrix partner = 100*e(b)
-local ppartner = partner[1,1]
-
-mean gain_partner [aweight=wpfinwgt] 
-matrix gain_partner = 100*e(b)
-local gain_p = gain_partner[1,1]
-
-mean lost_partner [aweight=wpfinwgt] 
-matrix lost_partner = 100*e(b)
-local lost_p= lost_partner[1,1]
-
-mean birth [aweight=wpfinwgt] 
-matrix birth = 100*e(b)
-local birth = birth[1,1]
-
-putexcel B5 = `pspouse', nformat(##.#)
-putexcel B6 = `ppartner', nformat(##.#)
-putexcel B7 = `gain_p', nformat(##.#)
-putexcel B8 = `lost_p', nformat(##.#)
-putexcel B9 = `birth', nformat(##.#)
-
-** Full sample
-
-local race "white black asian hispanic other"
-
-forvalues r=1/5 {
-   local re: word `r' of `race'
-   gen `re' = race==`r'
-   mean `re' [aweight=wpfinwgt] 
-   matrix m`re' = 100*e(b)
-   local p`re' = m`re'[1,1]
-   local row = 10+`r'
-   putexcel B`row' = `p`re'', nformat(##.#)
-}
-
-local ed "lesshs hs somecol univ adv"
-
-forvalues e=1/5 {
-   local educ : word `e' of `ed'
-   gen `educ' = educ==`e'
-   mean `educ' [aweight=wpfinwgt] 
-   matrix m`educ' = 100*e(b)
-   local p`educ' = m`educ'[1,1]
-   local row = 16+`e'
-   putexcel B`row' = `p`educ'', nformat(##.#)
-}
-
-local jobst "ft pt nwl nwnl"
-
-forvalues j=1/4 {
-   local job : word `j' of `jobst'
-   gen `job' = end_employ==`j'
-   mean `job' [aweight=wpfinwgt] 
-   matrix m`job' = 100*e(b)
-   local p`job' = m`job'[1,1]
-   local row = 22+`j'
-   putexcel B`row' = `p`job'', nformat(##.#)
-}
-
-local oc "mgmt stem educ_leg health serv sales off farm constr main prod trans mil"
-
-forvalues o=1/13 {
-   local occ : word `o' of `oc'
-   gen `occ' = end_occ_1==`o'
-   mean `occ' [aweight=wpfinwgt] 
-   matrix m`occ' = 100*e(b)
-   local p`occ' = m`occ'[1,1]
-   local row = 27+`o'
-   putexcel B`row' = `p`occ'', nformat(##.#)
-}
-
-mean bw60 [aweight=wpfinwgt] 
-matrix mbw60 = 100*e(b)
-local pbw60 = mbw60[1,1]
-putexcel B41 = `pbw60', nformat(##.#)
-
-local means "tage durmom tpearn thearn earnings_ratio earnings tmwkhrs avg_hrs hhsize numearner minorchildren preschoolchildren youngest_age oldest_age tage_fb end_rmnumjobs"
-
-forvalues m=1/16{
-    local var: word `m' of `means'
-    mean `var' [aweight=wpfinwgt] 
-    matrix m`var' = e(b)
-    local v`m' = m`var'[1,1]
-    local row = `m'+42
-    putexcel B`row' = `v`m'', nformat(##.#)
-}
-
-egen	obvsfs 	= nvals(idnum)
-local fs = obvsfs
-
-putexcel B59 = `fs'
-
-*******************************************
-// Fill in table for full samples' partners
-
-local race "white_sp black_sp asian_sp hispanic_sp other_sp"
-
-forvalues r=1/5 {
-   local re: word `r' of `race'
-   gen `re' = race_sp==`r' if !missing(race_sp)
-   mean `re' [aweight=wpfinwgt] 
-   matrix m`re' = 100*e(b)
-   local p`re' = m`re'[1,1]
-   local row = 10+`r'
-   putexcel F`row' = `p`re'', nformat(##.#)
-}
-
-local ed "lesshs_sp hs_sp somecol_sp univ_sp adv_sp"
-
-forvalues e=1/5 {
-   local educ : word `e' of `ed'
-   gen `educ' = educ_sp==`e' if !missing(educ_sp)
-   mean `educ' [aweight=wpfinwgt] 
-   matrix m`educ' = 100*e(b)
-   local p`educ' = m`educ'[1,1]
-   local row = 16+`e'
-   putexcel F`row' = `p`educ'', nformat(##.#)
-}
-
-local jobst "ft_sp pt_sp nwl_sp nwnl_sp"
-
-forvalues j=1/4 {
-   local job : word `j' of `jobst'
-   gen `job' = employ_sp==`j' if !missing(employ_sp)
-   mean `job' [aweight=wpfinwgt] 
-   matrix m`job' = 100*e(b)
-   local p`job' = m`job'[1,1]
-   local row = 22+`j'
-   putexcel F`row' = `p`job'', nformat(##.#)
-}
-
-local oc "mgmt_sp stem_sp educ_leg_sp health_sp serv_sp sales_sp off_sp farm_sp constr_sp main_sp prod_sp trans_sp mil_sp"
-
-forvalues o=1/13 {
-   local occ : word `o' of `oc'
-   gen `occ' = occ_sp==`o' if !missing(occ_sp)
-   mean `occ' [aweight=wpfinwgt] 
-   matrix m`occ' = 100*e(b)
-   local p`occ' = m`occ'[1,1]
-   local row = 27+`o'
-   putexcel F`row' = `p`occ'', nformat(##.#)
-}
-
-local means "age_sp earnings_sp earnings_a_sp tot_hrs_sp avg_hrs_sp"
-local rowval "43 45 48 49 50"
-
-forvalues m=1/5{
-    local var: word `m' of `means'
-    mean `var' [aweight=wpfinwgt] 
-    matrix m`var' = e(b)
-    local v`m' = m`var'[1,1]
-    local row: word `m' of `rowval'
-    putexcel F`row' = `v`m'', nformat(##.#)
-}
-
-*******************************************
-// keep only observations with data in the current waves
-keep if !missing(monthsobserved)
-
-tab durmom
-
-	egen	obvsnow 	= nvals(idnum)
-	global 	obvsnow_n 	= obvsnow
-	di "$obvsnow_n"
-
-// and the previous wave, the only cases where we know about a *transition*
-// except in year where woman becomes a mother. 
-keep if !missing(monthsobservedL) | durmom==0 
-
-tab durmom
-
-	egen	obvsprev 	= nvals(idnum)
-	global 	obvsprev_n 	= obvsprev
-	di "$obvsprev_n"
-
-	drop idnum obvsnow obvsprev
-
-** Analytical sample
-
-mean spouse [aweight=wpfinwgt] 
-matrix sspouse = 100*e(b)
-local pspouse = sspouse[1,1]
-
-mean partner [aweight=wpfinwgt] 
-matrix spartner = 100*e(b)
-local ppartner = spartner[1,1]
-
-mean gain_partner [aweight=wpfinwgt] 
-matrix gain_partner = 100*e(b)
-local gain_p = gain_partner[1,1]
-
-mean lost_partner [aweight=wpfinwgt] 
-matrix lost_partner = 100*e(b)
-local lost_p= lost_partner[1,1]
-
-mean birth [aweight=wpfinwgt] 
-matrix birth = 100*e(b)
-local birth = birth[1,1]
-
-putexcel D5 = `pspouse', nformat(##.#)
-putexcel D6 = `ppartner', nformat(##.#)
-putexcel D7 = `gain_p', nformat(##.#)
-putexcel D8 = `lost_p', nformat(##.#)
-putexcel D9 = `birth', nformat(##.#)
-
-local race "white black asian hispanic other"
-
-forvalues r=1/5 {
-   local re: word `r' of `race'
-   mean `re' [aweight=wpfinwgt] 
-   matrix sm`re' = 100*e(b)
-   local p`re' = sm`re'[1,1]
-   local row = 10+`r'
-   putexcel D`row' = `p`re'', nformat(##.#)
-}
-
-
-local ed "lesshs hs somecol univ adv"
-
-forvalues e=1/5 {
-   local educ : word `e' of `ed'
-   mean `educ' [aweight=wpfinwgt] 
-   matrix m`educ' = 100*e(b)
-   local p`educ' = m`educ'[1,1]
-   local row = 16+`e'
-   putexcel D`row' = `p`educ'', nformat(##.#)
-}
-
-local jobst "ft pt nwl nwnl"
-
-forvalues j=1/4 {
-   local job : word `j' of `jobst'
-   mean `job' [aweight=wpfinwgt] 
-   matrix m`job' = 100*e(b)
-   local p`job' = m`job'[1,1]
-   local row = 22+`j'
-   putexcel D`row' = `p`job'', nformat(##.#)
-}
-
-local oc "mgmt stem educ_leg health serv sales off farm constr main prod trans mil"
-
-forvalues o=1/13 {
-   local occ : word `o' of `oc'
-   mean `occ' [aweight=wpfinwgt] 
-   matrix m`occ' = 100*e(b)
-   local p`occ' = m`occ'[1,1]
-   local row = 27+`o'
-   putexcel D`row' = `p`occ'', nformat(##.#)
-}
-
-mean bw60 [aweight=wpfinwgt] 
-matrix mbw60 = 100*e(b)
-local pbw60 = mbw60[1,1]
-putexcel D41 = `pbw60'
-
-local means "tage durmom tpearn thearn earnings_ratio earnings tmwkhrs avg_hrs hhsize numearner minorchildren preschoolchildren youngest_age oldest_age tage_fb end_rmnumjobs"
-forvalues m=1/16{
-    local var: word `m' of `means'
-    mean `var' [aweight=wpfinwgt] 
-    matrix sm`var' = e(b)
-    local v`m' = sm`var'[1,1]
-    local row = `m'+42
-    putexcel D`row' = `v`m'', nformat(##.#)
-}
-
-putexcel D59 = $obvsprev_n
+	
+// First birth
+forvalues y=2014/2016{
+	tab firstbirth if trans_bw60==1 & year==`y'
+	tab firstbirth if trans_bw60[_n+1]==1 & year[_n+1]==`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+}	
+	
+// Concurrent changes
 
 save "$SIPP14keep/bw_descriptives.dta", replace

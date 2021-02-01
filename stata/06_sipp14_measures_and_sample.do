@@ -364,7 +364,7 @@ drop if _merge==2
 	di "$mothers_sample"
 	di "$newsamplesize"
 
-	if ("$newsamplesize" == "$newsamplesize") {
+	if ("$newsamplesize" == "$mothers_sample") {
 		display "Success! Sample sizes consistent."
 		}
 		else {

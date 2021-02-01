@@ -84,8 +84,13 @@ set maxvar 5500
 	do "$SIPP2014_code/08_sipp14_annualize.do"
 	log close
 
-// Create descriptive statistics
+// Create descriptive statistics of who transitions to BW
 	log using "$logdir/bw_descriptives.log", replace
 	do "$SIPP2014_code/09_sipp14_bw_descriptives.do"
+	log close
+	
+// Create sample descriptive statistics
+	log using "$logdir/sample_descriptives.log", replace
+	do "$SIPP2014_code/10_sipp14_sample_descriptives.do"
 	log close
 
