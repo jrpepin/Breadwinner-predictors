@@ -159,8 +159,9 @@ putexcel set "$results/Breadwinner_Characteristics", sheet(data) replace
 putexcel C1:D1 = "2014", merge border(bottom)
 putexcel E1:F1 = "2015", merge border(bottom)
 putexcel G1:H1 = "2016", merge border(bottom)
-putexcel C2 = ("Year") E2 = ("Year") G2 = ("Year"), border(bottom)
-putexcel D2 = ("Prior Year") F2 = ("Prior Year") H2 = ("Prior Year"), border(bottom)
+putexcel I1:J1 = "Total", merge border(bottom)
+putexcel C2 = ("Year") E2 = ("Year") G2 = ("Year") I2 = ("Year"), border(bottom)
+putexcel D2 = ("Prior Year") F2 = ("Prior Year") H2 = ("Prior Year") J2 = ("Prior Year"), border(bottom)
 putexcel A3:A10="Marital Status", merge vcenter
 putexcel B3= "Single -> Cohabit"
 putexcel B4= "Single -> Married"
@@ -210,7 +211,7 @@ local status_vars "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_co
 local colu1 "C E G"
 local colu2 "D F H"
 
-
+*by year
 forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
@@ -227,6 +228,19 @@ forvalues w=1/8 {
 		}
 }
 
+* total
+forvalues w=1/8 {
+		local row=`w'+2
+		local var: word `w' of `status_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var'= e(b)
+		mean `var' if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		matrix pr`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+		putexcel J`row' = matrix(pr`var'), nformat(#.##%)
+
+}
+
 
 // Household changes
 
@@ -239,6 +253,7 @@ local hh_vars "hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn r
 local colu1 "C E G"
 local colu2 "D F H"
 	
+* by year
 forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
@@ -254,6 +269,20 @@ forvalues w=1/8 {
 		putexcel `col2'`row' = matrix(pr`var'`y'), nformat(#.##%)
 		}
 }
+
+* total
+forvalues w=1/8 {
+		local row=`w'+10
+		local var: word `w' of `hh_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var'= e(b)
+		mean `var' if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		matrix pr`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+		putexcel J`row' = matrix(pr`var'), nformat(#.##%)
+
+}
+
 
 // Earnings changes
 	// Do we care who else’s earnings changed up or down? Or just that they did. Maybe do any change up or down, then spouse up or down (see code in descriptives file), then anyone NOT spouse -do as TOTAL CHANGE? or by person?
@@ -330,7 +359,8 @@ by SSUID PNUM (year), sort: gen earn_change_oth = ((other_earn-other_earn[_n-1])
 * then calculate changes
 local earn_vars "earn_up earn_down earn_up_sp earn_down_sp earn_up_hh earn_down_hh earn_up_oth earn_down_oth"
 local colu1 "C E G"
-	
+
+* by year
 forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
@@ -343,9 +373,19 @@ forvalues w=1/8 {
 		}
 }
 
+* total
+forvalues w=1/8 {
+		local row=`w'+18
+		local var: word `w' of `earn_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+}
+
 local change_vars "earn_change earn_change_sp earn_change_hh earn_change_oth"
 local colu1 "C E G"
 
+* by year
 forvalues w=1/4 {
 	forvalues y=14/16{
 		local i=`y'-13
@@ -358,11 +398,20 @@ forvalues w=1/4 {
 		}
 }
 
+* total
+forvalues w=1/4 {
+		local row=`w'+26
+		local var: word `w' of `change_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+}
 	
 // First birth
 local colu1 "C E G"
 local colu2 "D F H"
 
+* by year
 forvalues y=14/16{
 	local i=`y'-13
 	local row=31
@@ -375,7 +424,76 @@ forvalues y=14/16{
 	putexcel `col1'`row' = matrix(mbirth`y'), nformat(#.##%)
 	putexcel `col2'`row' = matrix(prbirth`y'), nformat(#.##%)
 }
+
+*total
+mean firstbirth if trans_bw60==1
+matrix mfirstbirth= e(b)
+mean firstbirth if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+matrix prfirstbirth = e(b)
+putexcel I31 = matrix(mfirstbirth), nformat(#.##%)
+putexcel J31 = matrix(prfirstbirth), nformat(#.##%)
+
 	
-// Concurrent changes
+********************************************************************************
+* Concurrent changes
+********************************************************************************
+
+//can't do change variables because that's a mean and has too many values
+
+local vars1 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg firstbirth hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non earn_up earn_down earn_up_sp earn_down_sp earn_up_hh earn_down_hh earn_up_oth earn_down_oth"
+
+local vars2 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg firstbirth hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non earn_up earn_down earn_up_sp earn_down_sp earn_up_hh earn_down_hh earn_up_oth earn_down_oth"
+
+local colu "B C D E F G H I J K L M N O P Q R S T U V W X Y Z"
+
+putexcel set "$results/Breadwinner_Characteristics", sheet(matrix) modify
+
+putexcel A2= "Single -> Cohabit" B1= "Single -> Cohabit"
+putexcel A3= "Single -> Married" C1= "Single -> Married"
+putexcel A4= "Cohabit -> Married" D1= "Cohabit -> Married"
+putexcel A5= "Cohabit -> Dissolved" E1= "Cohabit -> Dissolved"
+putexcel A6= "Married -> Dissolved" F1= "Married -> Dissolved"
+putexcel A7= "Married -> Widowed" G1= "Married -> Widowed"
+putexcel A8= "Married -> Cohabit" H1= "Married -> Cohabit"
+putexcel A9= "No Status Change" I1= "No Status Change"
+putexcel A10 = "First Birth" J1= "First Birth"
+putexcel A11 = "Member Left" K1= "Member Left"
+putexcel A12 = "Earner Left" L1= "Earner Left"
+putexcel A13 = "Earner -> Non-earner" M1= "Earner -> Non-earner"
+putexcel A14 = "Member Gained" N1= "Member Gained"
+putexcel A15 = "Earner Gained" O1= "Earner Gained"
+putexcel A16 = "Non-earner -> earner" P1= "Non-earner -> earner"
+putexcel A17 = "R became earner" Q1= "R became earner"
+putexcel A18 = "R became non-earner" R1= "R became non-earner"
+putexcel A19 = "R Earnings Up" S1= "R Earnings Up"
+putexcel A20 = "R Earnings Down" T1= "R Earnings Down"
+putexcel A21 = "Spouse Earnings Up" U1= "Spouse Earnings Up"
+putexcel A22 = "Spouse Earnings Down" V1= "Spouse Earnings Down"
+putexcel A23 = "HH Earnings Up" W1= "HH Earnings Up"
+putexcel A24 = "HH Earnings Down" X1= "HH Earnings Down"
+putexcel A25 = "Other Earnings Up" Y1= "Other Earnings Up"
+putexcel A26 = "Other Earnings Down" Z1= "Other Earnings Down"
+
+
+forvalues v=1/25{
+local var1: word `v' of `vars1'
+local row =`v'+1
+	forvalues x=1/25{
+	local col: word `x' of `colu'
+	local var2: word `x' of `vars2'
+	tab `var1' `var2' if trans_bw60==1, matcell(`var1'_`var2'_1)
+	mata: st_matrix("`var1'_`var2'_1", (st_matrix("`var1'_`var2'_1")  :/ sum(st_matrix("`var1'_`var2'_1"))))
+	mat `var1'_`var2' = `var1'_`var2'_1[2,2]
+	putexcel `col'`row' = matrix(`var1'_`var2'), nformat(#.##%) 
+	}
+}
+
+/* logic to follow
+tab sing_coh hh_lose if trans_bw60==1 & year==2014, matcell(test)
+mata: st_matrix("test", (st_matrix("test")  :/ sum(st_matrix("test"))))
+mat B = test[2,2]
+matrix list B = has just the value I want
+*/
+
 
 save "$SIPP14keep/bw_descriptives.dta", replace
