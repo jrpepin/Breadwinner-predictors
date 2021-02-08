@@ -62,6 +62,15 @@ label values employ employ
 
 drop RMESR
 
+label define jobchange 0 "No" 1 "Yes"
+forvalues job=1/7{
+	recode AJB`job'_RSEND (0=0) (1/10=1), gen(jobchange_`job')
+	label values jobchange_`job' jobchange
+	drop AJB`job'_RSEND
+}
+
+// check how AJB_RSEND and missings for that work - is that sufficient to get job change?
+
 * earnings change: tpearn seems to cover all jobs in month. need to decide if we want OVERALL change in earnings, or PER JOB (<5% of sample has 2+ jobs) - less hard than i thought...
 // browse TAGE RMNUMJOBS EJB1_PAYHR1 TJB1_ANNSAL1 TJB1_HOURLY1 TJB1_WKLY1 TJB1_BWKLY1 TJB1_MTHLY1 TJB1_SMTHLY1 TJB1_OTHER1 TJB1_GAMT1 TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN
 
@@ -80,6 +89,14 @@ tab check // 8.4% don't match
 	recode TMWKHRS (0/34.99=2)(35.0/99=1), gen(ft_pt)
 	label define hours 1 "Full-Time" 2 "Part-Time"
 	label values ft_pt hours
+	
+	* type of schedule - Each person can have up to 7 jobs, so recoding all 7
+	label define jobtype 1 "Regular Day" 2 "Regular Night" 3 "Irregular" 4 "Other"
+	forvalues job=1/7{
+		recode EJB`job'_WSJOB (1=1) (2/3=2) (4/6=3) (7=4), gen(jobtype_`job')
+		label values jobtype_`job' jobtype
+		drop EJB`job'_WSJOB
+	}
 	
 * occupation change (https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html)...do we care about industry change? (industry codes: https://www.naics.com/search/)
 label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 "Healthcare" 5 "Service" 6 "Sales" 7 "Office / Admin" 8 "Farming" 9 "Construction" 10 "Maintenance" 11 "Production" 12 "Transportation" 13 "Military" 
@@ -137,6 +154,12 @@ replace why_nowork=13 if count_nowork>=2 & !missing(count_nowork)
 recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), gen(whynowork)
 label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
 label values whynowork whynowork
+
+*poverty
+recode THINCPOV (0/0.499=1) (.500/1.249=2) (1.250/1.499=3) (1.500/1.849=4) (1.850/1.999=5) (2.000/3.999=6) (4.000/1000=7), gen(pov_level)
+label define pov_level 1 "< 50%" 2 "50-125%" 3 "125-150%" 4 "150-185%" 5 "185-200%" 6 "200-400%" 7 "400%+" // http://neocando.case.edu/cando/pdf/CensusPovertyandIncomeIndicators.pdf - to determine thresholds
+label values pov_level pov_level
+drop THINCPOV
 
 
 save "$SIPP14keep/allmonths14_rec.dta", replace

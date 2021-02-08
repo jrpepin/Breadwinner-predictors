@@ -18,7 +18,7 @@ drop RRELIG
 
 // reshape wide to_num relationship to_sex to_age to_race to_educ to_employ to_TAGE_FB to_EMS to_TPEARN to_earnings to_TMWKHRS to_ft_pt to_occ_1 to_occ_2 to_occ_3 to_occ_4 to_occ_5 to_occ_6 to_occ_7,i(SSUID ERESIDENCEID from_num panelmonth) j(lno) 
 
-reshape wide to_num relationship RREL to_sex from_age to_age pairtype from_sex from_race to_race from_educ to_educ from_employ to_employ from_TAGE_FB to_TAGE_FB from_EMS to_EMS from_TPEARN to_TPEARN from_earnings to_earnings from_TMWKHRS to_TMWKHRS from_ft_pt to_ft_pt from_occ_1 to_occ_1 from_occ_2 to_occ_2 from_occ_3 to_occ_3 from_occ_4 to_occ_4 from_occ_5 to_occ_5 from_occ_6 to_occ_6 from_occ_7 to_occ_7 from_EINTTYPE to_EINTTYPE from_whynowork to_whynowork from_leave_job1 to_leave_job1 from_leave_job2 to_leave_job2 from_leave_job3 to_leave_job3 from_leave_job4 to_leave_job4 from_leave_job5 to_leave_job5 from_leave_job6 to_leave_job6 from_leave_job7 to_leave_job7,i(SSUID ERESIDENCEID from_num panelmonth) j(lno)
+reshape wide to_num relationship RREL to_sex from_age to_age pairtype from_sex from_race to_race from_educ to_educ from_employ to_employ from_TAGE_FB to_TAGE_FB from_EMS to_EMS from_TPEARN to_TPEARN from_earnings to_earnings from_TMWKHRS to_TMWKHRS from_ft_pt to_ft_pt from_occ_1 to_occ_1 from_occ_2 to_occ_2 from_occ_3 to_occ_3 from_occ_4 to_occ_4 from_occ_5 to_occ_5 from_occ_6 to_occ_6 from_occ_7 to_occ_7 from_EINTTYPE to_EINTTYPE from_whynowork to_whynowork from_leave_job1 to_leave_job1 from_leave_job2 to_leave_job2 from_leave_job3 to_leave_job3 from_leave_job4 to_leave_job4 from_leave_job5 to_leave_job5 from_leave_job6 to_leave_job6 from_leave_job7 to_leave_job7 from_jobchange_1 to_jobchange_1 from_jobchange_2 to_jobchange_2 from_jobchange_3 to_jobchange_3 from_jobchange_4 to_jobchange_4 from_jobchange_5 to_jobchange_5 from_jobchange_6 to_jobchange_6 from_jobchange_7 to_jobchange_7 from_jobtype_1 to_jobtype_1 from_jobtype_2 to_jobtype_2 from_jobtype_3 to_jobtype_3 from_jobtype_4 to_jobtype_4 from_jobtype_5 to_jobtype_5 from_jobtype_6 to_jobtype_6 from_jobtype_7 to_jobtype_7 from_pov_level to_pov_level,i(SSUID ERESIDENCEID from_num panelmonth) j(lno)
 
 rename from_num PNUM
 
@@ -72,5 +72,16 @@ gen other_earner=numearner if tpearn==.
 replace other_earner=(numearner-1) if tpearn!=.
 
 // browse panelmonth numearner other_earner tpearn to_TPEARN*
+
+// job changes
+egen jobchange = rowtotal(jobchange_1-jobchange_7)
+replace jobchange=1 if jobchange>=1 & jobchange!=.
+replace jobchange=. if tmwkhrs==.
+
+forvalues n=1/22{
+	egen to_jobchange`n' = rowtotal(to_jobchange_1`n'-to_jobchange_7`n')
+	replace to_jobchange`n'=1 if to_jobchange`n'>=1 & to_jobchange`n'!=.
+	replace to_jobchange`n'=. if to_TMWKHRS`n'==.
+}
 
 save "$SIPP14keep/sipp14tpearn_rel.dta", replace

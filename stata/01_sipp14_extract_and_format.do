@@ -31,7 +31,7 @@ forvalues wave=1/4 {
 			tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2																	/// /* FINANCIAL */
 			tst_intv eehc_why ems ems_ehc tyrcurrmarr tyrfirstmarr exmar eorigin erace esex tage tage_fb eeduc					/// /* DEMOGRAPHIC */
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*								/// /* EMPLOYMENT */
-			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr*																	///
+			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend													///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 								/// /* EARNINGS */
 			tjb*_gamt* tjb*_msum tpearn
 	

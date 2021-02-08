@@ -96,32 +96,77 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	* Respondent became non-earner
 	by SSUID PNUM (panelmonth), sort: gen resp_non = (tpearn==. & tpearn[_n-1]!=.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	
-	// browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non
-	
+	// browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
 	
 // Create indicator of birth during the year
 	drop tcbyr_8-tcbyr_20 // suppressed variables, no observations
 	gen birth=1 if (tcbyr_1==year | tcbyr_2==year | tcbyr_3==year | tcbyr_4==year | tcbyr_5==year | tcbyr_6==year | tcbyr_7==year)
 	gen first_birth=1 if (yrfirstbirth==year)
 	// browse birth year tcbyr*
+	
+// create indicators of job changes
+**Respondent
+	* Full-Time to Part-Time
+	by SSUID PNUM (panelmonth), sort: gen full_part = (ft_pt==2 & ft_pt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is based on a recode of number of hours worked per week. I am not sure if there is a better way to get this. that is what the sipp uses to ask why a respondent works less than 35 hours
+	* Full-Time to No Job
+	by SSUID PNUM (panelmonth), sort: gen full_no = (ft_pt==. & ft_pt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Part-Time to No Job
+	by SSUID PNUM (panelmonth), sort: gen part_no = (ft_pt==. & ft_pt[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Part-Time to Full-Time
+	by SSUID PNUM (panelmonth), sort: gen part_full = (ft_pt==1 & ft_pt[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* No Job to Part-Time
+	by SSUID PNUM (panelmonth), sort: gen no_part = (ft_pt==2 & ft_pt[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* No Job to Full-Time
+	by SSUID PNUM (panelmonth), sort: gen no_full = (ft_pt==1 & ft_pt[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	
+	* Employer Change (currently using ANY out of a possible 7 jobs - can update to be first job or top job if needed)
+	* Recoded in file 07 - variable is jobchange
+	
+**Partner
+	* first get partner specific variables
+	gen spousenum=.
+	forvalues n=1/22{
+	replace spousenum=`n' if relationship`n'==1
+	}
 
-/* Do we want to record job changes within the year? - currently not, but keeping this here for code reference
-	gen w_job_up=0
-	replace w_job_up=1 if job < job[_n-1] & !missing(job[_n-1]) & idnum==idnum[_n-1] in 2/-1 
-	replace w_job_up=. if job==.
-	gen w_job_down=0 
-	replace w_job_down=1 if job > job[_n-1] & !missing(job[_n-1]) & idnum==idnum[_n-1] in 2/-1 
-	replace w_job_down=. if job==.
-	// browse panelmonth idnum job w_job* husband_job h_job* spouse partner - validate
-*/ 
+	gen partnernum=.
+	forvalues n=1/22{
+	replace partnernum=`n' if relationship`n'==2
+	}
 
+	gen spart_num=spousenum
+	replace spart_num=partnernum if spart_num==.
 
+	gen ft_pt_sp=.
+	gen jobchange_sp=.
+
+	forvalues n=1/22{
+	replace ft_pt_sp=to_ft_pt`n' if spart_num==`n'
+	replace jobchange_sp=to_jobchange`n' if spart_num==`n'
+	}
+
+	* Full-Time to Part-Time
+	by SSUID PNUM (panelmonth), sort: gen full_part_sp = (ft_pt_sp==2 & ft_pt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is based on a recode of number of hours worked per week. I am not sure if there is a better way to get this. that is what the sipp uses to ask why a respondent works less than 35 hours
+	* Full-Time to No Job
+	by SSUID PNUM (panelmonth), sort: gen full_no_sp = (ft_pt_sp==. & ft_pt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Part-Time to No Job
+	by SSUID PNUM (panelmonth), sort: gen part_no_sp = (ft_pt_sp==. & ft_pt_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Part-Time to Full-Time
+	by SSUID PNUM (panelmonth), sort: gen part_full_sp = (ft_pt_sp==1 & ft_pt_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* No Job to Part-Time
+	by SSUID PNUM (panelmonth), sort: gen no_part_sp = (ft_pt_sp==2 & ft_pt_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* No Job to Full-Time
+	by SSUID PNUM (panelmonth), sort: gen no_full_sp = (ft_pt_sp==1 & ft_pt_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	
+	* Employer Change (currently using ANY out of a possible 7 jobs - can update to be first job or top job if needed)
+	* Recoded above - variable is jobchange_sp
+	
 // Create basic indictor to identify months observed when data is collapsed
 	gen one=1
 	
 // cleaning up variables to prep for collapse - will remove these from original code later
 drop *_bmonth *_emonth *_payhr* *_msum apearn rhpov* *_ind *_annsal* *_hourly* *_wkly* *_bwkly* *_mthly* *_smthly* *_other* *_gamt* ///
-tyrcurrmarr tyrfirstmarr tyear_fb thtotinc tftotinc thincpov thincpovt2 pairtype* RREL* to_TAGE_FB*
+tyrcurrmarr tyrfirstmarr tyear_fb thtotinc tftotinc thincpovt2 pairtype* RREL* to_TAGE_FB*
 
 			// https://www.statalist.org/forums/forum/general-stata-discussion/general/639137-any-collapse-tricks-for-multiple-stats-from-multiple-vars
 
@@ -136,7 +181,7 @@ foreach var of varlist occ_1-occ_7 employ ft_pt ems_ehc rmnumjobs marital_status
 }
 
 forvalues r=1/22{
-gen avg_to_tpearn`r'=to_TPEARN`r'
+gen avg_to_tpearn`r'=to_TPEARN`r' // using the same variable in sum and avg and can't use wildcards in below, so renaming first to use renamed variable for avg
 gen avg_to_hrs`r'=to_TMWKHRS`r'
 gen avg_to_earn`r'=to_earnings`r'
 	foreach var of varlist to_occ_1`r'-to_occ_7`r' to_employ`r' to_ft_pt`r' to_EMS`r'{
@@ -145,15 +190,18 @@ gen avg_to_earn`r'=to_earnings`r'
 	}
 }
 
-
+ 
 // Collapse the data by year to create annual measures
 collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 		/// mother char.
 			(sum) 	tpearn thearn tmwkhrs earnings enjflag						///
 					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid		///
 					marr_coh first_birth hh_lose earn_lose earn_non hh_gain		///
 					earn_gain non_earn resp_earn resp_non						///
-			(mean) 	spouse partner numtype2 wpfinwgt birth avg_hrs=tmwkhrs 		/// 
-					avg_earn=earnings  numearner other_earner hhsize			///
+					jobchange full_part full_no part_no part_full no_part		///
+					no_full jobchange_sp full_part_sp full_no_sp				///
+					part_no_sp part_full_sp no_part_sp no_full_sp				///
+			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize		/// 
+					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner 	///
 			(max) 	minorchildren minorbiochildren preschoolchildren 			///
 					prebiochildren race educ tceb oldest_age			 		///
 					start_spartner last_spartner start_spouse last_spouse		///
@@ -184,8 +232,12 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 		/// moth
 	gen		no_status_chg=0
 	replace no_status_chg=1 if (sing_coh + sing_mar + coh_mar + coh_diss + marr_diss + marr_wid + marr_coh)==0
 	
-	// have these more specific variables now: sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh
-
+	gen no_job_chg=0
+	replace no_job_chg=1 if (full_part + full_no + part_no + part_full + no_part + no_full)==0
+	
+	gen no_job_chg_sp=0
+	replace no_job_chg_sp=1 if (full_part_sp + full_no_sp + part_no_sp + part_full_sp + no_part_sp + no_full_sp)==0
+	
 // Create indicator for incomple annual observations
 	gen partial_year= (monthsobserved < 12)
 
