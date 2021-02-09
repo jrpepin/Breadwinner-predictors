@@ -166,7 +166,7 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	
 // cleaning up variables to prep for collapse - will remove these from original code later
 drop *_bmonth *_emonth *_payhr* *_msum apearn rhpov* *_ind *_annsal* *_hourly* *_wkly* *_bwkly* *_mthly* *_smthly* *_other* *_gamt* ///
-tyrcurrmarr tyrfirstmarr tyear_fb thtotinc tftotinc thincpovt2 pairtype* RREL* to_TAGE_FB*
+tyrcurrmarr tyrfirstmarr tyear_fb thtotinc tftotinc pairtype* RREL* to_TAGE_FB*
 
 			// https://www.statalist.org/forums/forum/general-stata-discussion/general/639137-any-collapse-tricks-for-multiple-stats-from-multiple-vars
 
@@ -201,7 +201,8 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 		/// moth
 					no_full jobchange_sp full_part_sp full_no_sp				///
 					part_no_sp part_full_sp no_part_sp no_full_sp				///
 			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize		/// 
-					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner 	///
+					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner	///
+					thincpovt2 pov_level 										///
 			(max) 	minorchildren minorbiochildren preschoolchildren 			///
 					prebiochildren race educ tceb oldest_age			 		///
 					start_spartner last_spartner start_spouse last_spouse		///
@@ -209,7 +210,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 		/// moth
 			(min) 	tage_fb durmom youngest_age first_wave						///
 			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*		/// other hh members char.
 			(sum) 	to_TPEARN* to_TMWKHRS* to_earnings*			 				///
-			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*						///
+			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*	to_pov_level*		///
 			(firstnm) st_*														/// will cover all (mother + hh per recodes) 
 			(lastnm) end_*,														///
 			by(SSUID PNUM year)
