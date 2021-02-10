@@ -1,5 +1,7 @@
 setup_kraley.do
 setup_joanna.do
+setup_kmcerlean.do
+km_research_log.txt
 *.dta
 *.dat
 *.gz
