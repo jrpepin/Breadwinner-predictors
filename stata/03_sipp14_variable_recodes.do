@@ -42,16 +42,13 @@ drop ERACE EORIGIN
 * marital status at 1st birth: not 100% sure. TYEAR_FB is year of first birth. we also have first and current marriage year. HOWEVER, if divorced, do not have that information. Would need to merge with SSA supplement
 
 * educational attainment: use EEDUC
-recode EEDUC (31/38=1)(39=2)(40/42=3)(43=4)(44/46=5), gen(educ)
-label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Degree" 5 "Advanced Degree"
+recode EEDUC (31/38=1)(39=2)(40/42=3)(43/46=4), gen(educ)
+label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Plus"
 label values educ educ
 
 drop EEDUC
 
 * subsequent birth: can use TCBYR* to get year of each birth, so will get a flag if that occurs during survey waves.
-
-* partner status: can use ems for marriage. for cohabiting unions, need to use relationship codes. will recode this in a later step (may already happen in step 4)
-	* need to code as like year status, did they lose a partner at all, add one, in that year - need to think about this more
 
 * employment change: use rmesr? but this is the question around like # of jobs - RMESR is OVERALL employment status, but then could have went from 2 jobs to 1 job and still be "employed" - do we care about that?! also put with hours to get FT / PT?
 	* also use ENJFLAG - says if no-job or not
@@ -69,7 +66,9 @@ forvalues job=1/7{
 	drop AJB`job'_RSEND
 }
 
-// check how AJB_RSEND and missings for that work - is that sufficient to get job change?
+gen better_job = .
+replace better_job = 1 if (inlist(EJB1_RSEND,7,8) | inlist(EJB2_RSEND,7,8) | inlist(EJB3_RSEND,7,8) | inlist(EJB4_RSEND,7,8) | inlist(EJB5_RSEND,7,8) | inlist(EJB6_RSEND,7,8) | inlist(EJB7_RSEND,7,8))
+replace better_job = 0 if (jobchange_1==1 | jobchange_2==1 | jobchange_3==1 | jobchange_4==1 | jobchange_5==1 | jobchange_6==1 | jobchange_7==1) & better_job==.
 
 * earnings change: tpearn seems to cover all jobs in month. need to decide if we want OVERALL change in earnings, or PER JOB (<5% of sample has 2+ jobs) - less hard than i thought...
 // browse TAGE RMNUMJOBS EJB1_PAYHR1 TJB1_ANNSAL1 TJB1_HOURLY1 TJB1_WKLY1 TJB1_BWKLY1 TJB1_MTHLY1 TJB1_SMTHLY1 TJB1_OTHER1 TJB1_GAMT1 TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN
@@ -82,6 +81,9 @@ replace check=1 if earnings==TPEARN
 
 tab check // 8.4% don't match
 // browse TAGE TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN earnings if check==0 // think difference is the profit / loss piece of TPEARN. decide to use that or earnings
+
+* wages change: Was going to try to aggregate across but it is seeming too complicated, so will handle in annualization, with any wage change, as well as shift from how paid (e.g. hourly to annual salary)
+// EJB*_PAYHR* TJB*_ANNSAL* TJB*_HOURLY* TJB*_WKLY* TJB*_BWKLY* TJB*_MTHLY* TJB*_SMTHLY* TJB*_OTHER* TJB*_GAMT*
 
 * hours change: do average tmwkhrs? this is average hours by month, so to aggregate to year, use average?
 	
@@ -108,14 +110,35 @@ label values occ_`job' occupation
 drop TJB`job'_OCC
 }
 
-* employer change: do we want any employer characteristics? could / would industry go here?
-
 //misc variables
+* Disability status
+// EFINDJOB (seems more restrictive than EDISABL, which is about limits, find job is about difficult finding ANY job) EDISABL RDIS_ALT (alt includes job rrlated disability measures whereas RDIS doesn't, but theeir differences are very neglible so relying on the more comprehensive one)
+// relabeling so the Nos are 0 not 2
+foreach var in EFINDJOB EDISABL RDIS_ALT{
+replace `var' =0 if `var'==2
+}
+
+* Welfare use
+foreach var in EEITC EENERGY_ASST EHOUSE_ANY RFSYN TGAYN RTANFYN RWICYN{
+replace `var' =0 if `var'==2
+}
+
+egen programs = rowtotal ( RFSYN TGAYN RTANFYN RWICYN )
+
+* Child care ease of use
+foreach var in ECHLD_MNYN ELIST EWORKMORE{
+replace `var'=0 if `var'==2
+}
+
 * reasons for moving
 
 recode EEHC_WHY (1/3=1) (4/7=2) (8/12=3) (13=4) (14=5) (15=7) (16=6), gen(moves)
 label define moves 1 "Family reason" 2 "Job reason" 3 "House/Neighborhood" 4 "Disaster" 5 "Evicted" 6 "Other" 7 "Did not Move"
 label values moves moves
+
+recode EEHC_WHY (1=1) (2=2) (3/14=3) (15=4) (16=3), gen(hh_move)
+label define hh_move 1 "Relationship Change" 2 "Independence" 3 "Other" 4 "Did not Move"
+label values hh_move hh_move
 
 * Reasons for leaving employer
 label define leave_job 1 "Fired" 2 "Other Involuntary Reason" 3 "Quit Voluntarily" 4 "Retired" 5 "Childcare-related" 6 "Other personal reason" 7 "Illness" 8 "In School"
@@ -155,11 +178,11 @@ recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), g
 label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
 label values whynowork whynowork
 
-*poverty
+/*poverty
 recode THINCPOV (0/0.499=1) (.500/1.249=2) (1.250/1.499=3) (1.500/1.849=4) (1.850/1.999=5) (2.000/3.999=6) (4.000/1000=7), gen(pov_level)
 label define pov_level 1 "< 50%" 2 "50-125%" 3 "125-150%" 4 "150-185%" 5 "185-200%" 6 "200-400%" 7 "400%+" // http://neocando.case.edu/cando/pdf/CensusPovertyandIncomeIndicators.pdf - to determine thresholds
 label values pov_level pov_level
 drop THINCPOV
-
+*/
 
 save "$SIPP14keep/allmonths14_rec.dta", replace

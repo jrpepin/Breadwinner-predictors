@@ -27,13 +27,18 @@ forvalues wave=1/4 {
     use "$SIPP2014/pu2014w`wave'_compressed"
 	keep	swave einttype monthcode wpfinwgt ssuid pnum epnpar1 epnpar2 epnspouse rfamrefwt2 eresidenceid shhadid thhldstatus 	/// /* TECHNICAL */
 			erelrp epar1typ epar2typ rhnumper rhnumperwt2 rhnumu18 rhnumu18wt2 rhnum65over rhnum65ovrt2 rrel*					/// /* HOUSEHOLD / CHILDREN */
-			rrel_pnum* rany5 rfamkind rfamkindwt2 tcbyr* tyear_fb																///
+			rrel_pnum* rany5 rfamkind rfamkindwt2 tcbyr* tyear_fb ?mover tehc_mvyr eehc_why										///
 			tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2																	/// /* FINANCIAL */
 			tst_intv eehc_why ems ems_ehc tyrcurrmarr tyrfirstmarr exmar eorigin erace esex tage tage_fb eeduc					/// /* DEMOGRAPHIC */
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*								/// /* EMPLOYMENT */
 			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend													///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 								/// /* EARNINGS */
-			tjb*_gamt* tjb*_msum tpearn
+			tjb*_gamt* tjb*_msum tpearn																							///
+			efindjob edisabl ejobcant rdis rdis_alt edisany																		/// /* DISABILITY */
+			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn 															/// /* PROGRAM USAGE */
+			ewelac_mnyn renroll eedgrade eedcred																				/// /* ENROLLMENT */
+			echld_mnyn epayhelp elist eworkmore																					/// /* CHILD CARE */
+			
 	
 // Make the person number identifier numeric
 		 * destring pnum, replace /// Already numeric

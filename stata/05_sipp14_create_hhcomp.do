@@ -66,9 +66,3 @@ save "$tempdir/hhcomp.dta", replace
 
 sum youngest_age
 sum oldest_age
-
-// Other recodes
-* subsequent birth: can use TCBYR* to get year of each birth, so will get a flag if that occurs during survey waves.
-
-* partner status: can use ems for marriage. for cohabiting unions, need to use relationship codes. will recode this in a later step (may already happen in step 4)
-	* need to code as like year status, did they lose a partner at all, add one, in that year - need to think about this more

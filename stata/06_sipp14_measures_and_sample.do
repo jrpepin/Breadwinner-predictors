@@ -24,11 +24,16 @@ clear
    	keep	swave monthcode wpfinwgt ssuid pnum eresidenceid shhadid einttype thhldstatus						/// /* TECHNICAL */
 			tpearn apearn tjb?_msum ajb?_msum tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2				/// /* FINANCIAL   */
 			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc								/// /* DEMOGRAPHIC */
-			tyrcurrmarr tyrfirstmarr exmar eehc_why														  		///
+			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why									///
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
 			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend									///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
-			tjb*_gamt* tjb*_msum tpearn
+			tjb*_gamt* tjb*_msum tpearn																			///		
+			efindjob edisabl ejobcant rdis rdis_alt edisany														/// /* DISABILITY */
+			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn 											/// /* PROGRAM USAGE */
+			ewelac_mnyn renroll eedgrade eedcred																/// /* ENROLLMENT */
+			echld_mnyn epayhelp elist eworkmore																	/// /* CHILD CARE */
+			
 			
 	  gen year = 2012+`w'
       save "$tempdir/sipp14tpearn`w'", replace
@@ -36,6 +41,8 @@ clear
 
  
 clear
+
+
 
 ********************************************************************************
 * Stack all the extracts into a single file 
@@ -49,6 +56,12 @@ clear
       append using "$tempdir/sipp14tpearn`w'"
    }
 
+// mover variable changed between waves 1 and 2 so recoding so file will append properly
+gen mover=.
+replace mover=tmover if inrange(swave, 2,4)
+replace mover=rmover if swave==1
+drop tmover rmover
+   
 ********************************************************************************
 * Create and format variables
 ********************************************************************************
@@ -179,6 +192,11 @@ forvalues job=1/7{
 	drop ajb`job'_rsend
 }
 
+gen better_job = .
+replace better_job = 1 if (inlist(ejb1_rsend,7,8) | inlist(ejb2_rsend,7,8) | inlist(ejb3_rsend,7,8) | inlist(ejb4_rsend,7,8) | inlist(ejb5_rsend,7,8) | inlist(ejb6_rsend,7,8) | inlist(ejb7_rsend,7,8))
+replace better_job = 0 if (jobchange_1==1 | jobchange_2==1 | jobchange_3==1 | jobchange_4==1 | jobchange_5==1 | jobchange_6==1 | jobchange_7==1) & better_job==.
+
+
 * earnings change: tpearn seems to cover all jobs in month. need to decide if we want OVERALL change in earnings, or PER JOB (<5% of sample has 2+ jobs) - less hard than i thought...
 // browse TAGE RMNUMJOBS EJB1_PAYHR1 TJB1_ANNSAL1 TJB1_HOURLY1 TJB1_WKLY1 TJB1_BWKLY1 TJB1_MTHLY1 TJB1_SMTHLY1 TJB1_OTHER1 TJB1_GAMT1 TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN
 
@@ -190,6 +208,9 @@ replace check_e=1 if earnings==tpearn
 
 tab check_e // 8.4% don't match
 // browse TAGE TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN earnings if check==0 // think difference is the profit / loss piece of TPEARN. decide to use that or earnings
+
+* wages change: Was going to try to aggregate across but it is seeming too complicated, so will handle in annualization, with any wage change, as well as shift from how paid (e.g. hourly to annual salary)
+// EJB*_PAYHR* TJB*_ANNSAL* TJB*_HOURLY* TJB*_WKLY* TJB*_BWKLY* TJB*_MTHLY* TJB*_SMTHLY* TJB*_OTHER* TJB*_GAMT*
 
 * hours change: do average tmwkhrs? this is average hours by month, so to aggregate to year, use average?
 	
@@ -219,11 +240,36 @@ drop tjb`job'_occ
 * employer change: do we want any employer characteristics? could / would industry go here?
 
 //misc variables
+* Disability status
+// EFINDJOB (seems more restrictive than EDISABL, which is about limits, find job is about difficult finding ANY job) EDISABL RDIS_ALT (alt includes job rrlated disability measures whereas RDIS doesn't, but theeir differences are very neglible so relying on the more comprehensive one)
+// relabeling so the Nos are 0 not 2
+foreach var in efindjob edisabl rdis_alt{
+replace `var' =0 if `var'==2
+}
+
+* Welfare use
+foreach var in eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn{
+replace `var' =0 if `var'==2
+}
+
+egen programs = rowtotal ( rfsyn tgayn rtanfyn rwicyn)
+
+* Child care ease of use
+foreach var in echld_mnyn elist eworkmore{
+replace `var'=0 if `var'==2
+}
+
+
 * reasons for moving
 
 recode eehc_why (1/3=1) (4/7=2) (8/12=3) (13=4) (14=5) (15=7) (16=6), gen(moves)
 label define moves 1 "Family reason" 2 "Job reason" 3 "House/Neighborhood" 4 "Disaster" 5 "Evicted" 6 "Other" 7 "Did not Move"
 label values moves moves
+
+recode eehc_why (1=1) (2=2) (3/14=3) (15=4) (16=3), gen(hh_move)
+label define hh_move 1 "Relationship Change" 2 "Independence" 3 "Other" 4 "Did not Move"
+label values hh_move hh_move
+
 
 * Reasons for leaving employer
 label define leave_job 1 "Fired" 2 "Other Involuntary Reason" 3 "Quit Voluntarily" 4 "Retired" 5 "Childcare-related" 6 "Other personal reason" 7 "Illness" 8 "In School"
@@ -402,12 +448,8 @@ drop if _merge==2
 // Identify mothers who reside with their biological children
 	fre minorbiochildren
 	unique 	idnum 	if minorbiochildren >= 1  	// 1 or more minor children in household
-*NOTE: Keeping all mothers, even those not living with bio children for this part of the analysis.
-*Create macro just to get the n for later purposes (see msltprep.do).
-*	keep if minorbiochildren >= 1	// Keep only moms with kids in household
 
-/* It's something worth thinking about more. Generally, we assume that minor children live with their mothers and generally that is right. In the earlier analysis, I put women not living with minor children as a separate category to be able to see how wrong the assumption is. The results pretty clearly support the idea that most (but not all mothers, all the time) live with their minor children. So, the decision to include all mothers is really about minimizing the number of complications we introduce to the analysis.
-*/	
+	keep if minorbiochildren >= 1	// Keep only moms with kids in household
 
 // Creates a macro with the total number of mothers in the dataset.
 preserve

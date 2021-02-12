@@ -26,6 +26,12 @@ forvalues wave = 2/4 {
     append using "$SIPP14keep/wave`wave'_extract"
 }
 
+// mover variable changed between waves 1 and 2 so recoding so file will append properly
+gen mover=.
+replace mover=TMOVER if inrange(swave, 2,4)
+replace mover=RMOVER if swave==1
+drop TMOVER RMOVER
+
 // allmonths14.dta is a long-form dataset including all the waves from SIPP2014
 save "$SIPP14keep/allmonths14.dta", replace
 
