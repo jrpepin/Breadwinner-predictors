@@ -100,9 +100,9 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	* Lost children under 5
 	by SSUID PNUM (panelmonth), sort: gen prekid_lose = (preschoolchildren < preschoolchildren[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Parents entered (bio and in-law)
-	by SSUID PNUM (panelmonth), sort: gen prekid_gain = (parents > parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen parents_gain = (parents > parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Parents left (bio and in-law)
-	by SSUID PNUM (panelmonth), sort: gen prekid_lose = (parents < parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
+	by SSUID PNUM (panelmonth), sort: gen parents_lose = (parents < parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
 
 
 // browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
@@ -140,14 +140,14 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 
 	// Number of Jobs // also going to test on an annual average, did # of job changes, this is monthly
 	* 1 to More than 1 (as I feel like this is a bigger deal than going from 2 to 3, say)
-	by SSUID PNUM (panelmonth), sort: gen many_jobs = ((inrange,rmnumjobs,2,7) & rmnumjobs[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen many_jobs = (inrange(rmnumjobs,2,7) & rmnumjobs[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	* More than 1 to 1
-	by SSUID PNUM (panelmonth), sort: gen one_job = (rmnumjobs==1 & (inrange,rmnumjobs[_n-1],2,7))  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen one_job = (rmnumjobs==1 & inrange(rmnumjobs[_n-1],2,7))  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	* Any # job change up
-	by SSUID PNUM (panelmonth), sort: gen num_jobs_up = (rmnumjobs > rmnumjobs[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]  // confirm if any missing here, this doesn't mess up the greater / less than
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_up = (rmnumjobs > rmnumjobs[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Any # job change down
 	by SSUID PNUM (panelmonth), sort: gen num_jobs_down = (rmnumjobs < rmnumjobs[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-
+	
 // Disability status - testing all three specifications for now; will pick one. efindjob and esdisabl more about work, while dis_alt is broader disability
 	by SSUID PNUM (panelmonth), sort: gen efindjob_in= (efindjob==1 & efindjob[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	by SSUID PNUM (panelmonth), sort: gen efindjob_out = (efindjob==0 & efindjob[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
@@ -157,7 +157,7 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	by SSUID PNUM (panelmonth), sort: gen rdis_alt_out = (rdis_alt==0 & rdis_alt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 // Welfare Use
-	by SSUID PNUM (panelmonth), sort: gen welfare_in = (programs>0 & programs[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]  // confirm that missing won't mess up the greater than
+	by SSUID PNUM (panelmonth), sort: gen welfare_in = (programs>0 & programs[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	by SSUID PNUM (panelmonth), sort: gen welfare_out = (programs==0 & programs[_n-1]>0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 // East of finding child-care. Not 100% sure these capture our sentiment, but testing for now
@@ -169,15 +169,15 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	by SSUID PNUM (panelmonth), sort: gen ch_waitlist_no = (elist==0 & elist[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 // Respondent moved
-	// can I see if eresidence ID changed? play around with this more
-	by SSUID PNUM (panelmonth), sort: gen move_relat = (hh_move==1 & hh_move[_n-1]==4)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // see if this works the way I want. can they go from like other to 2? assuming right now, it's did not move, to moved for specific reason
-	by SSUID PNUM (panelmonth), sort: gen move_indep = (hh_move==2 & hh_move[_n-1]==4)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	// can I see if eresidence ID changed? play around with this more browse SSUID PNUM panelmonth ERESIDENCEID hh_move move_relat move_indep
+	by SSUID PNUM (panelmonth), sort: gen move_relat = (hh_move==1 & inrange(hh_move[_n-1],2,4)) & ERESIDENCEID != ERESIDENCEID[_n-1]  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen move_indep = (hh_move==2 & inlist(hh_move[_n-1],1,3,4)) & ERESIDENCEID != ERESIDENCEID[_n-1]  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 // Education
 	// highest educational attainment only measured yearly, so will test yearly educational changes, as well as school enrollment. testing monthly, but will also add to annualize file
 	by SSUID PNUM (panelmonth), sort: gen educ_change = (educ>educ[_n-12])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // make sure this creates the 0s I want, for people who didn't get more education
-	by SSUID PNUM (panelmonth), sort: gen enrolled_yes = (renroll==1 & renroll[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	by SSUID PNUM (panelmonth), sort: gen enrolled_no = (renroll==0 & renroll[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen enrolled_yes = (renroll==1 & renroll[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen enrolled_no = (renroll==2 & renroll[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 **Partner
 	* first get partner specific variables
@@ -196,10 +196,24 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 
 	gen ft_pt_sp=.
 	gen jobchange_sp=.
+	gen better_job_sp=.
+	gen rmnumjobs_sp=.
+	gen efindjob_sp=.
+	gen edisabl_sp=.
+	gen rdis_alt_sp=.
+	gen educ_sp=.
+	gen renroll_sp=.
 
 	forvalues n=1/22{
 	replace ft_pt_sp=to_ft_pt`n' if spart_num==`n'
 	replace jobchange_sp=to_jobchange`n' if spart_num==`n'
+	replace better_job_sp=to_better_job`n' if spart_num==`n'
+	replace rmnumjobs_sp=to_RMNUMJOBS`n' if spart_num==`n'
+	replace efindjob_sp=to_EFINDJOB`n' if spart_num==`n'
+	replace edisabl_sp=to_EDISABL`n' if spart_num==`n'
+	replace rdis_alt_sp=to_RDIS_ALT`n' if spart_num==`n'
+	replace educ_sp=to_educ`n' if spart_num==`n'
+	replace renroll_sp=to_RENROLL`n' if spart_num==`n'
 	}
 
 	* Full-Time to Part-Time
@@ -218,12 +232,40 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	* Employer Change (currently using ANY out of a possible 7 jobs - can update to be first job or top job if needed)
 	* Recoded above - variable is jobchange_sp
 	
+	* "Better Job" (see recode in file 06 - based on reasons left job)
+	by SSUID PNUM (panelmonth), sort: gen betterjob_sp = (better_job_sp==1 & better_job_sp[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+	// Number of Jobs // also going to test on an annual average, did # of job changes, this is monthly
+	* 1 to More than 1 (as I feel like this is a bigger deal than going from 2 to 3, say)
+	by SSUID PNUM (panelmonth), sort: gen many_jobs_sp = (inrange(rmnumjobs_sp,2,7) & rmnumjobs_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* More than 1 to 1
+	by SSUID PNUM (panelmonth), sort: gen one_job_sp = (rmnumjobs_sp==1 & inrange(rmnumjobs_sp[_n-1],2,7))  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* Any # job change up
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_up_sp = (rmnumjobs_sp > rmnumjobs_sp[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Any # job change down
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_down_sp = (rmnumjobs_sp < rmnumjobs_sp[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	
+// Disability status - testing all three specifications for now; will pick one. efindjob and esdisabl more about work, while dis_alt is broader disability
+	by SSUID PNUM (panelmonth), sort: gen efindjob_in_sp= (efindjob_sp==1 & efindjob_sp[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen efindjob_out_sp = (efindjob_sp==0 & efindjob_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen edisabl_in_sp = (edisabl_sp==1 & edisabl_sp[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen edisabl_out_sp = (edisabl_sp==0 & edisabl_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen rdis_alt_in_sp = (rdis_alt_sp==1 & rdis_alt_sp[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen rdis_alt_out_sp = (rdis_alt_sp==0 & rdis_alt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+// Education
+	// highest educational attainment only measured yearly, so will test yearly educational changes, as well as school enrollment. testing monthly, but will also add to annualize file
+	by SSUID PNUM (panelmonth), sort: gen educ_change_sp = (educ_sp > educ_sp[_n-12])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // make sure this creates the 0s I want, for people who didn't get more education
+	by SSUID PNUM (panelmonth), sort: gen enrolled_yes_sp = (renroll_sp==1 & renroll_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen enrolled_no_sp = (renroll_sp==2 & renroll_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+	
 // Create basic indictor to identify months observed when data is collapsed
 	gen one=1
 	
 // cleaning up variables to prep for collapse - will remove these from original code later
-drop *_bmonth *_emonth *_payhr* *_msum apearn rhpov* *_ind *_annsal* *_hourly* *_wkly* *_bwkly* *_mthly* *_smthly* *_other* *_gamt* ///
-tyrcurrmarr tyrfirstmarr tyear_fb thtotinc tftotinc pairtype* RREL* to_TAGE_FB*
+// drop *_bmonth *_emonth *_payhr* *_msum apearn rhpov* *_ind *_annsal* *_hourly* *_wkly* *_bwkly* *_mthly* *_smthly* *_other* *_gamt* ///
+// tyrcurrmarr tyrfirstmarr tyear_fb thtotinc tftotinc pairtype* RREL* to_TAGE_FB*
 
 			// https://www.statalist.org/forums/forum/general-stata-discussion/general/639137-any-collapse-tricks-for-multiple-stats-from-multiple-vars
 
@@ -249,27 +291,40 @@ gen avg_to_earn`r'=to_earnings`r'
 
  
 // Collapse the data by year to create annual measures
-collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 		/// mother char.
-			(sum) 	tpearn thearn tmwkhrs earnings enjflag						///
-					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid		///
-					marr_coh first_birth hh_lose earn_lose earn_non hh_gain		///
-					earn_gain non_earn resp_earn resp_non						///
-					jobchange full_part full_no part_no part_full no_part		///
-					no_full jobchange_sp full_part_sp full_no_sp				///
-					part_no_sp part_full_sp no_part_sp no_full_sp				///
-			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize		/// 
-					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner	///
-					thincpovt2 pov_level 										///
-			(max) 	minorchildren minorbiochildren preschoolchildren 			///
-					prebiochildren race educ tceb oldest_age			 		///
-					start_spartner last_spartner start_spouse last_spouse		///
-					start_partner last_partner tage ageb1 tcbyr_1-tcbyr_7		///
-			(min) 	tage_fb durmom youngest_age first_wave						///
-			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*		/// other hh members char.
-			(sum) 	to_TPEARN* to_TMWKHRS* to_earnings*			 				///
-			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*	to_pov_level*		///
-			(firstnm) st_*														/// will cover all (mother + hh per recodes) 
-			(lastnm) end_*,														///
+collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
+			(sum) 	tpearn thearn tmwkhrs earnings enjflag								///
+					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh 		///
+					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non 	///
+					prekid_gain prekid_lose parents_gain parents_lose first_birth		///
+					full_part full_no part_no part_full no_part no_full jobchange		///
+					betterjob left_preg many_jobs one_job num_jobs_up num_jobs_down		///
+					efindjob_in efindjob_out edisabl_in edisabl_out rdis_alt_in			///
+					rdis_alt_out welfare_in welfare_out ch_workmore_yes	ch_workmore_no	///
+					childasst_yes childasst_no ch_waitlist_yes ch_waitlist_no			///
+					move_relat move_indep educ_change enrolled_yes enrolled_no 			///
+					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
+					no_full_sp betterjob_sp many_jobs_sp one_job_sp num_jobs_up_sp 		///
+					num_jobs_down_sp jobchange_sp efindjob_in_sp edisabl_in_sp			///
+					efindjob_out_sp edisabl_out_sp rdis_alt_in_sp rdis_alt_out_sp		///
+					educ_change_sp enrolled_yes_sp enrolled_no_sp						///
+			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize				/// 
+					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner			///
+					thincpovt2 pov_level rmnumjobs_sp									///
+					tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1					///
+					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
+			(max) 	minorchildren minorbiochildren preschoolchildren 					///
+					prebiochildren race educ tceb oldest_age ejb*_payhr1 				///
+					start_spartner last_spartner start_spouse last_spouse				///
+					start_partner last_partner tage ageb1 tcbyr_1-tcbyr_7				///
+			(min) 	tage_fb durmom youngest_age first_wave								///
+			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*				/// other hh members char.
+			(sum) 	to_TPEARN* to_TMWKHRS* to_earnings*			 						///
+			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*								///
+					to_EJB*_PAYHR1* to_TJB*_ANNSAL1* to_TJB*_HOURLY1* to_TJB*_WKLY1* 	///
+					to_TJB*_BWKLY1* to_TJB*_MTHLY1* to_TJB*_SMTHLY1* to_TJB*_OTHER1*	///
+					to_TJB*_GAMT1* to_RMNUMJOBS*										///
+			(firstnm) st_*																/// will cover all (mother + hh per recodes) 
+			(lastnm) end_*,																///
 			by(SSUID PNUM year)
 			
 
