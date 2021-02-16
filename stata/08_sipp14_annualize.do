@@ -76,27 +76,36 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	tab `var'
 	}
 	
-// indicators of someone leaving household DURING the year
+// indicators of someone leaving household DURING the year -- revisit this. am I capturing mother at all, or ALL OTHERS?
 	// browse SSUID PNUM panelmonth hhsize numearner other_earner
 	
 	* Anyone left - hhsize change
-	by SSUID PNUM (panelmonth), sort: gen hh_lose = (hhsize<hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen hh_lose = (hhsize < hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Earner left - other earner left AND hh size change
-	by SSUID PNUM (panelmonth), sort: gen earn_lose = (other_earner<other_earner[_n-1]) & (hhsize<hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen earn_lose = (other_earner < other_earner[_n-1]) & (hhsize < hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Earner became non-earner - other earner down AND hh size stayed the same
-	by SSUID PNUM (panelmonth), sort: gen earn_non = (other_earner<other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen earn_non = (other_earner < other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Anyone came - hhsize change
-	by SSUID PNUM (panelmonth), sort: gen hh_gain = (hhsize>hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen hh_gain = (hhsize > hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Earner came - other earner came AND hh size change
-	by SSUID PNUM (panelmonth), sort: gen earn_gain = (other_earner>other_earner[_n-1]) & (hhsize>hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen earn_gain = (other_earner > other_earner[_n-1]) & (hhsize > hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Non-earner became earner - other earner up AND hh size stayed the same
-	by SSUID PNUM (panelmonth), sort: gen non_earn = (other_earner>other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen non_earn = (other_earner > other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Respondent became earner
 	by SSUID PNUM (panelmonth), sort: gen resp_earn = (tpearn!=. & tpearn[_n-1]==.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Respondent became non-earner
 	by SSUID PNUM (panelmonth), sort: gen resp_non = (tpearn==. & tpearn[_n-1]!=.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	
-	// browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
+	* Gained children under 5
+	by SSUID PNUM (panelmonth), sort: gen prekid_gain = (preschoolchildren > preschoolchildren[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // check for missing and ensure not messed up, also do I want to specifically track like from 0 to more? as that might be different than say, 1 to 2?
+	* Lost children under 5
+	by SSUID PNUM (panelmonth), sort: gen prekid_lose = (preschoolchildren < preschoolchildren[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Parents entered (bio and in-law)
+	by SSUID PNUM (panelmonth), sort: gen prekid_gain = (parents > parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Parents left (bio and in-law)
+	by SSUID PNUM (panelmonth), sort: gen prekid_lose = (parents < parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
+
+
+// browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
 	
 // Create indicator of birth during the year
 	drop tcbyr_8-tcbyr_20 // suppressed variables, no observations
@@ -106,6 +115,7 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	
 // create indicators of job changes
 **Respondent
+	// Employment Status
 	* Full-Time to Part-Time
 	by SSUID PNUM (panelmonth), sort: gen full_part = (ft_pt==2 & ft_pt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is based on a recode of number of hours worked per week. I am not sure if there is a better way to get this. that is what the sipp uses to ask why a respondent works less than 35 hours
 	* Full-Time to No Job
@@ -122,6 +132,53 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	* Employer Change (currently using ANY out of a possible 7 jobs - can update to be first job or top job if needed)
 	* Recoded in file 07 - variable is jobchange
 	
+	* "Better Job" (see recode in file 06 - based on reasons left job)
+	by SSUID PNUM (panelmonth), sort: gen betterjob = (better_job==1 & better_job[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+	* Left job for pregnancy / childbirth. Don't 100% know which it was, but will code it for now anyway
+	by SSUID PNUM (panelmonth), sort: gen left_preg = (enj_nowrk5==1 & enj_nowrk5[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+	// Number of Jobs // also going to test on an annual average, did # of job changes, this is monthly
+	* 1 to More than 1 (as I feel like this is a bigger deal than going from 2 to 3, say)
+	by SSUID PNUM (panelmonth), sort: gen many_jobs = ((inrange,rmnumjobs,2,7) & rmnumjobs[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* More than 1 to 1
+	by SSUID PNUM (panelmonth), sort: gen one_job = (rmnumjobs==1 & (inrange,rmnumjobs[_n-1],2,7))  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* Any # job change up
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_up = (rmnumjobs > rmnumjobs[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]  // confirm if any missing here, this doesn't mess up the greater / less than
+	* Any # job change down
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_down = (rmnumjobs < rmnumjobs[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+
+// Disability status - testing all three specifications for now; will pick one. efindjob and esdisabl more about work, while dis_alt is broader disability
+	by SSUID PNUM (panelmonth), sort: gen efindjob_in= (efindjob==1 & efindjob[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen efindjob_out = (efindjob==0 & efindjob[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen edisabl_in = (edisabl==1 & edisabl[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen edisabl_out = (edisabl==0 & edisabl[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen rdis_alt_in = (rdis_alt==1 & rdis_alt[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen rdis_alt_out = (rdis_alt==0 & rdis_alt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+// Welfare Use
+	by SSUID PNUM (panelmonth), sort: gen welfare_in = (programs>0 & programs[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]  // confirm that missing won't mess up the greater than
+	by SSUID PNUM (panelmonth), sort: gen welfare_out = (programs==0 & programs[_n-1]>0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+// East of finding child-care. Not 100% sure these capture our sentiment, but testing for now
+	by SSUID PNUM (panelmonth), sort: gen ch_workmore_yes = (eworkmore==1 & eworkmore[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen ch_workmore_no = (eworkmore==0 & eworkmore[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen childasst_yes = (echld_mnyn==1 & echld_mnyn[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen childasst_no = (echld_mnyn==0 & echld_mnyn[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen ch_waitlist_yes = (elist==1 & elist[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen ch_waitlist_no = (elist==0 & elist[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+// Respondent moved
+	// can I see if eresidence ID changed? play around with this more
+	by SSUID PNUM (panelmonth), sort: gen move_relat = (hh_move==1 & hh_move[_n-1]==4)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // see if this works the way I want. can they go from like other to 2? assuming right now, it's did not move, to moved for specific reason
+	by SSUID PNUM (panelmonth), sort: gen move_indep = (hh_move==2 & hh_move[_n-1]==4)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
+// Education
+	// highest educational attainment only measured yearly, so will test yearly educational changes, as well as school enrollment. testing monthly, but will also add to annualize file
+	by SSUID PNUM (panelmonth), sort: gen educ_change = (educ>educ[_n-12])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // make sure this creates the 0s I want, for people who didn't get more education
+	by SSUID PNUM (panelmonth), sort: gen enrolled_yes = (renroll==1 & renroll[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen enrolled_no = (renroll==0 & renroll[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+
 **Partner
 	* first get partner specific variables
 	gen spousenum=.
