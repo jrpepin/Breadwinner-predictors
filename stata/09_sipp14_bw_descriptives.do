@@ -292,7 +292,36 @@ putexcel B116 = "R Wages Up 5%"
 putexcel B117 = "R Wages Down 5%"
 putexcel B118 = "Spouse Wages Up 5%"
 putexcel B119 = "Spouse Wages Down 5%"
-
+putexcel A120:A139="Alt Earnings Threshold", merge vcenter
+putexcel B120 = "R Earnings Change - Average"
+putexcel B121 = "Spouse Earnings Change - Average"
+putexcel B122 = "HH Earnings Change - Average"
+putexcel B123 = "Other Earnings Change - Average"
+putexcel B124 = "R Earnings Up 20%"
+putexcel B125 = "R Earnings Down 20%"
+putexcel B126 = "Spouse Earnings Up 20%"
+putexcel B127 = "Spouse Earnings Down 20%"
+putexcel B128 = "HH Earnings Up 20%"
+putexcel B129 = "HH Earnings Down 20%"
+putexcel B130 = "Other Earnings Up 20%"
+putexcel B131 = "Other Earnings Down 20%"
+putexcel B132 = "R Earnings Up 5%"
+putexcel B133 = "R Earnings Down 5%"
+putexcel B134 = "Spouse Earnings Up 5%"
+putexcel B135 = "Spouse Earnings Down 5%"
+putexcel B136 = "HH Earnings Up 5%"
+putexcel B137 = "HH Earnings Down 5%"
+putexcel B138 = "Other Earnings Up 5%"
+putexcel B139 = "Other Earnings Down 5%"
+putexcel A140:A147="Changes in Earner Status", merge vcenter
+putexcel B140 = "R Became Earner"
+putexcel B141 = "R Stopped Earning"
+putexcel B142 = "Spouse Became Earner"
+putexcel B143 = "Spouse Stopped Earning"
+putexcel B144 = "HH Became Earner"
+putexcel B145 = "HH Stopped Earning"
+putexcel B146 = "Other Became Earner"
+putexcel B147 = "Other Stopped Earning"
 
 
 
@@ -525,6 +554,10 @@ forvalues w=1/28 {
 * Using earnings not tpearn which is the sum of all earnings and won't be negative
 * First create a variable that indicates percent change YoY
 by SSUID PNUM (year), sort: gen earn_change = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+
+browse SSUID PNUM year earnings earn_change if trans_bw60==1 & earn_change >1
+browse SSUID PNUM year earnings earn_change if earn_change >10 & earn_change!=. // trying to understand big jumps in earnings
+
 	// testing a mean, then up over 5% and 20% thresholds
 	gen earn_up_20=0
 	replace earn_up_20 = 1 if earn_change >=.2000000
@@ -746,6 +779,134 @@ forvalues w=1/40 {
 		matrix m`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
+
+// Testing placing a min earnings threshold to calculate changes in earnings (>$10 in a year)
+* Respondent
+	by SSUID PNUM (year), sort: gen earn_change_alt = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings[_n-1] > 100
+	gen earn_up_alt_20=0
+	replace earn_up_alt_20 = 1 if earn_change_alt >=.2000000
+	replace earn_up_alt_20=. if earn_change_alt==.
+	gen earn_down_alt_20=0
+	replace earn_down_alt_20 = 1 if earn_change_alt <=-.2000000
+	replace earn_down_alt_20=. if earn_change_alt==.
+	gen earn_up_alt_5=0
+	replace earn_up_alt_5 = 1 if earn_change_alt >=.05000000
+	replace earn_up_alt_5=. if earn_change_alt==.
+	gen earn_down_alt_5=0
+	replace earn_down_alt_5 = 1 if earn_change_alt <=-.05000000
+	replace earn_down_alt_5=. if earn_change_alt==.
+
+*Partner
+	by SSUID PNUM (year), sort: gen earn_change_alt_sp = ((earnings_a_sp-earnings_a_sp[_n-1])/earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings_a_sp[_n-1] > 100
+	gen earn_up_alt_20_sp=0
+	replace earn_up_alt_20_sp = 1 if earn_change_alt_sp >=.2000000
+	replace earn_up_alt_20_sp=. if earn_change_alt_sp==.
+	gen earn_down_alt_20_sp=0
+	replace earn_down_alt_20_sp = 1 if earn_change_alt_sp <=-.2000000
+	replace earn_down_alt_20_sp=. if earn_change_alt_sp==.
+	gen earn_up_alt_5_sp=0
+	replace earn_up_alt_5_sp = 1 if earn_change_alt_sp >=.05000000
+	replace earn_up_alt_5_sp=. if earn_change_alt_sp==.
+	gen earn_down_alt_5_sp=0
+	replace earn_down_alt_5_sp = 1 if earn_change_alt_sp <=-.05000000
+	replace earn_down_alt_5_sp=. if earn_change_alt_sp==.
+	
+* All earnings in HH besides R
+	by SSUID PNUM (year), sort: gen earn_change_alt_hh = ((hh_earn-hh_earn[_n-1])/hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & hh_earn[_n-1] > 100
+	// testing a mean, then up over a threshold, down over a threshold
+	gen earn_up_alt_20_hh=0
+	replace earn_up_alt_20_hh = 1 if earn_change_alt_hh >=.2000000
+	replace earn_up_alt_20_hh=. if earn_change_alt_hh==.
+	gen earn_down_alt_20_hh=0
+	replace earn_down_alt_20_hh = 1 if earn_change_alt_hh <=-.2000000
+	replace earn_down_alt_20_hh=. if earn_change_alt_hh==.
+	gen earn_up_alt_5_hh=0
+	replace earn_up_alt_5_hh = 1 if earn_change_alt_hh >=.05000000
+	replace earn_up_alt_5_hh=. if earn_change_alt_hh==.
+	gen earn_down_alt_5_hh=0
+	replace earn_down_alt_5_hh = 1 if earn_change_alt_hh <=-.05000000
+	replace earn_down_alt_5_hh=. if earn_change_alt_hh==.
+	
+* All earnings in HH besides R + partner
+	by SSUID PNUM (year), sort: gen earn_change_alt_oth = ((other_earn-other_earn[_n-1])/other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & other_earn[_n-1] > 100
+	// testing a mean, then up over a threshold, down over a threshold
+	gen earn_up_alt_20_oth=0
+	replace earn_up_alt_20_oth = 1 if earn_change_alt_oth >=.2000000
+	replace earn_up_alt_20_oth=. if earn_change_alt_oth==.
+	gen earn_down_alt_20_oth=0
+	replace earn_down_alt_20_oth = 1 if earn_change_alt_oth <=-.2000000
+	replace earn_down_alt_20_oth=. if earn_change_alt_oth==.
+	gen earn_up_alt_5_oth=0
+	replace earn_up_alt_5_oth = 1 if earn_change_alt_oth >=.05000000
+	replace earn_up_alt_5_oth=. if earn_change_alt_oth==.
+	gen earn_down_alt_5_oth=0
+	replace earn_down_alt_5_oth = 1 if earn_change_alt_oth <=-.05000000
+	replace earn_down_alt_5_oth=. if earn_change_alt_oth==.
+
+* then calculate changes
+local alt_chg_vars "earn_change_alt earn_change_alt_sp earn_change_alt_hh earn_change_alt_oth earn_up_alt_20 earn_down_alt_20 earn_up_alt_20_sp earn_down_alt_20_sp earn_up_alt_20_hh earn_down_alt_20_hh earn_up_alt_20_oth earn_down_alt_20_oth earn_up_alt_5 earn_down_alt_5 earn_up_alt_5_sp earn_down_alt_5_sp earn_up_alt_5_hh earn_down_alt_5_hh earn_up_alt_5_oth earn_down_alt_5_oth"
+
+local colu1 "C E G"
+
+* by year
+forvalues w=1/20 {
+	forvalues y=14/16{
+		local i=`y'-13
+		local row=`w'+119
+		local col1: word `i' of `colu1'
+		local var: word `w' of `alt_chg_vars'
+		mean `var' if trans_bw60==1 & year==20`y'
+		matrix m`var'`y' = e(b)
+		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
+		}
+}
+
+* total
+forvalues w=1/20 {
+		local row=`w'+119
+		local var: word `w' of `alt_chg_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+}
+
+// Testing changes from no earnings to earnings for all (Mother, Partner, Others)
+
+by SSUID PNUM (year), sort: gen mom_gain_earn = (earnings!=. & earnings[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen mom_lose_earn = (earnings==. & earnings[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen part_gain_earn = (earnings_a_sp!=. & earnings_a_sp[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen part_lose_earn = (earnings_a_sp==. & earnings_a_sp[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen hh_gain_earn = (hh_earn!=. & hh_earn[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen hh_lose_earn = (hh_earn==. & hh_earn[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen oth_gain_earn = (other_earn!=. & other_earn[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen oth_lose_earn = (other_earn==. & other_earn[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	
+local earn_status_vars "mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
+
+local colu1 "C E G"
+
+* by year
+forvalues w=1/8 {
+	forvalues y=14/16{
+		local i=`y'-13
+		local row=`w'+139
+		local col1: word `i' of `colu1'
+		local var: word `w' of `earn_status_vars'
+		mean `var' if trans_bw60==1 & year==20`y'
+		matrix m`var'`y' = e(b)
+		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
+		}
+}
+
+* total
+forvalues w=1/8 {
+		local row=`w'+139
+		local var: word `w' of `earn_status_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+}
+
 
 /*
 

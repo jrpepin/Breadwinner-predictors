@@ -283,13 +283,22 @@ forvalues r=1/22{
 gen avg_to_tpearn`r'=to_TPEARN`r' // using the same variable in sum and avg and can't use wildcards in below, so renaming first to use renamed variable for avg
 gen avg_to_hrs`r'=to_TMWKHRS`r'
 gen avg_to_earn`r'=to_earnings`r'
+gen to_mis_TPEARN`r'=to_TPEARN`r'
+gen to_mis_earnings`r'=to_earnings`r'
+gen to_mis_TMWKHRS`r'=to_TMWKHRS`r'
 	foreach var of varlist to_occ_1`r'-to_occ_7`r' to_employ`r' to_ft_pt`r' to_EMS`r'{
 		gen st_`var'=`var'
 		gen end_`var'=`var'
 	}
 }
 
- 
+// need to retain missings for earnings when annualizing (sum treats missing as 0)
+
+bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn)
+// browse SSUID PNUM year panelmonth tpearn tpearn_mis // can I just do this with min in collapse? if all missing, missing will be min?
+bysort SSUID PNUM year (earnings): egen earnings_mis = min(earnings)
+bysort SSUID PNUM year (tmwkhrs): egen tmwkhrs_mis = min(tmwkhrs)
+
 // Collapse the data by year to create annual measures
 collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
 			(sum) 	tpearn thearn tmwkhrs earnings enjflag								///
@@ -317,6 +326,8 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					start_spartner last_spartner start_spouse last_spouse				///
 					start_partner last_partner tage ageb1 tcbyr_1-tcbyr_7				///
 			(min) 	tage_fb durmom youngest_age first_wave								///
+					tpearn_mis tmwkhrs_mis earnings_mis									///
+					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///
 			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*				/// other hh members char.
 			(sum) 	to_TPEARN* to_TMWKHRS* to_earnings*			 						///
 			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*								///
@@ -353,6 +364,17 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 	
 // Create indicator for incomple annual observations
 	gen partial_year= (monthsobserved < 12)
+	
+// update earnings / hours to be missing if missing all 12 months
+replace earnings=. if earnings_mis==.
+replace tpearn=. if tpearn_mis==.
+replace tmwkhrs=. if tmwkhrs_mis==.
+
+forvalues r=1/22{
+replace to_TPEARN`r'=. if to_mis_TPEARN`r'==.
+replace to_earnings`r'=. if to_mis_earnings`r'==.
+replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
+}
 
 // Create annual breadwinning indicators
 
@@ -368,6 +390,9 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 		/* *?*?* WE DON'T HAVE ANY MISSING TPEARN | THEARN. IS THAT EXPECTED? */
 		/* yes. We are now using allocated data. The SIPP 2014 doesn't have codes */
 		/* for whether the summary measure includes allocated data */
+		
+		/*This above message about missing tpearn was written by someone else - but the tpearn data is NOT expected - it's because
+		of how the collapse function handles missing in sum(). I've since updated so tpearn is missing if it was missing for all 12 months of the year */
 
 
 	// 60% breadwinning threshold

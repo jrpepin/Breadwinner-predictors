@@ -26,9 +26,9 @@ clear
 			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc								/// /* DEMOGRAPHIC */
 			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why									///
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
-			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend									///
+			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend ejb*_jborse 						///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
-			tjb*_gamt* tjb*_msum tpearn																			///		
+			tjb*_gamt* tjb*_msum tpearn																			///
 			efindjob edisabl ejobcant rdis rdis_alt edisany														/// /* DISABILITY */
 			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn 											/// /* PROGRAM USAGE */
 			ewelac_mnyn renroll eedgrade eedcred																/// /* ENROLLMENT */
@@ -76,6 +76,21 @@ drop tmover rmover
 // Create a measure of total household earnings per month (with allocated data)
 	* Note that this approach omits the earnings of type 2 people.
     egen thearn = total(tpearn), 	by(SSUID ERESIDENCEID swave monthcode)
+	
+// Creating a measure of earnings solely based on wages and not profits and losses
+	egen earnings=rowtotal(tjb1_msum tjb2_msum tjb3_msum tjb4_msum tjb5_msum tjb6_msum tjb7_msum), missing
+
+	// browse earnings tpearn
+	gen check_e=.
+	replace check_e=0 if earnings!=tpearn & tpearn!=.
+	replace check_e=1 if earnings==tpearn
+
+	tab check_e 
+	
+	tab ejb1_jborse check_e, m
+    
+	egen thearn_alt = total(earnings), 	by(SSUID ERESIDENCEID swave monthcode) // how different is a HH measure based on earnings v. tpearn?
+	// browse tftotinc thtotinc thearn thearn_alt
 
 // Count number of earners in hh per month
     egen numearner = count(tpearn),	by(SSUID ERESIDENCEID swave monthcode)
@@ -196,18 +211,6 @@ gen better_job = .
 replace better_job = 1 if (inlist(ejb1_rsend,7,8) | inlist(ejb2_rsend,7,8) | inlist(ejb3_rsend,7,8) | inlist(ejb4_rsend,7,8) | inlist(ejb5_rsend,7,8) | inlist(ejb6_rsend,7,8) | inlist(ejb7_rsend,7,8))
 replace better_job = 0 if (jobchange_1==1 | jobchange_2==1 | jobchange_3==1 | jobchange_4==1 | jobchange_5==1 | jobchange_6==1 | jobchange_7==1) & better_job==.
 
-
-* earnings change: tpearn seems to cover all jobs in month. need to decide if we want OVERALL change in earnings, or PER JOB (<5% of sample has 2+ jobs) - less hard than i thought...
-// browse TAGE RMNUMJOBS EJB1_PAYHR1 TJB1_ANNSAL1 TJB1_HOURLY1 TJB1_WKLY1 TJB1_BWKLY1 TJB1_MTHLY1 TJB1_SMTHLY1 TJB1_OTHER1 TJB1_GAMT1 TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN
-
-egen earnings=rowtotal(tjb1_msum tjb2_msum tjb3_msum tjb4_msum tjb5_msum tjb6_msum tjb7_msum)
-browse earnings tpearn
-gen check_e=.
-replace check_e=0 if earnings!=tpearn & tpearn!=.
-replace check_e=1 if earnings==tpearn
-
-tab check_e // 8.4% don't match
-// browse TAGE TJB1_MSUM TJB2_MSUM TJB3_MSUM TPEARN earnings if check==0 // think difference is the profit / loss piece of TPEARN. decide to use that or earnings
 
 * wages change: Was going to try to aggregate across but it is seeming too complicated, so will handle in annualization, with any wage change, as well as shift from how paid (e.g. hourly to annual salary)
 // EJB*_PAYHR* TJB*_ANNSAL* TJB*_HOURLY* TJB*_WKLY* TJB*_BWKLY* TJB*_MTHLY* TJB*_SMTHLY* TJB*_OTHER* TJB*_GAMT*
