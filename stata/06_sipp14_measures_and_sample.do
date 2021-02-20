@@ -180,8 +180,8 @@ drop erace eorigin
 * marital status at 1st birth: not 100% sure. TYEAR_FB is year of first birth. we also have first and current marriage year. HOWEVER, if divorced, do not have that information. Would need to merge with SSA supplement
 
 * educational attainment: use EEDUC
-recode eeduc (31/38=1)(39=2)(40/42=3)(43=4)(44/46=5), gen(educ)
-label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Degree" 5 "Advanced Degree"
+recode eeduc (31/38=1)(39=2)(40/42=3)(43/46=4), gen(educ)
+label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Plus"
 label values educ educ
 
 drop eeduc
