@@ -19,26 +19,39 @@ di "$S_DATE"
 use "$SIPP14keep/bw_descriptives.dta", clear
 
 ********************************************************************************
+* Calculating who is primary earner in each HH
+********************************************************************************
+egen hh_earn_max = rowmax (to_earnings1-to_earnings22)
+// browse SSUID PNUM year hh_earn_max earnings to_earnings* 
+
+gen who_max_earn=.
+forvalues n=1/22{
+replace who_max_earn=relationship`n' if to_earnings`n'==hh_earn_max
+}
+
+// browse SSUID PNUM year who_max_earn hh_earn_max earnings to_earnings* relationship*
+
+gen total_max_earner=.
+replace total_max_earner=who_max_earn if (earnings==. & hh_earn_max>0 & hh_earn_max!=.) | (hh_earn_max > earnings & earnings!=. & hh_earn_max!=.)
+replace total_max_earner=99 if (earnings>0 & earnings!=. & hh_earn_max==.) | (hh_earn_max < earnings & earnings!=. & hh_earn_max!=.)
+
+browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner
+
+label values who_max_earn total_max_earner arel // defined in step 9, this only works if run in same session
+
+// put in excel
+
+tabout total_max_earner using "$results/Breadwinner_Distro.xls", c(freq col) clab(N Percent) f(0c 1p) replace
+
+forvalues e=1/4{
+	tabout total_max_earner using "$results/Breadwinner_Distro.xls" if educ==`e', c(freq col) clab(Educ=`e' Percent) f(0c 1p) append 
+}
+
+/* Need to revisit all below as it's mostly redundant to file 9 now
+
+********************************************************************************
 * Partner descriptive info
 ********************************************************************************
-/* moved this to previous file
-gen spousenum=.
-forvalues n=1/22{
-replace spousenum=`n' if relationship`n'==1
-}
-
-gen partnernum=.
-forvalues n=1/22{
-replace partnernum=`n' if relationship`n'==2
-}
-
-// gen check=.
-// replace check=1 if !missing(spousenum) & !missing(partnernum) // how many respondents have a spouse and unmarried partner in their HH = will use spouse. their marital status also changed over the year
-// drop check
-
-gen spart_num=spousenum
-replace spart_num=partnernum if spart_num==.
-*/
 
 foreach var in educ_sp race_sp employ_sp occ_sp age_sp tot_hrs_sp avg_hrs_sp{
 gen `var'=.
@@ -410,3 +423,4 @@ forvalues m=1/16{
 putexcel D59 = $obvsprev_n
 
 save "$SIPP14keep/bw_descriptives.dta", replace
+*/
