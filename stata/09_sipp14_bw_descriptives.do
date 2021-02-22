@@ -324,7 +324,7 @@ putexcel B144 = "HH Became Earner"
 putexcel B145 = "HH Stopped Earning"
 putexcel B146 = "Other Became Earner"
 putexcel B147 = "Other Stopped Earning"
-
+putexcel B149 = "Total Sample / Just BWs"
 
 
 // Marital status changes
@@ -934,6 +934,35 @@ forvalues w=1/8 {
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
+
+**** adding in sample sizes
+
+local colu1 "C E G"
+local colu2 "D F H"
+
+forvalues y=14/16{
+	local i=`y'-13
+	local col1: word `i' of `colu1'
+	local col2: word `i' of `colu2'
+	egen total_`y' = nvals(idnum) if year==20`y'
+	bysort total_`y': replace total_`y' = total_`y'[1] 
+	local total_`y' = total_`y'
+	display `total_`y''
+	putexcel `col1'149 = `total_`y''
+	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
+	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
+	local bw_`y' = bw_`y'
+	putexcel `col2'149 = `bw_`y''
+}
+
+egen total_samp = nvals(idnum)
+egen bw_samp = nvals(idnum) if trans_bw60==1
+local total_samp = total_samp
+local bw_samp = bw_samp
+
+putexcel I149 = `total_samp'
+putexcel J149 = `bw_samp'
+
 ********************************************************************************
 * Now breaking down by education
 ********************************************************************************
@@ -1100,6 +1129,8 @@ putexcel B144 = "HH Became Earner"
 putexcel B145 = "HH Stopped Earning"
 putexcel B146 = "Other Became Earner"
 putexcel B147 = "Other Stopped Earning"
+putexcel B149 = "Total Sample"
+putexcel B150 = "Breadwinners"
 
 // Partner and HH status changes
 local status_vars "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non prekid_gain prekid_lose parents_gain parents_lose birth firstbirth"
@@ -1207,6 +1238,24 @@ forvalues w=1/8 {
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
 }
+
+**** adding in sample sizes
+
+local colu1 "C D E F"
+
+
+forvalues e=1/4{
+	local i=`e'
+	local col1: word `i' of `colu1'
+	egen total_`e' = nvals(idnum) if educ==`e'
+	bysort total_`e': replace total_`e' = total_`e'[1] 
+	local total_`e' = total_`e'
+	egen bw_`e' = nvals(idnum) if educ==`e' & trans_bw60==1
+	bysort bw_`e': replace bw_`e' = bw_`e'[1] 
+	local bw_`e' = bw_`e'
+	putexcel `col1'149 = `total_`e''
+	putexcel `col1'150 = `bw_`e''
+	}
 
 
 /*
