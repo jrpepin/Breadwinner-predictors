@@ -318,6 +318,9 @@ label define pov_level 1 "< 50%" 2 "50-125%" 3 "125-150%" 4 "150-185%" 5 "185-20
 label values pov_level pov_level
 // drop thincpov
 
+save "$tempdir/sipp14tpearn_fullsamp", replace
+
+
 ********************************************************************************
 * Create the analytic sample
 ********************************************************************************
@@ -452,7 +455,10 @@ drop if _merge==2
 	fre minorbiochildren
 	unique 	idnum 	if minorbiochildren >= 1  	// 1 or more minor children in household
 
-	keep if minorbiochildren >= 1	// Keep only moms with kids in household
+	gen children_yn=minorbiochildren
+	replace children_yn=1 if inrange(minorbiochildren,1,10)
+
+	keep if minorbiochildren >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
 
 // Creates a macro with the total number of mothers in the dataset.
 preserve
