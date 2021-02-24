@@ -806,7 +806,7 @@ forvalues w=1/40 {
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
-// Testing placing a min earnings threshold to calculate changes in earnings (>$10 in a year)
+// Testing placing a min earnings threshold to calculate changes in earnings (>$100 in a year)
 * Respondent
 	by SSUID PNUM (year), sort: gen earn_change_alt = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings[_n-1] > 100
 	gen earnup_alt20=0
