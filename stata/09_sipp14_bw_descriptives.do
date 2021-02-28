@@ -103,7 +103,7 @@ drop nprevbw50 nprevbw60*
 		}
 */
 
-// temp recode - but fixed in source file, but will take awhile to run recode educ (1=1) (2=2) (3=3) (4/5=4)
+//
 label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Plus"
 label values educ educ
 
@@ -259,84 +259,60 @@ putexcel B84 = "R Hours Change - Average"
 putexcel B85 = "Spouse Hours Change - Average"
 putexcel B86 = "R Wages Change - Average"
 putexcel B87 = "Spouse Wages Change - Average"
-putexcel A88:A103="Earnings Thresholds", merge vcenter
-putexcel B88 = "R Earnings Up 20%"
-putexcel B89 = "R Earnings Down 20%"
-putexcel B90 = "Spouse Earnings Up 20%"
-putexcel B91 = "Spouse Earnings Down 20%"
-putexcel B92 = "HH Earnings Up 20%"
-putexcel B93 = "HH Earnings Down 20%"
-putexcel B94 = "Other Earnings Up 20%"
-putexcel B95 = "Other Earnings Down 20%"
-putexcel B96 = "R Earnings Up 5%"
-putexcel B97 = "R Earnings Down 5%"
-putexcel B98 = "Spouse Earnings Up 5%"
-putexcel B99 = "Spouse Earnings Down 5%"
-putexcel B100 = "HH Earnings Up 5%"
-putexcel B101 = "HH Earnings Down 5%"
-putexcel B102 = "Other Earnings Up 5%"
-putexcel B103 = "Other Earnings Down 5%"
-putexcel A104:A111="Hours Thresholds", merge vcenter
-putexcel B104 = "R Hours Up 15%"
-putexcel B105 = "R Hours Down 15%"
-putexcel B106 = "Spouse Hours Up 15%"
-putexcel B107 = "Spouse Hours Down 15%"
-putexcel B108 = "R Hours Up 5%"
-putexcel B109 = "R Hours Down 5%"
-putexcel B110 = "Spouse Hours Up 5%"
-putexcel B111 = "Spouse Hours Down 5%"
-putexcel A112:A119="Wages Changes", merge vcenter
-putexcel B112 = "R Wages Up 15%"
-putexcel B113 = "R Wages Down 15%"
-putexcel B114 = "Spouse Wages Up 15%"
-putexcel B115 = "Spouse Wages Down 15%"
-putexcel B116 = "R Wages Up 5%"
-putexcel B117 = "R Wages Down 5%"
-putexcel B118 = "Spouse Wages Up 5%"
-putexcel B119 = "Spouse Wages Down 5%"
-putexcel A120:A139="Alt Earnings Threshold", merge vcenter
-putexcel B120 = "R Earnings Change - Average"
-putexcel B121 = "Spouse Earnings Change - Average"
-putexcel B122 = "HH Earnings Change - Average"
-putexcel B123 = "Other Earnings Change - Average"
-putexcel B124 = "R Earnings Up 20%"
-putexcel B125 = "R Earnings Down 20%"
-putexcel B126 = "Spouse Earnings Up 20%"
-putexcel B127 = "Spouse Earnings Down 20%"
-putexcel B128 = "HH Earnings Up 20%"
-putexcel B129 = "HH Earnings Down 20%"
-putexcel B130 = "Other Earnings Up 20%"
-putexcel B131 = "Other Earnings Down 20%"
-putexcel B132 = "R Earnings Up 5%"
-putexcel B133 = "R Earnings Down 5%"
-putexcel B134 = "Spouse Earnings Up 5%"
-putexcel B135 = "Spouse Earnings Down 5%"
-putexcel B136 = "HH Earnings Up 5%"
-putexcel B137 = "HH Earnings Down 5%"
-putexcel B138 = "Other Earnings Up 5%"
-putexcel B139 = "Other Earnings Down 5%"
-putexcel A140:A147="Changes in Earner Status", merge vcenter
-putexcel B140 = "R Became Earner"
-putexcel B141 = "R Stopped Earning"
-putexcel B142 = "Spouse Became Earner"
-putexcel B143 = "Spouse Stopped Earning"
-putexcel B144 = "HH Became Earner"
-putexcel B145 = "HH Stopped Earning"
-putexcel B146 = "Other Became Earner"
-putexcel B147 = "Other Stopped Earning"
-putexcel A148:A155="Median Changes", merge vcenter
-putexcel B148 = "R Earnings Change - Median"
-putexcel B149 = "Spouse Earnings Change - Median"
-putexcel B150 = "HH Earnings Change - Median"
-putexcel B151 = "Other Earnings Change - Median"
-putexcel B152 = "R Hours Change - Median"
-putexcel B153 = "Spouse Hours Change - Median"
-putexcel B154 = "R Wages Change - Median"
-putexcel B155 = "Spouse Wages Change - Median"
-putexcel B156 = "First Birth - year of BW"
-putexcel B157 = "First Birth - prior year BW"
-putexcel B159 = "Total Sample / Just BWs"
+putexcel A88:A95="Earnings Thresholds", merge vcenter
+putexcel B88 = "R Earnings Up 8%"
+putexcel B89 = "R Earnings Down 8%"
+putexcel B90 = "Spouse Earnings Up 8%"
+putexcel B91 = "Spouse Earnings Down 8%"
+putexcel B92 = "HH Earnings Up 8%"
+putexcel B93 = "HH Earnings Down 8%"
+putexcel B94 = "Other Earnings Up 8%"
+putexcel B95 = "Other Earnings Down 8%"
+putexcel A96:A99="Hours Thresholds", merge vcenter
+putexcel B96 = "R Hours Up 5%"
+putexcel B97 = "R Hours Down 5%"
+putexcel B98 = "Spouse Hours Up 5%"
+putexcel B99 = "Spouse Hours Down 5%"
+putexcel A100:A103="Wages Changes", merge vcenter
+putexcel B100 = "R Wages Up 8%"
+putexcel B101 = "R Wages Down 8%"
+putexcel B102 = "Spouse Wages Up 8%"
+putexcel B103 = "Spouse Wages Down 8%"
+putexcel A104:A111="Median Changes", merge vcenter
+putexcel B104 = "R Earnings Change - Median"
+putexcel B105 = "Spouse Earnings Change - Median"
+putexcel B106 = "HH Earnings Change - Median"
+putexcel B107 = "Other Earnings Change - Median"
+putexcel B108 = "R Hours Change - Median"
+putexcel B109 = "Spouse Hours Change - Median"
+putexcel B110 = "R Wages Change - Median"
+putexcel B111 = "Spouse Wages Change - Median"
+putexcel A112:A123="Alt Earnings Threshold", merge vcenter
+putexcel B112 = "R Earnings Change - Average"
+putexcel B113 = "Spouse Earnings Change - Average"
+putexcel B114 = "HH Earnings Change - Average"
+putexcel B115 = "Other Earnings Change - Average"
+putexcel B116 = "R Earnings Up 8%"
+putexcel B117 = "R Earnings Down 8%"
+putexcel B118 = "Spouse Earnings Up 8%"
+putexcel B119 = "Spouse Earnings Down 8%"
+putexcel B120 = "HH Earnings Up 8%"
+putexcel B121 = "HH Earnings Down 8%"
+putexcel B122 = "HH Earnings Up 8%"
+putexcel B123 = "HH Earnings Down 8%"
+putexcel A124:A131="Changes in Earner Status", merge vcenter
+putexcel B124 = "R Became Earner"
+putexcel B125 = "R Stopped Earning"
+putexcel B126 = "Spouse Became Earner"
+putexcel B127 = "Spouse Stopped Earning"
+putexcel B128 = "HH Became Earner"
+putexcel B129 = "HH Stopped Earning"
+putexcel B130 = "Other Became Earner"
+putexcel B131 = "Other Stopped Earning"
+putexcel B133 = "Total Sample / Just BWs"
 
+* putexcel B156 = "First Birth - year of BW" // update above and cut this
+* putexcel B157 = "First Birth - prior year BW" // update above and cut this
 
 // Marital status changes
 	*First need to calculate those with no status change
@@ -405,12 +381,12 @@ forvalues w=1/8 {
 	replace `var' = 1 if `var' > 1
 	}
 
-local hh_vars "hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non prekid_gain prekid_lose parents_gain parents_lose birth firstbirth"
+local hh_vars "hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non prekid_gain prekid_lose parents_gain parents_lose birth"
 local colu1 "C E G"
 local colu2 "D F H"
 	
 * by year
-forvalues w=1/14 {
+forvalues w=1/13 {
 	forvalues y=14/16{
 		local i=`y'-13
 		local row=`w'+10
@@ -427,7 +403,7 @@ forvalues w=1/14 {
 }
 
 * total
-forvalues w=1/14 {
+forvalues w=1/13 {
 		local row=`w'+10
 		local var: word `w' of `hh_vars'
 		mean `var' if trans_bw60==1
@@ -440,7 +416,7 @@ forvalues w=1/14 {
 }
 
 * compare to non-BW
-forvalues w=1/14 {
+forvalues w=1/13 {
 		local row=`w'+10
 		local var: word `w' of `hh_vars'
 		mean `var' if trans_bw60==0
@@ -451,6 +427,23 @@ forvalues w=1/14 {
 		putexcel L`row' = matrix(pr`var'), nformat(#.##%)
 
 }
+
+// firthbirth - needs own code because mother had to be a BW in year prior to having a child
+local colu1 "C E G"
+
+* by year
+	forvalues y=14/16{
+		local i=`y'-13
+		local col1: word `i' of `colu1'
+		mean firstbirth if bw60==1 & year==20`y' & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+		matrix mfirstbirth`y' = e(b)
+		putexcel `col1'24 = matrix(mfirstbirth`y'), nformat(#.##%)
+		}
+
+* total
+	mean firstbirth if bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	matrix mfirstbirth = e(b)
+	putexcel I24 = matrix(mfirstbirth), nformat(#.##%)
 
 
 // Job changes - respondent and spouse
@@ -566,39 +559,10 @@ forvalues w=1/28 {
 }
 
 // Earnings changes
-	// Do we care who else’s earnings changed up or down? Or just that they did. Maybe do any change up or down, then spouse up or down (see code in descriptives file), then anyone NOT spouse -do as TOTAL CHANGE? or by person?
 
 * Using earnings not tpearn which is the sum of all earnings and won't be negative
 * First create a variable that indicates percent change YoY
 by SSUID PNUM (year), sort: gen earn_change = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-
-// plots to determine thresholds
-histogram earn_change if earn_change < .5 & earn_change > -.5, width(.01) xlab(-.5(.05).5, labsize(small)) percent
-histogram earn_change if earn_change < .25 & earn_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram earn_change_sp if earn_change_sp < .25 & earn_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram earn_change_hh if earn_change_hh < .25 & earn_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-
-histogram earn_change if earn_change < .5 & earn_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-histogram earn_change_sp if earn_change_sp < .5 & earn_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-histogram earn_change_hh if earn_change_hh < .5 & earn_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-
-browse SSUID PNUM year earnings earn_change if trans_bw60==1 & earn_change >1
-browse SSUID PNUM year earnings earn_change if earn_change >10 & earn_change!=. // trying to understand big jumps in earnings
-
-	// testing a mean, then up over 5% and 20% thresholds
-	gen earnup20=0
-	replace earnup20 = 1 if earn_change >=.2000000
-	replace earnup20=. if earn_change==.
-	gen earndown20=0
-	replace earndown20 = 1 if earn_change <=-.2000000
-	replace earndown20=. if earn_change==.
-	gen earnup5=0
-	replace earnup5 = 1 if earn_change >=.05000000
-	replace earnup5=. if earn_change==.
-	gen earndown5=0
-	replace earndown5 = 1 if earn_change <=-.05000000
-	replace earndown5=. if earn_change==.
-	// browse SSUID PNUM year tpearn earn_change earnup earndown
 
 * then doing for partner specifically
 * first get partner specific earnings
@@ -627,53 +591,96 @@ browse SSUID PNUM year earnings earn_change if earn_change >10 & earn_change!=. 
 
 * then create variables
 by SSUID PNUM (year), sort: gen earn_change_sp = ((earnings_a_sp-earnings_a_sp[_n-1])/earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	// testing a mean, then up over a threshold, down over a threshold
-	gen earnup20_sp=0
-	replace earnup20_sp = 1 if earn_change_sp >=.2000000
-	replace earnup20_sp=. if earn_change_sp==.
-	gen earndown20_sp=0
-	replace earndown20_sp = 1 if earn_change_sp <=-.2000000
-	replace earndown20_sp=. if earn_change_sp==.
-	gen earnup5_sp=0
-	replace earnup5_sp = 1 if earn_change_sp >=.05000000
-	replace earnup5_sp=. if earn_change_sp==.
-	gen earndown5_sp=0
-	replace earndown5_sp = 1 if earn_change_sp <=-.05000000
-	replace earndown5_sp=. if earn_change_sp==.
-	
+
 * Variable for all earnings in HH besides R
 gen hh_earn=thearn-earnings // might need a better HH earn variable that isn't negative
 by SSUID PNUM (year), sort: gen earn_change_hh = ((hh_earn-hh_earn[_n-1])/hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	// testing a mean, then up over a threshold, down over a threshold
-	gen earnup20_hh=0
-	replace earnup20_hh = 1 if earn_change_hh >=.2000000
-	replace earnup20_hh=. if earn_change_hh==.
-	gen earndown20_hh=0
-	replace earndown20_hh = 1 if earn_change_hh <=-.2000000
-	replace earndown20_hh=. if earn_change_hh==.
-	gen earnup5_hh=0
-	replace earnup5_hh = 1 if earn_change_hh >=.05000000
-	replace earnup5_hh=. if earn_change_hh==.
-	gen earndown5_hh=0
-	replace earndown5_hh = 1 if earn_change_hh <=-.05000000
-	replace earndown5_hh=. if earn_change_hh==.
-	
-* Variable for all earnings in HH besides R + partner
+
+* Variable for all earnings in HH besides R + partner - eventually break this down to WHO? (like child, parent, etc)
 gen other_earn=thearn-earnings-earnings_a_sp // might need a better HH earn variable that isn't negative
 by SSUID PNUM (year), sort: gen earn_change_oth = ((other_earn-other_earn[_n-1])/other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	// testing a mean, then up over a threshold, down over a threshold
-	gen earnup20_oth=0
-	replace earnup20_oth = 1 if earn_change_oth >=.2000000
-	replace earnup20_oth=. if earn_change_oth==.
-	gen earndown20_oth=0
-	replace earndown20_oth = 1 if earn_change_oth <=-.2000000
-	replace earndown20_oth=. if earn_change_oth==.
-	gen earnup5_oth=0
-	replace earnup5_oth = 1 if earn_change_oth >=.05000000
-	replace earnup5_oth=. if earn_change_oth==.
-	gen earndown5_oth=0
-	replace earndown5_oth = 1 if earn_change_oth <=-.05000000
-	replace earndown5_oth=. if earn_change_oth==.
+
+** QA & checks
+	/* plots to determine thresholds
+	histogram earn_change if earn_change < .25 & earn_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	histogram earn_change_sp if earn_change_sp < .25 & earn_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	histogram earn_change_hh if earn_change_hh < .25 & earn_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	histogram earn_change if earn_change < .5 & earn_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram earn_change_sp if earn_change_sp < .5 & earn_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram earn_change_hh if earn_change_hh < .5 & earn_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+
+
+	histogram hours_change if hours_change < .25 & hours_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	histogram hours_change_sp if hours_change_sp < .25 & hours_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	* histogram hours_change_hh if hours_change_hh < .25 & hours_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent // didn't create these yet
+	histogram hours_change if hours_change < .5 & hours_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram hours_change_sp if hours_change_sp < .5 & hours_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	* histogram hours_change_hh if hours_change_hh < .5 & hours_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
+
+	histogram wage_chg if wage_chg < .25 & wage_chg > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	histogram wage_chg_sp if wage_chg_sp < .25 & wage_chg_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
+	* histogram wage_chg_hh if wage_chg_hh < .25 & wage_chg_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent // didn't create these yet
+	histogram wage_chg if wage_chg < .5 & wage_chg > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram wage_chg_sp if wage_chg_sp < .5 & wage_chg_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	* histogram wage_chg_hh if wage_chg_hh < .5 & wage_chg_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
+	
+	log using "$logdir/change_details.log"
+	sum earn_change, detail
+	sum earn_change_sp, detail
+	sum earn_change_hh, detail
+	sum earn_change if trans_bw60==1, detail
+	sum earn_change_sp if trans_bw60==1, detail
+	sum earn_change_hh if trans_bw60==1, detail
+	sum hours_change, detail
+	sum hours_change_sp, detail
+	sum hours_change if trans_bw60==1, detail
+	sum hours_change_sp if trans_bw60==1, detail
+	sum wage_chg, detail
+	sum wage_chg_sp, detail
+	sum wage_chg if trans_bw60==1, detail
+	sum wage_chg_sp if trans_bw60==1, detail
+	log close
+
+	*/
+
+	// browse SSUID PNUM year earnings earn_change if trans_bw60==1 & earn_change >1
+	// browse SSUID PNUM year earnings earn_change if earn_change >10 & earn_change!=. // trying to understand big jumps in earnings
+
+// coding changes up and down
+* Mother
+gen earnup8=0
+replace earnup8 = 1 if earn_change >=.08000000
+replace earnup8=. if earn_change==.
+gen earndown8=0
+replace earndown8 = 1 if earn_change <=-.08000000
+replace earndown8=. if earn_change==.
+
+// browse SSUID PNUM year tpearn earn_change earnup8 earndown8
+
+* partner
+gen earnup8_sp=0
+replace earnup8_sp = 1 if earn_change_sp >=.08000000
+replace earnup8_sp=. if earn_change_sp==.
+gen earndown8_sp=0
+replace earndown8_sp = 1 if earn_change_sp <=-.08000000
+replace earndown8_sp=. if earn_change_sp==.
+	
+
+* HH excl mother
+gen earnup8_hh=0
+replace earnup8_hh = 1 if earn_change_hh >=.08000000
+replace earnup8_hh=. if earn_change_hh==.
+gen earndown8_hh=0
+replace earndown8_hh = 1 if earn_change_hh <=-.08000000
+replace earndown8_hh=. if earn_change_hh==.
+	
+* HH excl mother and partner
+gen earnup8_oth=0
+replace earnup8_oth = 1 if earn_change_oth >=.08000000
+replace earnup8_oth=. if earn_change_oth==.
+gen earndown8_oth=0
+replace earndown8_oth = 1 if earn_change_oth <=-.08000000
+replace earndown8_oth=. if earn_change_oth==.
 	
 //browse thearn tpearn earnings_sp hh_earn other_earn
 
@@ -682,21 +689,6 @@ by SSUID PNUM (year), sort: gen earn_change_oth = ((other_earn-other_earn[_n-1])
 * First create a variable that indicates percent change YoY
 by SSUID PNUM (year), sort: gen hours_change = ((avg_hrs-avg_hrs[_n-1])/avg_hrs[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 browse SSUID PNUM year avg_hrs hours_change
-
-	// testing a mean, then up over a threshold, down over a threshold
-	gen hours_up15=0
-	replace hours_up15 = 1 if hours_change >=.1500000
-	replace hours_up15=. if hours_change==.
-	gen hoursdown15=0
-	replace hoursdown15 = 1 if hours_change <=-.1500000
-	replace hoursdown15=. if hours_change==.
-	gen hours_up5=0
-	replace hours_up5 = 1 if hours_change >=.0500000
-	replace hours_up5=. if hours_change==.
-	gen hoursdown5=0
-	replace hoursdown5 = 1 if hours_change <=-.0500000
-	replace hoursdown5=. if hours_change==.
-	// browse SSUID PNUM year avg_hrs hours_change hours_up hoursdown
 
 * then doing for partner specifically
 * first get partner specific hours
@@ -710,19 +702,24 @@ browse SSUID PNUM year avg_hrs hours_change
 
 * then create variables
 by SSUID PNUM (year), sort: gen hours_change_sp = ((hours_sp-hours_sp[_n-1])/hours_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	// testing a mean, then up over a threshold, down over a threshold
-	gen hours_up15_sp=0
-	replace hours_up15_sp = 1 if hours_change_sp >=.1500000
-	replace hours_up15_sp=. if hours_change_sp==.
-	gen hoursdown15_sp=0
-	replace hoursdown15_sp = 1 if hours_change_sp <=-.1500000
-	replace hoursdown15_sp=. if hours_change_sp==.
-	gen hours_up5_sp=0
-	replace hours_up5_sp = 1 if hours_change_sp >=.0500000
-	replace hours_up5_sp=. if hours_change_sp==.
-	gen hoursdown5_sp=0
-	replace hoursdown5_sp = 1 if hours_change_sp <=-.0500000
-	replace hoursdown5_sp=. if hours_change_sp==.
+
+// coding changes up and down
+* Mother
+gen hours_up5=0
+replace hours_up5 = 1 if hours_change >=.0500000
+replace hours_up5=. if hours_change==.
+gen hoursdown5=0
+replace hoursdown5 = 1 if hours_change <=-.0500000
+replace hoursdown5=. if hours_change==.
+// browse SSUID PNUM year avg_hrs hours_change hours_up hoursdown
+
+* Partner
+gen hours_up5_sp=0
+replace hours_up5_sp = 1 if hours_change_sp >=.0500000
+replace hours_up5_sp=. if hours_change_sp==.
+gen hoursdown5_sp=0
+replace hoursdown5_sp = 1 if hours_change_sp <=-.0500000
+replace hoursdown5_sp=. if hours_change_sp==.
 
 // Wage variables
 
@@ -733,21 +730,6 @@ by SSUID PNUM (year), sort: gen `var'_chg = ((`var'-`var'[_n-1])/`var'[_n-1]) if
 
 egen wage_chg = rowmin (tjb1_annsal1_chg tjb1_hourly1_chg tjb1_wkly1_chg tjb1_bwkly1_chg tjb1_mthly1_chg tjb1_smthly1_chg tjb1_other1_chg tjb1_gamt1_chg)
 browse SSUID PNUM year wage_chg tjb1_annsal1_chg tjb1_hourly1_chg tjb1_wkly1_chg tjb1_bwkly1_chg tjb1_mthly1_chg tjb1_smthly1_chg tjb1_other1_chg tjb1_gamt1_chg // need to go back to annual file and fix ejb1_payhr1 to not be a mean
-
-	// testing a mean, then up over a threshold, down over a threshold
-	gen wagesup15=0
-	replace wagesup15 = 1 if wage_chg >=.1500000
-	replace wagesup15=. if wage_chg==.
-	gen wagesdown15=0
-	replace wagesdown15 = 1 if wage_chg <=-.1500000
-	replace wagesdown15=. if wage_chg==.
-	gen wagesup5=0
-	replace wagesup5 = 1 if wage_chg >=.0500000
-	replace wagesup5=. if wage_chg==.
-	gen wagesdown5=0
-	replace wagesdown5 = 1 if wage_chg <=-.0500000
-	replace wagesdown5=. if wage_chg==.
-	// browse SSUID PNUM year avg_hrs hours_change hours_up hoursdown
 
 * then doing for partner specifically
 * first get partner specific hours
@@ -765,69 +747,31 @@ by SSUID PNUM (year), sort: gen `var'_chg = ((`var'-`var'[_n-1])/`var'[_n-1]) if
 
 egen wage_chg_sp = rowmin (EJB1_PAYHR1_sp_chg TJB1_ANNSAL1_sp_chg TJB1_HOURLY1_sp_chg TJB1_WKLY1_sp_chg TJB1_BWKLY1_sp_chg TJB1_MTHLY1_sp_chg TJB1_SMTHLY1_sp_chg TJB1_OTHER1_sp_chg TJB1_GAMT1_sp_chg)
 
-* then create variables
-	// testing a mean, then up over a threshold, down over a threshold
-	gen wagesup15_sp=0
-	replace wagesup15_sp = 1 if wage_chg_sp >=.1500000
-	replace wagesup15_sp=. if wage_chg_sp==.
-	gen wagesdown15_sp=0
-	replace wagesdown15_sp = 1 if wage_chg_sp <=-.1500000
-	replace wagesdown15_sp=. if wage_chg_sp==.
-	gen wagesup5_sp=0
-	replace wagesup5_sp = 1 if wage_chg_sp >=.0500000
-	replace wagesup5_sp=. if wage_chg_sp==.
-	gen wagesdown5_sp=0
-	replace wagesdown5_sp = 1 if wage_chg_sp <=-.0500000
-	replace wagesdown5_sp=. if wage_chg_sp==.
+// coding changes up and down
+* Mother
+gen wagesup8=0
+replace wagesup8 = 1 if wage_chg >=.0800000
+replace wagesup8=. if wage_chg==.
+gen wagesdown8=0
+replace wagesdown8 = 1 if wage_chg <=-.0800000
+replace wagesdown8=. if wage_chg==.
+// browse SSUID PNUM year avg_hrs hours_change hours_up hoursdown
 
-// plots to determine thresholds
-histogram earn_change if earn_change < .25 & earn_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram earn_change_sp if earn_change_sp < .25 & earn_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram earn_change_hh if earn_change_hh < .25 & earn_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram earn_change if earn_change < .5 & earn_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-histogram earn_change_sp if earn_change_sp < .5 & earn_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-histogram earn_change_hh if earn_change_hh < .5 & earn_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+* Partner 
+gen wagesup8_sp=0
+replace wagesup8_sp = 1 if wage_chg_sp >=.0800000
+replace wagesup8_sp=. if wage_chg_sp==.
+gen wagesdown8_sp=0
+replace wagesdown8_sp = 1 if wage_chg_sp <=-.0800000
+replace wagesdown8_sp=. if wage_chg_sp==.
 
-
-histogram hours_change if hours_change < .25 & hours_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram hours_change_sp if hours_change_sp < .25 & hours_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-* histogram hours_change_hh if hours_change_hh < .25 & hours_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent // didn't create these yet
-histogram hours_change if hours_change < .5 & hours_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-histogram hours_change_sp if hours_change_sp < .5 & hours_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-* histogram hours_change_hh if hours_change_hh < .5 & hours_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
-
-histogram wage_chg if wage_chg < .25 & wage_chg > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-histogram wage_chg_sp if wage_chg_sp < .25 & wage_chg_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-* histogram wage_chg_hh if wage_chg_hh < .25 & wage_chg_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent // didn't create these yet
-histogram wage_chg if wage_chg < .5 & wage_chg > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-histogram wage_chg_sp if wage_chg_sp < .5 & wage_chg_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-* histogram wage_chg_hh if wage_chg_hh < .5 & wage_chg_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
-
-log using "$logdir/change_details.log"
-sum earn_change, detail
-sum earn_change_sp, detail
-sum earn_change_hh, detail
-sum earn_change if trans_bw60==1, detail
-sum earn_change_sp if trans_bw60==1, detail
-sum earn_change_hh if trans_bw60==1, detail
-sum hours_change, detail
-sum hours_change_sp, detail
-sum hours_change if trans_bw60==1, detail
-sum hours_change_sp if trans_bw60==1, detail
-sum wage_chg, detail
-sum wage_chg_sp, detail
-sum wage_chg if trans_bw60==1, detail
-sum wage_chg_sp if trans_bw60==1, detail
-log close
-
-
-* then calculate changes
-local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp earnup20 earndown20 earnup20_sp earndown20_sp earnup20_hh earndown20_hh earnup20_oth earndown20_oth earnup5 earndown5 earnup5_sp earndown5_sp earnup5_hh earndown5_hh earnup5_oth earndown5_oth hours_up15 hoursdown15 hours_up15_sp hoursdown15_sp hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup15 wagesdown15 wagesup15_sp wagesdown15_sp wagesup5 wagesdown5 wagesup5_sp wagesdown5_sp"
+* then put changes in Excel
+local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp"
 
 local colu1 "C E G"
 
 * by year
-forvalues w=1/40 {
+forvalues w=1/24 {
 	forvalues y=14/16{
 		local i=`y'-13
 		local row=`w'+79
@@ -840,7 +784,7 @@ forvalues w=1/40 {
 }
 
 * total
-forvalues w=1/40 {
+forvalues w=1/24 {
 		local row=`w'+79
 		local var: word `w' of `chg_vars'
 		mean `var' if trans_bw60==1
@@ -849,7 +793,7 @@ forvalues w=1/40 {
 }
 
 * compare to non-BW
-forvalues w=1/40 {
+forvalues w=1/24 {
 		local row=`w'+79
 		local var: word `w' of `chg_vars'
 		mean `var' if trans_bw60==0
@@ -857,79 +801,91 @@ forvalues w=1/40 {
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
-// Testing placing a min earnings threshold to calculate changes in earnings (>$100 in a year)
-* Respondent
-	by SSUID PNUM (year), sort: gen earn_change_alt = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings[_n-1] > 100
-	gen earnup_alt20=0
-	replace earnup_alt20 = 1 if earn_change_alt >=.2000000
-	replace earnup_alt20=. if earn_change_alt==.
-	gen earndown_alt20=0
-	replace earndown_alt20 = 1 if earn_change_alt <=-.2000000
-	replace earndown_alt20=. if earn_change_alt==.
-	gen earnup_alt5=0
-	replace earnup_alt5 = 1 if earn_change_alt >=.05000000
-	replace earnup_alt5=. if earn_change_alt==.
-	gen earndown_alt5=0
-	replace earndown_alt5 = 1 if earn_change_alt <=-.05000000
-	replace earndown_alt5=. if earn_change_alt==.
-
-*Partner
-	by SSUID PNUM (year), sort: gen earn_change_alt_sp = ((earnings_a_sp-earnings_a_sp[_n-1])/earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings_a_sp[_n-1] > 100
-	gen earnup_alt20_sp=0
-	replace earnup_alt20_sp = 1 if earn_change_alt_sp >=.2000000
-	replace earnup_alt20_sp=. if earn_change_alt_sp==.
-	gen earndown_alt20_sp=0
-	replace earndown_alt20_sp = 1 if earn_change_alt_sp <=-.2000000
-	replace earndown_alt20_sp=. if earn_change_alt_sp==.
-	gen earnup_alt5_sp=0
-	replace earnup_alt5_sp = 1 if earn_change_alt_sp >=.05000000
-	replace earnup_alt5_sp=. if earn_change_alt_sp==.
-	gen earndown_alt5_sp=0
-	replace earndown_alt5_sp = 1 if earn_change_alt_sp <=-.05000000
-	replace earndown_alt5_sp=. if earn_change_alt_sp==.
-	
-* All earnings in HH besides R
-	by SSUID PNUM (year), sort: gen earn_change_alt_hh = ((hh_earn-hh_earn[_n-1])/hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & hh_earn[_n-1] > 100
-	// testing a mean, then up over a threshold, down over a threshold
-	gen earnup_alt20_hh=0
-	replace earnup_alt20_hh = 1 if earn_change_alt_hh >=.2000000
-	replace earnup_alt20_hh=. if earn_change_alt_hh==.
-	gen earndown_alt20_hh=0
-	replace earndown_alt20_hh = 1 if earn_change_alt_hh <=-.2000000
-	replace earndown_alt20_hh=. if earn_change_alt_hh==.
-	gen earnup_alt5_hh=0
-	replace earnup_alt5_hh = 1 if earn_change_alt_hh >=.05000000
-	replace earnup_alt5_hh=. if earn_change_alt_hh==.
-	gen earndown_alt5_hh=0
-	replace earndown_alt5_hh = 1 if earn_change_alt_hh <=-.05000000
-	replace earndown_alt5_hh=. if earn_change_alt_hh==.
-	
-* All earnings in HH besides R + partner
-	by SSUID PNUM (year), sort: gen earn_change_alt_oth = ((other_earn-other_earn[_n-1])/other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & other_earn[_n-1] > 100
-	// testing a mean, then up over a threshold, down over a threshold
-	gen earnup_alt20_oth=0
-	replace earnup_alt20_oth = 1 if earn_change_alt_oth >=.2000000
-	replace earnup_alt20_oth=. if earn_change_alt_oth==.
-	gen earndown_alt20_oth=0
-	replace earndown_alt20_oth = 1 if earn_change_alt_oth <=-.2000000
-	replace earndown_alt20_oth=. if earn_change_alt_oth==.
-	gen earnup_alt5_oth=0
-	replace earnup_alt5_oth = 1 if earn_change_alt_oth >=.05000000
-	replace earnup_alt5_oth=. if earn_change_alt_oth==.
-	gen earndown_alt5_oth=0
-	replace earndown_alt5_oth = 1 if earn_change_alt_oth <=-.05000000
-	replace earndown_alt5_oth=. if earn_change_alt_oth==.
-
+// median changes instead of mean because of outliers
 * then calculate changes
-local alt_chg_vars "earn_change_alt earn_change_alt_sp earn_change_alt_hh earn_change_alt_oth earnup_alt20 earndown_alt20 earnup_alt20_sp earndown_alt20_sp earnup_alt20_hh earndown_alt20_hh earnup_alt20_oth earndown_alt20_oth earnup_alt5 earndown_alt5 earnup_alt5_sp earndown_alt5_sp earnup_alt5_hh earndown_alt5_hh earnup_alt5_oth earndown_alt5_oth"
+local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp"
 
 local colu1 "C E G"
 
 * by year
-forvalues w=1/20 {
+forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
-		local row=`w'+119
+		local row=`w'+103
+		local col1: word `i' of `colu1'
+		local var: word `w' of `chg_vars'
+		summarize `var' if trans_bw60==1 & year==20`y', detail
+		matrix m`var'`y' = r(p50)
+		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
+		}
+}
+
+* total
+forvalues w=1/8 {
+		local row=`w'+103
+		local var: word `w' of `chg_vars'
+		summarize `var' if trans_bw60==1, detail
+		matrix m`var' = r(p50)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+}
+
+* compare to non-BW
+forvalues w=1/8 {
+		local row=`w'+103
+		local var: word `w' of `chg_vars'
+		summarize `var' if trans_bw60==0, detail
+		matrix m`var' = r(p50)
+		putexcel K`row' = matrix(m`var'), nformat(#.##%)
+}
+
+// Testing placing a min earnings threshold to calculate changes in earnings (>$500 in a year) - the $500 is based on outliers I observed, seems like the minimum amount that will remove those outliers
+
+* Respondent
+	by SSUID PNUM (year), sort: gen earn_change_alt = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings[_n-1] > 500
+	gen earnup_alt8=0
+	replace earnup_alt8 = 1 if earn_change_alt >=.08000000
+	replace earnup_alt8=. if earn_change_alt==.
+	gen earndown_alt8=0
+	replace earndown_alt8 = 1 if earn_change_alt <=-.08000000
+	replace earndown_alt8=. if earn_change_alt==.
+
+*Partner
+	by SSUID PNUM (year), sort: gen earn_change_alt_sp = ((earnings_a_sp-earnings_a_sp[_n-1])/earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & earnings_a_sp[_n-1] > 500
+	gen earnup_alt8_sp=0
+	replace earnup_alt8_sp = 1 if earn_change_alt_sp >=.08000000
+	replace earnup_alt8_sp=. if earn_change_alt_sp==.
+	gen earndown_alt8_sp=0
+	replace earndown_alt8_sp = 1 if earn_change_alt_sp <=-.08000000
+	replace earndown_alt8_sp=. if earn_change_alt_sp==.
+	
+* All earnings in HH besides R
+	by SSUID PNUM (year), sort: gen earn_change_alt_hh = ((hh_earn-hh_earn[_n-1])/hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & hh_earn[_n-1] > 500
+	gen earnup_alt8_hh=0
+	replace earnup_alt8_hh = 1 if earn_change_alt_hh >=.08000000
+	replace earnup_alt8_hh=. if earn_change_alt_hh==.
+	gen earndown_alt8_hh=0
+	replace earndown_alt8_hh = 1 if earn_change_alt_hh <=-.08000000
+	replace earndown_alt8_hh=. if earn_change_alt_hh==.
+	
+* All earnings in HH besides R + partner
+	by SSUID PNUM (year), sort: gen earn_change_alt_oth = ((other_earn-other_earn[_n-1])/other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & other_earn[_n-1] > 500
+	gen earnup_alt8_oth=0
+	replace earnup_alt8_oth = 1 if earn_change_alt_oth >=.08000000
+	replace earnup_alt8_oth=. if earn_change_alt_oth==.
+	gen earndown_alt8_oth=0
+	replace earndown_alt8_oth = 1 if earn_change_alt_oth <=-.08000000
+	replace earndown_alt8_oth=. if earn_change_alt_oth==.
+
+* then calculate changes
+local alt_chg_vars "earn_change_alt earn_change_alt_sp earn_change_alt_hh earn_change_alt_oth earnup_alt8 earndown_alt8 earnup_alt8_sp earndown_alt8_sp earnup_alt8_hh earndown_alt8_hh earnup_alt8_oth earndown_alt8_oth"
+
+local colu1 "C E G"
+
+* by year
+forvalues w=1/12 {
+	forvalues y=14/16{
+		local i=`y'-13
+		local row=`w'+111
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==1 & year==20`y'
@@ -939,8 +895,8 @@ forvalues w=1/20 {
 }
 
 * total
-forvalues w=1/20 {
-		local row=`w'+119
+forvalues w=1/12 {
+		local row=`w'+111
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==1
 		matrix m`var' = e(b)
@@ -948,8 +904,8 @@ forvalues w=1/20 {
 }
 
 * compare to  non-BW
-forvalues w=1/20 {
-		local row=`w'+119
+forvalues w=1/12 {
+		local row=`w'+111
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
@@ -975,7 +931,7 @@ local colu1 "C E G"
 forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
-		local row=`w'+139
+		local row=`w'+123
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1 & year==20`y'
@@ -986,7 +942,7 @@ forvalues w=1/8 {
 
 * total
 forvalues w=1/8 {
-		local row=`w'+139
+		local row=`w'+123
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1
 		matrix m`var' = e(b)
@@ -995,87 +951,13 @@ forvalues w=1/8 {
 
 * compare to non-BW
 forvalues w=1/8 {
-		local row=`w'+139
+		local row=`w'+123
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
-// median changes instead of mean because of outliers
-* then calculate changes
-local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp"
-
-local colu1 "C E G"
-
-* by year
-forvalues w=1/8 {
-	forvalues y=14/16{
-		local i=`y'-13
-		local row=`w'+147
-		local col1: word `i' of `colu1'
-		local var: word `w' of `chg_vars'
-		summarize `var' if trans_bw60==1 & year==20`y', detail
-		matrix m`var'`y' = r(p50)
-		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
-		}
-}
-
-* total
-forvalues w=1/8 {
-		local row=`w'+147
-		local var: word `w' of `chg_vars'
-		summarize `var' if trans_bw60==1, detail
-		matrix m`var' = r(p50)
-		putexcel I`row' = matrix(m`var'), nformat(#.##%)
-}
-
-* compare to non-BW
-forvalues w=1/8 {
-		local row=`w'+147
-		local var: word `w' of `chg_vars'
-		summarize `var' if trans_bw60==0, detail
-		matrix m`var' = r(p50)
-		putexcel K`row' = matrix(m`var'), nformat(#.##%)
-}
-
-// alternate firthbirth specifications
-local colu1 "C E G"
-
-// using bw in year, not transition	
-* by year
-	forvalues y=14/16{
-		local i=`y'-13
-		local col1: word `i' of `colu1'
-		mean firstbirth if bw60==1 & year==20`y'
-		matrix mfirstbirth`y' = e(b)
-		putexcel `col1'156 = matrix(mfirstbirth`y'), nformat(#.##%)
-		}
-
-* total
-	mean firstbirth if bw60==1
-	matrix mfirstbirth = e(b)
-	putexcel I156 = matrix(mfirstbirth), nformat(#.##%)
-
-* compare to non-BW
-	mean firstbirth if bw60==0
-	matrix mfirstbirth = e(b)
-	putexcel K156 = matrix(mfirstbirth), nformat(#.##%)
-
-// adding spec that you also had to be BW in year prior
-* by year
-	forvalues y=14/16{
-		local i=`y'-13
-		local col1: word `i' of `colu1'
-		mean firstbirth if bw60==1 & year==20`y' & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-		matrix mfirstbirth`y' = e(b)
-		putexcel `col1'157 = matrix(mfirstbirth`y'), nformat(#.##%)
-		}
-
-* total
-	mean firstbirth if bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	matrix mfirstbirth = e(b)
-	putexcel I157 = matrix(mfirstbirth), nformat(#.##%)
 
 **** adding in sample sizes
 
@@ -1090,11 +972,11 @@ forvalues y=14/16{
 	bysort total_`y': replace total_`y' = total_`y'[1] 
 	local total_`y' = total_`y'
 	display `total_`y''
-	putexcel `col1'159 = `total_`y''
+	putexcel `col1'133 = `total_`y''
 	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
-	putexcel `col2'159 = `bw_`y''
+	putexcel `col2'133 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
@@ -1102,8 +984,10 @@ egen bw_samp = nvals(idnum) if trans_bw60==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
-putexcel I159 = `total_samp'
-putexcel J159 = `bw_samp'
+putexcel I133 = `total_samp'
+putexcel J133 = `bw_samp'
+
+/*
 
 ********************************************************************************
 * Now breaking down by education
@@ -1399,5 +1283,6 @@ forvalues e=1/4{
 	putexcel `col1'150 = `bw_`e''
 	}
 
+*/
 
 save "$SIPP14keep/bw_descriptives.dta", replace
