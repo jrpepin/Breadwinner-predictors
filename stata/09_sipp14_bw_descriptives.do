@@ -309,13 +309,19 @@ putexcel B128 = "HH Became Earner"
 putexcel B129 = "HH Stopped Earning"
 putexcel B130 = "Other Became Earner"
 putexcel B131 = "Other Stopped Earning"
-putexcel A132:A136="Relevant Overlaps", merge vcenter
+putexcel A132:A140="Relevant Overlaps", merge vcenter
 putexcel B132 = "Mom Earnings Up, Partner Down"
 putexcel B133 = "Mom Earnings Up, Someone else down"
 putexcel B134 = "Mom Earnings Up Only"
 putexcel B135 = "Mom Earnings Unchanged, Partner Down"
 putexcel B136 = "Mom Earnings Unchanged, Someone else Down"
-putexcel B138 = "Total Sample / Just BWs"
+putexcel B137 = "Mom Earnings Up, Earner Left HH"
+putexcel B138 = "Mom Earnings Unchanged, Earner Left HH"
+putexcel B139 = "Mom Earnings Up, Relationship Ended"
+putexcel B140 = "Mom Earnings Unchanged, Relationship Ended"
+putexcel B142 = "Total Sample / Just BWs"
+
+sort SSUID PNUM year
 
 * putexcel B156 = "First Birth - year of BW" // update above and cut this
 * putexcel B157 = "First Birth - prior year BW" // update above and cut this
@@ -982,13 +988,25 @@ replace momno_partdown=1 if earnup8==0 & earndown8_sp==1
 * Mothers earnings did not change, someone else's earnings went down
 gen momno_othdown=0
 replace momno_othdown=1 if earnup8==0 & earndown8_oth==1
+* Mother earnings up, earner left household
+gen momup_othleft=0
+replace momup_othleft=1 if earnup8==1 & earn_lose==1
+* Mother earnings did not change, earner left household
+gen momno_othleft=0
+replace momno_othleft=1 if earnup8==0 & earn_lose==1
+* Mother earnings up, relationship ended
+gen momup_relend=0
+replace momup_relend=1 if earnup8==1 & (coh_diss==1 | marr_diss==1)
+* Mother earnings did not change, relationship ended
+gen momno_relend=0
+replace momno_relend=1 if earnup8==0 & (coh_diss==1 | marr_diss==1)
 
-local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown"
+local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown momup_othleft momno_othleft momup_relend momno_relend"
 
 local colu1 "C E G"
 
 * by year
-forvalues w=1/5 {
+forvalues w=1/9 {
 	forvalues y=14/16{
 		local i=`y'-13
 		local row=`w'+131
@@ -1001,7 +1019,7 @@ forvalues w=1/5 {
 }
 
 * total
-forvalues w=1/5 {
+forvalues w=1/9 {
 		local row=`w'+131
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==1
@@ -1010,7 +1028,7 @@ forvalues w=1/5 {
 }
 
 * compare to non-BW
-forvalues w=1/5 {
+forvalues w=1/9 {
 		local row=`w'+131
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==0
@@ -1031,11 +1049,11 @@ forvalues y=14/16{
 	bysort total_`y': replace total_`y' = total_`y'[1] 
 	local total_`y' = total_`y'
 	display `total_`y''
-	putexcel `col1'138 = `total_`y''
+	putexcel `col1'142 = `total_`y''
 	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
-	putexcel `col2'138 = `bw_`y''
+	putexcel `col2'142 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
@@ -1043,8 +1061,8 @@ egen bw_samp = nvals(idnum) if trans_bw60==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
-putexcel I138 = `total_samp'
-putexcel J138 = `bw_samp'
+putexcel I142 = `total_samp'
+putexcel J142 = `bw_samp'
 
 
 ********************************************************************************
@@ -1198,14 +1216,20 @@ putexcel B128 = "HH Became Earner"
 putexcel B129 = "HH Stopped Earning"
 putexcel B130 = "Other Became Earner"
 putexcel B131 = "Other Stopped Earning"
-putexcel A132:A136="Relevant Overlaps", merge vcenter
+putexcel A132:A140="Relevant Overlaps", merge vcenter
 putexcel B132 = "Mom Earnings Up, Partner Down"
 putexcel B133 = "Mom Earnings Up, Someone else down"
 putexcel B134 = "Mom Earnings Up Only"
 putexcel B135 = "Mom Earnings Unchanged, Partner Down"
 putexcel B136 = "Mom Earnings Unchanged, Someone else Down"
-putexcel B138 = "Total Sample"
-putexcel B139 = "Breadwinners"
+putexcel B137 = "Mom Earnings Up, Earner Left HH"
+putexcel B138 = "Mom Earnings Unchanged, Earner Left HH"
+putexcel B139 = "Mom Earnings Up, Relationship Ended"
+putexcel B140 = "Mom Earnings Unchanged, Relationship Ended"
+putexcel B142 = "Total Sample"
+putexcel B143 = "Breadwinners"
+
+sort SSUID PNUM year
 
 // Partner and HH status changes
 local status_vars "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non prekid_gain prekid_lose parents_gain parents_lose birth"
@@ -1348,12 +1372,12 @@ forvalues w=1/8 {
 
 // relevant overlap vars
 
-local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown"
+local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown momup_othleft momno_othleft momup_relend momno_relend"
 
 local colu1 "C D E F"
 
 * by year
-forvalues w=1/5 {
+forvalues w=1/9 {
 	forvalues e=1/4{
 		local i=`e'
 		local row=`w'+131
@@ -1380,8 +1404,8 @@ forvalues e=1/4{
 	egen bw_`e' = nvals(idnum) if educ==`e' & trans_bw60==1
 	bysort bw_`e': replace bw_`e' = bw_`e'[1] 
 	local bw_`e' = bw_`e'
-	putexcel `col1'138 = `total_`e''
-	putexcel `col1'139 = `bw_`e''
+	putexcel `col1'142 = `total_`e''
+	putexcel `col1'143 = `bw_`e''
 	}
 
 
