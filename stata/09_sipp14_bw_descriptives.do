@@ -309,7 +309,13 @@ putexcel B128 = "HH Became Earner"
 putexcel B129 = "HH Stopped Earning"
 putexcel B130 = "Other Became Earner"
 putexcel B131 = "Other Stopped Earning"
-putexcel B133 = "Total Sample / Just BWs"
+putexcel A132:A136="Relevant Overlaps", merge vcenter
+putexcel B132 = "Mom Earnings Up, Partner Down"
+putexcel B133 = "Mom Earnings Up, Someone else down"
+putexcel B134 = "Mom Earnings Up Only"
+putexcel B135 = "Mom Earnings Unchanged, Partner Down"
+putexcel B136 = "Mom Earnings Unchanged, Someone else Down"
+putexcel B138 = "Total Sample / Just BWs"
 
 * putexcel B156 = "First Birth - year of BW" // update above and cut this
 * putexcel B157 = "First Birth - prior year BW" // update above and cut this
@@ -959,6 +965,59 @@ forvalues w=1/8 {
 }
 
 
+// adding some core overlap views = need to figure out base, 0 assumes all have partners, missing accounts for those without partners - this is an issue throughout
+
+* Mother earnings up, partner earnings down
+gen momup_partdown=0
+replace momup_partdown=1 if earnup8==1 & earndown8_sp==1
+* Mother earnings up, someone else's earnings down
+gen momup_othdown=0
+replace momup_othdown=1 if earnup8==1 & earndown8_oth==1 // this "oth" view is all hh earnings except mom and partner so accounts for other hh earning changes
+* Mother earnings up, no one else's earnings changed
+gen momup_only=0
+replace momup_only=1 if earnup8==1 & earndown8_hh==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
+* Mother's earnings did not change, partner's earnings down
+gen momno_partdown=0
+replace momno_partdown=1 if earnup8==0 & earndown8_sp==1
+* Mothers earnings did not change, someone else's earnings went down
+gen momno_othdown=0
+replace momno_othdown=1 if earnup8==0 & earndown8_oth==1
+
+local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown"
+
+local colu1 "C E G"
+
+* by year
+forvalues w=1/5 {
+	forvalues y=14/16{
+		local i=`y'-13
+		local row=`w'+131
+		local col1: word `i' of `colu1'
+		local var: word `w' of `overlap_vars'
+		mean `var' if trans_bw60==1 & year==20`y'
+		matrix m`var'`y' = e(b)
+		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
+		}
+}
+
+* total
+forvalues w=1/5 {
+		local row=`w'+131
+		local var: word `w' of `overlap_vars'
+		mean `var' if trans_bw60==1
+		matrix m`var' = e(b)
+		putexcel I`row' = matrix(m`var'), nformat(#.##%)
+}
+
+* compare to non-BW
+forvalues w=1/5 {
+		local row=`w'+131
+		local var: word `w' of `overlap_vars'
+		mean `var' if trans_bw60==0
+		matrix m`var' = e(b)
+		putexcel K`row' = matrix(m`var'), nformat(#.##%)
+}
+
 **** adding in sample sizes
 
 local colu1 "C E G"
@@ -972,11 +1031,11 @@ forvalues y=14/16{
 	bysort total_`y': replace total_`y' = total_`y'[1] 
 	local total_`y' = total_`y'
 	display `total_`y''
-	putexcel `col1'133 = `total_`y''
+	putexcel `col1'138 = `total_`y''
 	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
-	putexcel `col2'133 = `bw_`y''
+	putexcel `col2'138 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
@@ -984,8 +1043,8 @@ egen bw_samp = nvals(idnum) if trans_bw60==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
-putexcel I133 = `total_samp'
-putexcel J133 = `bw_samp'
+putexcel I138 = `total_samp'
+putexcel J138 = `bw_samp'
 
 /*
 
