@@ -2,6 +2,8 @@ setup_kraley.do
 setup_joanna.do
 setup_kmcerlean.do
 km_research_log.txt
+QA_sipp14.do
+06_sipp14_measures_and_sample_QA version.do
 *.dta
 *.dat
 *.gz
