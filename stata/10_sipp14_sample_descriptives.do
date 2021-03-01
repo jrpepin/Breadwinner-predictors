@@ -35,16 +35,46 @@ gen total_max_earner=.
 replace total_max_earner=who_max_earn if (earnings==. & hh_earn_max>0 & hh_earn_max!=.) | (hh_earn_max > earnings & earnings!=. & hh_earn_max!=.)
 replace total_max_earner=99 if (earnings>0 & earnings!=. & hh_earn_max==.) | (hh_earn_max < earnings & earnings!=. & hh_earn_max!=.)
 
-browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner
+gen total_max_earner2=total_max_earner
+replace total_max_earner2=100 if total_max_earner==99 & (hh_earn_max==0 | hh_earn_max==.)
 
-label values who_max_earn total_max_earner arel // defined in step 9, this only works if run in same session
+browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner total_max_earner2 to_earnings*
+
+
+#delimit ;
+label define rel2 1 "Spouse"
+                  2 "Unmarried partner"
+                  3 "Biological parent"
+                  4 "Biological child"
+                  5 "Step parent"
+                  6 "Step child"
+                  7 "Adoptive parent"
+                  8 "Adoptive child"
+                  9 "Grandparent"
+                 10 "Grandchild"
+                 11 "Biological siblings"
+                 12 "Half siblings"
+                 13 "Step siblings"
+                 14 "Adopted siblings"
+                 15 "Other siblings"
+                 16 "In-law"
+                 17 "Aunt, Uncle, Niece, Nephew"
+                 18 "Other relationship"   
+                 19 "Foster parent/Child"
+                 20 "Other non-relative"
+                 99 "self" 
+				 100 "self - no other earners" ;
+
+#delimit cr
+
+label values who_max_earn total_max_earner* rel2
 
 // put in excel
 
-tabout total_max_earner using "$results/Breadwinner_Distro.xls", c(freq col) clab(N Percent) f(0c 1p) replace
+tabout total_max_earner2 using "$results/Breadwinner_Distro.xls", c(freq col) clab(N Percent) f(0c 1p) replace
 
 forvalues e=1/4{
-	tabout total_max_earner using "$results/Breadwinner_Distro.xls" if educ==`e', c(freq col) clab(Educ=`e' Percent) f(0c 1p) append 
+	tabout total_max_earner2 using "$results/Breadwinner_Distro.xls" if educ==`e', c(freq col) clab(Educ=`e' Percent) f(0c 1p) append 
 }
 
 /* Need to revisit all below as it's mostly redundant to file 9 now

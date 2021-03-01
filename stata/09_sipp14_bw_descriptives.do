@@ -259,7 +259,7 @@ putexcel B84 = "R Hours Change - Average"
 putexcel B85 = "Spouse Hours Change - Average"
 putexcel B86 = "R Wages Change - Average"
 putexcel B87 = "Spouse Wages Change - Average"
-putexcel A88:A95="Earnings Thresholds", merge vcenter
+putexcel A88:A99="Earnings Thresholds", merge vcenter
 putexcel B88 = "R Earnings Up 8%"
 putexcel B89 = "R Earnings Down 8%"
 putexcel B90 = "Spouse Earnings Up 8%"
@@ -268,58 +268,66 @@ putexcel B92 = "HH Earnings Up 8%"
 putexcel B93 = "HH Earnings Down 8%"
 putexcel B94 = "Other Earnings Up 8%"
 putexcel B95 = "Other Earnings Down 8%"
-putexcel A96:A99="Hours Thresholds", merge vcenter
-putexcel B96 = "R Hours Up 5%"
-putexcel B97 = "R Hours Down 5%"
-putexcel B98 = "Spouse Hours Up 5%"
-putexcel B99 = "Spouse Hours Down 5%"
-putexcel A100:A103="Wages Changes", merge vcenter
-putexcel B100 = "R Wages Up 8%"
-putexcel B101 = "R Wages Down 8%"
-putexcel B102 = "Spouse Wages Up 8%"
-putexcel B103 = "Spouse Wages Down 8%"
-putexcel A104:A111="Median Changes", merge vcenter
-putexcel B104 = "R Earnings Change - Median"
-putexcel B105 = "Spouse Earnings Change - Median"
-putexcel B106 = "HH Earnings Change - Median"
-putexcel B107 = "Other Earnings Change - Median"
-putexcel B108 = "R Hours Change - Median"
-putexcel B109 = "Spouse Hours Change - Median"
-putexcel B110 = "R Wages Change - Median"
-putexcel B111 = "Spouse Wages Change - Median"
-putexcel A112:A123="Alt Earnings Threshold", merge vcenter
-putexcel B112 = "R Earnings Change - Average"
-putexcel B113 = "Spouse Earnings Change - Average"
-putexcel B114 = "HH Earnings Change - Average"
-putexcel B115 = "Other Earnings Change - Average"
-putexcel B116 = "R Earnings Up 8%"
-putexcel B117 = "R Earnings Down 8%"
-putexcel B118 = "Spouse Earnings Up 8%"
-putexcel B119 = "Spouse Earnings Down 8%"
-putexcel B120 = "HH Earnings Up 8%"
-putexcel B121 = "HH Earnings Down 8%"
-putexcel B122 = "HH Earnings Up 8%"
-putexcel B123 = "HH Earnings Down 8%"
-putexcel A124:A131="Changes in Earner Status", merge vcenter
-putexcel B124 = "R Became Earner"
-putexcel B125 = "R Stopped Earning"
-putexcel B126 = "Spouse Became Earner"
-putexcel B127 = "Spouse Stopped Earning"
-putexcel B128 = "HH Became Earner"
-putexcel B129 = "HH Stopped Earning"
-putexcel B130 = "Other Became Earner"
-putexcel B131 = "Other Stopped Earning"
-putexcel A132:A140="Relevant Overlaps", merge vcenter
-putexcel B132 = "Mom Earnings Up, Partner Down"
-putexcel B133 = "Mom Earnings Up, Someone else down"
-putexcel B134 = "Mom Earnings Up Only"
-putexcel B135 = "Mom Earnings Unchanged, Partner Down"
-putexcel B136 = "Mom Earnings Unchanged, Someone else Down"
-putexcel B137 = "Mom Earnings Up, Earner Left HH"
-putexcel B138 = "Mom Earnings Unchanged, Earner Left HH"
-putexcel B139 = "Mom Earnings Up, Relationship Ended"
-putexcel B140 = "Mom Earnings Unchanged, Relationship Ended"
-putexcel B142 = "Total Sample / Just BWs"
+putexcel B96 = "Child Earnings Up 8%"
+putexcel B97 = "Child Earnings Down 8%"
+putexcel B98 = "Parent Earnings Up 8%"
+putexcel B99 = "Parent Earnings Down 8%"
+putexcel A100:A103="Hours Thresholds", merge vcenter
+putexcel B100 = "R Hours Up 5%"
+putexcel B101 = "R Hours Down 5%"
+putexcel B102 = "Spouse Hours Up 5%"
+putexcel B103 = "Spouse Hours Down 5%"
+putexcel A104:A107="Wages Changes", merge vcenter
+putexcel B104 = "R Wages Up 8%"
+putexcel B105 = "R Wages Down 8%"
+putexcel B106 = "Spouse Wages Up 8%"
+putexcel B107 = "Spouse Wages Down 8%"
+putexcel A108:A115="Median Changes", merge vcenter
+putexcel B108 = "R Earnings Change - Median"
+putexcel B109 = "Spouse Earnings Change - Median"
+putexcel B110 = "HH Earnings Change - Median"
+putexcel B111 = "Other Earnings Change - Median"
+putexcel B112 = "R Hours Change - Median"
+putexcel B113 = "Spouse Hours Change - Median"
+putexcel B114 = "R Wages Change - Median"
+putexcel B115 = "Spouse Wages Change - Median"
+putexcel A116:A127="Alt Earnings Threshold", merge vcenter
+putexcel B116 = "R Earnings Change - Average"
+putexcel B117 = "Spouse Earnings Change - Average"
+putexcel B118 = "HH Earnings Change - Average"
+putexcel B119 = "Other Earnings Change - Average"
+putexcel B120 = "R Earnings Up 8%"
+putexcel B121 = "R Earnings Down 8%"
+putexcel B122 = "Spouse Earnings Up 8%"
+putexcel B123 = "Spouse Earnings Down 8%"
+putexcel B124 = "HH Earnings Up 8%"
+putexcel B125 = "HH Earnings Down 8%"
+putexcel B126 = "HH Earnings Up 8%"
+putexcel B127 = "HH Earnings Down 8%"
+putexcel A128:A135="Changes in Earner Status", merge vcenter
+putexcel B128 = "R Became Earner"
+putexcel B129 = "R Stopped Earning"
+putexcel B130 = "Spouse Became Earner"
+putexcel B131 = "Spouse Stopped Earning"
+putexcel B132 = "HH Became Earner"
+putexcel B133 = "HH Stopped Earning"
+putexcel B134 = "Other Became Earner"
+putexcel B135 = "Other Stopped Earning"
+putexcel A136:A148="Relevant Overlaps", merge vcenter
+putexcel B136 = "Mom Earnings Up, Partner Down"
+putexcel B137 = "Mom Earnings Up, Someone else down"
+putexcel B138 = "Mom Earnings Up, Child down"
+putexcel B139 = "Mom Earnings Up, Parent down"
+putexcel B140 = "Mom Earnings Up Only"
+putexcel B141 = "Mom Earnings Unchanged, Partner Down"
+putexcel B142 = "Mom Earnings Unchanged, Someone else Down"
+putexcel B143 = "Mom Earnings Unchanged, Child down"
+putexcel B144 = "Mom Earnings Unchanged, Parent down"
+putexcel B145 = "Mom Earnings Up, Earner Left HH"
+putexcel B146 = "Mom Earnings Unchanged, Earner Left HH"
+putexcel B147 = "Mom Earnings Up, Relationship Ended"
+putexcel B148 = "Mom Earnings Unchanged, Relationship Ended"
+putexcel B150 = "Total Sample / Just BWs"
 
 sort SSUID PNUM year
 
@@ -696,6 +704,30 @@ replace earndown8_oth=. if earn_change_oth==.
 	
 //browse thearn tpearn earnings_sp hh_earn other_earn
 
+// Looking at other HH member changes
+
+* First calculate a change measure for all earnings
+forvalues n=1/22{
+	by SSUID PNUM (year), sort: gen to_earn_change`n' = ((to_earnings`n'-to_earnings`n'[_n-1])/to_earnings`n'[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+}
+
+* these are currently capturing *any* change from child or parent, not a specific one (say highest earner)
+gen earnup8_child=0
+gen earndown8_child=0
+forvalues n=1/22{
+	replace earnup8_child=1 if to_earn_change`n' >=.08000000 & to_earn_change`n'!=. & relationship`n'==4
+	replace earndown8_child=1 if to_earn_change`n' <=-.08000000 & to_earn_change`n'!=. & relationship`n'==4
+}
+
+gen earnup8_par=0
+gen earndown8_par=0
+forvalues n=1/22{
+	replace earnup8_par=1 if to_earn_change`n' >=.08000000 & to_earn_change`n'!=. & relationship`n'==3
+	replace earndown8_par=1 if to_earn_change`n' <=-.08000000 & to_earn_change`n'!=. & relationship`n'==3
+}
+
+browse earnup8_child earndown8_child earnup8_par earndown8_par to_earn_change* relationship*
+
 // Raw hours changes
 
 * First create a variable that indicates percent change YoY
@@ -778,12 +810,12 @@ replace wagesdown8_sp = 1 if wage_chg_sp <=-.0800000
 replace wagesdown8_sp=. if wage_chg_sp==.
 
 * then put changes in Excel
-local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp"
+local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth earnup8_child earndown8_child earnup8_par earndown8_par hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp"
 
 local colu1 "C E G"
 
 * by year
-forvalues w=1/24 {
+forvalues w=1/28 {
 	forvalues y=14/16{
 		local i=`y'-13
 		local row=`w'+79
@@ -796,7 +828,7 @@ forvalues w=1/24 {
 }
 
 * total
-forvalues w=1/24 {
+forvalues w=1/28 {
 		local row=`w'+79
 		local var: word `w' of `chg_vars'
 		mean `var' if trans_bw60==1
@@ -805,7 +837,7 @@ forvalues w=1/24 {
 }
 
 * compare to non-BW
-forvalues w=1/24 {
+forvalues w=1/28 {
 		local row=`w'+79
 		local var: word `w' of `chg_vars'
 		mean `var' if trans_bw60==0
@@ -823,7 +855,7 @@ local colu1 "C E G"
 forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
-		local row=`w'+103
+		local row=`w'+107
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==1 & year==20`y', detail
@@ -834,7 +866,7 @@ forvalues w=1/8 {
 
 * total
 forvalues w=1/8 {
-		local row=`w'+103
+		local row=`w'+107
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==1, detail
 		matrix m`var' = r(p50)
@@ -843,7 +875,7 @@ forvalues w=1/8 {
 
 * compare to non-BW
 forvalues w=1/8 {
-		local row=`w'+103
+		local row=`w'+107
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==0, detail
 		matrix m`var' = r(p50)
@@ -897,7 +929,7 @@ local colu1 "C E G"
 forvalues w=1/12 {
 	forvalues y=14/16{
 		local i=`y'-13
-		local row=`w'+111
+		local row=`w'+115
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==1 & year==20`y'
@@ -908,7 +940,7 @@ forvalues w=1/12 {
 
 * total
 forvalues w=1/12 {
-		local row=`w'+111
+		local row=`w'+115
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==1
 		matrix m`var' = e(b)
@@ -917,7 +949,7 @@ forvalues w=1/12 {
 
 * compare to  non-BW
 forvalues w=1/12 {
-		local row=`w'+111
+		local row=`w'+115
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
@@ -943,7 +975,7 @@ local colu1 "C E G"
 forvalues w=1/8 {
 	forvalues y=14/16{
 		local i=`y'-13
-		local row=`w'+123
+		local row=`w'+127
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1 & year==20`y'
@@ -954,7 +986,7 @@ forvalues w=1/8 {
 
 * total
 forvalues w=1/8 {
-		local row=`w'+123
+		local row=`w'+127
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1
 		matrix m`var' = e(b)
@@ -963,7 +995,7 @@ forvalues w=1/8 {
 
 * compare to non-BW
 forvalues w=1/8 {
-		local row=`w'+123
+		local row=`w'+127
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
@@ -979,6 +1011,12 @@ replace momup_partdown=1 if earnup8==1 & earndown8_sp==1
 * Mother earnings up, someone else's earnings down
 gen momup_othdown=0
 replace momup_othdown=1 if earnup8==1 & earndown8_oth==1 // this "oth" view is all hh earnings except mom and partner so accounts for other hh earning changes
+* Mother earnings up, child's earnings down
+gen momup_childdown=0
+replace momup_childdown=1 if earnup8==1 & earndown8_child==1
+* Mother earnings up, parent's earnings down
+gen momup_parentdown=0
+replace momup_parentdown=1 if earnup8==1 & earndown8_par==1
 * Mother earnings up, no one else's earnings changed
 gen momup_only=0
 replace momup_only=1 if earnup8==1 & earndown8_hh==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
@@ -988,6 +1026,12 @@ replace momno_partdown=1 if earnup8==0 & earndown8_sp==1
 * Mothers earnings did not change, someone else's earnings went down
 gen momno_othdown=0
 replace momno_othdown=1 if earnup8==0 & earndown8_oth==1
+* Mother's earnings did not change, child's earnings down
+gen momno_childdown=0
+replace momno_childdown=1 if earnup8==0 & earndown8_child==1
+* Mother's earnings did not change, parent's earnings down
+gen momno_parentdown=0
+replace momno_parentdown=1 if earnup8==0 & earndown8_par==1
 * Mother earnings up, earner left household
 gen momup_othleft=0
 replace momup_othleft=1 if earnup8==1 & earn_lose==1
@@ -1001,15 +1045,15 @@ replace momup_relend=1 if earnup8==1 & (coh_diss==1 | marr_diss==1)
 gen momno_relend=0
 replace momno_relend=1 if earnup8==0 & (coh_diss==1 | marr_diss==1)
 
-local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown momup_othleft momno_othleft momup_relend momno_relend"
+local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend"
 
 local colu1 "C E G"
 
 * by year
-forvalues w=1/9 {
+forvalues w=1/13 {
 	forvalues y=14/16{
 		local i=`y'-13
-		local row=`w'+131
+		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==1 & year==20`y'
@@ -1019,8 +1063,8 @@ forvalues w=1/9 {
 }
 
 * total
-forvalues w=1/9 {
-		local row=`w'+131
+forvalues w=1/13 {
+		local row=`w'+135
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==1
 		matrix m`var' = e(b)
@@ -1028,8 +1072,8 @@ forvalues w=1/9 {
 }
 
 * compare to non-BW
-forvalues w=1/9 {
-		local row=`w'+131
+forvalues w=1/13 {
+		local row=`w'+135
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
@@ -1049,11 +1093,11 @@ forvalues y=14/16{
 	bysort total_`y': replace total_`y' = total_`y'[1] 
 	local total_`y' = total_`y'
 	display `total_`y''
-	putexcel `col1'142 = `total_`y''
+	putexcel `col1'150 = `total_`y''
 	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
-	putexcel `col2'142 = `bw_`y''
+	putexcel `col2'150 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
@@ -1061,8 +1105,8 @@ egen bw_samp = nvals(idnum) if trans_bw60==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
-putexcel I142 = `total_samp'
-putexcel J142 = `bw_samp'
+putexcel I150 = `total_samp'
+putexcel J150 = `bw_samp'
 
 
 ********************************************************************************
@@ -1166,7 +1210,7 @@ putexcel B84 = "R Hours Change - Average"
 putexcel B85 = "Spouse Hours Change - Average"
 putexcel B86 = "R Wages Change - Average"
 putexcel B87 = "Spouse Wages Change - Average"
-putexcel A88:A95="Earnings Thresholds", merge vcenter
+putexcel A88:A99="Earnings Thresholds", merge vcenter
 putexcel B88 = "R Earnings Up 8%"
 putexcel B89 = "R Earnings Down 8%"
 putexcel B90 = "Spouse Earnings Up 8%"
@@ -1175,59 +1219,68 @@ putexcel B92 = "HH Earnings Up 8%"
 putexcel B93 = "HH Earnings Down 8%"
 putexcel B94 = "Other Earnings Up 8%"
 putexcel B95 = "Other Earnings Down 8%"
-putexcel A96:A99="Hours Thresholds", merge vcenter
-putexcel B96 = "R Hours Up 5%"
-putexcel B97 = "R Hours Down 5%"
-putexcel B98 = "Spouse Hours Up 5%"
-putexcel B99 = "Spouse Hours Down 5%"
-putexcel A100:A103="Wages Changes", merge vcenter
-putexcel B100 = "R Wages Up 8%"
-putexcel B101 = "R Wages Down 8%"
-putexcel B102 = "Spouse Wages Up 8%"
-putexcel B103 = "Spouse Wages Down 8%"
-putexcel A104:A111="Median Changes", merge vcenter
-putexcel B104 = "R Earnings Change - Median"
-putexcel B105 = "Spouse Earnings Change - Median"
-putexcel B106 = "HH Earnings Change - Median"
-putexcel B107 = "Other Earnings Change - Median"
-putexcel B108 = "R Hours Change - Median"
-putexcel B109 = "Spouse Hours Change - Median"
-putexcel B110 = "R Wages Change - Median"
-putexcel B111 = "Spouse Wages Change - Median"
-putexcel A112:A123="Alt Earnings Threshold", merge vcenter
-putexcel B112 = "R Earnings Change - Average"
-putexcel B113 = "Spouse Earnings Change - Average"
-putexcel B114 = "HH Earnings Change - Average"
-putexcel B115 = "Other Earnings Change - Average"
-putexcel B116 = "R Earnings Up 8%"
-putexcel B117 = "R Earnings Down 8%"
-putexcel B118 = "Spouse Earnings Up 8%"
-putexcel B119 = "Spouse Earnings Down 8%"
-putexcel B120 = "HH Earnings Up 8%"
-putexcel B121 = "HH Earnings Down 8%"
-putexcel B122 = "HH Earnings Up 8%"
-putexcel B123 = "HH Earnings Down 8%"
-putexcel A124:A131="Changes in Earner Status", merge vcenter
-putexcel B124 = "R Became Earner"
-putexcel B125 = "R Stopped Earning"
-putexcel B126 = "Spouse Became Earner"
-putexcel B127 = "Spouse Stopped Earning"
-putexcel B128 = "HH Became Earner"
-putexcel B129 = "HH Stopped Earning"
-putexcel B130 = "Other Became Earner"
-putexcel B131 = "Other Stopped Earning"
-putexcel A132:A140="Relevant Overlaps", merge vcenter
-putexcel B132 = "Mom Earnings Up, Partner Down"
-putexcel B133 = "Mom Earnings Up, Someone else down"
-putexcel B134 = "Mom Earnings Up Only"
-putexcel B135 = "Mom Earnings Unchanged, Partner Down"
-putexcel B136 = "Mom Earnings Unchanged, Someone else Down"
-putexcel B137 = "Mom Earnings Up, Earner Left HH"
-putexcel B138 = "Mom Earnings Unchanged, Earner Left HH"
-putexcel B139 = "Mom Earnings Up, Relationship Ended"
-putexcel B140 = "Mom Earnings Unchanged, Relationship Ended"
-putexcel B142 = "Total Sample"
-putexcel B143 = "Breadwinners"
+putexcel B96 = "Child Earnings Up 8%"
+putexcel B97 = "Child Earnings Down 8%"
+putexcel B98 = "Parent Earnings Up 8%"
+putexcel B99 = "Parent Earnings Down 8%"
+putexcel A100:A103="Hours Thresholds", merge vcenter
+putexcel B100 = "R Hours Up 5%"
+putexcel B101 = "R Hours Down 5%"
+putexcel B102 = "Spouse Hours Up 5%"
+putexcel B103 = "Spouse Hours Down 5%"
+putexcel A104:A107="Wages Changes", merge vcenter
+putexcel B104 = "R Wages Up 8%"
+putexcel B105 = "R Wages Down 8%"
+putexcel B106 = "Spouse Wages Up 8%"
+putexcel B107 = "Spouse Wages Down 8%"
+putexcel A108:A115="Median Changes", merge vcenter
+putexcel B108 = "R Earnings Change - Median"
+putexcel B109 = "Spouse Earnings Change - Median"
+putexcel B110 = "HH Earnings Change - Median"
+putexcel B111 = "Other Earnings Change - Median"
+putexcel B112 = "R Hours Change - Median"
+putexcel B113 = "Spouse Hours Change - Median"
+putexcel B114 = "R Wages Change - Median"
+putexcel B115 = "Spouse Wages Change - Median"
+putexcel A116:A127="Alt Earnings Threshold", merge vcenter
+putexcel B116 = "R Earnings Change - Average"
+putexcel B117 = "Spouse Earnings Change - Average"
+putexcel B118 = "HH Earnings Change - Average"
+putexcel B119 = "Other Earnings Change - Average"
+putexcel B120 = "R Earnings Up 8%"
+putexcel B121 = "R Earnings Down 8%"
+putexcel B122 = "Spouse Earnings Up 8%"
+putexcel B123 = "Spouse Earnings Down 8%"
+putexcel B124 = "HH Earnings Up 8%"
+putexcel B125 = "HH Earnings Down 8%"
+putexcel B126 = "HH Earnings Up 8%"
+putexcel B127 = "HH Earnings Down 8%"
+putexcel A128:A135="Changes in Earner Status", merge vcenter
+putexcel B128 = "R Became Earner"
+putexcel B129 = "R Stopped Earning"
+putexcel B130 = "Spouse Became Earner"
+putexcel B131 = "Spouse Stopped Earning"
+putexcel B132 = "HH Became Earner"
+putexcel B133 = "HH Stopped Earning"
+putexcel B134 = "Other Became Earner"
+putexcel B135 = "Other Stopped Earning"
+putexcel A136:A148="Relevant Overlaps", merge vcenter
+putexcel B136 = "Mom Earnings Up, Partner Down"
+putexcel B137 = "Mom Earnings Up, Someone else down"
+putexcel B138 = "Mom Earnings Up, Child down"
+putexcel B139 = "Mom Earnings Up, Parent down"
+putexcel B140 = "Mom Earnings Up Only"
+putexcel B141 = "Mom Earnings Unchanged, Partner Down"
+putexcel B142 = "Mom Earnings Unchanged, Someone else Down"
+putexcel B143 = "Mom Earnings Unchanged, Child down"
+putexcel B144 = "Mom Earnings Unchanged, Parent down"
+putexcel B145 = "Mom Earnings Up, Earner Left HH"
+putexcel B146 = "Mom Earnings Unchanged, Earner Left HH"
+putexcel B147 = "Mom Earnings Up, Relationship Ended"
+putexcel B148 = "Mom Earnings Unchanged, Relationship Ended"
+
+putexcel B150 = "Total Sample"
+putexcel B151 = "Breadwinners"
 
 sort SSUID PNUM year
 
@@ -1301,11 +1354,11 @@ forvalues w=1/28 {
 
 // Earnings, hours, and wage changes
 
-local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp"
+local chg_vars "earn_change earn_change_sp earn_change_hh earn_change_oth hours_change hours_change_sp wage_chg wage_chg_sp earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth earnup8_child earndown8_child earnup8_par earndown8_par hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp"
 
 local colu1 "C D E F"
 
-forvalues w=1/24{
+forvalues w=1/28{
 	forvalues e=1/4{
 		local i=`e'
 		local row=`w'+79
@@ -1325,7 +1378,7 @@ local colu1 "C D E F"
 forvalues w=1/8{
 	forvalues e=1/4{
 		local i=`e'
-		local row=`w'+103
+		local row=`w'+107
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==1 & educ==`e', detail
@@ -1343,7 +1396,7 @@ local colu1 "C D E F"
 forvalues w=1/12 {
 	forvalues e=1/4{
 		local i=`e'
-		local row=`w'+111
+		local row=`w'+115
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
 		mean `var' if trans_bw60==1  & educ==`e'
@@ -1361,7 +1414,7 @@ local colu1 "C D E F"
 forvalues w=1/8 {
 	forvalues e=1/4{
 		local i=`e'
-		local row=`w'+123
+		local row=`w'+127
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1 & educ==`e'
@@ -1372,15 +1425,15 @@ forvalues w=1/8 {
 
 // relevant overlap vars
 
-local overlap_vars "momup_partdown momup_othdown momup_only momno_partdown momno_othdown momup_othleft momno_othleft momup_relend momno_relend"
+local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend"
 
 local colu1 "C D E F"
 
 * by year
-forvalues w=1/9 {
+forvalues w=1/13 {
 	forvalues e=1/4{
 		local i=`e'
-		local row=`w'+131
+		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==1 & educ==`e'
@@ -1404,8 +1457,8 @@ forvalues e=1/4{
 	egen bw_`e' = nvals(idnum) if educ==`e' & trans_bw60==1
 	bysort bw_`e': replace bw_`e' = bw_`e'[1] 
 	local bw_`e' = bw_`e'
-	putexcel `col1'142 = `total_`e''
-	putexcel `col1'143 = `bw_`e''
+	putexcel `col1'150 = `total_`e''
+	putexcel `col1'151 = `bw_`e''
 	}
 
 

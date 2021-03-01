@@ -17,10 +17,80 @@ di "$S_DATE"
 use "$SIPP14keep/bw_descriptives.dta", clear
 
 ********************************************************************************
-* Concurrent changes
+* Concurrent changes - condensed version
 ********************************************************************************
-// this is very long atm
 //can't do change variables because that's a mean and has too many values
+
+local vars1 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose hh_gain earn_gain birth firstbirth earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth earnup8_child earndown8_child earnup8_par earndown8_par hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
+
+local vars2 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose hh_gain earn_gain birth firstbirth earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth earnup8_child earndown8_child earnup8_par earndown8_par hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
+
+local colu "B C D E F G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF AG AH AI AJ AK AL AM AN AO AP AQ"
+
+putexcel set "$results/Breadwinner_Characteristics", sheet(matrix) modify
+
+putexcel A2="Single -> Cohabit" B1="Single -> Cohabit"
+putexcel A3="Single -> Married" C1="Single -> Married"
+putexcel A4="Cohabit -> Married" D1="Cohabit -> Married"
+putexcel A5="Cohabit -> Dissolved" E1="Cohabit -> Dissolved"
+putexcel A6="Married -> Dissolved" F1="Married -> Dissolved"
+putexcel A7="Married -> Widowed" G1="Married -> Widowed"
+putexcel A8="Married -> Cohabit" H1="Married -> Cohabit"
+putexcel A9="No Marital Status Change" I1="No Marital Status Change"
+putexcel A10="Member Left" J1="Member Left"
+putexcel A11="Earner Left" K1="Earner Left"
+putexcel A12="Member Gained" L1="Member Gained"
+putexcel A13="Earner Gained" M1="Earner Gained"
+putexcel A14="Subsequent Birth" N1="Subsequent Birth"
+putexcel A15="First Birth" O1="First Birth"
+putexcel A16="R Earnings Up 8%" P1="R Earnings Up 8%"
+putexcel A17="R Earnings Down 8%" Q1="R Earnings Down 8%"
+putexcel A18="Spouse Earnings Up 8%" R1="Spouse Earnings Up 8%"
+putexcel A19="Spouse Earnings Down 8%" S1="Spouse Earnings Down 8%"
+putexcel A20="HH Earnings Up 8%" T1="HH Earnings Up 8%"
+putexcel A21="HH Earnings Down 8%" U1="HH Earnings Down 8%"
+putexcel A22="Other Earnings Up 8%" V1="Other Earnings Up 8%"
+putexcel A23="Other Earnings Down 8%" W1="Other Earnings Down 8%"
+putexcel A24="Child Earnings Up 8%" X1="Child Earnings Up 8%"
+putexcel A25="Child Earnings Down 8%" Y1="Child Earnings Down 8%"
+putexcel A26="Parent Earnings Up 8%" Z1="Parent Earnings Up 8%"
+putexcel A27="Parent Earnings Down 8%" AA1="Parent Earnings Down 8%"
+putexcel A28="R Hours Up 5%" AB1="R Hours Up 5%"
+putexcel A29="R Hours Down 5%" AC1="R Hours Down 5%"
+putexcel A30="Spouse Hours Up 5%" AD1="Spouse Hours Up 5%"
+putexcel A31="Spouse Hours Down 5%" AE1="Spouse Hours Down 5%"
+putexcel A32="R Wages Up 8%" AF1="R Wages Up 8%"
+putexcel A33="R Wages Down 8%" AG1="R Wages Down 8%"
+putexcel A34="Spouse Wages Up 8%" AH1="Spouse Wages Up 8%"
+putexcel A35="Spouse Wages Down 8%" AI1="Spouse Wages Down 8%"
+putexcel A36="R Became Earner" AJ1="R Became Earner"
+putexcel A37="R Stopped Earning" AK1="R Stopped Earning"
+putexcel A38="Spouse Became Earner" AL1="Spouse Became Earner"
+putexcel A39="Spouse Stopped Earning" AM1="Spouse Stopped Earning"
+putexcel A40="HH Became Earner" AN1="HH Became Earner"
+putexcel A41="HH Stopped Earning" AO1="HH Stopped Earning"
+putexcel A42="Other Became Earner" AP1="Other Became Earner"
+putexcel A43="Other Stopped Earning" AQ1="Other Stopped Earning"
+
+
+forvalues v=1/42{
+local var1: word `v' of `vars1'
+local row =`v'+1
+	forvalues x=1/42{
+	local col: word `x' of `colu'
+	local var2: word `x' of `vars2'
+	quietly tab `var1' `var2' if trans_bw60==1, matcell(`var1'_`var2')
+	mata: st_matrix("`var1'_`var2'", (st_matrix("`var1'_`var2'")  :/ sum(st_matrix("`var1'_`var2'"))))
+	mat `var1'_`var2' = `var1'_`var2'[2,2]
+	quietly putexcel `col'`row' = matrix(`var1'_`var2'), nformat(#.##%) 
+	}
+}
+
+/*
+********************************************************************************
+* Concurrent changes - long version (for reference)
+*******************************************************************************
+// this is very long atm
 
 local vars1 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non prekid_gain prekid_lose parents_gain parents_lose birth firstbirth full_part full_no part_no part_full no_part no_full no_job_chg jobchange betterjob left_preg many_jobs one_job numjobs_up numjobs_down full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp no_job_chg_sp jobchange_sp betterjob_sp many_jobs_sp one_job_sp numjobs_up_sp numjobs_down_sp efindjob_in efindjob_out edisabl_in edisabl_out rdis_alt_in rdis_alt_out efindjob_in_sp edisabl_in_sp efindjob_out_sp edisabl_out_sp rdis_alt_in_sp rdis_alt_out_sp welfare_in welfare_out ch_workmore_yes ch_workmore_no childasst_yes childasst_no ch_waitlist_yes ch_waitlist_no move_relat move_indep educ_change enrolled_yes enrolled_no educ_change_sp enrolled_yes_sp enrolled_no_sp earnup20 earndown20 earnup20_sp earndown20_sp earnup20_hh earndown20_hh earnup20_oth earndown20_oth earnup5 earndown5 earnup5_sp earndown5_sp earnup5_hh earndown5_hh earnup5_oth earndown5_oth hours_up15 hoursdown15 hours_up15_sp hoursdown15_sp hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup15 wagesdown15 wagesup15_sp wagesdown15_sp wagesup5 wagesdown5 wagesup5_sp wagesdown5_sp mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
 
@@ -161,6 +231,8 @@ local row =`v'+1
 	quietly putexcel `col'`row' = matrix(`var1'_`var2'), nformat(#.##%) 
 	}
 }
+
+*/
 
 /* logic to follow
 tab sing_coh hh_lose if trans_bw60==1 & year==2014, matcell(test)
