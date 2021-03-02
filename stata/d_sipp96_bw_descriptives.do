@@ -444,3 +444,5 @@ local bw_samp = bw_samp
 
 putexcel I31 = `total_samp'
 putexcel J31 = `bw_samp'
+
+save "$SIPP14keep/96_bw_descriptives.dta", replace

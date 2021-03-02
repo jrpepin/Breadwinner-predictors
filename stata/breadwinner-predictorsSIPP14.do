@@ -95,3 +95,26 @@ set maxvar 5500
 	log using "$logdir/sample_descriptives.log", replace
 	do "$SIPP2014_code/10_sipp14_sample_descriptives.do"
 	log close
+
+********************************************************************************
+* C1. VERY INITIAL 1996 INDICATORS
+********************************************************************************
+// Create annual measures of breadwinning
+	log using "$logdir/96_extract_and_merge.log", replace
+	do "a_sipp96_extract_and_merge_files.do"
+	log close
+
+// Create annual measures of breadwinning
+	log using "$logdir/96_measures_and_sample.log", replace
+	do "b_sipp96_measures_and_sample.do"
+	log close
+	
+// Create annual measures of breadwinning
+	log using "$logdir/96_annualize.log", replace
+	do "c_sipp96_annualize.do"s
+	log close
+	
+// Create annual measures of breadwinning
+	log using "$logdir/96_bw_descriptives.log", replace
+	do "d_sipp96_bw_descriptives.do"
+	log close
