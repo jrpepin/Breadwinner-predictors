@@ -270,21 +270,23 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 ********************************************************************************
 * Create annual measures
 ********************************************************************************
-// need to retain missings for earnings when annualizing (sum treats missing as 0)
+// need to retain missings for earnings when annualizing (sum treats missing as 0) - currently with msum1, 0 means either none or not in universe, so will use hours to deduce if it should be missing or 0 (because for hours, 0 was just not in universe)
 
-bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn) // problem is currently 0 means EITHER none or not in universe - need to revisit this
-// browse SSUID PNUM year panelmonth tpearn tpearn_mis // can I just do this with min in collapse? if all missing, missing will be min?
+replace tpearn = . if avg_mo_hrs ==.
+replace earnings= . if avg_mo_hrs ==.
+
+bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn)
 bysort SSUID PNUM year (earnings): egen earnings_mis = min(earnings)
 
 // Collapse the data by year to create annual measures
 collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
-			(sum) 	tpearn thearn rmhrswk earnings eawop								///
+			(sum) 	tpearn thearn total_hrs=avg_mo_hrs earnings eawop					///
 					full_part full_no part_no part_full no_part no_full jobchange		///
 					betterjob many_jobs one_job num_jobs_up num_jobs_down				///
-			(mean) 	birth first_birth mom_panel avg_hrs=rmhrswk avg_earn=earnings		///
-					numearner tpyrate1	tpyrate2 wpfinwgt								/// 		
-			(max) 	erace educ tmomchl tage ageb1 yrfirstbirth yrlastbirth 				///
-			(min) 	durmom first_wave tpearn_mis earnings_mis,							///
+			(mean) 	birth first_birth mom_panel avg_mo_hrs avg_earn=earnings			///
+					numearner tpyrate1	tpyrate2 avg_wk_rate wpfinwgt					/// 		
+			(max) 	erace educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth 	///
+			(min) 	durmom durmom_1st emomlivh first_wave tpearn_mis earnings_mis,		/// put emomlivh as min - because min=yes and if at SOME PT in year, all kids at home, want here
 			by(SSUID PNUM year)
 
 gen no_job_chg=0
@@ -293,12 +295,12 @@ replace no_job_chg=1 if (full_part + full_no + part_no + part_full + no_part + n
 // Create indicator for incomple annual observations
 gen partial_year= (monthsobserved < 12)
 	
-/* need to revisit this
+
 // update earnings / hours to be missing if missing all 12 months
 replace earnings=. if earnings_mis==.
 replace tpearn=. if tpearn_mis==.
-replace tmwkhrs=. if tmwkhrs_mis==.
 
+/* need to revisit this
 forvalues r=1/22{
 replace to_TPEARN`r'=. if to_mis_TPEARN`r'==.
 replace to_earnings`r'=. if to_mis_earnings`r'==.

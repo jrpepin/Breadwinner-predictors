@@ -24,8 +24,8 @@ clear
    	keep	swave rhcalyr rhcalmn srefmon wpfinwgt ssuid epppnum eentaid shhadid eppintvw rhchange	/// /* TECHNICAL */
 			tpearn  tpmsum* apmsum* tftotinc thtotinc thpov 										/// /* FINANCIAL   */
 			erace eorigin esex tage  eeducate   ems uentmain ulftmain								/// /* DEMOGRAPHIC */
-			tjbocc* ejbind* rmhrswk eawop rmesr epdjbthn ejobcntr eptwrk eptresn					/// /* EMPLOYMENT & EARNINGS */
-			ersend* ersnowrk rpyper* epayhr* tpyrate*												///
+			tjbocc* ejbind* rmhrswk ejbhrs* eawop rmesr epdjbthn ejobcntr eptwrk eptresn			/// /* EMPLOYMENT & EARNINGS */
+			ersend* ersnowrk rpyper* epayhr* tpyrate* rwksperm										///
 			rcutyp27 rcutyp21 rcutyp25 rcutyp20 rcutyp24 rhnbrf rhcbrf rhmtrf efsyn epatyn ewicyn	/// /* PROGRAM USAGE */
 			renroll eenlevel  epatyp5 	edisabl edisprev											/// /* MISC (enrollment, child care, disability)*/
 			
@@ -55,7 +55,7 @@ clear
 save "$tempdir/sipp96tpearn_core", replace
 
 sort ssuid epppnum rhcalyr rhcalmn
-browse ssuid epppnum rhcalyr rhcalmn tpearn
+// browse ssuid epppnum rhcalyr rhcalmn tpearn
 
 ********************************************************************************
 * Merging records from topical module 2 (fertility, marriage, relationships) 
@@ -63,9 +63,10 @@ browse ssuid epppnum rhcalyr rhcalmn tpearn
 ********************************************************************************
 use "$SIPP1996/sip96t2.dta", clear
 
-keep 	swave wpfinwgt ssuid epppnum eentaid shhadid eppintvw erelat* eprlpn*				/// /* TECHNICAL & HH */
-		tfbrthyr efbrthmo tlbirtyr elbirtmo ragfbrth tmomchl tfrchl emomlivh tfrinhh		/// /* FERTILITY */
-		tlmyear tfmyear exmar emarpth														/// /* MARRIAGE */
+keep 	swave wpfinwgt ssuid epppnum eentaid shhadid eppintvw erelat* eprlpn*		/// /* TECHNICAL & HH */
+		tfbrthyr efbrthmo tlbirtyr elbirtmo ragfbrth tmomchl tfrchl 				/// /* FERTILITY */
+		emomlivh tfrinhh efblivnw elblivnw											///
+		tlmyear tfmyear exmar emarpth												/// /* MARRIAGE */
 
 sort ssuid eentaid epppnum swave
 		

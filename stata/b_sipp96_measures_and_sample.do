@@ -43,7 +43,7 @@ use "$SIPP14keep/sipp96_data.dta", clear
 	tab check_e 
 	
 	egen thearn_alt = total(earnings), 	by(SSUID ERESIDENCEID swave monthcode) // how different is a HH measure based on earnings v. tpearn?
-	// browse tftotinc thtotinc thearn thearn_alt
+	// browse SSUID thearn thearn_alt
 
 // Count number of earners in hh per month
     egen numearner = count(tpearn) if tpearn>0,	by(SSUID ERESIDENCEID swave monthcode)
@@ -85,12 +85,13 @@ replace mom_panel=1 if inrange(yrfirstbirth, 1995, 2000) // flag if became a mom
 // create an indicator of age at first birth to be able to compare to NLSY analysis
    gen ageb1=yrfirstbirth-mybirthyear
    replace ragfbrth=. if ragfbrth==-1
-   
-   gen check=.
-   replace check=1 if ageb1==ragfbrth & ragfbrth!=.
-   replace check=0 if ageb1!=ragfbrth // ragfbrth is very wrong, use ageb1. will revisit this later
-   
+   gen ageb1_mon=(ragfbrth/12) // ragfbrth is given in months not years
 
+   gen check=.
+   replace check=1 if ageb1==round(ageb1_mon) & ageb1_mon!=.
+   replace check=0 if ageb1!=round(ageb1_mon) 
+   browse mybirthyear yrfirstbirth ageb1 ageb1_mon
+   
 ********************************************************************************
 * Variable recodes
 ********************************************************************************
@@ -138,10 +139,29 @@ replace better_job = 1 if (inlist(ersend1,12,14) | inlist(ersend2,12,14))
 replace better_job = 0 if (jobchange_1==1 | jobchange_2==1) & better_job==.
 
 
-* wages change: revisit this
-
-* hours change: do average tmwkhrs? this is average hours by month, so to aggregate to year, use average?
+* wages change: revisit this - confused bc only seem to track hourly pay rates
+browse SSUID PNUM epayhr1 tpyrate1 ejbhrs1 tpmsum1
+// should I either create an hourly metric for all? need the column w weeks in month...or create annual or monthly wages for those not paid hourly? - this might also be in a topical module, haven't gotten this far 
+gen hourly_est1 = .
+replace hourly_est1 = tpyrate1 if epayhr1==1
+replace hourly_est1 = (tpmsum1 / rwksperm / ejbhrs1) if epayhr1==2
+	// browse SSUID PNUM epayhr1 tpyrate1 ejbhrs1 tpmsum1 hourly_est1
 	
+gen hourly_est2 = .
+replace hourly_est2 = tpyrate2 if epayhr2==1
+replace hourly_est2 = (tpmsum2 / rwksperm / ejbhrs2) if epayhr2==2
+	
+egen avg_wk_rate=rowmean(hourly_est1 hourly_est2)
+
+// browse SSUID PNUM epayhr1 tpyrate1 ejbhrs1 tpmsum1 hourly_est1 hourly_est2 avg_wk_rate
+	
+
+* hours change: need to create a view of average hours across both job options // browse SSUID ejbhrs1 ejbhrs2 rmhrswk
+replace ejbhrs1=. if ejbhrs1==-1
+replace ejbhrs2=. if ejbhrs2==-1
+
+egen avg_mo_hrs=rowmean(ejbhrs1 ejbhrs2)
+
 * also do a recode for reference of FT / PT
 replace eptwrk=. if eptwrk==-1
 	
@@ -374,6 +394,8 @@ drop if _merge==2
 */
 
 /* need the previous files to do this - emomlivh asks if "all" children are living at home, but for moms with more than 2 kids, that isn't helpful
+potentially use # of children, then where first and last born living? why no info about middle children? what is incidence...
+browse SSUID tmomchl efblivnw elblivnw emomlivh
 
 ********************************************************************************
 * Restrict sample to women who live with their own minor children

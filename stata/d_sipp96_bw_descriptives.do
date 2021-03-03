@@ -117,9 +117,10 @@ putexcel E1:F1 = "1997", merge border(bottom)
 putexcel G1:H1 = "1998", merge border(bottom)
 putexcel I1:J1 = "1999", merge border(bottom)
 putexcel K1:L1 = "Total", merge border(bottom)
-putexcel M1:N1 = "Non-BW Comparison", merge border(bottom)
-putexcel C2 = ("Year") E2 = ("Year") G2 = ("Year") I2 = ("Year") K2 = ("Year") M2 = ("Year"), border(bottom)
-putexcel D2 = ("Prior Year") F2 = ("Prior Year") H2 = ("Prior Year") J2 = ("Prior Year") L2 = ("Prior Year") N2 = ("Prior Year"), border(bottom)
+putexcel M1:N1 = "All Children in HH", merge border(bottom)
+putexcel O1:P1 = "Non-BW Comparison", merge border(bottom)
+putexcel C2 = ("Year") E2 = ("Year") G2 = ("Year") I2 = ("Year") K2 = ("Year") M2 = ("Year") O2 = ("Year"), border(bottom)
+putexcel D2 = ("Prior Year") F2 = ("Prior Year") H2 = ("Prior Year") J2 = ("Prior Year") L2 = ("Prior Year") N2 = ("Prior Year") P2 = ("Prior Year"), border(bottom)
 putexcel A3:A4="Births", merge vcenter
 putexcel B3 = "First Birth"
 putexcel B4 = "Subsequent Birth"
@@ -137,24 +138,30 @@ putexcel B14 = "One to Many Jobs"
 putexcel B15 = "Many to one job"
 putexcel B16 = "Added a job"
 putexcel B17 = "Lost a job"
-putexcel A18:A19="Average Changes", merge vcenter
+putexcel A18:A21="Average Changes", merge vcenter
 putexcel B18 = "R Earnings Change - Average"
 putexcel B19 = "HH Earnings Change - Average"
-putexcel A20:A23="Thresholds", merge vcenter
-putexcel B20 = "R Earnings Up 8%"
-putexcel B21 = "R Earnings Down 8%"
-putexcel B22 = "HH Earnings Up 8%"
-putexcel B23 = "HH Earnings Down 8%"
-putexcel A24:A25="Median Changes", merge vcenter
-putexcel B24 = "R Earnings Change - Median"
-putexcel B25 = "HH Earnings Change - Median"
-putexcel A26:A29="Changes in Earner Status", merge vcenter
-putexcel B26 = "R Became Earner"
-putexcel B27 = "R Stopped Earning"
-putexcel B28 = "Someone else in HH Became Earner"
-putexcel B29 = "Someone else in HH Stopped Earning"
+putexcel B20 = "R Hours Change - Average"
+putexcel B21 = "R Wages Change - Average"
+putexcel A22:A29="Thresholds", merge vcenter
+putexcel B22 = "R Earnings Up 8%"
+putexcel B23 = "R Earnings Down 8%"
+putexcel B24 = "HH Earnings Up 8%"
+putexcel B25 = "HH Earnings Down 8%"
+putexcel B26 = "R Hours Up 5%"
+putexcel B27 = "R Hours Down 5%"
+putexcel B28 = "R Wages Up 8%"
+putexcel B29 = "R Wages Down 8%"
+putexcel A30:A31="Median Changes", merge vcenter
+putexcel B30 = "R Earnings Change - Median"
+putexcel B31 = "HH Earnings Change - Median"
+putexcel A32:A35="Changes in Earner Status", merge vcenter
+putexcel B32 = "R Became Earner"
+putexcel B33 = "R Stopped Earning"
+putexcel B34 = "Someone else in HH Became Earner"
+putexcel B35 = "Someone else in HH Stopped Earning"
 
-putexcel B31 = "Total Sample / Just BWs"
+putexcel B37 = "Total Sample / Just BWs"
 
 sort SSUID PNUM year
 
@@ -221,6 +228,19 @@ forvalues w=1/13 {
 
 }
 
+* just those with ALL kids at home // temporary until I have full file with actual # of kids in HH
+forvalues w=1/13 {
+		local row=`w'+4
+		local var: word `w' of `job_vars'
+		mean `var' if trans_bw60==1 & emomlivh==1
+		matrix m`var'= e(b)
+		mean `var' if trans_bw60[_n+1]==1 & emomlivh[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		matrix pr`var' = e(b)
+		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+		putexcel N`row' = matrix(pr`var'), nformat(#.##%)
+
+}
+
 * Compare to non-BW
 forvalues w=1/13 {
 		local row=`w'+4
@@ -229,8 +249,8 @@ forvalues w=1/13 {
 		matrix m`var'= e(b)
 		mean `var' if trans_bw60[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
-		putexcel M`row' = matrix(m`var'), nformat(#.##%)
-		putexcel N`row' = matrix(pr`var'), nformat(#.##%)
+		putexcel O`row' = matrix(m`var'), nformat(#.##%)
+		putexcel P`row' = matrix(pr`var'), nformat(#.##%)
 
 }
 
@@ -262,12 +282,11 @@ gen earndown8_hh=0
 replace earndown8_hh = 1 if earn_change_hh <=-.08000000
 replace earndown8_hh=. if earn_change_hh==.
 
-/* hours variable definitely wrong, need to figure out wages
 // Raw hours changes
 
 * First create a variable that indicates percent change YoY
-by SSUID PNUM (year), sort: gen hours_change = ((avg_hrs-avg_hrs[_n-1])/avg_hrs[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-browse SSUID PNUM year avg_hrs hours_change
+by SSUID PNUM (year), sort: gen hours_change = ((avg_mo_hrs-avg_mo_hrs[_n-1])/avg_mo_hrs[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+browse SSUID PNUM year avg_mo_hrs hours_change
 
 // coding changes up and down
 * Mother
@@ -280,13 +299,9 @@ replace hoursdown5=. if hours_change==.
 
 // Wage variables
 
-* First create a variable that indicates percent change YoY - using just job 1 for now, as that's already a lot of variables
-foreach var in ejb1_payhr1 tjb1_annsal1 tjb1_hourly1 tjb1_wkly1 tjb1_bwkly1 tjb1_mthly1 tjb1_smthly1 tjb1_other1 tjb1_gamt1{
-by SSUID PNUM (year), sort: gen `var'_chg = ((`var'-`var'[_n-1])/`var'[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]  
-}
-
-egen wage_chg = rowmin (tjb1_annsal1_chg tjb1_hourly1_chg tjb1_wkly1_chg tjb1_bwkly1_chg tjb1_mthly1_chg tjb1_smthly1_chg tjb1_other1_chg tjb1_gamt1_chg)
-browse SSUID PNUM year wage_chg tjb1_annsal1_chg tjb1_hourly1_chg tjb1_wkly1_chg tjb1_bwkly1_chg tjb1_mthly1_chg tjb1_smthly1_chg tjb1_other1_chg tjb1_gamt1_chg // need to go back to annual file and fix ejb1_payhr1 to not be a mean
+* First create a variable that indicates percent change YoY
+by SSUID PNUM (year), sort: gen wage_chg = ((avg_wk_rate-avg_wk_rate[_n-1])/avg_wk_rate[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+browse SSUID PNUM year avg_wk_rate wage_chg
 
 // coding changes up and down
 * Mother
@@ -298,16 +313,14 @@ replace wagesdown8 = 1 if wage_chg <=-.0800000
 replace wagesdown8=. if wage_chg==.
 // browse SSUID PNUM year avg_hrs hours_change hours_up hoursdown
 
-*/
-
 
 * then put changes in Excel
-local chg_vars "earn_change earn_change_hh earnup8 earndown8 earnup8_hh earndown8_hh"
+local chg_vars "earn_change earn_change_hh hours_change wage_chg earnup8 earndown8 earnup8_hh earndown8_hh hours_up5 hoursdown5 wagesup8 wagesdown8"
 
 local colu1 "C E G I"
 
 * by year
-forvalues w=1/6 {
+forvalues w=1/12 {
 	forvalues y=97/99{
 		local i=`y'-95
 		local row=`w'+17
@@ -320,7 +333,7 @@ forvalues w=1/6 {
 }
 
 * total
-forvalues w=1/6 {
+forvalues w=1/12 {
 		local row=`w'+17
 		local var: word `w' of `chg_vars'
 		mean `var' if trans_bw60==1
@@ -328,13 +341,22 @@ forvalues w=1/6 {
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
+* just those with all kids at home
+forvalues w=1/12 {
+		local row=`w'+17
+		local var: word `w' of `chg_vars'
+		mean `var' if trans_bw60==1 & emomlivh==1
+		matrix m`var' = e(b)
+		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+}
+
 * compare to non-BW
-forvalues w=1/6{
+forvalues w=1/12{
 		local row=`w'+17
 		local var: word `w' of `chg_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
-		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+		putexcel O`row' = matrix(m`var'), nformat(#.##%)
 }
 
 // median changes instead of mean because of outliers
@@ -347,7 +369,7 @@ local colu1 "C E G I"
 forvalues w=1/2 {
 	forvalues y=97/99{
 		local i=`y'-95
-		local row=`w'+23
+		local row=`w'+29
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==1 & year==19`y', detail
@@ -358,20 +380,30 @@ forvalues w=1/2 {
 
 * total
 forvalues w=1/2 {
-		local row=`w'+23
+		local row=`w'+29
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==1, detail
 		matrix m`var' = r(p50)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
+
+* just those with all kids at home
+forvalues w=1/2 {
+		local row=`w'+29
+		local var: word `w' of `chg_vars'
+		summarize `var' if trans_bw60==1 & emomlivh==1, detail
+		matrix m`var' = r(p50)
+		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+}
+
 * compare to non-BW
 forvalues w=1/2 {
-		local row=`w'+23
+		local row=`w'+29
 		local var: word `w' of `chg_vars'
 		summarize `var' if trans_bw60==0, detail
 		matrix m`var' = r(p50)
-		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+		putexcel O`row' = matrix(m`var'), nformat(#.##%)
 }
 
 
@@ -390,7 +422,7 @@ local colu1 "C E G I"
 forvalues w=1/4 {
 	forvalues y=97/99{
 		local i=`y'-95
-		local row=`w'+25
+		local row=`w'+31
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1 & year==19`y'
@@ -401,20 +433,29 @@ forvalues w=1/4 {
 
 * total
 forvalues w=1/4 {
-		local row=`w'+25
+		local row=`w'+31
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==1
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
+* just those with ALL kids at home
+forvalues w=1/4 {
+		local row=`w'+31
+		local var: word `w' of `earn_status_vars'
+		mean `var' if trans_bw60==1 & emomlivh==1
+		matrix m`var' = e(b)
+		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+}
+
 * compare to non-BW
 forvalues w=1/4 {
-		local row=`w'+25
+		local row=`w'+31
 		local var: word `w' of `earn_status_vars'
 		mean `var' if trans_bw60==0
 		matrix m`var' = e(b)
-		putexcel M`row' = matrix(m`var'), nformat(#.##%)
+		putexcel O`row' = matrix(m`var'), nformat(#.##%)
 }
 
 **** adding in sample sizes
@@ -430,11 +471,11 @@ forvalues y=97/99{
 	bysort total_`y': replace total_`y' = total_`y'[1] 
 	local total_`y' = total_`y'
 	display `total_`y''
-	putexcel `col1'31 = `total_`y''
+	putexcel `col1'37 = `total_`y''
 	egen bw_`y' = nvals(idnum) if year==19`y' & trans_bw60==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
-	putexcel `col2'31 = `bw_`y''
+	putexcel `col2'37 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
@@ -442,7 +483,19 @@ egen bw_samp = nvals(idnum) if trans_bw60==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
-putexcel I31 = `total_samp'
-putexcel J31 = `bw_samp'
+putexcel K37 = `total_samp'
+putexcel L37 = `bw_samp'
+
+
+egen total_samp_ch = nvals(idnum) if emomlivh==1
+bysort year (total_samp_ch) : replace total_samp_ch = total_samp_ch[1] // bc of missing values from sample restriction, need to copy values to all rows to get local macro to not be missing
+egen bw_samp_ch = nvals(idnum) if trans_bw60==1 &  emomlivh==1
+bysort idnum (bw_samp_ch) : replace bw_samp_ch = bw_samp_ch[1]
+local total_samp_ch = total_samp_ch
+local bw_samp_ch = bw_samp_ch
+
+putexcel M37 = `total_samp_ch'
+putexcel N37 = `bw_samp_ch'
+
 
 save "$SIPP14keep/96_bw_descriptives.dta", replace
