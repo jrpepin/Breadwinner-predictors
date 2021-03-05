@@ -8,7 +8,8 @@ di "$S_DATE"
 ********************************************************************************
 * DESCRIPTION
 ********************************************************************************
-* Extracts key variables from all SIPP 2014 waves and creates the analytic sample.
+* Extracts key variables from all SIPP 1996 core waves and matches to
+* relevant topical modules.
 
 * The data files used in this script are the compressed data files that we
 * created from the Census data files. 
@@ -21,7 +22,8 @@ clear
 
    forvalues w=1/12{
       use "$SIPP1996/sip96l`w'.dta"
-   	keep	swave rhcalyr rhcalmn srefmon wpfinwgt ssuid epppnum eentaid shhadid eppintvw rhchange	/// /* TECHNICAL */
+   	keep	swave rhcalyr rhcalmn srefmon wpfinwgt ssuid epppnum ehrefper errp eentaid shhadid		/// /* TECHNICAL */
+			eppintvw rhchange																		///
 			tpearn  tpmsum* apmsum* tftotinc thtotinc thpov 										/// /* FINANCIAL   */
 			erace eorigin esex tage  eeducate   ems uentmain ulftmain								/// /* DEMOGRAPHIC */
 			tjbocc* ejbind* rmhrswk ejbhrs* eawop rmesr epdjbthn ejobcntr eptwrk eptresn			/// /* EMPLOYMENT & EARNINGS */

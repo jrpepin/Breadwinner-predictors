@@ -27,6 +27,9 @@ use "$SIPP14keep/sipp96_data.dta", clear
 	rename epppnum PNUM
 	rename rhcalmn monthcode
 	rename rhcalyr year
+	
+// exploring HH roster
+browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
 
 // Create a measure of total household earnings per month (with allocated data)
 	* Note that this approach omits the earnings of type 2 people.
