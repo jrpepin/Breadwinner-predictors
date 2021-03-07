@@ -153,8 +153,139 @@ replace relationship = 65 if from_num==ehrefper & RREL==13 & _merge==1
 
 drop if RREL==. // no info on relationship
 
-tabout RREL errp if relationship==. & _merge==1 using "$results/s96_unmatched_pairs.xls"
+tabout RREL errp if relationship==. & _merge==1 using "$results/s96_unmatched_pairs.xls" replace
 
+preserve
+collapse (min) minrel=relationship (max) maxrel=relationship (p50) commonrel=relationship (mean) relationship, by(RREL errp)
+restore
+
+// recoding remaining missing
+replace relationship = 99 if errp == 1 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 1 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 1 if errp == 1 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 20 if errp == 1 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 1 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 1 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 30 if errp == 1 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 1 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 1 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 2 if errp == 1 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 1 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 1 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 1 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 2 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 2 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 1 if errp == 2 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 2 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 2 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 2 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 30 if errp == 2 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 2 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 2 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 2 if errp == 2 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 2 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 52 if errp == 2 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 2 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 1 if errp == 3 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 1 if errp == 3 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 3 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 20 if errp == 3 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 3 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 50 if errp == 3 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 52 if errp == 3 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 3 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 3 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 3 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 3 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 3 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 3 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 4 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 4 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 20 if errp == 4 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 30 if errp == 4 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 70 if errp == 4 & RREL == 5 & _merge==1 & relationship==. // could be parent OR aunt/uncle
+replace relationship = 40 if errp == 4 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 43 if errp == 4 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 4 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 32 if errp == 4 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 21 if errp == 4 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 4 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 4 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 4 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 5 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 5 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 5 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 70 if errp == 5 & RREL == 4 & _merge==1 & relationship==. // could be parent OR aunt/uncle
+replace relationship = 99 if errp == 5 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 5 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 5 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 5 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 5 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 5 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 5 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 5 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 5 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 6 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 6 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 50 if errp == 6 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 40 if errp == 6 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 6 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 6 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 6 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 6 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 6 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 6 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 6 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 6 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 6 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 30 if errp == 7 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 30 if errp == 7 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 52 if errp == 7 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 42 if errp == 7 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 7 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 10 if errp == 7 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 7 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 7 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 42 if errp == 7 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 7 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 7 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 7 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 7 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 9 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 9 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 9 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 32 if errp == 9 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 42 if errp == 9 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 40 if errp == 9 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 42 if errp == 9 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 9 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 9 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 9 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 9 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 9 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 9 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 2 if errp == 10 & RREL == 1 & _merge==1 & relationship==.
+replace relationship = 2 if errp == 10 & RREL == 2 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 10 & RREL == 3 & _merge==1 & relationship==.
+replace relationship = 21 if errp == 10 & RREL == 4 & _merge==1 & relationship==.
+replace relationship = 41 if errp == 10 & RREL == 5 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 10 & RREL == 6 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 10 & RREL == 7 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 10 & RREL == 8 & _merge==1 & relationship==.
+replace relationship = 24 if errp == 10 & RREL == 9 & _merge==1 & relationship==.
+replace relationship = 99 if errp == 10 & RREL == 10 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 10 & RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 10 & RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 10 & RREL == 13 & _merge==1 & relationship==.
+replace relationship = 61 if RREL == 11 & _merge==1 & relationship==.
+replace relationship = 62 if RREL == 12 & _merge==1 & relationship==.
+replace relationship = 65 if RREL == 13 & _merge==1 & relationship==.
+replace relationship = 55 if errp == 8 & _merge==1 & relationship==.
+replace relationship = 61 if errp == 11 & _merge==1 & relationship==.
+replace relationship = 62 if errp == 12 & _merge==1 & relationship==.
+replace relationship = 65 if errp == 13 & _merge==1 & relationship==.
+
+browse if relationship==.
 
 save "$tempdir/s96_rel_pairs_full.dta", replace
 
