@@ -8,4 +8,4 @@ QA_sipp14.do
 *.dat
 *.gz
 output/
-
+x_*
