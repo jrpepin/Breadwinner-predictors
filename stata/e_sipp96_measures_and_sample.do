@@ -99,21 +99,19 @@ replace mom_panel=1 if inrange(yrfirstbirth, 1995, 2000) // flag if became a mom
 * Variable recodes
 ********************************************************************************
 
-/* revisiting this for later, because eorigin is not just Hispanic and not here - all origins, regardless of where
-
 * race/ ethnicity: combo of ERACE and EORIGIN
 gen race=.
-replace race=1 if erace==1 & eorigin==2
-replace race=2 if erace==2 & eorigin==2
-replace race=3 if erace==3 & eorigin==2
-replace race=4 if eorigin==1
-replace race=5 if erace==4 & eorigin==2
+replace race=1 if erace==1 & !inrange(eorigin, 20,28)
+replace race=2 if erace==2 & !inrange(eorigin, 20,28)
+replace race=3 if erace==4 & !inrange(eorigin, 20,28)
+replace race=4 if inrange(eorigin, 20,28)
+replace race=5 if erace==3 & !inrange(eorigin, 20,28)
 
 label define race 1 "NH White" 2 "NH Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
 label values race race
 
 drop erace eorigin
-*/
+
 
 * educational attainment: use EEDUC
 recode eeducate (31/38=1)(39=2)(40/43=3)(44/47=4)(-1=.), gen(educ)
@@ -178,6 +176,16 @@ replace eptwrk=. if eptwrk==-1
 	}
 */
 
+* Welfare use
+foreach var in rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf{
+replace `var' =0 if `var'==2
+}
+
+egen programs = rowtotal ( rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 )
+egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
+
+drop rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf
+
 /* revisit this coding - trying to prioritize basic estimates
 
 * occupation change (https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html)...do we care about industry change? (industry codes: https://www.naics.com/search/)
@@ -201,12 +209,6 @@ foreach var in efindjob edisabl rdis_alt{
 replace `var' =0 if `var'==2
 }
 
-* Welfare use
-foreach var in eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn{
-replace `var' =0 if `var'==2
-}
-
-egen programs = rowtotal ( rfsyn tgayn rtanfyn rwicyn)
 
 * Child care ease of use
 foreach var in echld_mnyn elist eworkmore{
@@ -341,16 +343,18 @@ tab birthyear_error
 // Clean up dataset
 	drop idnum all allwomen women mothers mothers_sample 
 
-/* don't have this file yet
 ********************************************************************************
 * Merge  measures of earning, demographic characteristics and household composition
 ********************************************************************************
-// Merge this data with household composition data. hhcomp.dta has one record for
+// Merge this data with household composition data - created in step c. hhcomp.dta has one record for
 	* every SSUID PNUM panelmonth combination except for PNUMs living alone (_merge==1). 
 	* those not in the target sample are _merge==2
-	merge 1:1 SSUID PNUM panelmonth using "$tempdir/hhcomp.dta"
+	drop _merge
+	destring PNUM, replace
+	
+	merge 1:1 SSUID PNUM panelmonth using "$tempdir/s96_hhcomp.dta"
 
-drop if _merge==2
+	drop if _merge==2
 
 // Fix household compposition variables for unmatched individuals who live alone (_merge==1)
 	* Relationship_pairs_bymonth has one record per person living with PNUM. 
@@ -358,7 +362,7 @@ drop if _merge==2
 	* So, individuals living alone are not in the data.
 
 	// Make relationship variables equal to zero
-	local hhcompvars "minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner numtype2 parents grandparents grandchildren siblings"
+	local hhcompvars "minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner parents grandparents grandchildren siblings"
 
 	foreach var of local hhcompvars{
 		replace `var'=0 if _merge==1 & missing(`var') 
@@ -394,11 +398,6 @@ drop if _merge==2
 		}
 		
 	drop 	_merge
-*/
-
-/* need the previous files to do this - emomlivh asks if "all" children are living at home, but for moms with more than 2 kids, that isn't helpful
-potentially use # of children, then where first and last born living? why no info about middle children? what is incidence...
-browse SSUID tmomchl efblivnw elblivnw emomlivh
 
 ********************************************************************************
 * Restrict sample to women who live with their own minor children
@@ -409,7 +408,7 @@ browse SSUID tmomchl efblivnw elblivnw emomlivh
 	unique 	idnum 	if minorbiochildren >= 1  	// 1 or more minor children in household
 
 	gen children_yn=minorbiochildren
-	replace children_yn=1 if inrange(minorbiochildren,1,10)
+	replace children_yn=1 if inrange(minorbiochildren,1,11)
 
 	keep if minorbiochildren >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
 

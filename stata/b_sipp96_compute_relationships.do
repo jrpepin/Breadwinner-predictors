@@ -22,6 +22,7 @@ use "$SIPP14keep/sipp96_hhdata.dta", clear
 keep SSUID ERESIDENCEID PNUM errp panelmonth
 
 bysort SSUID ERESIDENCEID panelmonth: egen person = rank(PNUM)
+// bysort SSUID ERESIDENCEID PNUM: replace person = person[1]
 
 // Reshape the data
 reshape wide PNUM errp,i(SSUID ERESIDENCEID panelmonth) j(person) 
@@ -150,7 +151,7 @@ replace relationship = 65 if from_num==ehrefper & RREL==13 & _merge==1
 
 drop if RREL==. // no info on relationship
 
-tabout RREL errp if relationship==. & _merge==1 using "$results/s96_unmatched_pairs.xls" replace
+tabout RREL errp if relationship==. & _merge==1 using "$results/s96_unmatched_pairs.xls", replace
 
 preserve
 collapse (min) minrel=relationship (max) maxrel=relationship (p50) commonrel=relationship (mean) relationship, by(RREL errp)
