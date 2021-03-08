@@ -104,6 +104,9 @@ drop _merge
 	destring epppnum, gen(PNUM)
 	rename rhcalmn monthcode
 	rename rhcalyr year
+	gen from_num=PNUM // will need these later to match to pairs data
+	gen to_num=PNUM // will need these later to match to pairs data
+
 	
 // Creating a measure of earnings solely based on wages and not profits and losses
 	egen earnings=rowtotal(tpmsum1 tpmsum2), missing
@@ -184,6 +187,15 @@ replace eptwrk=. if eptwrk==-1
 	}
 */
 
+* Welfare use
+foreach var in rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf{
+replace `var' =0 if `var'==2
+}
+
+egen programs = rowtotal ( rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 )
+egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
+
+
 /* revisit this coding - trying to prioritize basic estimates
 
 * occupation change (https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html)...do we care about industry change? (industry codes: https://www.naics.com/search/)
@@ -205,12 +217,6 @@ foreach var in efindjob edisabl rdis_alt{
 replace `var' =0 if `var'==2
 }
 
-* Welfare use
-foreach var in eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn{
-replace `var' =0 if `var'==2
-}
-
-egen programs = rowtotal ( rfsyn tgayn rtanfyn rwicyn)
 
 * Child care ease of use
 foreach var in echld_mnyn elist eworkmore{
