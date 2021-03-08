@@ -8,6 +8,9 @@
 
 set maxvar 5500
 
-// SIPP analysis
+// 2014 SIPP analysis
 cd ./stata
 do breadwinner-predictorsSIPP14.do
+
+// 1996 SIPP analysis
+do breadwinner-predictorsSIPP96.do
