@@ -20,13 +20,6 @@ use "$SIPP14keep/bw_descriptives.dta", clear
 * Concurrent changes - condensed version
 ********************************************************************************
 //can't do change variables because that's a mean and has too many values
-
-local vars1 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose hh_gain earn_gain birth firstbirth earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth earnup8_child earndown8_child earnup8_par earndown8_par hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
-
-local vars2 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose hh_gain earn_gain birth firstbirth earnup8 earndown8 earnup8_sp earndown8_sp earnup8_hh earndown8_hh earnup8_oth earndown8_oth earnup8_child earndown8_child earnup8_par earndown8_par hours_up5 hoursdown5 hours_up5_sp hoursdown5_sp wagesup8 wagesdown8 wagesup8_sp wagesdown8_sp mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
-
-local colu "B C D E F G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF AG AH AI AJ AK AL AM AN AO AP AQ"
-
 putexcel set "$results/Breadwinner_Characteristics", sheet(matrix) modify
 
 putexcel A2="Single -> Cohabit" B1="Single -> Cohabit"
@@ -72,6 +65,22 @@ putexcel A41="HH Stopped Earning" AO1="HH Stopped Earning"
 putexcel A42="Other Became Earner" AP1="Other Became Earner"
 putexcel A43="Other Stopped Earning" AQ1="Other Stopped Earning"
 
+
+// var names too long to go in matrix
+rename earndown8_sp_all		earndown8spall
+rename earndown8_hh_all		earndown8hhall
+rename earndown8_oth_all	earndown8othall
+rename hours_up5_sp_all		hours_up5spall
+rename hoursdown5_sp_all	hoursdown5spall
+rename wagesdown8_sp_all	wagesdown8spall
+
+
+local vars1 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose hh_gain earn_gain birth firstbirth earnup8_all earndown8_all earnup8_sp_all earndown8spall earnup8_hh_all earndown8hhall earnup8_oth_all earndown8othall earnup8_child earndown8_child earnup8_par earndown8_par hours_up5_all hoursdown5_all hours_up5spall hoursdown5spall wagesup8_all wagesdown8_all wagesup8_sp_all wagesdown8spall mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
+
+local vars2 "sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg hh_lose earn_lose hh_gain earn_gain birth firstbirth earnup8_all earndown8_all earnup8_sp_all earndown8spall earnup8_hh_all earndown8hhall earnup8_oth_all earndown8othall earnup8_child earndown8_child earnup8_par earndown8_par hours_up5_all hoursdown5_all hours_up5spall hoursdown5spall wagesup8_all wagesdown8_all wagesup8_sp_all wagesdown8spall mom_gain_earn mom_lose_earn part_gain_earn part_lose_earn hh_gain_earn hh_lose_earn oth_gain_earn oth_lose_earn"
+
+
+local colu "B C D E F G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF AG AH AI AJ AK AL AM AN AO AP AQ"
 
 forvalues v=1/42{
 local var1: word `v' of `vars1'
