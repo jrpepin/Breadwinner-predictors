@@ -17,7 +17,7 @@ di "$S_DATE"
 ********************************************************************************
 * Create descrptive statistics to prep for annualized variables
 ********************************************************************************
-use "$SIPP14keep/sipp96tpearn_all", clear
+use "$SIPP14keep/sipp96tpearn_rel.dta", clear
 
 // Create variables with the first and last month of observation by year
    egen startmonth=min(monthcode), by(SSUID PNUM year)
@@ -34,12 +34,12 @@ use "$SIPP14keep/sipp96tpearn_all", clear
    gen mbw50=1 if tpearn > .5*thearn & !missing(tpearn) & !missing(thearn)	// 50% threshold
    gen mbw60=1 if tpearn > .6*thearn & !missing(tpearn) & !missing(thearn)	// 60% threshold
    
- /* don't have these variables yet so temporarily commenting out
+
 // Create indicators of transitions into marriage/cohabitation or out of marriage/cohabitation
 
 	egen statuses = nvals(marital_status),	by(SSUID ERESIDENCEID PNUM year) // first examining how many people have more than 2 statuses in a year (aka changed status more than 1 time)
 	// browse SSUID PNUM panelmonth marital_status statuses // if statuses>2
-	tab statuses // okay very small percent - will use last status change OR if I do as separate columns, she can get both captured?
+	tab statuses
 	
 	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
@@ -104,7 +104,6 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 	by SSUID PNUM (panelmonth), sort: gen parents_gain = (parents > parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Parents left (bio and in-law)
 	by SSUID PNUM (panelmonth), sort: gen parents_lose = (parents < parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
-*/
 
 // browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
 	
@@ -135,10 +134,9 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 	
 	* "Better Job" (see recode in file 06 - based on reasons left job)
 	by SSUID PNUM (panelmonth), sort: gen betterjob = (better_job==1 & better_job[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-/*
+	
 	* Left job for pregnancy / childbirth. Don't 100% know which it was, but will code it for now anyway
-	by SSUID PNUM (panelmonth), sort: gen left_preg = (enj_nowrk5==1 & enj_nowrk5[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-*/
+	by SSUID PNUM (panelmonth), sort: gen left_preg = (ersnowrk==5 & ersnowrk[_n-1]!=5)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & ersnowrk != -1 & ersnowrk[_n-1] != -1
 
 	// Number of Jobs // also going to test on an annual average, did # of job changes, this is monthly
 	* 1 to More than 1 (as I feel like this is a bigger deal than going from 2 to 3, say)
@@ -150,6 +148,12 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 	* Any # job change down
 	by SSUID PNUM (panelmonth), sort: gen num_jobs_down = (ejobcntr < ejobcntr[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & ejobcntr != -1 & ejobcntr[_n-1] != -1
 
+	// Welfare Use
+	by SSUID PNUM (panelmonth), sort: gen welfare_in = (programs>0 & programs[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen welfare_out = (programs==0 & programs[_n-1]>0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen benefits_in = (benefits>0 & benefits[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen benefits_out = (benefits==0 & benefits[_n-1]>0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	
 /*
 // Disability status - testing all three specifications for now; will pick one. efindjob and esdisabl more about work, while dis_alt is broader disability
 	by SSUID PNUM (panelmonth), sort: gen efindjob_in= (efindjob==1 & efindjob[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
@@ -158,10 +162,6 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 	by SSUID PNUM (panelmonth), sort: gen edisabl_out = (edisabl==0 & edisabl[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	by SSUID PNUM (panelmonth), sort: gen rdis_alt_in = (rdis_alt==1 & rdis_alt[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	by SSUID PNUM (panelmonth), sort: gen rdis_alt_out = (rdis_alt==0 & rdis_alt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-
-// Welfare Use
-	by SSUID PNUM (panelmonth), sort: gen welfare_in = (programs>0 & programs[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	by SSUID PNUM (panelmonth), sort: gen welfare_out = (programs==0 & programs[_n-1]>0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 // East of finding child-care. Not 100% sure these capture our sentiment, but testing for now
 	by SSUID PNUM (panelmonth), sort: gen ch_workmore_yes = (eworkmore==1 & eworkmore[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
@@ -176,79 +176,84 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 	by SSUID PNUM (panelmonth), sort: gen move_relat = (hh_move==1 & inrange(hh_move[_n-1],2,4)) & ERESIDENCEID != ERESIDENCEID[_n-1]  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	by SSUID PNUM (panelmonth), sort: gen move_indep = (hh_move==2 & inlist(hh_move[_n-1],1,3,4)) & ERESIDENCEID != ERESIDENCEID[_n-1]  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
-
-// Education
+// Education - how often can education change?
 	// highest educational attainment only measured yearly, so will test yearly educational changes, as well as school enrollment. testing monthly, but will also add to annualize file
 	by SSUID PNUM (panelmonth), sort: gen educ_change = (educ>educ[_n-12])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // make sure this creates the 0s I want, for people who didn't get more education
 	by SSUID PNUM (panelmonth), sort: gen enrolled_yes = (renroll==1 & renroll[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	by SSUID PNUM (panelmonth), sort: gen enrolled_no = (renroll==2 & renroll[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
+*/
+
 **Partner
 	* first get partner specific variables
 	gen spousenum=.
-	forvalues n=1/22{
+	forvalues n=1/17{
 	replace spousenum=`n' if relationship`n'==1
 	}
 
 	gen partnernum=.
-	forvalues n=1/22{
+	forvalues n=1/17{
 	replace partnernum=`n' if relationship`n'==2
 	}
 
 	gen spart_num=spousenum
 	replace spart_num=partnernum if spart_num==.
 
-	gen ft_pt_sp=.
-	gen jobchange_sp=.
+	gen eptwrk_sp=.
+	gen jobchange1_sp=.
+	gen jobchange2_sp=.
 	gen better_job_sp=.
-	gen rmnumjobs_sp=.
-	gen efindjob_sp=.
-	gen edisabl_sp=.
-	gen rdis_alt_sp=.
-	gen educ_sp=.
-	gen renroll_sp=.
+	gen ejobcntr_sp=.
+	gen ejbhrs1_sp=.
+	gen ejbhrs2_sp=.
 
-	forvalues n=1/22{
-	replace ft_pt_sp=to_ft_pt`n' if spart_num==`n'
-	replace jobchange_sp=to_jobchange`n' if spart_num==`n'
+	forvalues n=1/17{
+	replace eptwrk_sp=to_eptwrk`n' if spart_num==`n'
+	replace jobchange1_sp=to_jobchange_1`n' if spart_num==`n'
+	replace jobchange1_sp=to_jobchange_2`n' if spart_num==`n'
 	replace better_job_sp=to_better_job`n' if spart_num==`n'
-	replace rmnumjobs_sp=to_RMNUMJOBS`n' if spart_num==`n'
-	replace efindjob_sp=to_EFINDJOB`n' if spart_num==`n'
-	replace edisabl_sp=to_EDISABL`n' if spart_num==`n'
-	replace rdis_alt_sp=to_RDIS_ALT`n' if spart_num==`n'
-	replace educ_sp=to_educ`n' if spart_num==`n'
-	replace renroll_sp=to_RENROLL`n' if spart_num==`n'
+	replace ejobcntr_sp=to_ejobcntr`n' if spart_num==`n'
+	replace ejbhrs1_sp=to_ejbhrs1`n' if spart_num==`n'
+	replace ejbhrs2_sp=to_ejbhrs2`n' if spart_num==`n'
 	}
 
 	* Full-Time to Part-Time
-	by SSUID PNUM (panelmonth), sort: gen full_part_sp = (ft_pt_sp==2 & ft_pt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is based on a recode of number of hours worked per week. I am not sure if there is a better way to get this. that is what the sipp uses to ask why a respondent works less than 35 hours
+	by SSUID PNUM (panelmonth), sort: gen full_part_sp = (eptwrk_sp==1 & eptwrk_sp[_n-1]==2) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Full-Time to No Job
-	by SSUID PNUM (panelmonth), sort: gen full_no_sp = (ft_pt_sp==. & ft_pt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen full_no_sp = (eptwrk_sp==. & eptwrk_sp[_n-1]==2) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Part-Time to No Job
-	by SSUID PNUM (panelmonth), sort: gen part_no_sp = (ft_pt_sp==. & ft_pt_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen part_no_sp = (eptwrk_sp==. & eptwrk_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Part-Time to Full-Time
-	by SSUID PNUM (panelmonth), sort: gen part_full_sp = (ft_pt_sp==1 & ft_pt_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen part_full_sp = (eptwrk_sp==2 & eptwrk_sp[_n-1]==1)   & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* No Job to Part-Time
-	by SSUID PNUM (panelmonth), sort: gen no_part_sp = (ft_pt_sp==2 & ft_pt_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen no_part_sp = (eptwrk_sp==1 & eptwrk_sp[_n-1]==.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	* No Job to Full-Time
-	by SSUID PNUM (panelmonth), sort: gen no_full_sp = (ft_pt_sp==1 & ft_pt_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen no_full_sp = (eptwrk_sp==2 & eptwrk_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	
+	* Average hours recode
+	replace ejbhrs1_sp=. if ejbhrs1_sp==-1
+	replace ejbhrs2_sp=. if ejbhrs2_sp==-1
+	egen avg_mo_hrs_sp=rowmean(ejbhrs1_sp ejbhrs2_sp)
 	
 	* Employer Change (currently using ANY out of a possible 7 jobs - can update to be first job or top job if needed)
-	* Recoded above - variable is jobchange_sp
+	gen jobchange_sp=0
+	replace jobchange_sp =1 if jobchange1_sp==1 | jobchange2_sp==1
+	
 	
 	* "Better Job" (see recode in file 06 - based on reasons left job)
 	by SSUID PNUM (panelmonth), sort: gen betterjob_sp = (better_job_sp==1 & better_job_sp[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 
 	// Number of Jobs // also going to test on an annual average, did # of job changes, this is monthly
 	* 1 to More than 1 (as I feel like this is a bigger deal than going from 2 to 3, say)
-	by SSUID PNUM (panelmonth), sort: gen many_jobs_sp = (inrange(rmnumjobs_sp,2,7) & rmnumjobs_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	by SSUID PNUM (panelmonth), sort: gen many_jobs_sp = (inrange(ejobcntr_sp,2,7) & ejobcntr_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	* More than 1 to 1
-	by SSUID PNUM (panelmonth), sort: gen one_job_sp = (rmnumjobs_sp==1 & inrange(rmnumjobs_sp[_n-1],2,7))  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	* Any # job change up
-	by SSUID PNUM (panelmonth), sort: gen num_jobs_up_sp = (rmnumjobs_sp > rmnumjobs_sp[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen one_job_sp = (ejobcntr_sp==1 & inrange(ejobcntr_sp[_n-1],2,7))  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+	* Any # job change up 
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_up_sp = (ejobcntr_sp > ejobcntr_sp[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & ejobcntr_sp != -1 & ejobcntr_sp[_n-1] != -1
 	* Any # job change down
-	by SSUID PNUM (panelmonth), sort: gen num_jobs_down_sp = (rmnumjobs_sp < rmnumjobs_sp[_n-1])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	
+	by SSUID PNUM (panelmonth), sort: gen num_jobs_down_sp = (ejobcntr_sp < ejobcntr_sp[_n-1])   & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & ejobcntr_sp != -1 & ejobcntr_sp[_n-1] != -1
+
+/*	
 // Disability status - testing all three specifications for now; will pick one. efindjob and esdisabl more about work, while dis_alt is broader disability
 	by SSUID PNUM (panelmonth), sort: gen efindjob_in_sp= (efindjob_sp==1 & efindjob_sp[_n-1]==0)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	by SSUID PNUM (panelmonth), sort: gen efindjob_out_sp = (efindjob_sp==0 & efindjob_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
@@ -270,6 +275,24 @@ use "$SIPP14keep/sipp96tpearn_all", clear
 ********************************************************************************
 * Create annual measures
 ********************************************************************************
+// Creating variables to facilate the below since a lot of variables share a suffix
+
+foreach var of varlist employ eptwrk ems ejobcntr marital_status{ 
+    gen st_`var'=`var'
+    gen end_`var'=`var'
+}
+
+forvalues r=1/17{
+gen avg_to_tpearn`r'=to_tpearn`r' // using the same variable in sum and avg and can't use wildcards in below, so renaming first to use renamed variable for avg
+gen avg_to_earn`r'=to_earnings`r'
+gen to_mis_tpearn`r'=to_tpearn`r'
+gen to_mis_earnings`r'=to_earnings`r'
+	foreach var of varlist to_employ`r' to_eptwrk`r' to_ems`r'{
+		gen st_`var'=`var'
+		gen end_`var'=`var'
+	}
+}
+
 // need to retain missings for earnings when annualizing (sum treats missing as 0) - currently with msum1, 0 means either none or not in universe, so will use hours to deduce if it should be missing or 0 (because for hours, 0 was just not in universe)
 
 replace tpearn = . if avg_mo_hrs ==.
@@ -279,138 +302,35 @@ bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn)
 bysort SSUID PNUM year (earnings): egen earnings_mis = min(earnings)
 
 // Collapse the data by year to create annual measures
-collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
-			(sum) 	tpearn thearn total_hrs=avg_mo_hrs earnings eawop					///
-					full_part full_no part_no part_full no_part no_full jobchange		///
-					betterjob many_jobs one_job num_jobs_up num_jobs_down				///
-			(mean) 	birth first_birth mom_panel avg_mo_hrs avg_earn=earnings			///
-					numearner tpyrate1	tpyrate2 avg_wk_rate wpfinwgt					/// 		
-			(max) 	erace educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth 	///
-			(min) 	durmom durmom_1st emomlivh first_wave tpearn_mis earnings_mis,		/// put emomlivh as min - because min=yes and if at SOME PT in year, all kids at home, want here
+collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 								/// mother char.
+			(sum) 	tpearn thearn total_hrs=avg_mo_hrs total_hrs_sp = avg_mo_hrs_sp earnings eawop		///
+					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh						///
+					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non 			///
+					prekid_gain prekid_lose parents_gain parents_lose first_birth						///
+					full_part full_no part_no part_full no_part no_full jobchange						///
+					betterjob left_preg many_jobs one_job num_jobs_up num_jobs_down						///
+					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp							///
+					no_full_sp betterjob_sp many_jobs_sp one_job_sp num_jobs_up_sp 						///
+					num_jobs_down_sp jobchange_sp 														///
+			(mean) 	spouse partner wpfinwgt birth mom_panel hhsize										///
+					avg_mo_hrs avg_mo_hrs_sp avg_earn=earnings numearner other_earner					///
+					tpyrate1	tpyrate2 avg_wk_rate thpov												/// 		
+			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age			///
+					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth 					///
+					start_spartner last_spartner start_spouse last_spouse start_partner last_partner	///
+			(min) 	durmom durmom_1st emomlivh youngest_age first_wave									///
+					tpearn_mis earnings_mis to_mis_tpearn* to_mis_earnings*								/// put emomlivh as min, bc min=yes and if at SOME PT in year, all kids at home, want here
+			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*								/// other hh members char.
+			(sum) 	to_tpearn* to_ejbhrs1* to_ejbhrs2* to_earnings*			 							///
+			(mean) 	avg_to_tpearn* avg_to_earn*	to_epayhr1* to_epayhr2*									///
+					to_tpyrate1* to_tpyrate2* to_ejobcntr*	to_avg_wk_rate*								///
+			(firstnm) st_*																				/// will cover all (mother + hh per recodes) 
+			(lastnm) end_*,																				///
 			by(SSUID PNUM year)
 
-gen no_job_chg=0
-replace no_job_chg=1 if (full_part + full_no + part_no + part_full + no_part + no_full)==0
-	
-// Create indicator for incomple annual observations
-gen partial_year= (monthsobserved < 12)
-	
-
-// update earnings / hours to be missing if missing all 12 months
-replace earnings=. if earnings_mis==.
-replace tpearn=. if tpearn_mis==.
-
-/* need to revisit this
-forvalues r=1/22{
-replace to_TPEARN`r'=. if to_mis_TPEARN`r'==.
-replace to_earnings`r'=. if to_mis_earnings`r'==.
-replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
-}
-
-*/
-
-// Create annual breadwinning indicators
-
-	// Create indicator for negative household earnings & no earnings. 
-	gen hh_noearnings= (thearn <= 0)
-	
-	gen earnings_ratio=tpearn/thearn if hh_noearnings !=1 & !missing(tpearn) 
-
-	// 50% breadwinning threshold
-	* Note that this measure was missing for no (or negative) earnings households, but that is now changed
-	gen 	bw50= (tpearn > .5*thearn) 	if hh_noearnings !=1 & !missing(tpearn) 
-	replace bw50= 0 					if hh_noearnings==1
-		/* *?*?* WE DON'T HAVE ANY MISSING TPEARN | THEARN. IS THAT EXPECTED? */
-		/* yes. We are now using allocated data. The SIPP 2014 doesn't have codes */
-		/* for whether the summary measure includes allocated data */
 		
-		/*This above message about missing tpearn was written by someone else - but the tpearn data is NOT expected - it's because
-		of how the collapse function handles missing in sum(). I've since updated so tpearn is missing if it was missing for all 12 months of the year */
-
-
-	// 60% breadwinning threshold
-	gen 	bw60= (tpearn > .6*thearn) 	if hh_noearnings !=1 & !missing(tpearn)
-	replace bw60= 0 					if hh_noearnings==1
-	
-save "$SIPP14keep/sipp96_annual_bw_status.dta", replace
-
-********************************************************************************
-* Create annual measures
-********************************************************************************
-
-/* want to retain this for later use once all variables have been pulled in
-
-// Creating variables to facilate the below since a lot of variables share a suffix
-
-foreach var of varlist occ_1-occ_7 employ ft_pt ems_ehc rmnumjobs marital_status{ 
-    gen st_`var'=`var'
-    gen end_`var'=`var'
-}
-
-forvalues r=1/22{
-gen avg_to_tpearn`r'=to_TPEARN`r' // using the same variable in sum and avg and can't use wildcards in below, so renaming first to use renamed variable for avg
-gen avg_to_hrs`r'=to_TMWKHRS`r'
-gen avg_to_earn`r'=to_earnings`r'
-gen to_mis_TPEARN`r'=to_TPEARN`r'
-gen to_mis_earnings`r'=to_earnings`r'
-gen to_mis_TMWKHRS`r'=to_TMWKHRS`r'
-	foreach var of varlist to_occ_1`r'-to_occ_7`r' to_employ`r' to_ft_pt`r' to_EMS`r'{
-		gen st_`var'=`var'
-		gen end_`var'=`var'
-	}
-}
-
-// need to retain missings for earnings when annualizing (sum treats missing as 0)
-
-bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn)
-// browse SSUID PNUM year panelmonth tpearn tpearn_mis // can I just do this with min in collapse? if all missing, missing will be min?
-bysort SSUID PNUM year (earnings): egen earnings_mis = min(earnings)
-bysort SSUID PNUM year (tmwkhrs): egen tmwkhrs_mis = min(tmwkhrs)
-
-// Collapse the data by year to create annual measures
-collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
-			(sum) 	tpearn thearn tmwkhrs earnings enjflag								///
-					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh 		///
-					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non 	///
-					prekid_gain prekid_lose parents_gain parents_lose first_birth		///
-					full_part full_no part_no part_full no_part no_full jobchange		///
-					betterjob left_preg many_jobs one_job num_jobs_up num_jobs_down		///
-					efindjob_in efindjob_out edisabl_in edisabl_out rdis_alt_in			///
-					rdis_alt_out welfare_in welfare_out ch_workmore_yes	ch_workmore_no	///
-					childasst_yes childasst_no ch_waitlist_yes ch_waitlist_no			///
-					move_relat move_indep educ_change enrolled_yes enrolled_no 			///
-					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
-					no_full_sp betterjob_sp many_jobs_sp one_job_sp num_jobs_up_sp 		///
-					num_jobs_down_sp jobchange_sp efindjob_in_sp edisabl_in_sp			///
-					efindjob_out_sp edisabl_out_sp rdis_alt_in_sp rdis_alt_out_sp		///
-					educ_change_sp enrolled_yes_sp enrolled_no_sp						///
-			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize				/// 
-					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner			///
-					thincpovt2 pov_level rmnumjobs_sp									///
-					tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1					///
-					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
-			(max) 	minorchildren minorbiochildren preschoolchildren 					///
-					prebiochildren race educ tceb oldest_age ejb*_payhr1 				///
-					start_spartner last_spartner start_spouse last_spouse				///
-					start_partner last_partner tage ageb1 tcbyr_1-tcbyr_7				///
-			(min) 	tage_fb durmom youngest_age first_wave								///
-					tpearn_mis tmwkhrs_mis earnings_mis									///
-					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///
-			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*				/// other hh members char.
-			(sum) 	to_TPEARN* to_TMWKHRS* to_earnings*			 						///
-			(mean) 	avg_to_tpearn* avg_to_hrs* avg_to_earn*								///
-					to_EJB*_PAYHR1* to_TJB*_ANNSAL1* to_TJB*_HOURLY1* to_TJB*_WKLY1* 	///
-					to_TJB*_BWKLY1* to_TJB*_MTHLY1* to_TJB*_SMTHLY1* to_TJB*_OTHER1*	///
-					to_TJB*_GAMT1* to_RMNUMJOBS*										///
-			(firstnm) st_*																/// will cover all (mother + hh per recodes) 
-			(lastnm) end_*,																///
-			by(SSUID PNUM year)
 			
-
-
-// Fix Type 2 people identifier
-	gen 	anytype2 = (numtype2 > 0)
-	drop 	numtype2
+// Fix identifiers greater than 1
 	gen 	firstbirth = (first_birth>0)
 	drop	first_birth
 
@@ -436,13 +356,12 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 // update earnings / hours to be missing if missing all 12 months
 replace earnings=. if earnings_mis==.
 replace tpearn=. if tpearn_mis==.
-replace tmwkhrs=. if tmwkhrs_mis==.
 
-forvalues r=1/22{
-replace to_TPEARN`r'=. if to_mis_TPEARN`r'==.
+forvalues r=1/17{
+replace to_tpearn`r'=. if to_mis_tpearn`r'==.
 replace to_earnings`r'=. if to_mis_earnings`r'==.
-replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
 }
+
 
 // Create annual breadwinning indicators
 
@@ -467,7 +386,4 @@ replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
 	gen 	bw60= (tpearn > .6*thearn) 	if hh_noearnings !=1 & !missing(tpearn)
 	replace bw60= 0 					if hh_noearnings==1
 	
-gen wave=year-2012
-	
-save "$SIPP14keep/annual_bw_status.dta", replace
-*/
+save "$SIPP14keep/sipp96_annual_bw_status.dta", replace

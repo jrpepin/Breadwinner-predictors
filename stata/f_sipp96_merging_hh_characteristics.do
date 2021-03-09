@@ -78,4 +78,4 @@ replace other_earner=(numearner-1) if tpearn!=.
 
 // browse panelmonth numearner other_earner tpearn to_tpearn*
 
-save "$SIPP14keep/sipp14tpearn_rel.dta", replace
+save "$SIPP14keep/sipp96tpearn_rel.dta", replace
