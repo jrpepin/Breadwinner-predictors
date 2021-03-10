@@ -9,12 +9,12 @@ putexcel set "$results/overtime_comparison.xlsx", replace
 tabout bw60 using "$results/overtime_comparison.xlsx", c(freq col) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Overall Breadwinner Status - 1996) append
 tabout year bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) style(xlsx) title(Breadwinner Status by Year - 1996) f(0c 1p) location(10 1) append
 tabout educ bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Breadwinner Status by Education - 1996) location(25 1) append
-tabout emomlivh bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Breadwinner Status by Children's Living - 1996) location(40 1)append
+// tabout emomlivh bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Breadwinner Status by Children's Living - 1996) location(40 1)append
 
 tabout trans_bw60 using "$results/overtime_comparison.xlsx", c(freq col) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Overall Breadwinner Transitions - 1996) location(55 1) append
 tabout year trans_bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Breadwinner Transitions by Year - 1996) location(65 1) append
 tabout educ trans_bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb)f(0c 1p) style(xlsx) title(Breadwinner Transitions by Education - 1996) location(80 1) append
-tabout emomlivh trans_bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Breadwinner Transitions by Children's Living - 1996) location(95 1) append
+// tabout emomlivh trans_bw60 using "$results/overtime_comparison.xlsx", c(freq row) clab(1996 Percent) layout(cb) f(0c 1p) style(xlsx) title(Breadwinner Transitions by Children's Living - 1996) location(95 1) append
 
 
 // 2014 descriptives
