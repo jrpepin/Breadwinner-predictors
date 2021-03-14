@@ -823,24 +823,42 @@ forvalues w=1/8 {
 
 // adding some core overlap views = currently base is total sample, per meeting 3/4, want a consistent view. so, even if woman doesn't have a partner, for now that is 0 not missing
 
+* Mother earnings up, anyone else down
+gen momup_anydown=0
+replace momup_anydown=1 if earnup8_all==1 & earndown8_hh_all==1
 * Mother earnings up, partner earnings down
 gen momup_partdown=0
 replace momup_partdown=1 if earnup8_all==1 & earndown8_sp_all==1
 * Mother earnings up, someone else's earnings down
 gen momup_othdown=0
 replace momup_othdown=1 if earnup8_all==1 & earndown8_oth_all==1 // this "oth" view is all hh earnings except mom and partner so accounts for other hh earning changes
+* Mother earnings up, child's earnings down
+gen momup_childdown=0
+replace momup_childdown=1 if earnup8_all==1 & earndown8_child==1
+* Mother earnings up, parent's earnings down
+gen momup_parentdown=0
+replace momup_parentdown=1 if earnup8_all==1 & earndown8_par==1
 * Mother earnings up, no one else's earnings changed
 gen momup_only=0
 replace momup_only=1 if earnup8_all==1 & earndown8_hh_all==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
 * Mother's earnings did not change, HH's earnings down
 gen momno_hhdown=0
 replace momno_hhdown=1 if earnup8_all==0 & earndown8_hh_all==1
+* Mother earnings did not change, anyone else down
+gen momno_anydown=0
+replace momno_anydown=1 if earnup8_all==0 & earndown8_hh_all==1
 * Mother's earnings did not change, partner's earnings down
 gen momno_partdown=0
 replace momno_partdown=1 if earnup8_all==0 & earndown8_sp_all==1
 * Mothers earnings did not change, someone else's earnings went down
 gen momno_othdown=0
 replace momno_othdown=1 if earnup8_all==0 & earndown8_oth_all==1
+* Mother's earnings did not change, child's earnings down
+gen momno_childdown=0
+replace momno_childdown=1 if earnup8_all==0 & earndown8_child==1
+* Mother's earnings did not change, parent's earnings down
+gen momno_parentdown=0
+replace momno_parentdown=1 if earnup8_all==0 & earndown8_par==1
 * Mother earnings up, earner left household
 gen momup_othleft=0
 replace momup_othleft=1 if earnup8_all==1 & earn_lose==1
@@ -853,12 +871,18 @@ replace momup_relend=1 if earnup8_all==1 & (coh_diss==1 | marr_diss==1)
 * Mother earnings did not change, relationship ended
 gen momno_relend=0
 replace momno_relend=1 if earnup8_all==0 & (coh_diss==1 | marr_diss==1)
+* Mother earnings up, anyone else's earnings up
+gen momup_anyup=0
+replace momup_anyup=1 if earnup8_all==1 & earnup8_hh_all==1
 * Mother earnings up, partner earnings up
 gen momup_partup=0
 replace momup_partup=1 if earnup8_all==1 & earnup8_sp_all==1
 * Mother earnings up, someone else's earnings up
 gen momup_othup=0
 replace momup_othup=1 if earnup8_all==1 & earnup8_oth_all==1
+* Mother earnings down, anyone else's earnings down
+gen momdown_anydown=0
+replace momdown_anydown=1 if earndown8_all==1 & earndown8_hh_all==1
 * Mother earnings down, partner earnings down
 gen momdown_partdown=0
 replace momdown_partdown=1 if earndown8_all==1 & earndown8_sp_all==1

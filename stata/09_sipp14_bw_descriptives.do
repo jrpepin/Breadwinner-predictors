@@ -1143,6 +1143,9 @@ forvalues w=1/8 {
 
 // adding some core overlap views = currently base is total sample, per meeting 3/4, want a consistent view. so, even if woman doesn't have a partner, for now that is 0 not missing
 
+* Mother earnings up, anyone else down
+gen momup_anydown=0
+replace momup_anydown=1 if earnup8_all==1 & earndown8_hh_all==1
 * Mother earnings up, partner earnings down
 gen momup_partdown=0
 replace momup_partdown=1 if earnup8_all==1 & earndown8_sp_all==1
@@ -1161,6 +1164,9 @@ replace momup_only=1 if earnup8_all==1 & earndown8_hh_all==0 // this hh view is 
 * Mother's earnings did not change, HH's earnings down
 gen momno_hhdown=0
 replace momno_hhdown=1 if earnup8_all==0 & earndown8_hh_all==1
+* Mother earnings did not change, anyone else down
+gen momno_anydown=0
+replace momno_anydown=1 if earnup8_all==0 & earndown8_hh_all==1
 * Mother's earnings did not change, partner's earnings down
 gen momno_partdown=0
 replace momno_partdown=1 if earnup8_all==0 & earndown8_sp_all==1
@@ -1185,12 +1191,18 @@ replace momup_relend=1 if earnup8_all==1 & (coh_diss==1 | marr_diss==1)
 * Mother earnings did not change, relationship ended
 gen momno_relend=0
 replace momno_relend=1 if earnup8_all==0 & (coh_diss==1 | marr_diss==1)
+* Mother earnings up, anyone else's earnings up
+gen momup_anyup=0
+replace momup_anyup=1 if earnup8_all==1 & earnup8_hh_all==1
 * Mother earnings up, partner earnings up
 gen momup_partup=0
 replace momup_partup=1 if earnup8_all==1 & earnup8_sp_all==1
 * Mother earnings up, someone else's earnings up
 gen momup_othup=0
 replace momup_othup=1 if earnup8_all==1 & earnup8_oth_all==1
+* Mother earnings down, anyone else's earnings down
+gen momdown_anydown=0
+replace momdown_anydown=1 if earndown8_all==1 & earndown8_hh_all==1
 * Mother earnings down, partner earnings down
 gen momdown_partdown=0
 replace momdown_partdown=1 if earndown8_all==1 & earndown8_sp_all==1
