@@ -90,7 +90,7 @@ drop nprevbw50 nprevbw60*
 label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Plus"
 label values educ educ
 
-label define race 1 "NH White" 2 "NH Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
+label define race 1 "NH White" 2 "Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
 label values race race
 
 /*
@@ -832,12 +832,6 @@ replace momup_partdown=1 if earnup8_all==1 & earndown8_sp_all==1
 * Mother earnings up, someone else's earnings down
 gen momup_othdown=0
 replace momup_othdown=1 if earnup8_all==1 & earndown8_oth_all==1 // this "oth" view is all hh earnings except mom and partner so accounts for other hh earning changes
-* Mother earnings up, child's earnings down
-gen momup_childdown=0
-replace momup_childdown=1 if earnup8_all==1 & earndown8_child==1
-* Mother earnings up, parent's earnings down
-gen momup_parentdown=0
-replace momup_parentdown=1 if earnup8_all==1 & earndown8_par==1
 * Mother earnings up, no one else's earnings changed
 gen momup_only=0
 replace momup_only=1 if earnup8_all==1 & earndown8_hh_all==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
@@ -853,13 +847,6 @@ replace momno_partdown=1 if earnup8_all==0 & earndown8_sp_all==1
 * Mothers earnings did not change, someone else's earnings went down
 gen momno_othdown=0
 replace momno_othdown=1 if earnup8_all==0 & earndown8_oth_all==1
-* Mother's earnings did not change, child's earnings down
-gen momno_childdown=0
-replace momno_childdown=1 if earnup8_all==0 & earndown8_child==1
-* Mother's earnings did not change, parent's earnings down
-gen momno_parentdown=0
-replace momno_parentdown=1 if earnup8_all==0 & earndown8_par==1
-* Mother earnings up, earner left household
 gen momup_othleft=0
 replace momup_othleft=1 if earnup8_all==1 & earn_lose==1
 * Mother earnings did not change, earner left household

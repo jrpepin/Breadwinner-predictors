@@ -102,15 +102,15 @@ replace mom_panel=1 if inrange(yrfirstbirth, 1995, 2000) // flag if became a mom
 * race/ ethnicity: combo of ERACE and EORIGIN
 gen race=.
 replace race=1 if erace==1 & !inrange(eorigin, 20,28)
-replace race=2 if erace==2 & !inrange(eorigin, 20,28)
+replace race=2 if erace==2
 replace race=3 if erace==4 & !inrange(eorigin, 20,28)
-replace race=4 if inrange(eorigin, 20,28)
+replace race=4 if inrange(eorigin, 20,28) & erace!=2
 replace race=5 if erace==3 & !inrange(eorigin, 20,28)
 
-label define race 1 "NH White" 2 "NH Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
+label define race 1 "NH White" 2 "Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
 label values race race
 
-drop erace eorigin
+// drop erace eorigin
 
 
 * educational attainment: use EEDUC

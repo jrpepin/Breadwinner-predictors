@@ -12,7 +12,6 @@ di "$S_DATE"
 * for mothers who became breadwinners during the panel
 
 * The data file used in this script was produced by annualize.do
-* It is NOT restricted to mothers living with minor children.
 
 ********************************************************************************
 * Import data  & create breadwinning measures
@@ -107,7 +106,7 @@ drop nprevbw50 nprevbw60*
 label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Plus"
 label values educ educ
 
-label define race 1 "NH White" 2 "NH Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
+label define race 1 "NH White" 2 "Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
 label values race race
 
 label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 "Healthcare" 5 "Service" 6 "Sales" 7 "Office / Admin" 8 "Farming" 9 "Construction" 10 "Maintenance" 11 "Production" 12 "Transportation" 13 "Military" 
