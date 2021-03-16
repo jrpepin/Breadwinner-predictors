@@ -17,7 +17,7 @@ di "$S_DATE"
 * First need to append the 2014 and 1996 files
 ********************************************************************************
 
-local keep_vars "SSUID year PNUM spart_num ageb1 educ race avg_earn avg_mo_hrs betterjob betterjob_sp birth bw50 bw50L bw60 bw60L coh_diss coh_mar durmom earn_change earn_change_hh earn_change_oth earn_change_raw earn_change_raw_hh earn_change_raw_oth earn_change_raw_sp earn_change_sp earn_gain earn_lose earn_non earndown8 earndown8_all earndown8_hh earndown8_hh_all earndown8_oth earndown8_oth_all earndown8_sp earndown8_sp_all earnings earnings_a_sp earnings_mis earnings_ratio earnings_sp earnup8 earnup8_all earnup8_hh earnup8_hh_all earnup8_oth earnup8_oth_all earnup8_sp earnup8_sp_all firstbirth full_no full_no_sp full_part full_part_sp gain_partner hh_earn hh_gain hh_gain_earn hh_lose hh_lose_earn hhsize hours_change hours_change_sp avg_mo_hrs_sp hours_up5 hours_up5_all hours_up5_sp hours_up5_sp_all hoursdown5 hoursdown5_all hoursdown5_sp hoursdown5_sp_all jobchange jobchange_sp lost_partner marr_coh marr_diss marr_wid mom_gain_earn mom_lose_earn momdown_othdown momdown_partdown momno_hhdown momno_othdown momno_othleft momno_partdown momno_relend momup_only momup_othdown momup_othleft momup_othup momup_partdown momup_partup momup_relend monthsobserved nmos_bw50 nmos_bw60 no_full no_full_sp no_job_chg no_job_chg_sp no_part no_part_sp no_status_chg non_earn numearner oth_gain_earn oth_lose_earn other_earn other_earner part_full part_full_sp part_gain_earn part_lose_earn part_no part_no_sp resp_earn resp_non sing_coh sing_mar tage ageb1_mon thearn tpearn tpearn_mis trans_bw50 trans_bw60 wage_chg wage_chg_sp wagesdown8 wagesdown8_all wagesdown8_sp wagesdown8_sp_all wagesup8 wagesup8_all wagesup8_sp wagesup8_sp_all wpfinwgt momup_anydown momup_anyup momno_anydown momdown_anydown"
+local keep_vars "SSUID year PNUM firstyr spart_num ageb1 educ race avg_earn avg_mo_hrs betterjob betterjob_sp birth bw50 bw50L bw60 bw60L trans_bw50 trans_bw60 trans_bw60_alt coh_diss coh_mar durmom earn_change earn_change_hh earn_change_oth earn_change_raw earn_change_raw_hh earn_change_raw_oth earn_change_raw_sp earn_change_sp earn_gain earn_lose earn_non earndown8 earndown8_all earndown8_hh earndown8_hh_all earndown8_oth earndown8_oth_all earndown8_sp earndown8_sp_all earnings earnings_a_sp earnings_mis earnings_ratio earnings_sp earnup8 earnup8_all earnup8_hh earnup8_hh_all earnup8_oth earnup8_oth_all earnup8_sp earnup8_sp_all firstbirth full_no full_no_sp full_part full_part_sp gain_partner hh_earn hh_gain hh_gain_earn hh_lose hh_lose_earn hhsize hours_change hours_change_sp avg_mo_hrs_sp hours_up5 hours_up5_all hours_up5_sp hours_up5_sp_all hoursdown5 hoursdown5_all hoursdown5_sp hoursdown5_sp_all jobchange jobchange_sp lost_partner marr_coh marr_diss marr_wid mom_gain_earn mom_lose_earn momdown_othdown momdown_partdown momno_hhdown momno_othdown momno_othleft momno_partdown momno_relend momup_only momup_othdown momup_othleft momup_othup momup_partdown momup_partup momup_relend monthsobserved nmos_bw50 nmos_bw60 no_full no_full_sp no_job_chg no_job_chg_sp no_part no_part_sp no_status_chg non_earn numearner oth_gain_earn oth_lose_earn other_earn other_earner part_full part_full_sp part_gain_earn part_lose_earn part_no part_no_sp resp_earn resp_non sing_coh sing_mar tage ageb1_mon thearn tpearn tpearn_mis wage_chg wage_chg_sp wagesdown8 wagesdown8_all wagesdown8_sp wagesdown8_sp_all wagesup8 wagesup8_all wagesup8_sp wagesup8_sp_all wpfinwgt momup_anydown momup_anyup momno_anydown momdown_anydown"
 
 // 1996 file
 use "$SIPP14keep/96_bw_descriptives.dta", clear
@@ -39,6 +39,13 @@ append using "$SIPP14keep/96_bw_descriptives.dta"
 
 save "$SIPP14keep/combined_annual_bw_status.dta", replace
 
+/* investigations
+browse earnup8_all earndown8_hh_all earn_lose if dv==1
+browse SSUID PNUM year earnup8_all earndown8_hh_all earn_lose earn_change earn_change_sp earn_change_hh earn_change_raw earnings earnings_a_sp hh_earn earn_change_hh dv bw60 trans_bw60 // if dv==1
+
+browse SSUID PNUM year earnup8_all earndown8_hh_all earn_lose bw60 trans_bw60 trans_bw60_alt if inlist(SSUID, "000418500162", "000418209903", "000418334944")
+browse momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown dv // if dv==1
+*/
 
 ********************************************************************************
 * now specify models
@@ -52,52 +59,90 @@ replace survey=2014 if inrange(year,2013,2016)
 gen dv=trans_bw60==1
 replace dv=. if trans_bw60==. // recoding so only can be 0 or 1 - currently has missing values because we have been counting first year as "ineligible" since we don't know history. decide if that should stay?
 
-local simple "earnup8_all earndown8_hh_all earn_lose"
-local overlap "momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown"
-// should I add any control variables like educ and race here?!
+gen dv_alt = trans_bw60_alt==1
+replace dv_alt=. if trans_bw60_alt==. // recode from step 9 - some mothers not tracked until a later year in our sample, so this has more missing to account for loss of history prior to that.
 
 // base models
+local simple "earnup8_all earndown8_hh_all earn_lose"
+local overlap "momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown"
 logistic dv i.year `simple'
 logistic dv i.year `overlap'
 logistic dv i.survey `simple' i.survey#i.(`simple')
 logistic dv i.survey `overlap' i.survey#i.(`overlap')
 
-**************************************************8
+// Making specification of earn_lose that is mutually exclusive
+gen earnup_excl=earnup8_all
+replace earnup_excl=0 if earn_lose==1
+gen earndown_excl=earndown8_hh_all
+replace earndown_excl=0 if earn_lose==1
+
+
+*****************************************************************************************
 **Rest of below is me trying to figure out the collinearity problem
 
+// QA-ing
+local simple "earnup8_all earndown8_hh_all earn_lose"
+logistic dv i.year `simple'
+logistic dv_alt i.year `simple'
+logistic dv i.survey#i.(`simple')
+logistic dv_alt i.survey#i.(`simple') // this doesn't solve the problem
+
+local overlap "momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown"
+logistic dv i.year `overlap'
+logistic dv_alt i.year `overlap'
+logistic dv i.survey#i.(`overlap')
+logistic dv_alt i.survey#i.(`overlap') // this doesn't solve the problem
+
+// testing if it works even for just two variables at a time - it doesn't
+foreach var in momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown{
+	logistic dv i.survey#i.momup_only i.survey#i.`var'
+}
+
+foreach var in  momup_only momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown{
+	logistic dv i.survey#i.momup_anydown i.survey#i.`var'
+}
+
+
+// creating my own interactions - but this pools across 1996 and 2014 for the 0s (bc multiplying by 0). it gives me results, but not quite apples to apples. think understating 1996 and over-stating 2014.
+gen earnup_sur= earnup8_all * survey
+gen earndown_sur = earndown8_hh_all * survey
+gen earnlose_sur = earn_lose * survey
+gen earnup_excl_sur= earnup_excl * survey
+gen earndown_excl_sur = earndown_excl * survey
+
+foreach var in momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown{
+    gen `var'_sur = `var' * survey
+}
+
+logistic dv i.earnup_sur i.earndown_sur i.earnlose_sur // this works but no main effect - so I *think* base is 0 pooled across 1996 and 2014, then interaction is just 1 in each year. could this work?
+logistic dv i.survey earnup8_all earndown8_hh_all earn_lose i.earnup_sur i.earndown_sur i.earnlose_sur // when i add both main effects, collinear again
+logistic dv earnup8_all earndown8_hh_all earn_lose i.earnup_sur i.earndown_sur i.earnlose_sur // okay so JUST predictor main effects - also collinear
+logistic dv i.survey i.earnup_sur i.earndown_sur i.earnlose_sur // just survey main effect - works, but interpretation seems wonky
+
+logistic dv i.momup_only_sur i.momup_anydown_sur i.momup_othleft_sur i.momup_anyup_sur i.momno_hhdown_sur i.momno_othleft_sur i.momdown_anydown_sur
+
+/*
+// trying to make it 1v2 to split out base - doesn't avoid the collinearity
+gen earnup_alt = earnup8_all+1
+gen earndown_alt = earndown8_hh_all+1
+gen earnlose_alt = earn_lose+1
+
+gen earnupalt_sur= earnup_alt * survey
+gen earndownalt_sur = earndown_alt * survey
+gen earnlosealt_sur = earnlose_alt * survey
+
+logistic dv i.earnupalt_sur i.earndownalt_sur i.earnlosealt_sur // okay and back to same problems
+*/
+
 // base models with fit statistics
+local simple "earnup8_all earndown8_hh_all earn_lose"
+local overlap "momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown"
+
 logistic dv i.year `simple'
 est store m1
 fitstat
 outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 1) dec(2) alpha(0.001, 0.01, 0.05) replace 
 outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 1) dec(2) eform alpha(0.001, 0.01, 0.05) append 
-
-/*estat gof
-
-Logistic model for dv, goodness-of-fit test
-
-       number of observations =     38677
- number of covariate patterns =        54
-             Pearson chi2(44) =       219.56
-                  Prob > chi2 =         0.0000
-
-fitstat
-
-Measures of Fit for logistic of dv
-
-Log-Lik Intercept Only:     -10903.255   Log-Lik Full Model:          -9709.591
-D(38666):                    19419.183   LR(9):                        2387.328
-                                         Prob > LR:                       0.000
-McFadden's R2:                   0.109   McFadden's Adj R2:               0.108
-ML (Cox-Snell) R2:               0.060   Cragg-Uhler(Nagelkerke) R2:      0.139
-McKelvey & Zavoina's R2:         0.186   Efron's R2:                      0.075
-Variance of y*:                  4.044   Variance of error:               3.290
-Count R2:                        0.919   Adj Count R2:                    0.003
-AIC:                             0.503   AIC*n:                       19441.183
-BIC:                       -389009.790   BIC':                        -2292.261
-BIC used by Stata:           19524.813   AIC used by Stata:           19439.183
-
-*/
 
 logistic dv i.year `overlap'
 est store m2
@@ -105,54 +150,67 @@ fitstat
 outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 2) dec(2) alpha(0.001, 0.01, 0.05) append 
 outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 2) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
-/*estat gof
-
-Logistic model for dv, goodness-of-fit test
-
-       number of observations =     38677
- number of covariate patterns =       104
-             Pearson chi2(90) =       945.97
-                  Prob > chi2 =         0.0000
-
-
-fitstat
-
-Measures of Fit for logistic of dv
-
-Log-Lik Intercept Only:     -10903.255   Log-Lik Full Model:          -9452.086
-D(38662):                    18904.172   LR(13):                       2902.339
-                                         Prob > LR:                       0.000
-McFadden's R2:                   0.133   McFadden's Adj R2:               0.132
-ML (Cox-Snell) R2:               0.072   Cragg-Uhler(Nagelkerke) R2:      0.168
-McKelvey & Zavoina's R2:         0.228   Efron's R2:                      0.094
-Variance of y*:                  4.260   Variance of error:               3.290
-Count R2:                        0.919   Adj Count R2:                    0.003
-AIC:                             0.490   AIC*n:                       18934.172
-BIC:                       -389482.549   BIC':                        -2765.020
-BIC used by Stata:           19052.054   AIC used by Stata:           18932.172
-*/
-
 lrtest m1 m2, stats
-fitstat, using(m1)
+// fitstat, using(m1)
+// helpful ref for calculations: https://stats.idre.ucla.edu/stata/webbooks/logistic/chapter3/lesson-3-logistic-regression-diagnostics/
+// pseudo R2 = (null-model) / null
 
-/*
+logistic dv i.earnup_sur i.earndown_sur i.earnlose_sur
+est store m3
+fitstat
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 3) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 3) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
-Likelihood-ratio test                                 LR chi2(4)  =    515.01 // this is LR from m2 (2902.34) - LR from m1 (2387.33)
-(Assumption: m1 nested in m2)                         Prob > chi2 =    0.0000
+logistic dv i.momup_only_sur i.momup_anydown_sur i.momup_othleft_sur i.momup_anyup_sur i.momno_hhdown_sur i.momno_othleft_sur i.momdown_anydown_sur
+est store m4
+fitstat
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 4) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 4) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
-Akaike's information criterion and Bayesian information criterion
+lrtest m3 m4, stats
 
------------------------------------------------------------------------------
-       Model |          N   ll(null)  ll(model)      df        AIC        BIC
--------------+---------------------------------------------------------------
-          m1 |     38,677  -10903.26  -9709.591      10   19439.18   19524.81
-          m2 |     38,677  -10903.26  -9452.086      14   18932.17   19052.05
------------------------------------------------------------------------------
+// alt specification for earn_lose such that if an earner leaves, other changes coded as 0
+logistic dv i.year earnup_excl earndown_excl earn_lose
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 5) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 5) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
-helpful ref for calculations: https://stats.idre.ucla.edu/stata/webbooks/logistic/chapter3/lesson-3-logistic-regression-diagnostics/
-pseudo R2 = (null-model) / null
+logistic dv i.earnup_excl_sur i.earndown_excl_sur i.earnlose_sur
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 6) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 6) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
-*/
+// continuous IV specification
+* first need to recode such that if earnings went from 0 to something, they are coded as changing (currently not the case, bc can't divide by zero)
+sum earn_change
+gen earn_change_rec = (earn_change - r(min)) / (r(max) - r(min)) if earn_change >=0
+replace earn_change_rec = (earn_change - r(min)) / (r(min) - r(max)) if earn_change <0
+replace earn_change_rec =0 if earn_change==0
+replace earn_change_rec=1 if mom_gain_earn==1
+replace earn_change_rec=-1 if mom_lose_earn==1
+
+sum earn_change_hh
+gen earn_change_hh_rec = (earn_change_hh - r(min)) / (r(max) - r(min)) if earn_change_hh >=0
+replace earn_change_hh_rec = (earn_change_hh - r(min)) / (r(min) - r(max)) if earn_change_hh <0
+replace earn_change_hh_rec =0 if earn_change_hh==0
+replace earn_change_hh_rec=1 if hh_gain_earn==1
+replace earn_change_hh_rec=-1 if hh_lose_earn==1
+
+sum earn_change
+gen earn_change2 = (earn_change - r(min)) / (r(max) - r(min)) // keeping on 0 to 1 is working better then -1 to 1 because not symmetrical
+
+sum earn_change_hh
+gen earn_change_hh2 = (earn_change_hh - r(min)) / (r(max) - r(min))
+
+logistic dv i.year earn_lose earn_change2 earn_change_hh2
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 7) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 7) dec(2) eform alpha(0.001, 0.01, 0.05) append 
+
+logistic dv i.survey#earn_lose i.survey#c.earn_change2 i.survey#c.earn_change_hh2
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 8) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 8) dec(2) eform alpha(0.001, 0.01, 0.05) append
+
+
+*********************************************************************
+** More investigating
 
 corr earnup8_all earndown8_hh_all  earn_lose if dv==1
 corr dv earnup8_all earndown8_hh_all earn_lose

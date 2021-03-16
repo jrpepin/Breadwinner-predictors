@@ -68,6 +68,8 @@ browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
 
 // Create an indicator of how many years have elapsed since individual's last birth
    gen durmom=year-yrlastbirth if !missing(yrlastbirth)
+   
+   //browse SSUID PNUM year panelmonth yrlastbirth yrfirstbirth tfbrthyr tlbirtyr durmom
 
 // Create an indicator of how many years have elapsed since individual's first birth
 gen durmom_1st=year-yrfirstbirth if !missing(yrfirstbirth) // to get the duration 1 year prior to respondent becoming a mom

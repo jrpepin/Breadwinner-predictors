@@ -51,6 +51,11 @@ replace trans_bw60=1 if bw60==1 & nprevbw60==0
 replace trans_bw60=2 if nprevbw60 > 0
 replace trans_bw60=. if year==1995 | year==1996
 
+bysort SSUID PNUM (year): egen firstyr = min(year)
+
+gen trans_bw60_alt = trans_bw60
+replace trans_bw60_alt=. if year==firstyr
+
 // browse SSUID PNUM year nprevbw50 bw50 bw50L trans_bw50
 
 drop nprevbw50 nprevbw60*	

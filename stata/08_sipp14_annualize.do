@@ -19,6 +19,8 @@ di "$S_DATE"
 ********************************************************************************
 use "$SIPP14keep/sipp14tpearn_rel", clear
 
+//browse SSUID PNUM year panelmonth if inlist(SSUID, "000418500162", "000418209903", "000418334944")
+
 // Create variables with the first and last month of observation by year
    egen startmonth=min(monthcode), by(SSUID PNUM year)
    egen lastmonth =max(monthcode), by(SSUID PNUM year)
