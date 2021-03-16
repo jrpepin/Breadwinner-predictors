@@ -9,8 +9,11 @@
 set maxvar 5500
 
 // 2014 SIPP analysis
-cd ./stata
-do breadwinner-predictorsSIPP14.do
+
+* It is not necessary to cd into ./stata because you are using macros. 
+* and cd into ./stata causes troubles if one encoungers an error and has to start again.
+* cd ./stata
+do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
 
 // 1996 SIPP analysis
-do breadwinner-predictorsSIPP96.do
+do "$SIPP2014_code/breadwinner-predictorsSIPP96.do"
