@@ -174,7 +174,7 @@ logistic dv i.year earnup_excl earndown_excl earn_lose
 outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 5) dec(2) alpha(0.001, 0.01, 0.05) append 
 outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 5) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
-logistic dv i.earnup_sur i.earndown_excl_sur i.earnlose_sur
+logistic dv i.earnup_excl_sur i.earndown_excl_sur i.earnlose_sur
 outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 6) dec(2) alpha(0.001, 0.01, 0.05) append 
 outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 6) dec(2) eform alpha(0.001, 0.01, 0.05) append 
 
