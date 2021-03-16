@@ -47,13 +47,18 @@ replace minorbiochildrenL=minorbiochildren[_n-1] if PNUM==PNUM[_n-1] & SSUID==SS
 * reason to adjust code just for duration 0.
 
 gen nprevbw50=0
-replace nprevbw50=nprevbw50[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) // in 2/-1 
+replace nprevbw50=nprevbw50[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
 replace nprevbw50=nprevbw50+1 if bw50[_n-1]==1 & PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1)
 // browse SSUID PNUM year nprevbw50 bw50 bw50L
 
 gen nprevbw60=0
-replace nprevbw60=nprevbw60[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) // in 2/-1 
+replace nprevbw60=nprevbw60[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
 replace nprevbw60=nprevbw60+1 if bw60[_n-1]==1 & PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1)
+
+// for some mothers, year of first wave is not the year they appear in our sample. trying an alternate code
+bysort SSUID PNUM (year): egen firstyr = min(year)
+
+// browse SSUID PNUM year firstyr
 
 gen trans_bw50=.
 replace trans_bw50=0 if bw50==0 & nprevbw50==0
@@ -67,7 +72,10 @@ replace trans_bw60=1 if bw60==1 & nprevbw60==0
 replace trans_bw60=2 if nprevbw60 > 0
 replace trans_bw60=. if year==2013
 
-// browse SSUID PNUM year nprevbw50 bw50 bw50L trans_bw50
+gen trans_bw60_alt = trans_bw60
+replace trans_bw60_alt=. if year==firstyr
+
+// browse SSUID PNUM year firstyr nprevbw60 bw60 bw60L trans_bw60 trans_bw60_alt first_wave if inlist(SSUID, "000418500162", "000418209903", "000418334944")
 
 drop nprevbw50 nprevbw60*	
 
@@ -1162,34 +1170,34 @@ gen momup_only=0
 replace momup_only=1 if earnup8_all==1 & earndown8_hh_all==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
 * Mother's earnings did not change, HH's earnings down
 gen momno_hhdown=0
-replace momno_hhdown=1 if earnup8_all==0 & earndown8_hh_all==1
+replace momno_hhdown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_hh_all==1
 * Mother earnings did not change, anyone else down
 gen momno_anydown=0
-replace momno_anydown=1 if earnup8_all==0 & earndown8_hh_all==1
+replace momno_anydown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_hh_all==1
 * Mother's earnings did not change, partner's earnings down
 gen momno_partdown=0
-replace momno_partdown=1 if earnup8_all==0 & earndown8_sp_all==1
+replace momno_partdown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_sp_all==1
 * Mothers earnings did not change, someone else's earnings went down
 gen momno_othdown=0
-replace momno_othdown=1 if earnup8_all==0 & earndown8_oth_all==1
+replace momno_othdown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_oth_all==1
 * Mother's earnings did not change, child's earnings down
 gen momno_childdown=0
-replace momno_childdown=1 if earnup8_all==0 & earndown8_child==1
+replace momno_childdown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_child==1
 * Mother's earnings did not change, parent's earnings down
 gen momno_parentdown=0
-replace momno_parentdown=1 if earnup8_all==0 & earndown8_par==1
+replace momno_parentdown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_par==1
 * Mother earnings up, earner left household
 gen momup_othleft=0
 replace momup_othleft=1 if earnup8_all==1 & earn_lose==1
 * Mother earnings did not change, earner left household
 gen momno_othleft=0
-replace momno_othleft=1 if earnup8_all==0 & earn_lose==1
+replace momno_othleft=1 if earnup8_all==0 & earndown8_all==0 & earn_lose==1
 * Mother earnings up, relationship ended
 gen momup_relend=0
 replace momup_relend=1 if earnup8_all==1 & (coh_diss==1 | marr_diss==1)
 * Mother earnings did not change, relationship ended
 gen momno_relend=0
-replace momno_relend=1 if earnup8_all==0 & (coh_diss==1 | marr_diss==1)
+replace momno_relend=1 if earnup8_all==0 & earndown8_all==0 & (coh_diss==1 | marr_diss==1)
 * Mother earnings up, anyone else's earnings up
 gen momup_anyup=0
 replace momup_anyup=1 if earnup8_all==1 & earnup8_hh_all==1

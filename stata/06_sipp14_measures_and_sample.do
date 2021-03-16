@@ -99,6 +99,7 @@ drop tmover rmover
 
     egen first_wave = min(swave), by(SSUID PNUM)	
 	
+
 // Create an indictor of the birth year of the first child 
     gen yrfirstbirth = tcbyr_1 
 
@@ -118,6 +119,7 @@ drop tmover rmover
 	
 // create an indicator of birth year of the last child
 	egen yrlastbirth = rowmax(tcbyr_1-tcbyr_7)
+	bysort SSUID PNUM (yrlastbirth): replace yrlastbirth=yrlastbirth[1] // for some reason, fertility history is inconsistently missing or filled in for mothers who seem to have babies in some years and not others
 
 // Create an indicator of how many years have elapsed since individual's last birth
    gen durmom=year-yrlastbirth if !missing(yrlastbirth)
@@ -130,6 +132,10 @@ gen durmom_1st=year-yrfirstbirth if !missing(yrfirstbirth) // to get the duratio
    
 gen mom_panel=.
 replace mom_panel=1 if inrange(yrfirstbirth, 2013, 2016) // flag if became a mom during panel to use later
+
+sort SSUID PNUM year panelmonth
+browse SSUID PNUM year panelmonth swave durmom durmom_1st first_wave yrfirstbirth yrlastbirth tcbyr_* if inlist(SSUID, "000418500162", "000418209903", "000418334944")
+// durmom seems wrong - okay bc yearbirth seems missing sometimes when it shouldn't be, because tcbyr is just missing some years...
 
 * Note that durmom=0 when child was born in this year, but some of the children born in the previous calendar
 * year are still < 1. So if we want the percentage of mothers breadwinning in the year of the child's birth
@@ -320,11 +326,13 @@ label values pov_level pov_level
 
 save "$tempdir/sipp14tpearn_fullsamp", replace
 
+// browse SSUID PNUM year panelmonth durmom if inlist(SSUID, "000418500162", "000418209903", "000418334944")
+
 
 ********************************************************************************
 * Create the analytic sample
 ********************************************************************************
-* Keep observations of women in first 18 years since first birth. 
+* Keep observations of women in first 18 years since first or last birth. 
 * Durmom is wave specific. So a mother who was durmom=19 in wave 3 is still in the sample 
 * in waves 1 and 2.
 
@@ -394,6 +402,8 @@ tab birthyear_error
 // Clean up dataset
 	drop idnum all allwomen women mothers mothers_sample 
 	
+		// browse SSUID PNUM year panelmonth durmom if inlist(SSUID, "000418500162", "000418209903", "000418334944")
+	
 ********************************************************************************
 * Merge  measures of earning, demographic characteristics and household composition
 ********************************************************************************
@@ -403,6 +413,8 @@ tab birthyear_error
 	merge 1:1 SSUID PNUM panelmonth using "$tempdir/hhcomp.dta"
 
 drop if _merge==2
+
+// browse SSUID PNUM year panelmonth durmom minorbiochildren if inlist(SSUID, "000418500162", "000418209903", "000418334944") - okay yes so no minor children, so they're getting dropped. is this concerning?
 
 // Fix household compposition variables for unmatched individuals who live alone (_merge==1)
 	* Relationship_pairs_bymonth has one record per person living with PNUM. 
