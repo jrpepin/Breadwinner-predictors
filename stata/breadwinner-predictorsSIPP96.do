@@ -85,3 +85,12 @@ set maxvar 5500
 	log using "$logdir/bw_descriptives96.log", replace
 	do "$SIPP2014_code/h_sipp96_bw_descriptives.do"
 	log close
+
+********************************************************************************
+* C1. COMBINED EVENT HISTORY MODELS
+********************************************************************************
+
+// Appends 2014 and 1996 files and executes analysis
+	log using "$logdir/combined_models.log", replace
+	do "$SIPP2014_code/aa_combined_models.do"
+	log close
