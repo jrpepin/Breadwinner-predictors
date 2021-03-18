@@ -839,7 +839,7 @@ gen momup_othdown=0
 replace momup_othdown=1 if earnup8_all==1 & earndown8_oth_all==1 // this "oth" view is all hh earnings except mom and partner so accounts for other hh earning changes
 * Mother earnings up, no one else's earnings changed
 gen momup_only=0
-replace momup_only=1 if earnup8_all==1 & earndown8_hh_all==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
+replace momup_only=1 if earnup8_all==1 & earndown8_hh_all==0 & earnup8_hh_all==0 // this hh view is all hh earnings eXCEPT MOM so if 0, means no one else changed
 * Mother's earnings did not change, HH's earnings down
 gen momno_hhdown=0
 replace momno_hhdown=1 if earnup8_all==0 & earndown8_all==0 & earndown8_hh_all==1
@@ -1133,6 +1133,7 @@ forvalues w=1/55 {
 }
 
 local med_chg_vars "earn_change_m earn_change_sp_m earn_change_hh_m earn_change_oth_m earn_change_raw_m earn_change_raw_oth_m earn_change_raw_hh_m earn_change_raw_sp_m hours_change_m hours_change_sp_m wage_chg_m wage_chg_sp_m"
+
 
 forvalues w=1/12{
 	forvalues e=1/4{
