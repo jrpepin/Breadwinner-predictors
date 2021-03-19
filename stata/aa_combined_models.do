@@ -215,8 +215,10 @@ outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 
 corr earnup8_all earndown8_hh_all  earn_lose if dv==1
 corr dv earnup8_all earndown8_hh_all earn_lose
 corr dv earnup8_all earndown8_hh_all earn_lose if dv==1
-corr dv_nom earnup8_all earndown8_hh_all earn_lose if dv_nom==1
+
 gen dv_nom = dv
+
+corr dv_nom earnup8_all earndown8_hh_all earn_lose if dv_nom==1
 replace dv_nom=0 if dv_nom==. // okay def don't use this because the variables can't have 1 values in the first year (and that is where the missing come from)
 collin earnup8_all earndown8_hh_all earn_lose
 
@@ -224,6 +226,10 @@ gen survey_test = 1 // wondering if getting messed up with use of 1996 and 2014
 replace survey_test = 2 if survey == 2014
 
 ** testing making own interactions to test collinearity
+cap drop earnup_sur 
+cap drop earndown_sur 
+cap drop earnlose_sur 
+
 gen earnup_sur= earnup8_all * survey_test
 gen earndown_sur = earndown8_hh_all * survey_test
 gen earnlose_sur = earn_lose * survey_test
