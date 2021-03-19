@@ -15,3 +15,6 @@ global results 			"$homedir/projects/breadwinner-predictors/results"
 global SIPP2014 		"$homedir/data/sipp/2014"
 global SIPP2014_code 	"$projcode/stata"
 global SIPP14keep 		"$homedir/projects/breadwinner-predictors/data"
+
+// SIPP 1996
+global SIPP1996			"$homedir/data/sipp/1996"
