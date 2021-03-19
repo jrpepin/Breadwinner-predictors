@@ -110,3 +110,12 @@ if (_rc) {
 
     exit 199
 }
+
+// https://stats.idre.ucla.edu/stat/stata/ado/analysis)
+capture : which collin
+if (_rc) {
+    display as error in smcl `"Please install package {it:collin} from SSC in order to run these do-files;"' _newline ///
+        `"you can do so by clicking this link: {stata "net install collin":auto-install collin}"'
+
+    exit 199
+}
