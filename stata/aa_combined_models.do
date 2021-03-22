@@ -208,6 +208,10 @@ logistic dv i.survey#earn_lose i.survey#c.earn_change2 i.survey#c.earn_change_hh
 outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 8) dec(2) alpha(0.001, 0.01, 0.05) append 
 outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 8) dec(2) eform alpha(0.001, 0.01, 0.05) append
 
+logistic dv i.year earn_lose earn_change earn_change_hh
+outreg2 using "$results/regression.xls", sideway stats(coef se pval) label ctitle(Model 9) dec(2) alpha(0.001, 0.01, 0.05) append 
+outreg2 using "$results/regression.xls", sideway stats(coef) label ctitle(Model 9) dec(2) eform alpha(0.001, 0.01, 0.05) append
+
 
 *********************************************************************
 ** More investigating
@@ -340,14 +344,24 @@ putexcel set "$results/regression_educ.xls", replace
 
 forvalues e=1/3{
 	logistic dv i.year `simple' if educ_gp==`e'
+	fitstat
+	est store m1`e'
 	outreg2 using "$results/regression_educ.xls", sideway stats(coef) label ctitle(Model 1: `e') dec(2) eform alpha(0.001, 0.01, 0.05) append
 	logistic dv i.year `overlap' if educ_gp==`e'
+	fitstat
+	est store m2`e'
 	outreg2 using "$results/regression_educ.xls", sideway stats(coef) label ctitle(Model 2: `e') dec(2) eform alpha(0.001, 0.01, 0.05) append 
 	logistic dv i.earnup_sur i.earndown_sur i.earnlose_sur if educ_gp==`e'
+	fitstat
+	est store m3`e'
 	outreg2 using "$results/regression_educ.xls", sideway stats(coef) label ctitle(Model 3: `e') dec(2) eform alpha(0.001, 0.01, 0.05) append 
 	logistic dv i.momup_only_sur i.momup_anydown_sur i.momup_othleft_sur i.momup_anyup_sur i.momno_hhdown_sur i.momno_othleft_sur i.momdown_anydown_sur if educ_gp==`e'
+	fitstat
+	est store m4`e'
 	outreg2 using "$results/regression_educ.xls", sideway stats(coef) label ctitle(Model 4: `e') dec(2) eform alpha(0.001, 0.01, 0.05) append 	
 }
+
+drop _est
 
 // Race
 local simple "earnup8_all earndown8_hh_all earn_lose"
@@ -357,14 +371,24 @@ putexcel set "$results/regression_race.xls", replace
 
 forvalues r=1/4{
 	logistic dv i.year `simple' if race==`r'
+	fitstat
+	est store m1`r'
 	outreg2 using "$results/regression_race.xls", sideway stats(coef) label ctitle(Model 1: `r') dec(2) eform alpha(0.001, 0.01, 0.05) append
 	logistic dv i.year `overlap' if race==`r'
+	fitstat
+	est store m2`r'
 	outreg2 using "$results/regression_race.xls", sideway stats(coef) label ctitle(Model 2: `r') dec(2) eform alpha(0.001, 0.01, 0.05) append 
 	logistic dv i.earnup_sur i.earndown_sur i.earnlose_sur if race==`r'
+	fitstat
+	est store m3`r'
 	outreg2 using "$results/regression_race.xls", sideway stats(coef) label ctitle(Model 3: `r') dec(2) eform alpha(0.001, 0.01, 0.05) append 
 	logistic dv i.momup_only_sur i.momup_anydown_sur i.momup_othleft_sur i.momup_anyup_sur i.momno_hhdown_sur i.momno_othleft_sur i.momdown_anydown_sur if race==`r'
+	fitstat
+	est store m4`r'
 	outreg2 using "$results/regression_race.xls", sideway stats(coef) label ctitle(Model 4: `r') dec(2) eform alpha(0.001, 0.01, 0.05) append 	
 }
+
+drop _est*
 
 // Age at first birth
 local simple "earnup8_all earndown8_hh_all earn_lose"
@@ -374,11 +398,19 @@ putexcel set "$results/regression_age_birth.xls", replace
 
 forvalues a=1/5{
 	logistic dv i.year `simple' if ageb1_gp==`a'
+	fitstat
+	est store m1`a'
 	outreg2 using "$results/regression_age_birth.xls", sideway stats(coef) label ctitle(Model 1: `a') dec(2) eform alpha(0.001, 0.01, 0.05) append
 	logistic dv i.year `overlap' if ageb1_gp==`a'
+	fitstat
+	est store m2`a'
 	outreg2 using "$results/regression_age_birth.xls", sideway stats(coef) label ctitle(Model 2: `a') dec(2) eform alpha(0.001, 0.01, 0.05) append 
 	logistic dv i.earnup_sur i.earndown_sur i.earnlose_sur if ageb1_gp==`a'
+	fitstat
+	est store m3`a'
 	outreg2 using "$results/regression_age_birth.xls", sideway stats(coef) label ctitle(Model 3: `a') dec(2) eform alpha(0.001, 0.01, 0.05) append 
 	logistic dv i.momup_only_sur i.momup_anydown_sur i.momup_othleft_sur i.momup_anyup_sur i.momno_hhdown_sur i.momno_othleft_sur i.momdown_anydown_sur if ageb1_gp==`a'
+	fitstat
+	est store m4`a'
 	outreg2 using "$results/regression_age_birth.xls", sideway stats(coef) label ctitle(Model 4: `a') dec(2) eform alpha(0.001, 0.01, 0.05) append 	
 }
