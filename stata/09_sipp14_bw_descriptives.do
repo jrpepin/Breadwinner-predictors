@@ -372,7 +372,16 @@ putexcel B182 = "Mom Earnings Up, Partner Up"
 putexcel B183 = "Mom Earnings Up, Someone else Up"
 putexcel B184 = "Mom Earnings Down, Partner Down"
 putexcel B185 = "Mom Earnings Down, Someone else down"
-putexcel B187 = "Total Sample / Just BWs"
+putexcel A186:A192="Model categories", merge vcenter
+putexcel B186 = "Mom's up only"
+putexcel B187 = "Mom's up, someone else's down"
+putexcel B188 = "Mom's up, someone left HH"
+putexcel B189 = "Mom's up, someone else's up"
+putexcel B190 = "Mom's unchanged, someone else's down"
+putexcel B191 = "Mom's unchanged, someone left HH"
+putexcel B192 = "Mom's down, someone else's down"
+
+putexcel B194 = "Total Sample / Just BWs"
 
 sort SSUID PNUM year
 
@@ -1217,12 +1226,12 @@ replace momdown_partdown=1 if earndown8_all==1 & earndown8_sp_all==1
 gen momdown_othdown=0
 replace momdown_othdown=1 if earndown8_all==1 & earndown8_oth_all==1
 
-local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown"
+local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown momup_only momup_anydown momup_othleft momup_anyup momno_anydown momno_othleft momdown_anydown"
 
 local colu1 "C E G"
 
 * by year
-forvalues w=1/18 {
+forvalues w=1/25 {
 	forvalues y=14/16{
 		local i=`y'-13
 		local row=`w'+167
@@ -1235,7 +1244,7 @@ forvalues w=1/18 {
 }
 
 * total
-forvalues w=1/18 {
+forvalues w=1/25 {
 		local row=`w'+167
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==1
@@ -1244,7 +1253,7 @@ forvalues w=1/18 {
 }
 
 * compare to non-BW
-forvalues w=1/18 {
+forvalues w=1/25 {
 		local row=`w'+167
 		local var: word `w' of `overlap_vars'
 		mean `var' if trans_bw60==0
@@ -1265,11 +1274,11 @@ forvalues y=14/16{
 	bysort total_`y': replace total_`y' = total_`y'[1] 
 	local total_`y' = total_`y'
 	display `total_`y''
-	putexcel `col1'187 = `total_`y''
+	putexcel `col1'194 = `total_`y''
 	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
-	putexcel `col2'187 = `bw_`y''
+	putexcel `col2'194 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
@@ -1277,8 +1286,8 @@ egen bw_samp = nvals(idnum) if trans_bw60==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
-putexcel I187 = `total_samp'
-putexcel J187 = `bw_samp'
+putexcel I194 = `total_samp'
+putexcel J194 = `bw_samp'
 
 
 ********************************************************************************
@@ -1488,9 +1497,17 @@ putexcel B182 = "Mom Earnings Up, Partner Up"
 putexcel B183 = "Mom Earnings Up, Someone else Up"
 putexcel B184 = "Mom Earnings Down, Partner Down"
 putexcel B185 = "Mom Earnings Down, Someone else down"
+putexcel A186:A192="Model categories", merge vcenter
+putexcel B186 = "Mom's up only"
+putexcel B187 = "Mom's up, someone else's down"
+putexcel B188 = "Mom's up, someone left HH"
+putexcel B189 = "Mom's up, someone else's up"
+putexcel B190 = "Mom's unchanged, someone else's down"
+putexcel B191 = "Mom's unchanged, someone left HH"
+putexcel B192 = "Mom's down, someone else's down"
 
-putexcel B187 = "Total Sample"
-putexcel B188 = "Breadwinners"
+putexcel B194 = "Total Sample"
+putexcel B195 = "Breadwinners"
 
 sort SSUID PNUM year
 
@@ -1658,12 +1675,12 @@ forvalues w=1/8 {
 
 // relevant overlap vars
 
-local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown"
+local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown momup_only momup_anydown momup_othleft momup_anyup momno_anydown momno_othleft momdown_anydown"
 
 local colu1 "C D E F"
 
 * by year
-forvalues w=1/18 {
+forvalues w=1/25 {
 	forvalues e=1/4{
 		local i=`e'
 		local row=`w'+167
@@ -1690,8 +1707,8 @@ forvalues e=1/4{
 	egen bw_`e' = nvals(idnum) if educ==`e' & trans_bw60==1
 	bysort bw_`e': replace bw_`e' = bw_`e'[1] 
 	local bw_`e' = bw_`e'
-	putexcel `col1'187 = `total_`e''
-	putexcel `col1'188 = `bw_`e''
+	putexcel `col1'194 = `total_`e''
+	putexcel `col1'195 = `bw_`e''
 	}
 
 	
@@ -1902,9 +1919,17 @@ putexcel B182 = "Mom Earnings Up, Partner Up"
 putexcel B183 = "Mom Earnings Up, Someone else Up"
 putexcel B184 = "Mom Earnings Down, Partner Down"
 putexcel B185 = "Mom Earnings Down, Someone else down"
+putexcel A186:A192="Model categories", merge vcenter
+putexcel B186 = "Mom's up only"
+putexcel B187 = "Mom's up, someone else's down"
+putexcel B188 = "Mom's up, someone left HH"
+putexcel B189 = "Mom's up, someone else's up"
+putexcel B190 = "Mom's unchanged, someone else's down"
+putexcel B191 = "Mom's unchanged, someone left HH"
+putexcel B192 = "Mom's down, someone else's down"
 
-putexcel B187 = "Total Sample"
-putexcel B188 = "Breadwinners"
+putexcel B194 = "Total Sample"
+putexcel B195 = "Breadwinners"
 
 sort SSUID PNUM year
 
@@ -2068,12 +2093,12 @@ forvalues w=1/8 {
 
 // relevant overlap vars
 
-local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown"
+local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown momup_only momup_anydown momup_othleft momup_anyup momno_anydown momno_othleft momdown_anydown"
 
 local colu1 "C D E F"
 
 * by year
-forvalues w=1/18 {
+forvalues w=1/25 {
 	forvalues r=1/4{
 		local i=`r'
 		local row=`w'+167
@@ -2100,8 +2125,8 @@ forvalues r=1/4{
 	egen bw_r`r' = nvals(idnum) if race==`r' & trans_bw60==1
 	bysort bw_r`r': replace bw_r`r' = bw_r`r'[1] 
 	local bw_r`r' = bw_r`r'
-	putexcel `col1'187 = `total_r`r''
-	putexcel `col1'188 = `bw_r`r''
+	putexcel `col1'194 = `total_r`r''
+	putexcel `col1'195 = `bw_r`r''
 	}
 
 ********************************************************************************
@@ -2317,9 +2342,17 @@ putexcel B182 = "Mom Earnings Up, Partner Up"
 putexcel B183 = "Mom Earnings Up, Someone else Up"
 putexcel B184 = "Mom Earnings Down, Partner Down"
 putexcel B185 = "Mom Earnings Down, Someone else down"
+putexcel A186:A192="Model categories", merge vcenter
+putexcel B186 = "Mom's up only"
+putexcel B187 = "Mom's up, someone else's down"
+putexcel B188 = "Mom's up, someone left HH"
+putexcel B189 = "Mom's up, someone else's up"
+putexcel B190 = "Mom's unchanged, someone else's down"
+putexcel B191 = "Mom's unchanged, someone left HH"
+putexcel B192 = "Mom's down, someone else's down"
 
-putexcel B187 = "Total Sample"
-putexcel B188 = "Breadwinners"
+putexcel B194 = "Total Sample"
+putexcel B195 = "Breadwinners"
 
 sort SSUID PNUM year
 
@@ -2483,12 +2516,12 @@ forvalues w=1/8 {
 
 // relevant overlap vars
 
-local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown"
+local overlap_vars "momup_partdown momup_othdown momup_childdown momup_parentdown momup_only momno_hhdown momno_partdown momno_othdown momno_childdown momno_parentdown momup_othleft momno_othleft momup_relend momno_relend momup_partup momup_othup momdown_partdown momdown_othdown momup_only momup_anydown momup_othleft momup_anyup momno_anydown momno_othleft momdown_anydown"
 
 local colu1 "C D E F G"
 
 * by year
-forvalues w=1/18 {
+forvalues w=1/25 {
 	forvalues a=1/5{
 		local i=`a'
 		local row=`w'+167
@@ -2515,8 +2548,8 @@ forvalues a=1/5{
 	egen bw_a`a' = nvals(idnum) if ageb1_gp==`a' & trans_bw60==1
 	bysort bw_a`a': replace bw_a`a' = bw_a`a'[1] 
 	local bw_a`a' = bw_a`a'
-	putexcel `col1'187 = `total_a`a''
-	putexcel `col1'188 = `bw_a`a''
+	putexcel `col1'194 = `total_a`a''
+	putexcel `col1'195 = `bw_a`a''
 	}
 
 	
