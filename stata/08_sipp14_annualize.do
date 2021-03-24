@@ -14,8 +14,9 @@ di "$S_DATE"
 * The data file used in this script was produced by merging_hh_characteristics.do
 * It is restricted to mothers living with minor children.
 
+
 ********************************************************************************
-* Create descrptive statistics to prep for annualized variables
+* Create descriptive statistics to prep for annualized variables
 ********************************************************************************
 use "$SIPP14keep/sipp14tpearn_rel", clear
 
@@ -326,7 +327,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 			(max) 	minorchildren minorbiochildren preschoolchildren 					///
 					prebiochildren race educ tceb oldest_age ejb*_payhr1 				///
 					start_spartner last_spartner start_spouse last_spouse				///
-					start_partner last_partner tage ageb1 tcbyr_1-tcbyr_7				///
+					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
 			(min) 	tage_fb durmom youngest_age first_wave								///
 					tpearn_mis tmwkhrs_mis earnings_mis									///
 					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///

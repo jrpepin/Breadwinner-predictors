@@ -78,4 +78,33 @@ replace other_earner=(numearner-1) if tpearn!=.
 
 // browse panelmonth numearner other_earner tpearn to_tpearn*
 
+/// Figuring out recode for year maritaul status at first birth
+browse SSUID PNUM yrfirstbirth ems exmar tfmyear tsmyear tlmyear ewidiv* tfsyear tftyear tssyear tstyear tlsyear tltyear emarpth 
+
+//
+gen status_b1=.
+replace status_b1 = 1 if inlist(ems,1,2) & exmar==1 & yrfirstbirth >= tlmyear // assuming if birth happened IN year, they were married, especially bc it's birth NOT conception
+replace status_b1 = 1 if yrfirstbirth >= tlmyear & inlist(ems,1,2)
+replace status_b1 = 1 if ems!=6 & yrfirstbirth >= tlmyear & tlmyear!=-1 & ((yrfirstbirth <=tltyear & tltyear!=-1) | (yrfirstbirth <=tlsyear & tlsyear!=-1)) // last is what is for those only married once
+replace status_b1 = 1 if ems!=6 & yrfirstbirth >= tfmyear & tfmyear!=-1 & ((yrfirstbirth <=tftyear & tftyear!=-1) | (yrfirstbirth <=tfsyear & tfsyear!=-1)) // first marriage only applies if married more than once
+replace status_b1 = 1 if exmar>1 & yrfirstbirth >= tsmyear & tsmyear!=-1 & ((yrfirstbirth <=tstyear & tstyear!=-1) | (yrfirstbirth <=tssyear & tssyear!=-1))
+replace status_b1 = 2 if exmar==1 & yrfirstbirth < tlmyear
+replace status_b1 = 2 if exmar> 1 & yrfirstbirth < tfmyear
+replace status_b1 = 2 if ems==6
+replace status_b1 = 4 if exmar==1 & inlist(ems,4,5) &  ((yrfirstbirth > tltyear & tltyear!=-1) | (yrfirstbirth > tstyear & tstyear!=-1))
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tftyear & yrfirstbirth < tsmyear & tftyear!=-1 & tsmyear!=-1
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tfsyear & yrfirstbirth < tsmyear & tfsyear!=-1 & tsmyear!=-1
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tstyear & yrfirstbirth < tlmyear & tstyear!=-1 & tlmyear!=-1
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tssyear & yrfirstbirth < tlmyear & tssyear!=-1 & tlmyear!=-1
+
+browse SSUID PNUM yrfirstbirth ems exmar tfmyear tsmyear tlmyear ewidiv* tfsyear tftyear tssyear tstyear tlsyear tltyear if status_b1==.
+
+// filling in ones I have to guesstimate
+replace status_b1 = 1 if (yrfirstbirth-tlmyear) <=6 & status_b1==. // there are a lot of people who were married, are now separated, but then only have a first marriage year, not a separation year, so using time frame to guesstimate - using longer frame here because think cohab births less of an issue
+
+// some people just don't have marriage dates, but have statues of like divorced / married
+
+label define birth_status 1 "Married" 2 "Never Married" 3  "Widowed" 4 "Divorced or Separated"
+label values status_b1 birth_status
+
 save "$SIPP14keep/sipp96tpearn_rel.dta", replace

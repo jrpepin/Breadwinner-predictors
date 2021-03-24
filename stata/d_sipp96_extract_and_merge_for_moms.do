@@ -68,7 +68,8 @@ use "$SIPP1996/sip96t2.dta", clear
 keep 	swave wpfinwgt ssuid epppnum eentaid shhadid eppintvw erelat* eprlpn*		/// /* TECHNICAL & HH */
 		tfbrthyr efbrthmo tlbirtyr elbirtmo ragfbrth tmomchl tfrchl 				/// /* FERTILITY */
 		emomlivh tfrinhh efblivnw elblivnw											///
-		tlmyear tfmyear exmar emarpth												/// /* MARRIAGE */
+		exmar emarpth tfmyear tsmyear tlmyear ewidiv* 								/// /* MARRIAGE */
+		tfsyear tftyear tssyear tstyear	tlsyear tltyear								/// /* note: last used for last or ONLY, not first*/
 
 sort ssuid eentaid epppnum swave
 		

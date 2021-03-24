@@ -316,7 +316,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 								//
 					avg_mo_hrs avg_mo_hrs_sp avg_earn=earnings numearner other_earner					///
 					tpyrate1	tpyrate2 avg_wk_rate thpov												/// 		
 			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age			///
-					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth 					///
+					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth status_b1			///
 					start_spartner last_spartner start_spouse last_spouse start_partner last_partner	///
 			(min) 	durmom durmom_1st emomlivh youngest_age first_wave									///
 					tpearn_mis earnings_mis to_mis_tpearn* to_mis_earnings*								/// put emomlivh as min, bc min=yes and if at SOME PT in year, all kids at home, want here

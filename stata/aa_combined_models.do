@@ -17,7 +17,7 @@ di "$S_DATE"
 * First need to append the 2014 and 1996 files
 ********************************************************************************
 
-local keep_vars "SSUID year PNUM firstyr spart_num ageb1 educ race avg_earn avg_mo_hrs betterjob betterjob_sp birth bw50 bw50L bw60 bw60L trans_bw50 trans_bw60 trans_bw60_alt coh_diss coh_mar durmom earn_change earn_change_hh earn_change_oth earn_change_raw earn_change_raw_hh earn_change_raw_oth earn_change_raw_sp earn_change_sp earn_gain earn_lose earn_non earndown8 earndown8_all earndown8_hh earndown8_hh_all earndown8_oth earndown8_oth_all earndown8_sp earndown8_sp_all earnings earnings_a_sp earnings_mis earnings_ratio earnings_sp earnup8 earnup8_all earnup8_hh earnup8_hh_all earnup8_oth earnup8_oth_all earnup8_sp earnup8_sp_all firstbirth full_no full_no_sp full_part full_part_sp gain_partner hh_earn hh_gain hh_gain_earn hh_lose hh_lose_earn hhsize hours_change hours_change_sp avg_mo_hrs_sp hours_up5 hours_up5_all hours_up5_sp hours_up5_sp_all hoursdown5 hoursdown5_all hoursdown5_sp hoursdown5_sp_all jobchange jobchange_sp lost_partner marr_coh marr_diss marr_wid mom_gain_earn mom_lose_earn momdown_othdown momdown_partdown momno_hhdown momno_othdown momno_othleft momno_partdown momno_relend momup_only momup_othdown momup_othleft momup_othup momup_partdown momup_partup momup_relend monthsobserved nmos_bw50 nmos_bw60 no_full no_full_sp no_job_chg no_job_chg_sp no_part no_part_sp no_status_chg non_earn numearner oth_gain_earn oth_lose_earn other_earn other_earner part_full part_full_sp part_gain_earn part_lose_earn part_no part_no_sp resp_earn resp_non sing_coh sing_mar tage ageb1_mon thearn tpearn tpearn_mis wage_chg wage_chg_sp wagesdown8 wagesdown8_all wagesdown8_sp wagesdown8_sp_all wagesup8 wagesup8_all wagesup8_sp wagesup8_sp_all wpfinwgt momup_anydown momup_anyup momno_anydown momdown_anydown ageb1_gp"
+local keep_vars "SSUID year PNUM firstyr spart_num ageb1 educ race avg_earn avg_mo_hrs betterjob betterjob_sp birth bw50 bw50L bw60 bw60L trans_bw50 trans_bw60 trans_bw60_alt coh_diss coh_mar durmom earn_change earn_change_hh earn_change_oth earn_change_raw earn_change_raw_hh earn_change_raw_oth earn_change_raw_sp earn_change_sp earn_gain earn_lose earn_non earndown8 earndown8_all earndown8_hh earndown8_hh_all earndown8_oth earndown8_oth_all earndown8_sp earndown8_sp_all earnings earnings_a_sp earnings_mis earnings_ratio earnings_sp earnup8 earnup8_all earnup8_hh earnup8_hh_all earnup8_oth earnup8_oth_all earnup8_sp earnup8_sp_all firstbirth full_no full_no_sp full_part full_part_sp gain_partner hh_earn hh_gain hh_gain_earn hh_lose hh_lose_earn hhsize hours_change hours_change_sp avg_mo_hrs_sp hours_up5 hours_up5_all hours_up5_sp hours_up5_sp_all hoursdown5 hoursdown5_all hoursdown5_sp hoursdown5_sp_all jobchange jobchange_sp lost_partner marr_coh marr_diss marr_wid mom_gain_earn mom_lose_earn momdown_othdown momdown_partdown momno_hhdown momno_othdown momno_othleft momno_partdown momno_relend momup_only momup_othdown momup_othleft momup_othup momup_partdown momup_partup momup_relend monthsobserved nmos_bw50 nmos_bw60 no_full no_full_sp no_job_chg no_job_chg_sp no_part no_part_sp no_status_chg non_earn numearner oth_gain_earn oth_lose_earn other_earn other_earner part_full part_full_sp part_gain_earn part_lose_earn part_no part_no_sp resp_earn resp_non sing_coh sing_mar tage ageb1_mon thearn tpearn tpearn_mis wage_chg wage_chg_sp wagesdown8 wagesdown8_all wagesdown8_sp wagesdown8_sp_all wagesup8 wagesup8_all wagesup8_sp wagesup8_sp_all wpfinwgt momup_anydown momup_anyup momno_anydown momdown_anydown ageb1_gp status_b1"
 
 // 1996 file
 use "$SIPP14keep/96_bw_descriptives.dta", clear
@@ -414,3 +414,32 @@ forvalues a=1/5{
 	est store m4`a'
 	outreg2 using "$results/regression_age_birth.xls", sideway stats(coef) label ctitle(Model 4: `a') dec(2) eform alpha(0.001, 0.01, 0.05) append 	
 }
+
+
+drop _est*
+
+// Marital Status at first birth
+local simple "earnup8_all earndown8_hh_all earn_lose"
+local overlap "momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_othleft momdown_anydown"
+
+putexcel set "$results/regression_age_status.xls", replace
+
+forvalues s=1/2{
+	logistic dv i.year `simple' if status_b1==`s'
+	fitstat
+	est store m1`s'
+	outreg2 using "$results/regression_age_status.xls", sideway stats(coef) label ctitle(Model 1: `s') dec(2) eform alpha(0.001, 0.01, 0.05) append
+	logistic dv i.year `overlap' if status_b1==`s'
+	fitstat
+	est store m2`s'
+	outreg2 using "$results/regression_age_status.xls", sideway stats(coef) label ctitle(Model 2: `s') dec(2) eform alpha(0.001, 0.01, 0.05) append 
+	logistic dv i.earnup_sur i.earndown_sur i.earnlose_sur if status_b1==`s'
+	fitstat
+	est store m3`s'
+	outreg2 using "$results/regression_age_status.xls", sideway stats(coef) label ctitle(Model 3: `s') dec(2) eform alpha(0.001, 0.01, 0.05) append 
+	logistic dv i.momup_only_sur i.momup_anydown_sur i.momup_othleft_sur i.momup_anyup_sur i.momno_hhdown_sur i.momno_othleft_sur i.momdown_anydown_sur if status_b1==`s'
+	fitstat
+	est store m4`s'
+	outreg2 using "$results/regression_age_status.xls", sideway stats(coef) label ctitle(Model 4: `s') dec(2) eform alpha(0.001, 0.01, 0.05) append 	
+}
+

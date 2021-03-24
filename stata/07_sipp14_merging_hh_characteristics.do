@@ -6,6 +6,9 @@
 * The data file used in this script was produced by compute_relationships.do
 * and measures_and_sample.do
 
+* This file also merges the SSA Supplement onto the annualized file to get 
+* detailed marital history - to calculate marital status at first birth
+
 ********************************************************************************
 * Create file that retains information for those who match
 * to a mother in final sample
@@ -83,5 +86,68 @@ forvalues n=1/22{
 	replace to_jobchange`n'=1 if to_jobchange`n'>=1 & to_jobchange`n'!=.
 	replace to_jobchange`n'=. if to_TMWKHRS`n'==.
 }
+
+********************************************************************************
+* Merge on SSA to get marital history
+********************************************************************************
+rename SSUID ssuid // ssa currently in lowercare
+rename PNUM pnum
+
+drop _merge
+
+merge m:1 ssuid pnum using "$SIPP2014/pu2014ssa.dta", keepusing(ems_s exmar_s tmar?_yr twid?_yr tdiv?_yr tsep?_yr ewidiv*)
+
+drop if _merge==2 // don't want people JUST in SSA, bc likely means they are not in our sample
+
+rename ssuid SSUID
+rename pnum PNUM
+
+/* a LOT unmatched, some to look at: ssuid	pnum
+000418185142	101
+000418209291	102
+667860945880	102
+667860967919	101
+
+browse if inlist(ssuid, "000418185142", "000418209291", "667860945880", "667860967919")
+*/
+
+tab ems_ehc _merge // not a function of marital status
+tab first_wave _merge // SSA after wave 1, but still a lot of people in wave 1 unmatched
+
+/// creating indicator of marital status at first birth
+browse SSUID PNUM exmar exmar_s ems tyrcurrmarr tyrfirstmarr tmar1_yr tdiv1_yr tmar2_yr tmar3_yr yrfirstbirth _merge
+
+//
+gen status_b1=.
+replace status_b1 = 1 if inlist(ems,1,2) & exmar==1 & yrfirstbirth >= tyrfirstmarr // assuming if birth happened IN year, they were married, especially bc it's birth NOT conception
+replace status_b1 = 1 if yrfirstbirth >= tyrcurrmarr 
+replace status_b1 = 1 if ems!=6 & yrfirstbirth >= tyrfirstmarr & tyrfirstmarr!=. & ((yrfirstbirth < tdiv1_yr & tdiv1_yr!=.) | (yrfirstbirth < twid1_yr & twid1_yr!=.) | (yrfirstbirth < tsep1_yr & tsep1_yr!=.)) // trying to use the actual data v. SSA whenever possible
+replace status_b1 = 1 if exmar>1 & yrfirstbirth >= tmar2_yr & tmar2_yr!=. & ((yrfirstbirth < tdiv2_yr & tdiv2_yr!=.) | (yrfirstbirth < twid2_yr & twid2_yr!=.) | (yrfirstbirth < tsep2_yr & tsep2_yr!=.))
+replace status_b1 = 1 if exmar>2 & yrfirstbirth >= tmar3_yr & tmar3_yr!=. & ((yrfirstbirth < tdiv3_yr & tdiv3_yr!=.) | (yrfirstbirth < twid3_yr & twid3_yr!=.) | (yrfirstbirth < tsep3_yr & tsep3_yr!=.))
+replace status_b1 = 2 if ems==6
+replace status_b1 = 2 if yrfirstbirth < tyrfirstmarr
+replace status_b1 = 2 if inlist(ems,1,2) & exmar==1 & yrfirstbirth < tyrfirstmarr
+replace status_b1 = 3 if ems!=6 & yrfirstbirth > twid1_yr & yrfirstbirth < tmar2_yr & twid1_yr!=. & tmar2_yr!=.
+replace status_b1 = 3 if ems!=6 & yrfirstbirth > twid2_yr & yrfirstbirth < tmar3_yr & twid2_yr!=. & tmar3_yr!=.
+replace status_b1 = 3 if exmar==1 & ems==3 &  (yrfirstbirth > twid1_yr & twid1_yr!=.)
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tdiv1_yr & yrfirstbirth < tmar2_yr & tdiv1_yr!=. & tmar2_yr!=.
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tsep1_yr & yrfirstbirth < tmar2_yr & tsep1_yr!=. & tmar2_yr!=.
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tdiv2_yr & yrfirstbirth < tmar3_yr & tdiv2_yr!=. & tmar3_yr!=.
+replace status_b1 = 4 if ems!=6 & yrfirstbirth > tsep2_yr & yrfirstbirth < tmar3_yr & tsep2_yr!=. & tmar3_yr!=.
+replace status_b1 = 4 if exmar==1 & inlist(ems,4,5) &  ((yrfirstbirth > tdiv1_yr & tdiv1_yr!=.) | (yrfirstbirth > tsep1_yr & tsep1_yr!=.))
+
+// filling in ones I have to guesstimate
+replace status_b1 = 1 if (yrfirstbirth-tyrfirstmarr) <=3 & status_b1==. // assuming if birth within 3 years of married date, you were married
+// my concern with using a longer timeline is, for those who it was a while and are divorced, it COULD be with a partner, but we don't have that info, so feel less sure
+
+label define birth_status 1 "Married" 2 "Never Married" 3  "Widowed" 4 "Divorced or Separated"
+label values status_b1 birth_status
+
+browse SSUID PNUM exmar ems tyrcurrmarr tyrfirstmarr tmar1_yr tdiv1_yr tmar2_yr tmar3_yr yrfirstbirth status_b1 _merge
+
+* browse SSUID PNUM exmar ems tyrcurrmarr tyrfirstmarr tmar1_yr tdiv1_yr tmar2_yr tmar3_yr yrfirstbirth status_b1 if status_b1==.
+* browse SSUID PNUM exmar ems tyrcurrmarr tyrfirstmarr tmar1_yr tdiv1_yr tmar2_yr tmar3_yr yrfirstbirth status_b1 if _merge==3 & status_b1==. // have detail but can't; find
+* browse SSUID PNUM exmar ems tyrcurrmarr tyrfirstmarr tmar1_yr tdiv1_yr tmar2_yr tmar3_yr yrfirstbirth status_b1 if _merge==1 & status_b1==. // no detail and can't find
+// like this person for example: 000995185903	101 - first marriage 1992, second marriage 2006, birth in 2001, no info on when marriage ended. assume IN marriage? or make a catch-all EVER-married, when don't know if married or divorced but know they had their baby at least after ONE marriage?
 
 save "$SIPP14keep/sipp14tpearn_rel.dta", replace
