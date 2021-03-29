@@ -37,6 +37,10 @@ keep `keep_vars'
 
 append using "$SIPP14keep/96_bw_descriptives.dta"
 
+gen survey=.
+replace survey=1996 if inrange(year,1995,2000)
+replace survey=2014 if inrange(year,2013,2016)
+
 save "$SIPP14keep/combined_annual_bw_status.dta", replace
 
 /* investigations
@@ -51,10 +55,6 @@ browse momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_oth
 * now specify models
 ********************************************************************************
 //use "$SIPP14keep/combined_annual_bw_status.dta", clear
-
-gen survey=.
-replace survey=1996 if inrange(year,1995,2000)
-replace survey=2014 if inrange(year,2013,2016)
 
 gen dv=trans_bw60==1
 replace dv=. if trans_bw60==. // recoding so only can be 0 or 1 - currently has missing values because we have been counting first year as "ineligible" since we don't know history. decide if that should stay?
