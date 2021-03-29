@@ -64,7 +64,9 @@ tab earn_lose trans_bw60 if survey==2014
 
 *validate
 tab survey trans_bw60
+tab survey trans_bw60_alt
 
 // why don't match?@
-browse SSUID PNUM year bw60 trans_bw60 mt_mom_up ft_hh_down earn_lose earnup8_all earndown8_hh_all earn_change earn_change_hh mom_gain_earn hh_gain_earn hh_lose_earn
+browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt mt_mom_up ft_hh_down earn_lose earnup8_all earndown8_hh_all earn_change earn_change_hh mom_gain_earn hh_gain_earn hh_lose_earn
 // it's people whose 2013 are getting 1s as BW even with no history - need to figure this out
+// 000418662994 - bw but earnings down - think small things like this explain discrepancy between total
