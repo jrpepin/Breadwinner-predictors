@@ -18,6 +18,8 @@ di "$S_DATE"
 ********************************************************************************
 use "$SIPP14keep/annual_bw_status.dta", clear
 
+sort SSUID PNUM year
+
 
 ********************************************************************************
 * Create breadwinning measures
@@ -78,11 +80,11 @@ gen trans_bw60_alt2=.
 replace trans_bw60_alt2=0 if bw60==0 & nprevbw60==0 & year==(year[_n-1]+1) // ensuring if mothers drop out of our sample, we account for non-consecutive years
 replace trans_bw60_alt2=1 if bw60==1 & nprevbw60==0 & year==(year[_n-1]+1)
 replace trans_bw60_alt2=2 if nprevbw60 > 0 & year==(year[_n-1]+1)
-replace trans_bw60_alt2=. if year==2013
+replace trans_bw60_alt2=. if year==firstyr
 
-// browse SSUID PNUM year firstyr nprevbw60 nprevbw60_alt bw60 bw60L trans_bw60 trans_bw60_alt trans_bw60_alt2 first_wave if inlist(SSUID,"000418662994", "000860049040", "038418847765", "104925944020", "203344808594", "203925241506")
+// browse SSUID PNUM year firstyr nprevbw60 nprevbw60_alt bw60 bw60L trans_bw60_alt2 trans_bw60_alt2_alt trans_bw60_alt2_alt2 first_wave if inlist(SSUID,"000418662994", "000860049040", "038418847765", "104925944020", "203344808594", "203925241506")
 
-// browse SSUID PNUM year firstyr nprevbw60 bw60 bw60L trans_bw60 trans_bw60_alt first_wave if inlist(SSUID, "000418500162", "000418209903", "000418334944")
+// browse SSUID PNUM year firstyr nprevbw60 bw60 bw60L trans_bw60_alt2 trans_bw60_alt2_alt first_wave if inlist(SSUID, "000418500162", "000418209903", "000418334944")
 
 drop nprevbw50 nprevbw60*	
 
@@ -398,9 +400,9 @@ sort SSUID PNUM year
 // Marital status changes
 	*First need to calculate those with no status change
 	tab no_status_chg
-	tab no_status_chg if trans_bw60==1 & year==2014
-	tab no_status_chg if trans_bw60[_n+1]==1 & year[_n+1]==2014 // samples match when I do like this but with different distributions, and the sample for both matches those who became breadwinners in 2014 (578 at the moment) - which is what I want. However, now concerned that they are not necessarily the same people - hence below
-	tab no_status_chg if trans_bw60[_n+1]==1 & year[_n+1]==2014 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] // we might not always have the year prior, so this makes sure we are still getting data for the same person? - sample drops, which is to be expected
+	tab no_status_chg if trans_bw60_alt2==1 & year==2014
+	tab no_status_chg if trans_bw60_alt2[_n+1]==1 & year[_n+1]==2014 // samples match when I do like this but with different distributions, and the sample for both matches those who became breadwinners in 2014 (578 at the moment) - which is what I want. However, now concerned that they are not necessarily the same people - hence below
+	tab no_status_chg if trans_bw60_alt2[_n+1]==1 & year[_n+1]==2014 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] // we might not always have the year prior, so this makes sure we are still getting data for the same person? - sample drops, which is to be expected
 
 	* quick recode so 1 signals any transition not number of transitions
 	foreach var in sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh no_status_chg{
@@ -419,9 +421,9 @@ forvalues w=1/8 {
 		local col1: word `i' of `colu1'
 		local col2: word `i' of `colu2'
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
-		mean `var' if trans_bw60[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		putexcel `col2'`row' = matrix(pr`var'`y'), nformat(#.##%)
@@ -432,9 +434,9 @@ forvalues w=1/8 {
 forvalues w=1/8 {
 		local row=`w'+2
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 		putexcel J`row' = matrix(pr`var'), nformat(#.##%)
@@ -445,9 +447,9 @@ forvalues w=1/8 {
 forvalues w=1/8 {
 		local row=`w'+2
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 		putexcel L`row' = matrix(pr`var'), nformat(#.##%)
@@ -474,9 +476,9 @@ forvalues w=1/13 {
 		local col1: word `i' of `colu1'
 		local col2: word `i' of `colu2'
 		local var: word `w' of `hh_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
-		mean `var' if trans_bw60[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		putexcel `col2'`row' = matrix(pr`var'`y'), nformat(#.##%)
@@ -487,9 +489,9 @@ forvalues w=1/13 {
 forvalues w=1/13 {
 		local row=`w'+10
 		local var: word `w' of `hh_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 		putexcel J`row' = matrix(pr`var'), nformat(#.##%)
@@ -500,9 +502,9 @@ forvalues w=1/13 {
 forvalues w=1/13 {
 		local row=`w'+10
 		local var: word `w' of `hh_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 		putexcel L`row' = matrix(pr`var'), nformat(#.##%)
@@ -551,9 +553,9 @@ forvalues w=1/27 {
 		local col1: word `i' of `colu1'
 		local col2: word `i' of `colu2'
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
-		mean `var' if trans_bw60[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		putexcel `col2'`row' = matrix(pr`var'`y'), nformat(#.##%)
@@ -564,9 +566,9 @@ forvalues w=1/27 {
 forvalues w=1/27 {
 		local row=`w'+24
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 		putexcel J`row' = matrix(pr`var'), nformat(#.##%)
@@ -577,9 +579,9 @@ forvalues w=1/27 {
 forvalues w=1/27 {
 		local row=`w'+24
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 		putexcel L`row' = matrix(pr`var'), nformat(#.##%)
@@ -604,9 +606,9 @@ forvalues w=1/28 {
 		local col1: word `i' of `colu1'
 		local col2: word `i' of `colu2'
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
-		mean `var' if trans_bw60[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & year[_n+1]==20`y' & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		putexcel `col2'`row' = matrix(pr`var'`y'), nformat(#.##%)
@@ -617,9 +619,9 @@ forvalues w=1/28 {
 forvalues w=1/28 {
 		local row=`w'+51
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==1 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 		putexcel J`row' = matrix(pr`var'), nformat(#.##%)
@@ -630,9 +632,9 @@ forvalues w=1/28 {
 forvalues w=1/28 {
 		local row=`w'+51
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var'= e(b)
-		mean `var' if trans_bw60[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+		mean `var' if trans_bw60_alt2[_n+1]==0 & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 		matrix pr`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 		putexcel L`row' = matrix(pr`var'), nformat(#.##%)
@@ -692,45 +694,45 @@ by SSUID PNUM (year), sort: gen earn_change_raw_oth = (other_earn-other_earn[_n-
 	histogram earn_change if earn_change < .25 & earn_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
 	histogram earn_change_sp if earn_change_sp < .25 & earn_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
 	histogram earn_change_hh if earn_change_hh < .25 & earn_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
-	histogram earn_change if earn_change < .5 & earn_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-	histogram earn_change_sp if earn_change_sp < .5 & earn_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-	histogram earn_change_hh if earn_change_hh < .5 & earn_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram earn_change if earn_change < .5 & earn_change > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram earn_change_sp if earn_change_sp < .5 & earn_change_sp > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram earn_change_hh if earn_change_hh < .5 & earn_change_hh > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
 
 
 	histogram hours_change if hours_change < .25 & hours_change > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
 	histogram hours_change_sp if hours_change_sp < .25 & hours_change_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
 	* histogram hours_change_hh if hours_change_hh < .25 & hours_change_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent // didn't create these yet
-	histogram hours_change if hours_change < .5 & hours_change > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-	histogram hours_change_sp if hours_change_sp < .5 & hours_change_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-	* histogram hours_change_hh if hours_change_hh < .5 & hours_change_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
+	histogram hours_change if hours_change < .5 & hours_change > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram hours_change_sp if hours_change_sp < .5 & hours_change_sp > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	* histogram hours_change_hh if hours_change_hh < .5 & hours_change_hh > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
 
 	histogram wage_chg if wage_chg < .25 & wage_chg > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
 	histogram wage_chg_sp if wage_chg_sp < .25 & wage_chg_sp > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent
 	* histogram wage_chg_hh if wage_chg_hh < .25 & wage_chg_hh > -.25, width(.01) xlab(-.25(.01).25, labsize(tiny)) percent // didn't create these yet
-	histogram wage_chg if wage_chg < .5 & wage_chg > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-	histogram wage_chg_sp if wage_chg_sp < .5 & wage_chg_sp > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
-	* histogram wage_chg_hh if wage_chg_hh < .5 & wage_chg_hh > -.5 & trans_bw60==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
+	histogram wage_chg if wage_chg < .5 & wage_chg > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	histogram wage_chg_sp if wage_chg_sp < .5 & wage_chg_sp > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent
+	* histogram wage_chg_hh if wage_chg_hh < .5 & wage_chg_hh > -.5 & trans_bw60_alt2==1, width(.01) xlab(-.5(.05).5, labsize(tiny)) percent // didn't create these yet
 	
 	log using "$logdir/change_details.log"
 	sum earn_change, detail
 	sum earn_change_sp, detail
 	sum earn_change_hh, detail
-	sum earn_change if trans_bw60==1, detail
-	sum earn_change_sp if trans_bw60==1, detail
-	sum earn_change_hh if trans_bw60==1, detail
+	sum earn_change if trans_bw60_alt2==1, detail
+	sum earn_change_sp if trans_bw60_alt2==1, detail
+	sum earn_change_hh if trans_bw60_alt2==1, detail
 	sum hours_change, detail
 	sum hours_change_sp, detail
-	sum hours_change if trans_bw60==1, detail
-	sum hours_change_sp if trans_bw60==1, detail
+	sum hours_change if trans_bw60_alt2==1, detail
+	sum hours_change_sp if trans_bw60_alt2==1, detail
 	sum wage_chg, detail
 	sum wage_chg_sp, detail
-	sum wage_chg if trans_bw60==1, detail
-	sum wage_chg_sp if trans_bw60==1, detail
+	sum wage_chg if trans_bw60_alt2==1, detail
+	sum wage_chg_sp if trans_bw60_alt2==1, detail
 	log close
 
 	*/
 
-	// browse SSUID PNUM year earnings earn_change if trans_bw60==1 & earn_change >1
+	// browse SSUID PNUM year earnings earn_change if trans_bw60_alt2==1 & earn_change >1
 	// browse SSUID PNUM year earnings earn_change if earn_change >10 & earn_change!=. // trying to understand big jumps in earnings
 
 // coding changes up and down
@@ -893,7 +895,7 @@ forvalues w=1/32 {
 		local row=`w'+79
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		}
@@ -903,7 +905,7 @@ forvalues w=1/32 {
 forvalues w=1/32 {
 		local row=`w'+79
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -912,7 +914,7 @@ forvalues w=1/32 {
 forvalues w=1/32 {
 		local row=`w'+79
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -930,7 +932,7 @@ forvalues w=1/12 {
 		local row=`w'+111
 		local col1: word `i' of `colu1'
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==1 & year==20`y', detail
+		summarize `var' if trans_bw60_alt2==1 & year==20`y', detail
 		matrix m`var'`y' = r(p50)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		}
@@ -940,7 +942,7 @@ forvalues w=1/12 {
 forvalues w=1/12 {
 		local row=`w'+111
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==1, detail
+		summarize `var' if trans_bw60_alt2==1, detail
 		matrix m`var' = r(p50)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -949,7 +951,7 @@ forvalues w=1/12 {
 forvalues w=1/12 {
 		local row=`w'+111
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==0, detail
+		summarize `var' if trans_bw60_alt2==0, detail
 		matrix m`var' = r(p50)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1009,7 +1011,7 @@ forvalues w=1/12 {
 		local row=`w'+123
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		}
@@ -1019,7 +1021,7 @@ forvalues w=1/12 {
 forvalues w=1/12 {
 		local row=`w'+123
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1028,21 +1030,21 @@ forvalues w=1/12 {
 forvalues w=1/12 {
 		local row=`w'+123
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
 
 // Testing changes from no earnings to earnings for all (Mother, Partner, Others)
 
-by SSUID PNUM (year), sort: gen mom_gain_earn = (earnings!=. & earnings[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-by SSUID PNUM (year), sort: gen mom_lose_earn = (earnings==. & earnings[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-by SSUID PNUM (year), sort: gen part_gain_earn = (earnings_a_sp!=. & earnings_a_sp[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-by SSUID PNUM (year), sort: gen part_lose_earn = (earnings_a_sp==. & earnings_a_sp[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-by SSUID PNUM (year), sort: gen hh_gain_earn = (hh_earn!=. & hh_earn[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-by SSUID PNUM (year), sort: gen hh_lose_earn = (hh_earn==. & hh_earn[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-by SSUID PNUM (year), sort: gen oth_gain_earn = (other_earn!=. & other_earn[_n-1]==.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-by SSUID PNUM (year), sort: gen oth_lose_earn = (other_earn==. & other_earn[_n-1]!=.) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen mom_gain_earn = ((earnings!=. & earnings!=0) & (earnings[_n-1]==. | earnings[_n-1]==0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen mom_lose_earn = ((earnings==. | earnings==0) & (earnings[_n-1]!=. & earnings[_n-1]!=0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen part_gain_earn = ((earnings_a_sp!=. & earnings_a_sp!=0) & (earnings_a_sp[_n-1]==. | earnings_a_sp[_n-1]==0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen part_lose_earn = ((earnings_a_sp==. | earnings_a_sp==0) & (earnings_a_sp[_n-1]!=. & earnings_a_sp[_n-1]!=0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
+by SSUID PNUM (year), sort: gen hh_gain_earn = ((hh_earn!=. & hh_earn!=0) & (hh_earn[_n-1]==. | hh_earn[_n-1]==0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen hh_lose_earn = ((hh_earn==. | hh_earn==0) & (hh_earn[_n-1]!=. & hh_earn[_n-1]!=0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen oth_gain_earn = ((other_earn!=. & other_earn!=0) & (other_earn[_n-1]==. | other_earn[_n-1]==0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+by SSUID PNUM (year), sort: gen oth_lose_earn = ((other_earn==. | other_earn==0) & (other_earn[_n-1]!=. & other_earn[_n-1]!=0)) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 
 // recoding change variables to account for both changes in earnings for those already earning as well as adding those who became earners
 
@@ -1097,7 +1099,7 @@ forvalues w=1/24 {
 		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		}
@@ -1107,7 +1109,7 @@ forvalues w=1/24 {
 forvalues w=1/24 {
 		local row=`w'+135
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1116,7 +1118,7 @@ forvalues w=1/24 {
 forvalues w=1/24 {
 		local row=`w'+135
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1139,7 +1141,7 @@ forvalues w=1/8 {
 		local row=`w'+159
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		}
@@ -1149,7 +1151,7 @@ forvalues w=1/8 {
 forvalues w=1/8 {
 		local row=`w'+159
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1158,7 +1160,7 @@ forvalues w=1/8 {
 forvalues w=1/8 {
 		local row=`w'+159
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1244,7 +1246,7 @@ forvalues w=1/25 {
 		local row=`w'+167
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==1 & year==20`y'
+		mean `var' if trans_bw60_alt2==1 & year==20`y'
 		matrix m`var'`y' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`y'), nformat(#.##%)
 		}
@@ -1254,7 +1256,7 @@ forvalues w=1/25 {
 forvalues w=1/25 {
 		local row=`w'+167
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==1
+		mean `var' if trans_bw60_alt2==1
 		matrix m`var' = e(b)
 		putexcel I`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1263,7 +1265,7 @@ forvalues w=1/25 {
 forvalues w=1/25 {
 		local row=`w'+167
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==0
+		mean `var' if trans_bw60_alt2==0
 		matrix m`var' = e(b)
 		putexcel K`row' = matrix(m`var'), nformat(#.##%)
 }
@@ -1282,14 +1284,14 @@ forvalues y=14/16{
 	local total_`y' = total_`y'
 	display `total_`y''
 	putexcel `col1'194 = `total_`y''
-	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60==1
+	egen bw_`y' = nvals(idnum) if year==20`y' & trans_bw60_alt2==1
 	bysort bw_`y': replace bw_`y' = bw_`y'[1] 
 	local bw_`y' = bw_`y'
 	putexcel `col2'194 = `bw_`y''
 }
 
 egen total_samp = nvals(idnum)
-egen bw_samp = nvals(idnum) if trans_bw60==1
+egen bw_samp = nvals(idnum) if trans_bw60_alt2==1
 local total_samp = total_samp
 local bw_samp = bw_samp
 
@@ -1529,7 +1531,7 @@ forvalues w=1/21 {
 		local row=`w'+2
 		local col1: word `i' of `colu1'
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==1 & educ==`e'
+		mean `var' if trans_bw60_alt2==1 & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1562,7 +1564,7 @@ forvalues w=1/27 {
 		local row=`w'+24
 		local col1: word `i' of `colu1'
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==1 & educ==`e'
+		mean `var' if trans_bw60_alt2==1 & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1580,7 +1582,7 @@ forvalues w=1/28 {
 		local row=`w'+51
 		local col1: word `i' of `colu1'
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==1 & educ==`e'
+		mean `var' if trans_bw60_alt2==1 & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1598,7 +1600,7 @@ forvalues w=1/32{
 		local row=`w'+79
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==1 & educ==`e'
+		mean `var' if trans_bw60_alt2==1 & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1616,7 +1618,7 @@ forvalues w=1/12{
 		local row=`w'+111
 		local col1: word `i' of `colu1'
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==1 & educ==`e', detail
+		summarize `var' if trans_bw60_alt2==1 & educ==`e', detail
 		matrix m`var'`e' = r(p50)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1638,7 +1640,7 @@ forvalues w=1/12 {
 		local row=`w'+123
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==1  & educ==`e'
+		mean `var' if trans_bw60_alt2==1  & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1655,7 +1657,7 @@ forvalues w=1/24 {
 		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==1  & educ==`e'
+		mean `var' if trans_bw60_alt2==1  & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1674,7 +1676,7 @@ forvalues w=1/8 {
 		local row=`w'+159
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==1 & educ==`e'
+		mean `var' if trans_bw60_alt2==1 & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1693,7 +1695,7 @@ forvalues w=1/25 {
 		local row=`w'+167
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==1 & educ==`e'
+		mean `var' if trans_bw60_alt2==1 & educ==`e'
 		matrix m`var'`e' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`e'), nformat(#.##%)
 		}
@@ -1711,7 +1713,7 @@ forvalues e=1/4{
 	egen total_`e' = nvals(idnum) if educ==`e'
 	bysort total_`e': replace total_`e' = total_`e'[1] 
 	local total_`e' = total_`e'
-	egen bw_`e' = nvals(idnum) if educ==`e' & trans_bw60==1
+	egen bw_`e' = nvals(idnum) if educ==`e' & trans_bw60_alt2==1
 	bysort bw_`e': replace bw_`e' = bw_`e'[1] 
 	local bw_`e' = bw_`e'
 	putexcel `col1'194 = `total_`e''
@@ -1951,7 +1953,7 @@ forvalues w=1/21 {
 		local row=`w'+2
 		local col1: word `i' of `colu1'
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==1 & race==`r'
+		mean `var' if trans_bw60_alt2==1 & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -1980,7 +1982,7 @@ forvalues w=1/27 {
 		local row=`w'+24
 		local col1: word `i' of `colu1'
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==1 & race==`r'
+		mean `var' if trans_bw60_alt2==1 & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -1998,7 +2000,7 @@ forvalues w=1/28 {
 		local row=`w'+51
 		local col1: word `i' of `colu1'
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==1 & race==`r'
+		mean `var' if trans_bw60_alt2==1 & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2016,7 +2018,7 @@ forvalues w=1/32{
 		local row=`w'+79
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==1 & race==`r'
+		mean `var' if trans_bw60_alt2==1 & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2034,7 +2036,7 @@ forvalues w=1/12{
 		local row=`w'+111
 		local col1: word `i' of `colu1'
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==1 & race==`r', detail
+		summarize `var' if trans_bw60_alt2==1 & race==`r', detail
 		matrix m`var'`r' = r(p50)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2056,7 +2058,7 @@ forvalues w=1/12 {
 		local row=`w'+123
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==1  & race==`r'
+		mean `var' if trans_bw60_alt2==1  & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2073,7 +2075,7 @@ forvalues w=1/24 {
 		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==1  & race==`r'
+		mean `var' if trans_bw60_alt2==1  & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2092,7 +2094,7 @@ forvalues w=1/8 {
 		local row=`w'+159
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==1 & race==`r'
+		mean `var' if trans_bw60_alt2==1 & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2111,7 +2113,7 @@ forvalues w=1/25 {
 		local row=`w'+167
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==1 & race==`r'
+		mean `var' if trans_bw60_alt2==1 & race==`r'
 		matrix m`var'`r' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`r'), nformat(#.##%)
 		}
@@ -2129,7 +2131,7 @@ forvalues r=1/4{
 	egen total_r`r' = nvals(idnum) if race==`r'
 	bysort total_r`r': replace total_r`r' = total_r`r'[1] 
 	local total_r`r' = total_r`r'
-	egen bw_r`r' = nvals(idnum) if race==`r' & trans_bw60==1
+	egen bw_r`r' = nvals(idnum) if race==`r' & trans_bw60_alt2==1
 	bysort bw_r`r': replace bw_r`r' = bw_r`r'[1] 
 	local bw_r`r' = bw_r`r'
 	putexcel `col1'194 = `total_r`r''
@@ -2374,7 +2376,7 @@ forvalues w=1/21 {
 		local row=`w'+2
 		local col1: word `i' of `colu1'
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==1 & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1 & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2403,7 +2405,7 @@ forvalues w=1/27 {
 		local row=`w'+24
 		local col1: word `i' of `colu1'
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==1 & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1 & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2421,7 +2423,7 @@ forvalues w=1/28 {
 		local row=`w'+51
 		local col1: word `i' of `colu1'
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==1 & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1 & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2439,7 +2441,7 @@ forvalues w=1/32{
 		local row=`w'+79
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==1 & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1 & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2457,7 +2459,7 @@ forvalues w=1/12{
 		local row=`w'+111
 		local col1: word `i' of `colu1'
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==1 & ageb1_gp==`a', detail
+		summarize `var' if trans_bw60_alt2==1 & ageb1_gp==`a', detail
 		matrix m`var'`a' = r(p50)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2479,7 +2481,7 @@ forvalues w=1/12 {
 		local row=`w'+123
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==1  & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1  & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2496,7 +2498,7 @@ forvalues w=1/24 {
 		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==1  & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1  & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2515,7 +2517,7 @@ forvalues w=1/8 {
 		local row=`w'+159
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==1 & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1 & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2534,7 +2536,7 @@ forvalues w=1/25 {
 		local row=`w'+167
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==1 & ageb1_gp==`a'
+		mean `var' if trans_bw60_alt2==1 & ageb1_gp==`a'
 		matrix m`var'`a' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`a'), nformat(#.##%)
 		}
@@ -2552,7 +2554,7 @@ forvalues a=1/5{
 	egen total_a`a' = nvals(idnum) if ageb1_gp==`a'
 	bysort total_a`a': replace total_a`a' = total_a`a'[1] 
 	local total_a`a' = total_a`a'
-	egen bw_a`a' = nvals(idnum) if ageb1_gp==`a' & trans_bw60==1
+	egen bw_a`a' = nvals(idnum) if ageb1_gp==`a' & trans_bw60_alt2==1
 	bysort bw_a`a': replace bw_a`a' = bw_a`a'[1] 
 	local bw_a`a' = bw_a`a'
 	putexcel `col1'194 = `total_a`a''
@@ -2793,7 +2795,7 @@ forvalues w=1/21 {
 		local row=`w'+2
 		local col1: word `i' of `colu1'
 		local var: word `w' of `status_vars'
-		mean `var' if trans_bw60==1 & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1 & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2822,7 +2824,7 @@ forvalues w=1/27 {
 		local row=`w'+24
 		local col1: word `i' of `colu1'
 		local var: word `w' of `job_vars'
-		mean `var' if trans_bw60==1 & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1 & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2840,7 +2842,7 @@ forvalues w=1/28 {
 		local row=`w'+51
 		local col1: word `i' of `colu1'
 		local var: word `w' of `other_vars'
-		mean `var' if trans_bw60==1 & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1 & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2858,7 +2860,7 @@ forvalues w=1/32{
 		local row=`w'+79
 		local col1: word `i' of `colu1'
 		local var: word `w' of `chg_vars'
-		mean `var' if trans_bw60==1 & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1 & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2876,7 +2878,7 @@ forvalues w=1/12{
 		local row=`w'+111
 		local col1: word `i' of `colu1'
 		local var: word `w' of `med_chg_vars'
-		summarize `var' if trans_bw60==1 & status_b1==`s', detail
+		summarize `var' if trans_bw60_alt2==1 & status_b1==`s', detail
 		matrix m`var'`s' = r(p50)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2896,7 +2898,7 @@ forvalues w=1/12 {
 		local row=`w'+123
 		local col1: word `i' of `colu1'
 		local var: word `w' of `alt_chg_vars'
-		mean `var' if trans_bw60==1  & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1  & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2913,7 +2915,7 @@ forvalues w=1/24 {
 		local row=`w'+135
 		local col1: word `i' of `colu1'
 		local var: word `w' of `all_vars'
-		mean `var' if trans_bw60==1  & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1  & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2932,7 +2934,7 @@ forvalues w=1/8 {
 		local row=`w'+159
 		local col1: word `i' of `colu1'
 		local var: word `w' of `earn_status_vars'
-		mean `var' if trans_bw60==1 & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1 & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2951,7 +2953,7 @@ forvalues w=1/25 {
 		local row=`w'+167
 		local col1: word `i' of `colu1'
 		local var: word `w' of `overlap_vars'
-		mean `var' if trans_bw60==1 & status_b1==`s'
+		mean `var' if trans_bw60_alt2==1 & status_b1==`s'
 		matrix m`var'`s' = e(b)
 		putexcel `col1'`row' = matrix(m`var'`s'), nformat(#.##%)
 		}
@@ -2969,7 +2971,7 @@ forvalues s=1/2{
 	egen total_s`s' = nvals(idnum) if status_b1==`s'
 	bysort total_s`s': replace total_s`s' = total_s`s'[1] 
 	local total_s`s' = total_s`s'
-	egen bw_s`s' = nvals(idnum) if status_b1==`s' & trans_bw60==1
+	egen bw_s`s' = nvals(idnum) if status_b1==`s' & trans_bw60_alt2==1
 	bysort bw_s`s': replace bw_s`s' = bw_s`s'[1] 
 	local bw_s`s' = bw_s`s'
 	putexcel `col1'194 = `total_s`s''

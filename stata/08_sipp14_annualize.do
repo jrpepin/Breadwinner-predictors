@@ -34,8 +34,8 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 
 * Prep for counting the total number of months breadwinning for the year. 
 * NOTE: This isn't our primary measure.
-   gen mbw50=1 if tpearn > .5*thearn & !missing(tpearn) & !missing(thearn)	// 50% threshold
-   gen mbw60=1 if tpearn > .6*thearn & !missing(tpearn) & !missing(thearn)	// 60% threshold
+   gen mbw50=1 if earnings > .5*thearn_alt & !missing(earnings) & !missing(thearn_alt)	// 50% threshold
+   gen mbw60=1 if earnings > .6*thearn_alt & !missing(earnings) & !missing(thearn_alt)	// 60% threshold
    
 // Create indicators of transitions into marriage/cohabitation or out of marriage/cohabitation
 
@@ -95,9 +95,9 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	* Non-earner became earner - other earner up AND hh size stayed the same
 	by SSUID PNUM (panelmonth), sort: gen non_earn = (other_earner > other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Respondent became earner
-	by SSUID PNUM (panelmonth), sort: gen resp_earn = (tpearn!=. & tpearn[_n-1]==.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen resp_earn = (earnings!=. & (earnings[_n-1]==. | earnings[_n-1]==0)) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Respondent became non-earner
-	by SSUID PNUM (panelmonth), sort: gen resp_non = (tpearn==. & tpearn[_n-1]!=.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	by SSUID PNUM (panelmonth), sort: gen resp_non = ((earnings==. | earnings==0) & earnings[_n-1]!=.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Gained children under 5
 	by SSUID PNUM (panelmonth), sort: gen prekid_gain = (preschoolchildren > preschoolchildren[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // check for missing and ensure not messed up, also do I want to specifically track like from 0 to more? as that might be different than say, 1 to 2?
 	* Lost children under 5
@@ -304,7 +304,7 @@ bysort SSUID PNUM year (tmwkhrs): egen tmwkhrs_mis = min(tmwkhrs)
 
 // Collapse the data by year to create annual measures
 collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
-			(sum) 	tpearn thearn tmwkhrs earnings enjflag								///
+			(sum) 	tpearn thearn thearn_alt tmwkhrs earnings enjflag					///
 					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh 		///
 					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non 	///
 					prekid_gain prekid_lose parents_gain parents_lose first_birth		///
@@ -382,24 +382,17 @@ replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
 // Create annual breadwinning indicators
 
 	// Create indicator for negative household earnings & no earnings. 
-	gen hh_noearnings= (thearn <= 0)
+	gen hh_noearnings= (thearn_alt <= 0)
 	
-	gen earnings_ratio=tpearn/thearn if hh_noearnings !=1 & !missing(tpearn) 
+	gen earnings_ratio=earnings/thearn_alt if hh_noearnings !=1 & !missing(earnings) 
 
 	// 50% breadwinning threshold
 	* Note that this measure was missing for no (or negative) earnings households, but that is now changed
-	gen 	bw50= (tpearn > .5*thearn) 	if hh_noearnings !=1 & !missing(tpearn) 
+	gen 	bw50= (earnings > .5*thearn_alt) 	if hh_noearnings !=1 & !missing(earnings) 
 	replace bw50= 0 					if hh_noearnings==1
-		/* *?*?* WE DON'T HAVE ANY MISSING TPEARN | THEARN. IS THAT EXPECTED? */
-		/* yes. We are now using allocated data. The SIPP 2014 doesn't have codes */
-		/* for whether the summary measure includes allocated data */
-		
-		/*This above message about missing tpearn was written by someone else - but the tpearn data is NOT expected - it's because
-		of how the collapse function handles missing in sum(). I've since updated so tpearn is missing if it was missing for all 12 months of the year */
-
 
 	// 60% breadwinning threshold
-	gen 	bw60= (tpearn > .6*thearn) 	if hh_noearnings !=1 & !missing(tpearn)
+	gen 	bw60= (earnings > .6*thearn_alt) 	if hh_noearnings !=1 & !missing(earnings)
 	replace bw60= 0 					if hh_noearnings==1
 	
 gen wave=year-2012
