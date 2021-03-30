@@ -54,7 +54,13 @@ replace trans_bw60=. if year==1995 | year==1996
 bysort SSUID PNUM (year): egen firstyr = min(year)
 
 gen trans_bw60_alt = trans_bw60
-replace trans_bw60_alt=. if year==firstyr
+replace trans_bw60_alt=. if year==firstyr // if 1996 isnt their first year in the sample
+
+gen trans_bw60_alt2=.
+replace trans_bw60_alt2=0 if bw60==0 & nprevbw60==0 & year==(year[_n-1]+1) // ensuring if mothers drop out of our sample, we account for non-consecutive years
+replace trans_bw60_alt2=1 if bw60==1 & nprevbw60==0 & year==(year[_n-1]+1)
+replace trans_bw60_alt2=2 if nprevbw60 > 0 & year==(year[_n-1]+1)
+replace trans_bw60_alt2=. if year==1995 | year==1996
 
 // browse SSUID PNUM year nprevbw50 bw50 bw50L trans_bw50
 

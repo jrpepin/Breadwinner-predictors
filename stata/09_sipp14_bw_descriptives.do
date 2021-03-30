@@ -49,7 +49,6 @@ replace minorbiochildrenL=minorbiochildren[_n-1] if PNUM==PNUM[_n-1] & SSUID==SS
 gen nprevbw50=0
 replace nprevbw50=nprevbw50[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
 replace nprevbw50=nprevbw50+1 if bw50[_n-1]==1 & PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1)
-// browse SSUID PNUM year nprevbw50 bw50 bw50L
 
 gen nprevbw60=0
 replace nprevbw60=nprevbw60[_n-1] if PNUM==PNUM[_n-1] & SSUID==SSUID[_n-1] & year==(year[_n-1]+1) in 2/-1 
@@ -73,7 +72,15 @@ replace trans_bw60=2 if nprevbw60 > 0
 replace trans_bw60=. if year==2013
 
 gen trans_bw60_alt = trans_bw60
-replace trans_bw60_alt=. if year==firstyr
+replace trans_bw60_alt=. if year==firstyr // if 2013 isn't the first year in our sample (often bc of not living with biological children)
+
+gen trans_bw60_alt2=.
+replace trans_bw60_alt2=0 if bw60==0 & nprevbw60==0 & year==(year[_n-1]+1) // ensuring if mothers drop out of our sample, we account for non-consecutive years
+replace trans_bw60_alt2=1 if bw60==1 & nprevbw60==0 & year==(year[_n-1]+1)
+replace trans_bw60_alt2=2 if nprevbw60 > 0 & year==(year[_n-1]+1)
+replace trans_bw60_alt2=. if year==2013
+
+// browse SSUID PNUM year firstyr nprevbw60 nprevbw60_alt bw60 bw60L trans_bw60 trans_bw60_alt trans_bw60_alt2 first_wave if inlist(SSUID,"000418662994", "000860049040", "038418847765", "104925944020", "203344808594", "203925241506")
 
 // browse SSUID PNUM year firstyr nprevbw60 bw60 bw60L trans_bw60 trans_bw60_alt first_wave if inlist(SSUID, "000418500162", "000418209903", "000418334944")
 

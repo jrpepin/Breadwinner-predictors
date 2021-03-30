@@ -459,6 +459,8 @@ drop if _merge==2
 		
 	drop 	_merge
 
+// browse SSUID PNUM year panelmonth minorbiochildren youngest_age  tpearn thearn if inlist(SSUID,"000418662994", "000860049040", "038418847765", "104925944020", "203344808594", "203925241506")
+	
 ********************************************************************************
 * Restrict sample to women who live with their own minor children
 ********************************************************************************
