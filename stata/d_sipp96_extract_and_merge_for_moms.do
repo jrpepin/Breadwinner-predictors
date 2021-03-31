@@ -23,7 +23,7 @@ clear
    forvalues w=1/12{
       use "$SIPP1996/sip96l`w'.dta"
    	keep	swave rhcalyr rhcalmn srefmon wpfinwgt ssuid epppnum ehrefper errp eentaid shhadid		/// /* TECHNICAL */
-			eppintvw rhchange																		///
+			eppintvw rhchange epnmom etypmom epndad etypdad epnspous ehhnumpp						///
 			tpearn  tpmsum* apmsum* tftotinc thtotinc thpov 										/// /* FINANCIAL   */
 			erace eorigin esex tage  eeducate   ems uentmain ulftmain								/// /* DEMOGRAPHIC */
 			tjbocc* ejbind* rmhrswk ejbhrs* eawop rmesr epdjbthn ejobcntr eptwrk eptresn			/// /* EMPLOYMENT & EARNINGS */
@@ -87,5 +87,58 @@ browse ssuid epppnum rhcalyr rhcalmn eppintvw tfbrthyr tlbirtyr
 browse ssuid epppnum rhcalyr rhcalmn eppintvw esex swave _merge if _merge==1 // what are defining characteristics of those unmatched? are there any?
 tab swave if _merge==1 // okay mostly people in other waves, so probably attrition or new people - will leave in sample for now
 
+// Create a panel month variable ranging from 1(01/2013) to 48 (12/2016)
+	gen panelmonth = (rhcalyr-1996)*12+rhcalmn+1
+
+********************************************************************************
+* Trying to use ID numbers to start to identify moms - very crude initial
+* pass to HH members - not full relationships, but general presence in HH
+********************************************************************************
+browse ssuid epppnum epnmom ehrefper epnspous ehhnumpp rhcalmn tfbrthyr tmomchl emomlivh esex tage
+
+destring epppnum, gen(PNUM)
+
+replace epnmom=. if epnmom==9999
+replace epndad=. if epndad==9999
+
+bysort ssuid panelmonth (epnmom): egen hhmom1 = min(epnmom)  // this doesn't work if there are 2 moms in the HH, which there could be if multi-generational
+bysort ssuid panelmonth (epnmom): egen hhmom2 = max(epnmom) 
+bysort ssuid panelmonth (epndad): egen hhdad1 = min(epndad)
+bysort ssuid panelmonth (epndad): egen hhdad2 = max(epndad) 
+//browse ssuid panelmonth epnmom hhmom1 hhmom2 if ssuid == "019228369159"
+
+gen epnpart =.
+replace epnpart = ehrefper if errp==10 // this only captures if you are unmarried partner OF reference person, I need to know, if you are the reference person, do you have an unmarried partner
+bysort ssuid panelmonth (epnpart): replace epnpart = epnpart[1]
+gen epngrandparent=.
+replace epngrandparent = ehrefper if errp==5
+bysort ssuid panelmonth (epngrandparent): replace epngrandparent = epngrandparent[1]
+
+// browse ssuid PNUM errp ehrefper epnpart
+
+gen person=.
+replace person=1 if PNUM==hhmom1 | PNUM==hhmom2
+replace person=2 if PNUM==hhdad1 | PNUM==hhdad2
+replace person=3 if (epnmom !=. | epndad!=.) & (PNUM!=hhmom1 & PNUM!=hhdad1 & PNUM!=hhmom2 & PNUM!=hhdad2) // so, struggling here, do I only want to call them a "child" if not parent at all? but what if they are a child and ALSO a parent? will this work BEFORE they have grandkids? let's see
+replace person=4 if errp==10 & person==.
+replace person=4 if PNUM==epnpart & person==.
+replace person=5 if epnspous!=9999 & esex==2 & (PNUM!=hhmom1 & PNUM!=hhdad1 & PNUM!=hhmom2 & PNUM!=hhdad2) & person==. //could ALSO be a child, want to know that first I *think*?
+replace person=6 if epnspous!=9999 & esex==1 & (PNUM!=hhmom1 & PNUM!=hhdad1 & PNUM!=hhmom2 & PNUM!=hhdad2) & person==. //could ALSO be a child, want to know that first I *think*?
+replace person=7 if PNUM==ehrefper & ehhnumpp==1  & esex==1
+replace person=8 if PNUM==ehrefper & ehhnumpp==1  & esex==2
+replace person=9 if PNUM==epngrandparent & person==.
+replace person=10 if errp==5 & person==.
+
+label define person 1 "Mom" 2 "Dad" 3 "Child" 4 "Unmarried Partner" 5 "Married - Wife" 6 "Married - Husband" 7 "Solo - Male" 8 "Solo - Female" 9 "Grandparent" 10 "Grandchild"
+label values person person
+
+browse ssuid epppnum epnmom hhmom1 hhmom2 person esex tage errp ehrefper epnspous ehhnumpp rhcalmn if ssuid == "019228369159"
+
+// okay like 019003754630, 201 has kids, but she is not identified as a mother... (says no mother in HH - is it because her kids don't live with her?) but there are FIVE people in the HH, so who are they?! okay then 202 is one of her children I PRESUME, bc she is 9/10, and identifies 201 AS the mother in the HH...so only get a mom ID if you're a kid?
+
+* those above not capturing unmarried partners 955052123497
+* good example of grandparent / child HH: 955052123318
+* browse ssuid epppnum ehhnumpp errp esex tage if errp==2 & ehhnumpp > 1
+* browse ssuid epppnum ehhnumpp errp esex tage if ssuid == "019052123067" // unmarried partners considered "not relatives", so 2 people in HH, 1 could be ref w/ no relatives, other then unmarried parner
 
 save "$SIPP14keep/sipp96_data.dta", replace

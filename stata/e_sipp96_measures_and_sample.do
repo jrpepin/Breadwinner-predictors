@@ -18,13 +18,10 @@ use "$SIPP14keep/sipp96_data.dta", clear
 ********************************************************************************
 * Create and format variables
 ********************************************************************************
-// Create a panel month variable ranging from 1(01/2013) to 48 (12/2016)
-	gen panelmonth = (rhcalyr-1996)*12+rhcalmn+1
-	
+
 // Capitalize variables to be compatible with 2014 and household composition indicators
 	rename ssuid SSUID
 	rename eentaid ERESIDENCEID
-	rename epppnum PNUM
 	rename rhcalmn monthcode
 	rename rhcalyr year
 	
@@ -49,7 +46,7 @@ browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
 	// browse SSUID thearn thearn_alt
 
 // Count number of earners in hh per month
-    egen numearner = count(tpearn) if tpearn>0,	by(SSUID ERESIDENCEID swave monthcode)
+    egen numearner = count(earnings) if earnings>0,	by(SSUID ERESIDENCEID swave monthcode)
 
 // Create an indicator of first wave of observation for this individual
 
@@ -285,6 +282,22 @@ save "$tempdir/sipp96tpearn_fullsamp", replace
 * Durmom is wave specific. So a mother who was durmom=19 in wave 3 is still in the sample 
 * in waves 1 and 2.
 
+* Before dropping, get a count of children from here.
+egen ssuid_month = group (SSUID panelmonth)
+// qui unique epnmom if epnmom!=9999, by(ssuid_month) generate(count_mom)
+
+// bysort SSUID panelmonth (person): gen num_children= (count)
+qui unique PNUM if person==3 & epnmom!=., by(ssuid_month) generate(num_children)
+bysort SSUID panelmonth (num_children): replace num_children = num_children[1] if (PNUM==hhmom1 | PNUM==hhmom2) // this is more accurate ffor children, but NOT biological children
+qui unique PNUM if person==3 & tage < 18 & epnmom!=., by(ssuid_month) generate(num_minors)
+bysort SSUID panelmonth (num_minors): replace num_minors = num_minors[1] if (PNUM==hhmom1 | PNUM==hhmom2)
+
+browse SSUID PNUM panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper if inlist(SSUID, "019156667000", "019228369159" , "019359986255", "019344451235") // okay some issues with multigenerational households
+
+// ids to look at PRE drop: 019156667000, 019228369159, 019359986255 - potentially not related?
+// is 1 or 2 right for 019228369159 - does it switch? confused bc think 106 is a child, but 105 is unclear
+// 019359986255: grandkids: 2 (105,106) not: 1 (104), eventually 104 becomes "mom", now 2 chldren in home GAH, between month 10 and 11. mom 104 had 2 kids, mom 102 had 2 kids (104,101), then becomes grandparent via 104
+
 * First, create an id variable per person
 	sort SSUID PNUM
 	egen id = concat (SSUID PNUM)
@@ -344,6 +357,9 @@ tab birthyear_error
 
 // Clean up dataset
 	drop idnum all allwomen women mothers mothers_sample 
+	
+// now that sample is restricted, see how any missings there are for HH members (was around 6%)
+tab person, m
 
 ********************************************************************************
 * Merge  measures of earning, demographic characteristics and household composition
@@ -352,11 +368,21 @@ tab birthyear_error
 	* every SSUID PNUM panelmonth combination except for PNUMs living alone (_merge==1). 
 	* those not in the target sample are _merge==2
 	drop _merge
-	destring PNUM, replace
 	
 	merge 1:1 SSUID PNUM panelmonth using "$tempdir/s96_hhcomp.dta"
 
 	drop if _merge==2
+	
+	browse SSUID PNUM person ehhnumpp num_minors minorchildren num_children // validate if this at all matches 
+	gen check_c=0
+	replace check_c=1 if num_minors==minorchildren
+	replace check_c=1 if num_minors==0 & minorchildren==.
+	
+	browse SSUID PNUM person ehhnumpp num_minors minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner hhsize parents grandparents grandchildren siblings if check_c==0
+	browse SSUID PNUM person panelmonth ehhnumpp num_children num_minors minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner hhsize parents grandparents grandchildren siblings  if SSUID=="019228369159"
+	// ids to look at PRE drop: 019156667000, 019228369159, 019359986255, 019344451235
+	
+	/* okay, based investigating, these new measures of children seem SLIGHTLY more accurate than previous. I think this is due to when the people are all "non-relatives" of the reference person; I wasn't accurately capturing parent / child dynamics using mom & dad ids*/
 
 // Fix household compposition variables for unmatched individuals who live alone (_merge==1)
 	* Relationship_pairs_bymonth has one record per person living with PNUM. 
@@ -404,19 +430,21 @@ tab birthyear_error
 ********************************************************************************
 * Restrict sample to women who live with their own minor children
 ********************************************************************************
+// Revisit this for those living with bio children at start AND end of panel
 
 // Identify mothers who reside with their biological children
-	fre minorbiochildren
-	unique 	idnum 	if minorbiochildren >= 1  	// 1 or more minor children in household
+	replace num_minors=0 if num_minors==.
+	fre num_minors
+	unique 	idnum 	if num_minors >= 1  	// 1 or more minor children in household
 
-	gen children_yn=minorbiochildren
-	replace children_yn=1 if inrange(minorbiochildren,1,11)
+	gen children_yn=num_minors
+	replace children_yn=1 if inrange(num_minors,1,11)
 
-	keep if minorbiochildren >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
+	keep if num_minors >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
 
 // Creates a macro with the total number of mothers in the dataset.
 preserve
-	keep			if minorbiochildren >=1
+	keep			if num_minors >=1
 	cap drop 	hhmom
 	egen		hhmom	= nvals(idnum)
 	global 		hhmom_n = hhmom
