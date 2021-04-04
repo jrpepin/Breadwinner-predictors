@@ -436,11 +436,32 @@ tab person, m
 	replace num_minors=0 if num_minors==.
 	fre num_minors
 	unique 	idnum 	if num_minors >= 1  	// 1 or more minor children in household
+	
+// identify mothers who resided with their biological children for a full year
+	gen minors_m1=.
+	replace minors_m1=1 if num_minors>=1 & monthcode==1
+	bysort SSUID PNUM year (minors_m1): replace minors_m1 = minors_m1[1]
+	gen minors_m12=.
+	replace minors_m12=1 if num_minors>=1 & monthcode==12
+	bysort SSUID PNUM year (minors_m12): replace minors_m12 = minors_m12[1]
+	gen minors_fy=0
+	replace minors_fy=1 if minors_m12==1 & minors_m1==1
 
+	browse SSUID PNUM year monthcode minors_m1 minors_m12 minors_fy num_minors
+	
+	unique 	idnum 	if minors_fy >= 1  
+
+// identify mothers who resided with their children at some point in the panel
+	bysort SSUID PNUM: egen maxchildren=max(num_minors)
+	unique idnum if maxchildren >=1
+	
 	gen children_yn=num_minors
 	replace children_yn=1 if inrange(num_minors,1,11)
-
-	keep if num_minors >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
+	
+	gen children_ever=maxchildren
+	replace children_ever=1 if inrange(maxchildren,1,10)
+	
+	keep if maxchildren >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
 
 // Creates a macro with the total number of mothers in the dataset.
 preserve

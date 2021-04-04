@@ -136,3 +136,55 @@ browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_al
 
 // 038860814689 - calculation for earn change doesn't seem right 2015-2016, same this person 077925241695, 1998-1999
 // okay and the 0 to tpearn, not missing to tpearn.
+
+********************************************************************************
+* Limited to children in residence at start and end of year
+********************************************************************************
+
+*Dt-l: mothers not breadwinning at t-1
+tab survey bw60 if minors_fy==1 // want those with a 0
+
+*Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
+	
+tab survey mt_mom_up if minors_fy==1
+tab survey momup_only if minors_fy==1
+
+*Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
+
+tab mt_mom_up trans_bw60_alt2 if survey==1996 & minors_fy==1
+tab mt_mom_up trans_bw60_alt2 if survey==2014 & minors_fy==1
+
+tab momup_only trans_bw60_alt2 if survey==1996 & minors_fy==1
+tab momup_only trans_bw60_alt2 if survey==2014 & minors_fy==1
+
+*Ft = the proportion of mothers who had another household member lose earnings. If mothers earnings also went up, they are captured here, not above.
+
+tab survey ft_hh_down if minors_fy==1
+
+*Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
+
+tab ft_hh_down trans_bw60_alt2 if survey==1996 & minors_fy==1
+tab ft_hh_down trans_bw60_alt2 if survey==2014 & minors_fy==1
+
+*Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
+	
+tab survey earn_lose if minors_fy==1
+
+*BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
+tab earn_lose trans_bw60_alt2 if survey==1996 & minors_fy==1
+tab earn_lose trans_bw60_alt2 if survey==2014 & minors_fy==1
+
+*validate
+tab survey trans_bw60_alt if minors_fy==1
+tab survey trans_bw60_alt2 if minors_fy==1
+
+
+// figuring out how to add in mothers who had their first birth in a panel
+browse SSUID PNUM year firstbirth bw60 trans_bw60
+
+tab survey firstbirth
+tab survey firstbirth if bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 
+
+//what if had other changes?
+
+browse firstbirth mt_mom_up ft_hh_down earn_lose if firstbirth==1 & bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 

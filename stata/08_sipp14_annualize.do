@@ -324,7 +324,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					thincpovt2 pov_level rmnumjobs_sp									///
 					tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1					///
 					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
-			(max) 	minorchildren minorbiochildren preschoolchildren 					///
+			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
 					prebiochildren race educ tceb oldest_age ejb*_payhr1 				///
 					start_spartner last_spartner start_spouse last_spouse				///
 					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
