@@ -18,21 +18,93 @@ sort SSUID PNUM year
 
 browse SSUID PNUM year bw60 trans_bw60 earnup8_all momup_only earn_lose earndown8_hh_all
 
+// ensure those who became mothers IN panel removed from sample in years they hadn't yet had a baby
+browse SSUID PNUM year bw60 trans_bw60 firstbirth yrfirstbirth if mom_panel==1
+gen bw60_mom=bw60  // need to retain this for future calculations for women who became mom in panel
+replace bw60=. if year < yrfirstbirth & mom_panel==1
+replace trans_bw60=. if year < yrfirstbirth & mom_panel==1
+replace trans_bw60_alt=. if year < yrfirstbirth & mom_panel==1
+replace trans_bw60_alt2=. if year < yrfirstbirth & mom_panel==1
+
+
 ********************************************************************************
-* As-is
+* Accounts for duplicate years
 ********************************************************************************
 
 *Dt-l: mothers not breadwinning at t-1
 tab survey bw60 // want those with a 0
+tab survey bw60 if year==(year[_n+1]-1) // to ensure consecutive years, aka she is available to transition to BW the next year
 
 *Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
 
 gen mt_mom_up = 0
 replace mt_mom_up = 1 if earnup8_all==1 & earn_lose==0 & earndown8_hh_all==0
+replace mt_mom_up = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom_up==0 // to capture those outside the 8% threshold (v. small amount)
 
-	* validate
+* validate
 	tab mt_mom_up momup_only
 	* mt_mom_up is much higher than momup_only because there is a lot of overlap with mom's earnings going up AND someone else's going up. To me, this still feels like a success, so i included, but can update
+	
+tab survey mt_mom_up
+tab survey momup_only
+
+*Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
+
+tab mt_mom_up trans_bw60_alt2 if survey==1996
+tab mt_mom_up trans_bw60_alt2 if survey==2014
+
+tab momup_only trans_bw60_alt2 if survey==1996
+tab momup_only trans_bw60_alt2 if survey==2014
+
+*Ft = the proportion of mothers who had another household member lose earnings. If mothers earnings also went up, they are captured here, not above.
+gen ft_hh_down = 0
+replace ft_hh_down = 1 if earn_lose==0 & earndown8_hh_all==1
+replace ft_hh_down = 1 if earn_lose==0 & (earn_change_hh<0 & earn_change_hh>-.08) & (earn_change >0 & earn_change <.08) & ft_hh_down==0 // to capture those outside the 8% threshold (v. small amount)
+
+tab survey ft_hh_down
+
+*Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
+
+tab ft_hh_down trans_bw60_alt2 if survey==1996
+tab ft_hh_down trans_bw60_alt2 if survey==2014
+
+*Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
+	
+tab survey earn_lose
+
+*BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
+tab earn_lose trans_bw60_alt2 if survey==1996
+tab earn_lose trans_bw60_alt2 if survey==2014
+
+*validate
+tab survey trans_bw60_alt
+tab survey trans_bw60_alt2
+
+
+browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change earn_change_hh tpearn thearn mom_gain_earn hh_gain_earn hh_lose_earn if trans_bw60_alt2==1 & mt_mom_up==0 & ft_hh_down==0 & earn_lose==0 
+
+browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change earn_change_hh tpearn thearn mom_gain_earn hh_gain_earn hh_lose_earn if  trans_bw60_alt2==1 & mt_mom_up==1 & ft_hh_down==1 & earn_lose==0 
+
+
+// figuring out how to add in mothers who had their first birth in a panel
+browse SSUID PNUM year firstbirth bw60 trans_bw60
+
+tab survey firstbirth
+tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 
+
+//what if had other changes?
+
+browse firstbirth mt_mom_up ft_hh_down earn_lose if firstbirth==1 & bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 
+
+********************************************************************************
+* Original
+********************************************************************************
+
+*Dt-l: mothers not breadwinning at t-1
+tab survey bw60 // want those with a 0
+tab survey bw60 if year==(year[_n+1]-1) // to ensure consecutive years, aka she is available to transition to BW the next year
+
+*Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
 	
 tab survey mt_mom_up
 tab survey momup_only
@@ -46,11 +118,7 @@ tab momup_only trans_bw60 if survey==1996
 tab momup_only trans_bw60 if survey==2014
 
 *Ft = the proportion of mothers who had another household member lose earnings. If mothers earnings also went up, they are captured here, not above.
-gen ft_hh_down = 0
-replace ft_hh_down = 1 if earn_lose==0 & earndown8_hh_all==1
-	
-	* validate : tab earndown8_hh_all ft_hh_down
-	
+
 tab survey ft_hh_down
 
 *Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
@@ -84,58 +152,6 @@ browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt earn_change earn_change_hh
 
 // need to deal with non-consecutive years
 // 0 v. missing, in the mom-gain-earn, think need to recalculate.
-
-********************************************************************************
-* Fixed duplicate years
-********************************************************************************
-
-*Dt-l: mothers not breadwinning at t-1
-tab survey bw60 // want those with a 0
-
-*Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
-	
-tab survey mt_mom_up
-tab survey momup_only
-
-*Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
-
-tab mt_mom_up trans_bw60_alt2 if survey==1996
-tab mt_mom_up trans_bw60_alt2 if survey==2014
-
-tab momup_only trans_bw60_alt2 if survey==1996
-tab momup_only trans_bw60_alt2 if survey==2014
-
-*Ft = the proportion of mothers who had another household member lose earnings. If mothers earnings also went up, they are captured here, not above.
-
-tab survey ft_hh_down
-
-*Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
-
-tab ft_hh_down trans_bw60_alt2 if survey==1996
-tab ft_hh_down trans_bw60_alt2 if survey==2014
-
-*Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
-	
-tab survey earn_lose
-
-*BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
-tab earn_lose trans_bw60_alt2 if survey==1996
-tab earn_lose trans_bw60_alt2 if survey==2014
-
-*validate
-tab survey trans_bw60_alt
-tab survey trans_bw60_alt2
-
-browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change earn_change_hh tpearn thearn mom_gain_earn hh_gain_earn hh_lose_earn if trans_bw60_alt2==1 & mt_mom_up==0 & ft_hh_down==0 & earn_lose==0
-
-// No changes, mom seems like only earner: 038860222545, 038860334510 - weirdly missing trans_bw60_alt, but NOT trans_bw60_alt2
-// No changes, mom seems like only earner: 203052369737, 292136406232 - both versions match
-// changes in a direction that doen't make sense: 038860814689, 077925241695
-
-browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change earn_change_hh tpearn thearn mom_gain_earn hh_gain_earn hh_lose_earn if inlist(SSUID, "038860222545", "038860334510", "203052369737", "292136406232", "038860814689", "077925241695")
-
-// 038860814689 - calculation for earn change doesn't seem right 2015-2016, same this person 077925241695, 1998-1999
-// okay and the 0 to tpearn, not missing to tpearn.
 
 ********************************************************************************
 * Limited to children in residence at start and end of year
@@ -177,14 +193,3 @@ tab earn_lose trans_bw60_alt2 if survey==2014 & minors_fy==1
 *validate
 tab survey trans_bw60_alt if minors_fy==1
 tab survey trans_bw60_alt2 if minors_fy==1
-
-
-// figuring out how to add in mothers who had their first birth in a panel
-browse SSUID PNUM year firstbirth bw60 trans_bw60
-
-tab survey firstbirth
-tab survey firstbirth if bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 
-
-//what if had other changes?
-
-browse firstbirth mt_mom_up ft_hh_down earn_lose if firstbirth==1 & bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 

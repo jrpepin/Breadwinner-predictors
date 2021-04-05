@@ -680,12 +680,12 @@ by SSUID PNUM (year), sort: gen earn_change_sp = ((earnings_a_sp-earnings_a_sp[_
 by SSUID PNUM (year), sort: gen earn_change_raw_sp = (earnings_a_sp-earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 
 * Variable for all earnings in HH besides R
-gen hh_earn=thearn-earnings // might need a better HH earn variable that isn't negative
+gen hh_earn=thearn_alt-earnings
 by SSUID PNUM (year), sort: gen earn_change_hh = ((hh_earn-hh_earn[_n-1])/hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 by SSUID PNUM (year), sort: gen earn_change_raw_hh = (hh_earn-hh_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 
 * Variable for all earnings in HH besides R + partner - eventually break this down to WHO? (like child, parent, etc)
-gen other_earn=thearn-earnings-earnings_a_sp // might need a better HH earn variable that isn't negative
+gen other_earn=thearn_alt-earnings-earnings_a_sp
 by SSUID PNUM (year), sort: gen earn_change_oth = ((other_earn-other_earn[_n-1])/other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 by SSUID PNUM (year), sort: gen earn_change_raw_oth = (other_earn-other_earn[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 
