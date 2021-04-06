@@ -94,3 +94,12 @@ set maxvar 5500
 	log using "$logdir/combined_models.log", replace
 	do "$SIPP2014_code/aa_combined_models.do"
 	log close
+	
+********************************************************************************
+* D1. DECOMPOSITION ANALYSIS
+********************************************************************************
+
+// Appends 2014 and 1996 files and executes analysis
+	log using "$logdir/decomposition_equation.log", replace
+	do "$SIPP2014_code/ab_decomposition_equation.do"
+	log close
