@@ -77,6 +77,9 @@ tab survey ft_hh
 	
 	tab survey ft_partner
 	tab survey ft_other
+	
+	gen ft_overlap=0
+	replace ft_overlap = 1 if earn_lose==0 & earnup8_all==1 & earndown8_sp_all==1
 
 *Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
 
@@ -129,7 +132,7 @@ replace survey_yr = 2 if survey==2014
 egen base_1 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==1996
 egen base_2 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==2014
 
-foreach var in mt_mom ft_hh earn_lose {
+foreach var in mt_mom ft_hh earn_lose ft_partner ft_other {
     forvalues y=1/2{
 		egen `var'_`y' = count(id) if `var'==1 & survey_yr==`y'
 		sum `var'_`y'
@@ -146,14 +149,14 @@ foreach var in mt_mom ft_hh earn_lose {
 	}
 }
 
-gen bw_rate_96 = (mt_mom_rt_1 * mt_mom_bw_rt_1) + (ft_hh_rt_1 * ft_hh_bw_rt_1) + (earn_lose_rt_1 * earn_lose_bw_rt_1)
-gen bw_rate_14 = (mt_mom_rt_2 * mt_mom_bw_rt_2) + (ft_hh_rt_2 * ft_hh_bw_rt_2) + (earn_lose_rt_2 * earn_lose_bw_rt_2)
-gen comp96_rate14 = (mt_mom_rt_1 * mt_mom_bw_rt_2) + (ft_hh_rt_1 * ft_hh_bw_rt_2) + (earn_lose_rt_1 * earn_lose_bw_rt_2)
-gen comp14_rate96 = (mt_mom_rt_2 * mt_mom_bw_rt_1) + (ft_hh_rt_2 * ft_hh_bw_rt_1) + (earn_lose_rt_2 * earn_lose_bw_rt_1)
+gen bw_rate_96 = (mt_mom_rt_1 * mt_mom_bw_rt_1) + (ft_partner_rt_1 * ft_partner_bw_rt_1) + (ft_other_rt_1 * ft_other_bw_rt_1) + (earn_lose_rt_1 * earn_lose_bw_rt_1)
+gen bw_rate_14 = (mt_mom_rt_2 * mt_mom_bw_rt_2) + (ft_partner_rt_2 * ft_partner_bw_rt_2) + (ft_other_rt_2 * ft_other_bw_rt_2) + (earn_lose_rt_2 * earn_lose_bw_rt_2)
+gen comp96_rate14 = (mt_mom_rt_1 * mt_mom_bw_rt_2) + (ft_partner_rt_1 * ft_partner_bw_rt_2) + (ft_other_rt_1 * ft_other_bw_rt_2) + (earn_lose_rt_1 * earn_lose_bw_rt_2)
+gen comp14_rate96 = (mt_mom_rt_2 * mt_mom_bw_rt_1) + (ft_partner_rt_2 * ft_partner_bw_rt_1) + (ft_other_rt_2 * ft_other_bw_rt_1) + (earn_lose_rt_2 * earn_lose_bw_rt_1)
 
 global total_gap = (bw_rate_14 - bw_rate_96)*100
-global rate_diff = (bw_rate_14 - comp14_rate96)*100
-global comp_diff = (bw_rate_14 - comp96_rate14)*100
+global comp_diff = (comp14_rate96 - bw_rate_96)*100
+global rate_diff = (comp96_rate14 - bw_rate_96)*100
 global bw_rate_96 = bw_rate_96*100
 global bw_rate_14 = bw_rate_14*100
 
