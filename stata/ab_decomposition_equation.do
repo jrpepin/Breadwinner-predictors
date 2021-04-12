@@ -72,7 +72,7 @@ tab survey ft_hh
 	replace ft_other = 1 if earn_lose==0 & earndown8_hh_all==1 & ((earnup8_all==1 & earndown8_sp_all==1) | (earndown8_sp_all==1 & earndown8_oth_all==1))
 	replace ft_other = 1 if ft_hh==1 & ft_partner==0 & ft_other==0
 
-	browse ft_hh ft_partner mt_mom earn_lose thearn thearn_alt earnings earnings_a_sp hh_earn other_earn earnup8_all earndown8_sp_all earndown8_oth_all // 
+	browse ft_hh ft_partner mt_mom earn_lose thearn thearn_alt earnings earnings_a_sp hh_earn other_earn earnup8_all earndown8_sp_all earndown8_oth_all ///
 	earndown8_hh_all earn_change_sp earn_change_hh earn_change_oth if ft_hh==0 & ft_partner==1
 	
 	tab survey ft_partner
@@ -153,12 +153,21 @@ gen bw_rate_96 = (mt_mom_rt_1 * mt_mom_bw_rt_1) + (ft_partner_rt_1 * ft_partner_
 gen bw_rate_14 = (mt_mom_rt_2 * mt_mom_bw_rt_2) + (ft_partner_rt_2 * ft_partner_bw_rt_2) + (ft_other_rt_2 * ft_other_bw_rt_2) + (earn_lose_rt_2 * earn_lose_bw_rt_2)
 gen comp96_rate14 = (mt_mom_rt_1 * mt_mom_bw_rt_2) + (ft_partner_rt_1 * ft_partner_bw_rt_2) + (ft_other_rt_1 * ft_other_bw_rt_2) + (earn_lose_rt_1 * earn_lose_bw_rt_2)
 gen comp14_rate96 = (mt_mom_rt_2 * mt_mom_bw_rt_1) + (ft_partner_rt_2 * ft_partner_bw_rt_1) + (ft_other_rt_2 * ft_other_bw_rt_1) + (earn_lose_rt_2 * earn_lose_bw_rt_1)
+gen total_gap = (bw_rate_14 - bw_rate_96)
+gen mom_change =  (mt_mom_rt_2 * mt_mom_bw_rt_2) - (mt_mom_rt_1 * mt_mom_bw_rt_1)
+gen partner_change =  (ft_partner_rt_2 * ft_partner_bw_rt_2) - (ft_partner_rt_1 * ft_partner_bw_rt_1)
+gen other_hh_change =  (ft_other_rt_2 * ft_other_bw_rt_2) - (ft_other_rt_1 * ft_other_bw_rt_1)
+gen leaver_change =  (earn_lose_rt_2 * earn_lose_bw_rt_2) - (earn_lose_rt_1 * earn_lose_bw_rt_1)
 
 global total_gap = (bw_rate_14 - bw_rate_96)*100
 global comp_diff = (comp14_rate96 - bw_rate_96)*100
 global rate_diff = (comp96_rate14 - bw_rate_96)*100
 global bw_rate_96 = bw_rate_96*100
 global bw_rate_14 = bw_rate_14*100
+global mom_component = (mom_change / total_gap) * 100
+global partner_component = (partner_change / total_gap) * 100
+global other_hh_component = (other_hh_change / total_gap) * 100
+global leaver_component = (leaver_change / total_gap) * 100
 
 display %9.3f ${total_gap}
 display %9.3f ${rate_diff}

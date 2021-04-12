@@ -11,6 +11,12 @@ The rate of transition into breadwinning in 1996 was <<dd_di: %9.2f $bw_rate_96 
 The rate of transition into breadwinning in 2014 was <<dd_di: %9.2f $bw_rate_14 >>%.
 This is a difference of <<dd_di: %9.2f $total_gap >>%.
 
-<<dd_di: %9.2f $rate_diff >>% can be explained by rate differences between the two surveys (rate of transition once you experienced the event).
-<<dd_di: %9.2f $comp_diff >>% can be explained by compositional differences between the two surveys (e.g. how many people experienced the events).
+Of the total <<dd_di: %9.2f $total_gap >>% difference, <<dd_di: %9.2f $rate_diff >>% can be explained by rate differences between the two surveys (rate of transition once you experienced the event).
+Of the total <<dd_di: %9.2f $total_gap >>% difference, <<dd_di: %9.2f $comp_diff >>% can be explained by compositional differences between the two surveys (e.g. how many people experienced the events).
+
+Further breaking down the gap:
+<<dd_di: %9.2f $mom_component >>% could be attributed to the mother increasing component;
+<<dd_di: %9.2f $partner_component >>% could be attributed to the partner decreasing component;
+<<dd_di: %9.2f $other_hh_component >>% could be attributed to the other HH decreasing component;
+<<dd_di: %9.2f $leaver_component >>% could be attributed to the earner leaving component.
 
