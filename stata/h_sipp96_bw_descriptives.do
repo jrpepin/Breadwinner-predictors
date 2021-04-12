@@ -510,6 +510,9 @@ by SSUID PNUM (year), sort: gen earn_change_raw = (earnings-earnings[_n-1]) if S
 	}
 
 	//check: browse spart_num earnings_sp to_tpearn* 
+	
+replace earnings=0 if earnings==. // this is messing up the hh_earn calculations because not considering as 0
+replace earnings_a_sp=0 if earnings_a_sp==. // this is messing up the hh_earn calculations because not considering as 0
 
 * then create variables
 by SSUID PNUM (year), sort: gen earn_change_sp = ((earnings_a_sp-earnings_a_sp[_n-1])/earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]

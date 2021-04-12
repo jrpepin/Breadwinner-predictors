@@ -63,10 +63,31 @@ replace ft_hh = 1 if earn_lose==0 & (earn_change_hh<0 & earn_change_hh>-.08) & (
 
 tab survey ft_hh
 
+	** Breaking down the ft_hh into partner and all other
+
+	gen ft_partner=0
+	replace ft_partner = 1 if earn_lose==0 & earnup8_all==0 & earndown8_sp_all==1 & earndown8_oth_all==0 // also saying NO ONE else in hh's earnings could go down, JUST partner
+
+	gen ft_other=0
+	replace ft_other = 1 if earn_lose==0 & earndown8_hh_all==1 & ((earnup8_all==1 & earndown8_sp_all==1) | (earndown8_sp_all==1 & earndown8_oth_all==1))
+	replace ft_other = 1 if ft_hh==1 & ft_partner==0 & ft_other==0
+
+	browse ft_hh ft_partner mt_mom earn_lose thearn thearn_alt earnings earnings_a_sp hh_earn other_earn earnup8_all earndown8_sp_all earndown8_oth_all // 
+	earndown8_hh_all earn_change_sp earn_change_hh earn_change_oth if ft_hh==0 & ft_partner==1
+	
+	tab survey ft_partner
+	tab survey ft_other
+
 *Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
 
 tab ft_hh trans_bw60_alt2 if survey==1996
 tab ft_hh trans_bw60_alt2 if survey==2014
+
+tab ft_partner trans_bw60_alt2 if survey==1996
+tab ft_partner trans_bw60_alt2 if survey==2014
+
+tab ft_other trans_bw60_alt2 if survey==1996
+tab ft_other trans_bw60_alt2 if survey==2014
 
 *Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
 	

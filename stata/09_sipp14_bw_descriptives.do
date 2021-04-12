@@ -645,6 +645,7 @@ forvalues w=1/28 {
 
 * Using earnings not tpearn which is the sum of all earnings and won't be negative
 * First create a variable that indicates percent change YoY
+
 by SSUID PNUM (year), sort: gen earn_change = ((earnings-earnings[_n-1])/earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 by SSUID PNUM (year), sort: gen earn_change_raw = (earnings-earnings[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 
@@ -674,6 +675,9 @@ by SSUID PNUM (year), sort: gen earn_change_raw = (earnings-earnings[_n-1]) if S
 	}
 
 	//check: browse spart_num earnings_sp to_TPEARN* 
+
+replace earnings=0 if earnings==. // this is messing up the hh_earn calculations because not considering as 0
+replace earnings_a_sp=0 if earnings_a_sp==. // this is messing up the hh_earn calculations because not considering as 0
 
 * then create variables
 by SSUID PNUM (year), sort: gen earn_change_sp = ((earnings_a_sp-earnings_a_sp[_n-1])/earnings_a_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
