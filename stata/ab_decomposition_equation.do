@@ -121,13 +121,16 @@ tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & 
 browse firstbirth mt_mom ft_hh earn_lose if firstbirth==1 & bw60==1 & bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 
 
 ********************************************************************************
-* Creating variables to have for each year
+* Trying to automate
 ********************************************************************************
 egen id = concat (SSUID PNUM)
 destring id, replace
 
 gen survey_yr = 1 if survey==1996
 replace survey_yr = 2 if survey==2014
+
+*****************************
+* Overall
 
 egen base_1 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==1996
 egen base_2 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==2014
@@ -172,6 +175,60 @@ global leaver_component = (leaver_change / total_gap) * 100
 display %9.3f ${total_gap}
 display %9.3f ${rate_diff}
 display %9.3f ${comp_diff}
+
+*****************************
+* By education
+
+forvalues e=1/4{
+	egen base_`e'_1 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==1996 & educ==`e'
+	egen base_`e'_2 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==2014 & educ==`e'
+}
+
+forvalues e=1/4{
+	foreach var in mt_mom ft_hh earn_lose ft_partner ft_other {
+		forvalues y=1/2{
+			egen `var'_`e'_`y' = count(id) if `var'==1 & survey_yr==`y' & educ==`e'
+			sum `var'_`e'_`y'
+			replace `var'_`e'_`y' = r(mean)
+			gen `var'_rt_`e'_`y' = `var'_`e'_`y' / base_`e'_`y'
+			sum `var'_rt_`e'_`y'
+			replace `var'_rt_`e'_`y' = r(mean)
+			egen `var'_bw_`e'_`y' = count(id) if `var'==1 & trans_bw60_alt2==1 & survey_yr==`y' & educ==`e'
+			sum `var'_bw_`e'_`y'
+			replace `var'_bw_`e'_`y' = r(mean)
+			gen `var'_bw_rt_`e'_`y' = `var'_bw_`e'_`y' / `var'_`e'_`y'
+			sum `var'_bw_rt_`e'_`y'
+			replace `var'_bw_rt_`e'_`y' = r(mean)
+		}
+	}
+}
+
+forvalues e=1/4{
+	gen bw_rate_96_`e' = (mt_mom_rt_`e'_1 * mt_mom_bw_rt_`e'_1) + (ft_partner_rt_`e'_1 * ft_partner_bw_rt_`e'_1) + (ft_other_rt_`e'_1 * ft_other_bw_rt_`e'_1) + ///
+	(earn_lose_rt_`e'_1 * earn_lose_bw_rt_`e'_1)
+	gen bw_rate_14_`e' = (mt_mom_rt_`e'_2 * mt_mom_bw_rt_`e'_2) + (ft_partner_rt_`e'_2 * ft_partner_bw_rt_`e'_2) + (ft_other_rt_`e'_2 * ft_other_bw_rt_`e'_2) + ///
+	(earn_lose_rt_`e'_2 * earn_lose_bw_rt_`e'_2)
+	gen comp96_rate14_`e' = (mt_mom_rt_`e'_1 * mt_mom_bw_rt_`e'_2) + (ft_partner_rt_`e'_1 * ft_partner_bw_rt_`e'_2) + (ft_other_rt_`e'_1 * ft_other_bw_rt_`e'_2) + ///
+	(earn_lose_rt_`e'_1 * earn_lose_bw_rt_`e'_2)
+	gen comp14_rate96_`e' = (mt_mom_rt_`e'_2 * mt_mom_bw_rt_`e'_1) + (ft_partner_rt_`e'_2 * ft_partner_bw_rt_`e'_1) + (ft_other_rt_`e'_2 * ft_other_bw_rt_`e'_1) + ///
+	(earn_lose_rt_`e'_2 * earn_lose_bw_rt_`e'_1)
+	
+	gen total_gap_`e' = (bw_rate_14_`e' - bw_rate_96_`e')
+	gen mom_change_`e' =  (mt_mom_rt_`e'_2 * mt_mom_bw_rt_`e'_2) - (mt_mom_rt_`e'_1 * mt_mom_bw_rt_`e'_1)
+	gen partner_change_`e' =  (ft_partner_rt_`e'_2 * ft_partner_bw_rt_`e'_2) - (ft_partner_rt_`e'_1 * ft_partner_bw_rt_`e'_1)
+	gen other_hh_change_`e' =  (ft_other_rt_`e'_2 * ft_other_bw_rt_`e'_2) - (ft_other_rt_`e'_1 * ft_other_bw_rt_`e'_1)
+	gen leaver_change_`e' =  (earn_lose_rt_`e'_2 * earn_lose_bw_rt_`e'_2) - (earn_lose_rt_`e'_1 * earn_lose_bw_rt_`e'_1)
+
+	global total_gap_`e' = (bw_rate_14_`e' - bw_rate_96_`e')*100
+	global comp_diff_`e' = (comp14_rate96_`e' - bw_rate_96_`e')*100
+	global rate_diff_`e' = (comp96_rate14_`e' - bw_rate_96_`e')*100
+	global bw_rate_96_`e' = bw_rate_96_`e'*100
+	global bw_rate_14_`e' = bw_rate_14_`e'*100
+	global mom_component_`e' = (mom_change_`e' / total_gap_`e') * 100
+	global partner_component_`e' = (partner_change_`e' / total_gap_`e') * 100
+	global other_hh_component_`e' = (other_hh_change_`e' / total_gap_`e') * 100
+	global leaver_component_`e' = (leaver_change_`e' / total_gap_`e') * 100
+}
 
 // Create html document to describe results
 dyndoc "$SIPP2014_code/predictor_decomp.md", saving($results/predictor_decomp.html) replace
