@@ -25,8 +25,8 @@ Further breaking down the gap:
 ### Results by education
 
 | Group	        	 |   Total Gap                      | Rate Difference					| Composition Difference     		|
-|:-------------------|:----------------------------------|:----------------------------------|:--------------------------------- |
-|	Overall	    	 | <<dd_di: %9.2f $total_gap >>%		| <<dd_di: %9.2f $rate_diff >>%     | <<dd_di: %9.2f $comp_diff >>%     |
+|:-------------------|:---------------------------------|:----------------------------------|:--------------------------------- |
+|	Overall	    	 | <<dd_di: %9.2f $total_gap >>%	| <<dd_di: %9.2f $rate_diff >>%     | <<dd_di: %9.2f $comp_diff >>%     |
 |	College Educated | <<dd_di: %9.2f $total_gap_4 >>%	| <<dd_di: %9.2f $rate_diff_4 >>%   | <<dd_di: %9.2f $comp_diff_4 >>%   |
 |	Some College	 | <<dd_di: %9.2f $total_gap_3 >>%	| <<dd_di: %9.2f $rate_diff_3 >>%   | <<dd_di: %9.2f $comp_diff_3 >>%   |
 |	HS Degree		 | <<dd_di: %9.2f $total_gap_2 >>%	| <<dd_di: %9.2f $rate_diff_2 >>%   | <<dd_di: %9.2f $comp_diff_2 >>%   |
@@ -39,7 +39,7 @@ Further breaking down the gap:
 |	College Educated | <<dd_di: %9.2f $mom_component_4 >>%	| <<dd_di: %9.2f $partner_component_4 >>%   | <<dd_di: %9.2f $other_hh_component_4 >>%   | <<dd_di: %9.2f $leaver_component_4 >>% |
 |	Some College	 | <<dd_di: %9.2f $mom_component_3 >>%	| <<dd_di: %9.2f $partner_component_3 >>%   | <<dd_di: %9.2f $other_hh_component_3 >>%   | <<dd_di: %9.2f $leaver_component_3 >>% |
 |	HS Degree		 | <<dd_di: %9.2f $mom_component_2 >>%	| <<dd_di: %9.2f $partner_component_2 >>%   | <<dd_di: %9.2f $other_hh_component_2 >>%   | <<dd_di: %9.2f $leaver_component_2 >>% |
-|	Less than HS	 | <<dd_di: %9.2f $mom_component_1 >>%	| <<dd_di: %9.2f $partner_component_1 >>%   | <<dd_di: %9.2f $other_hh_component_1 >>%   | <<dd_di: %9.2f $leaver_component_2 >>% |
+|	Less than HS	 | <<dd_di: %9.2f $mom_component_1 >>%	| <<dd_di: %9.2f $partner_component_1 >>%   | <<dd_di: %9.2f $other_hh_component_1 >>%   | <<dd_di: %9.2f $leaver_component_1 >>% |
 
 
 #### College educated
@@ -97,3 +97,23 @@ Further breaking down the gap:
 <<dd_di: %9.2f $partner_component_1 >>% could be attributed to the partner decreasing component;
 <<dd_di: %9.2f $other_hh_component_1 >>% could be attributed to the other HH decreasing component;
 <<dd_di: %9.2f $leaver_component_1 >>% could be attributed to the earner leaving component.
+
+### Results by race
+
+| Group	        	 |   Total Gap                      | Rate Difference					 | Composition Difference     		  |
+|:-------------------|:---------------------------------|:-----------------------------------|:-----------------------------------|
+|	Overall	    	 | <<dd_di: %9.2f $total_gap >>%	| <<dd_di: %9.2f $rate_diff >>%      | <<dd_di: %9.2f $comp_diff >>%      |
+|	NH White		 | <<dd_di: %9.2f $total_gap_r1 >>%	| <<dd_di: %9.2f $rate_diff_r1 >>%   | <<dd_di: %9.2f $comp_diff_r1 >>%   |
+|	Black			 | <<dd_di: %9.2f $total_gap_r2 >>%	| <<dd_di: %9.2f $rate_diff_r2 >>%   | <<dd_di: %9.2f $comp_diff_r2 >>%   |
+|	Hispanic 		 | <<dd_di: %9.2f $total_gap_r4 >>%	| <<dd_di: %9.2f $rate_diff_r4 >>%   | <<dd_di: %9.2f $comp_diff_r4 >>%   |
+|	NH Asian	 	 | <<dd_di: %9.2f $total_gap_r3 >>%	| <<dd_di: %9.2f $rate_diff_r3 >>%   | <<dd_di: %9.2f $comp_diff_r3 >>%   |
+
+
+
+| Group	        	 |   Mom Component                      | Partner Component 						 | Other HH Component     					   | Leaver Component						 |
+|:-------------------|:-------------------------------------|:-------------------------------------------|:--------------------------------------------|:----------------------------------------|
+|	Overall	    	 | <<dd_di: %9.2f $mom_component >>%	| <<dd_di: %9.2f $partner_component >>%      | <<dd_di: %9.2f $other_hh_component >>%      | <<dd_di: %9.2f $leaver_component >>%    |
+|	NH White	 	 | <<dd_di: %9.2f $mom_component_r1 >>%	| <<dd_di: %9.2f $partner_component_r1 >>%   | <<dd_di: %9.2f $other_hh_component_r1 >>%   | <<dd_di: %9.2f $leaver_component_r1 >>% |
+|	Black		 	 | <<dd_di: %9.2f $mom_component_r2 >>%	| <<dd_di: %9.2f $partner_component_r2 >>%   | <<dd_di: %9.2f $other_hh_component_r2 >>%   | <<dd_di: %9.2f $leaver_component_r2 >>% |
+|	Hispanic 		 | <<dd_di: %9.2f $mom_component_r4 >>%	| <<dd_di: %9.2f $partner_component_r4 >>%   | <<dd_di: %9.2f $other_hh_component_r4 >>%   | <<dd_di: %9.2f $leaver_component_r4 >>% |
+|	NH Asian	 	 | <<dd_di: %9.2f $mom_component_r3 >>%	| <<dd_di: %9.2f $partner_component_r3 >>%   | <<dd_di: %9.2f $other_hh_component_r3 >>%   | <<dd_di: %9.2f $leaver_component_r3 >>% |

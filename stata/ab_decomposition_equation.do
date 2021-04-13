@@ -230,6 +230,60 @@ forvalues e=1/4{
 	global leaver_component_`e' = (leaver_change_`e' / total_gap_`e') * 100
 }
 
+*****************************
+* By race
+
+forvalues r=1/4{
+	egen base_r`r'_1 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==1996 & race==`r'
+	egen base_r`r'_2 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==2014 & race==`r'
+}
+
+forvalues r=1/4{
+	foreach var in mt_mom ft_hh earn_lose ft_partner ft_other {
+		forvalues y=1/2{
+			egen `var'_r`r'_`y' = count(id) if `var'==1 & survey_yr==`y' & race==`r'
+			sum `var'_r`r'_`y'
+			replace `var'_r`r'_`y' = r(mean)
+			gen `var'_rt_r`r'_`y' = `var'_r`r'_`y' / base_r`r'_`y'
+			sum `var'_rt_r`r'_`y'
+			replace `var'_rt_r`r'_`y' = r(mean)
+			egen `var'_bw_r`r'_`y' = count(id) if `var'==1 & trans_bw60_alt2==1 & survey_yr==`y' & race==`r'
+			sum `var'_bw_r`r'_`y'
+			replace `var'_bw_r`r'_`y' = r(mean)
+			gen `var'_bw_rt_r`r'_`y' = `var'_bw_r`r'_`y' / `var'_r`r'_`y'
+			sum `var'_bw_rt_r`r'_`y'
+			replace `var'_bw_rt_r`r'_`y' = r(mean)
+		}
+	}
+}
+
+forvalues r=1/4{
+	gen bw_rate_96_r`r' = (mt_mom_rt_r`r'_1 * mt_mom_bw_rt_r`r'_1) + (ft_partner_rt_r`r'_1 * ft_partner_bw_rt_r`r'_1) + (ft_other_rt_r`r'_1 * ft_other_bw_rt_r`r'_1) + ///
+	(earn_lose_rt_r`r'_1 * earn_lose_bw_rt_r`r'_1)
+	gen bw_rate_14_r`r' = (mt_mom_rt_r`r'_2 * mt_mom_bw_rt_r`r'_2) + (ft_partner_rt_r`r'_2 * ft_partner_bw_rt_r`r'_2) + (ft_other_rt_r`r'_2 * ft_other_bw_rt_r`r'_2) + ///
+	(earn_lose_rt_r`r'_2 * earn_lose_bw_rt_r`r'_2)
+	gen comp96_rate14_r`r' = (mt_mom_rt_r`r'_1 * mt_mom_bw_rt_r`r'_2) + (ft_partner_rt_r`r'_1 * ft_partner_bw_rt_r`r'_2) + (ft_other_rt_r`r'_1 * ft_other_bw_rt_r`r'_2) + ///
+	(earn_lose_rt_r`r'_1 * earn_lose_bw_rt_r`r'_2)
+	gen comp14_rate96_r`r' = (mt_mom_rt_r`r'_2 * mt_mom_bw_rt_r`r'_1) + (ft_partner_rt_r`r'_2 * ft_partner_bw_rt_r`r'_1) + (ft_other_rt_r`r'_2 * ft_other_bw_rt_r`r'_1) + ///
+	(earn_lose_rt_r`r'_2 * earn_lose_bw_rt_r`r'_1)
+	
+	gen total_gap_r`r' = (bw_rate_14_r`r' - bw_rate_96_r`r')
+	gen mom_change_r`r' =  (mt_mom_rt_r`r'_2 * mt_mom_bw_rt_r`r'_2) - (mt_mom_rt_r`r'_1 * mt_mom_bw_rt_r`r'_1)
+	gen partner_change_r`r' =  (ft_partner_rt_r`r'_2 * ft_partner_bw_rt_r`r'_2) - (ft_partner_rt_r`r'_1 * ft_partner_bw_rt_r`r'_1)
+	gen other_hh_change_r`r' =  (ft_other_rt_r`r'_2 * ft_other_bw_rt_r`r'_2) - (ft_other_rt_r`r'_1 * ft_other_bw_rt_r`r'_1)
+	gen leaver_change_r`r' =  (earn_lose_rt_r`r'_2 * earn_lose_bw_rt_r`r'_2) - (earn_lose_rt_r`r'_1 * earn_lose_bw_rt_r`r'_1)
+
+	global total_gap_r`r' = (bw_rate_14_r`r' - bw_rate_96_r`r')*100
+	global comp_diff_r`r' = (comp14_rate96_r`r' - bw_rate_96_r`r')*100
+	global rate_diff_r`r' = (comp96_rate14_r`r' - bw_rate_96_r`r')*100
+	global bw_rate_96_r`r' = bw_rate_96_r`r'*100
+	global bw_rate_14_r`r' = bw_rate_14_r`r'*100
+	global mom_component_r`r' = (mom_change_r`r' / total_gap_r`r') * 100
+	global partner_component_r`r' = (partner_change_r`r' / total_gap_r`r') * 100
+	global other_hh_component_r`r' = (other_hh_change_r`r' / total_gap_r`r') * 100
+	global leaver_component_r`r' = (leaver_change_r`r' / total_gap_r`r') * 100
+}
+
 // Create html document to describe results
 dyndoc "$SIPP2014_code/predictor_decomp.md", saving($results/predictor_decomp.html) replace
 
