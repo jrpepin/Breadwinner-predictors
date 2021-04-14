@@ -49,6 +49,8 @@ tab survey mt_mom // is this right? or do I also need to control for prior BW?
 tab survey momup_only
 
 // concerned I now need to revise my estimates to account for just moms at risk of breadwinning.
+tab survey mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) 
+
 mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
 mean mt_mom if survey==1996
 
@@ -56,6 +58,9 @@ mean mt_mom if survey==1996
 
 tab mt_mom trans_bw60_alt2 if survey==1996
 tab mt_mom trans_bw60_alt2 if survey==2014
+
+tab mt_mom trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+tab mt_mom trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
 
 tab momup_only trans_bw60_alt2 if survey==1996
 tab momup_only trans_bw60_alt2 if survey==2014
@@ -66,6 +71,7 @@ replace ft_hh = 1 if earn_lose==0 & earndown8_hh_all==1
 replace ft_hh = 1 if earn_lose==0 & (earn_change_hh<0 & earn_change_hh>-.08) & (earn_change >0 & earn_change <.08) & ft_hh==0 // to capture those outside the 8% threshold (v. small amount)
 
 tab survey ft_hh
+tab survey ft_hh if bw60[_n-1]==0 & year==(year[_n-1]+1)
 
 	** Breaking down the ft_hh into partner and all other
 
@@ -81,6 +87,9 @@ tab survey ft_hh
 	
 	tab survey ft_partner
 	tab survey ft_other
+		
+	tab survey ft_partner if bw60[_n-1]==0 & year==(year[_n-1]+1)
+	tab survey ft_other if bw60[_n-1]==0 & year==(year[_n-1]+1)
 	
 	gen ft_overlap=0
 	replace ft_overlap = 1 if earn_lose==0 & earnup8_all==1 & earndown8_sp_all==1
@@ -96,17 +105,34 @@ tab ft_partner trans_bw60_alt2 if survey==2014
 tab ft_other trans_bw60_alt2 if survey==1996
 tab ft_other trans_bw60_alt2 if survey==2014
 
+tab ft_hh trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+tab ft_hh trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+
+tab ft_partner trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+tab ft_partner trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+
+tab ft_other trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+tab ft_other trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+
 *Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
 	
-tab survey earn_lose
+tab survey earn_lose 
+tab survey earn_lose if bw60[_n-1]==0 & year==(year[_n-1]+1)
+
 
 *BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
 tab earn_lose trans_bw60_alt2 if survey==1996
 tab earn_lose trans_bw60_alt2 if survey==2014
 
+tab earn_lose trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1)
+tab earn_lose trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1)
+
+
 *validate
 tab survey trans_bw60_alt
 tab survey trans_bw60_alt2
+
+tab survey trans_bw60_alt2 if bw60[_n-1]==0 & year==(year[_n-1]+1)
 
 
 browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change earn_change_hh tpearn thearn mom_gain_earn hh_gain_earn hh_lose_earn if trans_bw60_alt2==1 & mt_mom==0 & ft_hh==0 & earn_lose==0 
@@ -135,6 +161,8 @@ replace survey_yr = 2 if survey==2014
 
 *****************************
 * Overall
+
+// okay so this will become much easier when I incorporate the base changes.
 
 egen base_1 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==1996
 egen base_2 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==2014
