@@ -45,8 +45,12 @@ replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mo
 	tab mt_mom momup_only
 	* mt_mom is much higher than momup_only because there is a lot of overlap with mom's earnings going up AND someone else's going up. To me, this still feels like a success, so i included, but can update
 	
-tab survey mt_mom
+tab survey mt_mom // is this right? or do I also need to control for prior BW?
 tab survey momup_only
+
+// concerned I now need to revise my estimates to account for just moms at risk of breadwinning.
+mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
+mean mt_mom if survey==1996
 
 *Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
 
