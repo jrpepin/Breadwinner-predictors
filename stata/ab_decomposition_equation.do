@@ -26,14 +26,15 @@ replace trans_bw60=. if year < yrfirstbirth & mom_panel==1
 replace trans_bw60_alt=. if year < yrfirstbirth & mom_panel==1
 replace trans_bw60_alt2=. if year < yrfirstbirth & mom_panel==1
 
+svyset [pweight = wpfinwgt]
+
 
 ********************************************************************************
 * Accounts for duplicate years
 ********************************************************************************
 
 *Dt-l: mothers not breadwinning at t-1
-tab survey bw60 // want those with a 0
-tab survey bw60 if year==(year[_n+1]-1) // to ensure consecutive years, aka she is available to transition to BW the next year
+svy: tab survey bw60 if year==(year[_n+1]-1), row // to ensure consecutive years, aka she is available to transition to BW the next year
 
 *Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
 
@@ -41,37 +42,22 @@ gen mt_mom = 0
 replace mt_mom = 1 if earnup8_all==1 & earn_lose==0 & earndown8_hh_all==0
 replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom==0 // to capture those outside the 8% threshold (v. small amount)
 
-* validate
-	tab mt_mom momup_only
-	* mt_mom is much higher than momup_only because there is a lot of overlap with mom's earnings going up AND someone else's going up. To me, this still feels like a success, so i included, but can update
-	
-tab survey mt_mom // is this right? or do I also need to control for prior BW?
-tab survey momup_only
+svy: tab survey mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
-// concerned I now need to revise my estimates to account for just moms at risk of breadwinning.
-tab survey mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) 
-
-mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
-mean mt_mom if survey==1996
+svy: mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
+svy: mean mt_mom if survey==1996
 
 *Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
 
-tab mt_mom trans_bw60_alt2 if survey==1996
-tab mt_mom trans_bw60_alt2 if survey==2014
-
-tab mt_mom trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-tab mt_mom trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-
-tab momup_only trans_bw60_alt2 if survey==1996
-tab momup_only trans_bw60_alt2 if survey==2014
+svy: tab mt_mom trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
+svy: tab mt_mom trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 *Ft = the proportion of mothers who had another household member lose earnings. If mothers earnings also went up, they are captured here, not above.
 gen ft_hh = 0
 replace ft_hh = 1 if earn_lose==0 & earndown8_hh_all==1
 replace ft_hh = 1 if earn_lose==0 & (earn_change_hh<0 & earn_change_hh>-.08) & (earn_change >0 & earn_change <.08) & ft_hh==0 // to capture those outside the 8% threshold (v. small amount)
 
-tab survey ft_hh
-tab survey ft_hh if bw60[_n-1]==0 & year==(year[_n-1]+1)
+svy: tab survey ft_hh if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 	** Breaking down the ft_hh into partner and all other
 
@@ -85,54 +71,35 @@ tab survey ft_hh if bw60[_n-1]==0 & year==(year[_n-1]+1)
 	browse ft_hh ft_partner mt_mom earn_lose thearn thearn_alt earnings earnings_a_sp hh_earn other_earn earnup8_all earndown8_sp_all earndown8_oth_all ///
 	earndown8_hh_all earn_change_sp earn_change_hh earn_change_oth if ft_hh==0 & ft_partner==1
 	
-	tab survey ft_partner
-	tab survey ft_other
-		
-	tab survey ft_partner if bw60[_n-1]==0 & year==(year[_n-1]+1)
-	tab survey ft_other if bw60[_n-1]==0 & year==(year[_n-1]+1)
+	svy: tab survey ft_partner if bw60[_n-1]==0 & year==(year[_n-1]+1), row
+	svy: tab survey ft_other if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 	
 	gen ft_overlap=0
 	replace ft_overlap = 1 if earn_lose==0 & earnup8_all==1 & earndown8_sp_all==1
 
 *Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
+svy: tab ft_hh trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
+svy: tab ft_hh trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row 
 
-tab ft_hh trans_bw60_alt2 if survey==1996
-tab ft_hh trans_bw60_alt2 if survey==2014
+svy: tab ft_partner trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row 
+svy: tab ft_partner trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row 
 
-tab ft_partner trans_bw60_alt2 if survey==1996
-tab ft_partner trans_bw60_alt2 if survey==2014
-
-tab ft_other trans_bw60_alt2 if survey==1996
-tab ft_other trans_bw60_alt2 if survey==2014
-
-tab ft_hh trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-tab ft_hh trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-
-tab ft_partner trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-tab ft_partner trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-
-tab ft_other trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
-tab ft_other trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1) 
+svy: tab ft_other trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
+svy: tab ft_other trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 *Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
 	
-tab survey earn_lose 
-tab survey earn_lose if bw60[_n-1]==0 & year==(year[_n-1]+1)
+svy: tab survey earn_lose if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 
 *BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
-tab earn_lose trans_bw60_alt2 if survey==1996
-tab earn_lose trans_bw60_alt2 if survey==2014
-
-tab earn_lose trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1)
-tab earn_lose trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1)
+svy: tab earn_lose trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
+svy: tab earn_lose trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 
 *validate
-tab survey trans_bw60_alt
-tab survey trans_bw60_alt2
-
-tab survey trans_bw60_alt2 if bw60[_n-1]==0 & year==(year[_n-1]+1)
+svy: tab survey trans_bw60_alt2, row
+svy: tab survey trans_bw60_alt2 if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 
 browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change earn_change_hh tpearn thearn mom_gain_earn hh_gain_earn hh_lose_earn if trans_bw60_alt2==1 & mt_mom==0 & ft_hh==0 & earn_lose==0 
@@ -143,8 +110,8 @@ browse SSUID PNUM year bw60 trans_bw60 trans_bw60_alt trans_bw60_alt2 earnup8_al
 // figuring out how to add in mothers who had their first birth in a panel
 browse SSUID PNUM year firstbirth bw60 trans_bw60
 
-tab survey firstbirth
-tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 
+svy: tab survey firstbirth, row
+svy: tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1, row
 
 //what if had other changes?
 
@@ -162,10 +129,13 @@ replace survey_yr = 2 if survey==2014
 *****************************
 * Overall
 
-// okay so this will become much easier when I incorporate the base changes.
-
 egen base_1 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==1996
 egen base_2 = count(id) if bw60==0 & year==(year[_n+1]-1) & survey==2014
+
+svy: mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
+svy: mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==2014
+svy: mean trans_bw60_alt2 if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996 & mt_mom==1
+svy: mean trans_bw60_alt2 if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==2014 & mt_mom==1
 
 foreach var in mt_mom ft_hh earn_lose ft_partner ft_other {
     forvalues y=1/2{
