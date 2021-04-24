@@ -28,6 +28,8 @@ replace trans_bw60_alt2=. if year < yrfirstbirth & mom_panel==1
 
 svyset [pweight = wpfinwgt]
 
+recode partner_lose (2/6=1)
+
 
 ********************************************************************************
 * Accounts for duplicate years
@@ -59,12 +61,9 @@ replace ft_partner_down = 1 if earndown8_sp_all==1 & mt_mom==0
 svy: tab survey ft_partner_down if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
 gen ft_partner_leave = 0
-replace ft_partner_leave = 1 if lost_partner==1 & mt_mom==0
+replace ft_partner_leave = 1 if partner_lose==1 & mt_mom==0
 
 svy: tab survey ft_partner_leave if bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
-	browse ft_hh ft_partner mt_mom earn_lose thearn thearn_alt earnings earnings_a_sp hh_earn other_earn earnup8_all earndown8_sp_all earndown8_oth_all ///
-	earndown8_hh_all earn_change_sp earn_change_hh earn_change_oth if ft_hh==0 & ft_partner==1
 		
 gen ft_overlap=0
 replace ft_overlap = 1 if earn_lose==0 & earnup8_all==1 & earndown8_sp_all==1
