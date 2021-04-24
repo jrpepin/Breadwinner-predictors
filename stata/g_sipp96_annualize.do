@@ -104,7 +104,11 @@ use "$SIPP14keep/sipp96tpearn_rel.dta", clear
 	by SSUID PNUM (panelmonth), sort: gen parents_gain = (parents > parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Parents left (bio and in-law)
 	by SSUID PNUM (panelmonth), sort: gen parents_lose = (parents < parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
-
+	* Gained partner // validate with above status measures
+	by SSUID PNUM (panelmonth), sort: gen partner_gain = (spartner > spartner[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Lost partner // validate with above status measures
+	by SSUID PNUM (panelmonth), sort: gen partner_lose = (spartner < spartner[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
+	
 // browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
 	
 // Create indicator of birth during the year  -- because fertility module is only in wave 2, aka 1996, we can't really get a robust measure of this. we also only get first and last month of birth, nothing in between.
@@ -305,8 +309,8 @@ bysort SSUID PNUM year (earnings): egen earnings_mis = min(earnings)
 collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 								/// mother char.
 			(sum) 	tpearn thearn thearn_alt total_hrs=avg_mo_hrs total_hrs_sp = avg_mo_hrs_sp earnings ///
 					eawop sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh				///
-					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non 			///
-					prekid_gain prekid_lose parents_gain parents_lose first_birth						///
+					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non first_birth ///
+					prekid_gain prekid_lose parents_gain parents_lose partner_gain partner_lose			///
 					full_part full_no part_no part_full no_part no_full jobchange						///
 					betterjob left_preg many_jobs one_job num_jobs_up num_jobs_down						///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp							///

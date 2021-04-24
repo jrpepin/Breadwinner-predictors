@@ -106,6 +106,11 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	by SSUID PNUM (panelmonth), sort: gen parents_gain = (parents > parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 	* Parents left (bio and in-law)
 	by SSUID PNUM (panelmonth), sort: gen parents_lose = (parents < parents[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
+	* Gained partner // validate with above status measures
+	by SSUID PNUM (panelmonth), sort: gen partner_gain = (spartner > spartner[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
+	* Lost partner // validate with above status measures
+	by SSUID PNUM (panelmonth), sort: gen partner_lose = (spartner < spartner[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
+	
 
 
 // browse SSUID PNUM tpearn panelmonth hhsize numearner other_earner hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non	
@@ -306,7 +311,8 @@ bysort SSUID PNUM year (tmwkhrs): egen tmwkhrs_mis = min(tmwkhrs)
 collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mother char.
 			(sum) 	tpearn thearn thearn_alt tmwkhrs earnings enjflag					///
 					sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh 		///
-					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non 	///
+					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn		///
+					resp_non partner_gain partner_lose									///
 					prekid_gain prekid_lose parents_gain parents_lose first_birth		///
 					full_part full_no part_no part_full no_part no_full jobchange		///
 					betterjob left_preg many_jobs one_job num_jobs_up num_jobs_down		///
