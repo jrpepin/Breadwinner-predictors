@@ -99,7 +99,7 @@ browse SSUID PNUM year trans_bw60_alt2 earnup8_all earndown8_hh_all earn_change 
 browse SSUID PNUM year firstbirth bw60 trans_bw60
 
 svy: tab survey firstbirth, row
-svy: tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1, row
+svy: tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1
 
 
 ********************************************************************************
@@ -432,6 +432,72 @@ forvalues e=1/3{
 // Create html document to describe results
 dyndoc "$SIPP2014_code/Predictor_Decomposition.md", saving($results/Predictor_Decomposition.html) replace
 
+********************************************************************************
+* Concerning if I should include MISSING bw60 in base
+********************************************************************************
+
+*Dt-l: mothers not breadwinning at t-1
+svy: tab survey bw60 if year==(year[_n+1]-1), row // to ensure consecutive years, aka she is available to transition to BW the next year
+tab survey bw60 if year==(year[_n+1]-1), m
+
+*Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
+
+svy: tab survey mt_mom if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+
+svy: mean mt_mom if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1) & survey==1996
+svy: mean mt_mom if survey==1996
+
+*Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
+
+svy: tab mt_mom trans_bw60_alt2 if survey==1996 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+svy: tab mt_mom trans_bw60_alt2 if survey==2014 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+
+*Ft = the proportion of mothers who had their partner lose earnings OR leave. If mothers earnings also went up, they are captured here, not above.
+svy: tab survey ft_partner_down if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+svy: tab survey ft_partner_leave if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+
+browse ft_partner_down ft_partner_leave earndown8_sp_all partner_lose earn_change_sp earn_change_raw_sp marr_diss coh_diss if ft_partner_down == 1 & ft_partner_leave == 1
+
+
+*Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
+svy: tab ft_partner_down trans_bw60_alt2 if survey==1996 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+svy: tab ft_partner_down trans_bw60_alt2 if survey==2014 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row 
+
+svy: tab ft_partner_leave trans_bw60_alt2 if survey==1996 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row 
+svy: tab ft_partner_leave trans_bw60_alt2 if survey==2014 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row 
+
+*Lt = the proportion of mothers who either stopped living with someone (besides their partner) who was an earner OR someone else in the household's earnings went down (again besides her partner). Partner is main category, so if a partner experienced changes as well as someone else in HH, they are captured above.
+	
+svy: tab survey lt_other_changes if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+
+*BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
+svy: tab lt_other_changes trans_bw60_alt2 if survey==1996 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+svy: tab lt_other_changes trans_bw60_alt2 if survey==2014 & (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+
+
+*validate
+svy: tab survey trans_bw60_alt2, row
+svy: tab survey trans_bw60_alt2 if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year[_n-1]+1), row
+
+
+********************************************************************************
+* Some exploration
+********************************************************************************
+browse SSUID PNUM year earnings thearn_alt earnings_ratio bw60 bw50 trans_bw60_alt2
+
+gen earnings_ratio_m = earnings_ratio
+replace earnings_ratio=0 if earnings_ratio==.
+
+tabstat earnings_ratio, by(survey_yr)
+
+sum earnings_ratio if survey_yr==1, detail
+sum earnings_ratio if survey_yr==2, detail
+
+recode earnings_ratio (0=0) (0.00000001/0.249999999=1) (.2500000/.499999=2) (.50000/.599999=3) (.600000/.7499999=4) (.7500000/.999999=5) (1=6), gen(earn_ratio_gp)
+label define ratio 0 "0" 1 "0.0-25%" 2 "25-49%" 3 "50-60%" 4 "60-75%" 5 "75%-99%" 6 "100%"
+label values earn_ratio_gp ratio
+
+tab survey_yr earn_ratio_gp, row
 
 /*
 
