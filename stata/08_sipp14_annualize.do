@@ -390,15 +390,15 @@ replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
 	// Create indicator for negative household earnings & no earnings. 
 	gen hh_noearnings= (thearn_alt <= 0)
 	
-	gen earnings_ratio=earnings/thearn_alt if hh_noearnings !=1 & !missing(earnings) 
+	gen earnings_ratio=earnings/thearn_alt if hh_noearnings !=1 
 
 	// 50% breadwinning threshold
 	* Note that this measure was missing for no (or negative) earnings households, but that is now changed
-	gen 	bw50= (earnings > .5*thearn_alt) 	if hh_noearnings !=1 & !missing(earnings) 
+	gen 	bw50= (earnings > .5*thearn_alt) 	if hh_noearnings !=1
 	replace bw50= 0 					if hh_noearnings==1
 
 	// 60% breadwinning threshold
-	gen 	bw60= (earnings > .6*thearn_alt) 	if hh_noearnings !=1 & !missing(earnings)
+	gen 	bw60= (earnings > .6*thearn_alt) 	if hh_noearnings !=1
 	replace bw60= 0 					if hh_noearnings==1
 	
 gen wave=year-2012
