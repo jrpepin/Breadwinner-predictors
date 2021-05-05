@@ -376,12 +376,12 @@ replace to_earnings`r'=. if to_mis_earnings`r'==.
 
 	// 50% breadwinning threshold
 	* Note that this measure was missing for no (or negative) earnings households, but that is now changed
-	gen 	bw50= (earnings > .5*thearn_alt) 	if hh_noearnings !=1
-	replace bw50= 0 					if hh_noearnings==1
+	gen 	bw50= (earnings > .5*thearn_alt) 	if hh_noearnings !=1 // if earnings missing, techincally larger than this ratio so was getting a 1 here when I removed the missing restriction above, so need to add below
+	replace bw50= 0 					if hh_noearnings==1 | earnings==.	
 
 	// 60% breadwinning threshold
 	gen 	bw60= (earnings > .6*thearn_alt) 	if hh_noearnings !=1
-	replace bw60= 0 					if hh_noearnings==1
+	replace bw60= 0 					if hh_noearnings==1 | earnings==.
 	
 	/*
 	// 60% breadwinning threshold - old, uses potential negative earnings for tpearn. more different for 1996 than 2014
