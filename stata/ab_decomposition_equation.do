@@ -215,12 +215,12 @@ gen bw_rate_14 = (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_2 * ft_partner_down
 gen comp96_rate14 = (mt_mom_1 * mt_mom_2_bw) + (ft_partner_down_1 * ft_partner_down_2_bw) + (ft_partner_leave_1 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_2_bw)
 gen comp14_rate96 = (mt_mom_2 * mt_mom_1_bw) + (ft_partner_down_2 * ft_partner_down_1_bw) + (ft_partner_leave_2 * ft_partner_leave_1_bw) + (lt_other_changes_2 * lt_other_changes_1_bw)
 gen total_gap = (bw_rate_14 - bw_rate_96)
-gen mom_change =  (mt_mom_2 * mt_mom_2_bw) - (mt_mom_1 * mt_mom_1_bw)
-gen partner_down_change =  (ft_partner_down_2 * ft_partner_down_2_bw) - (ft_partner_down_1 * ft_partner_down_1_bw)
-gen partner_down_only_chg = (ft_partner_down_only_2 * ft_partner_down_only_2_bw) - (ft_partner_down_only_1 * ft_partner_down_only_1_bw)
-gen partner_down_mom_up_chg  =  (ft_partner_down_mom_2 * ft_partner_down_mom_2_bw) - (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw)
-gen partner_leave_change =  (ft_partner_leave_2 * ft_partner_leave_2_bw) - (ft_partner_leave_1 * ft_partner_leave_1_bw)
-gen other_hh_change =  (lt_other_changes_2 * lt_other_changes_2_bw) - (lt_other_changes_1 * lt_other_changes_1_bw)
+gen mom_change =  (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_2 * ft_partner_down_2_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+gen partner_down_change =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_1 * ft_partner_down_1_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+gen partner_down_only_chg = (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_2 * ft_partner_down_mom_2_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+gen partner_down_mom_up_chg  =   (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_only_2 * ft_partner_down_only_2_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+gen partner_leave_change =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_2 * ft_partner_down_2_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+gen other_hh_change =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_2 * ft_partner_down_2_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
 
 global bw_rate_96 = bw_rate_96*100
 putexcel P2 = $bw_rate_96, nformat(#.##)
@@ -232,22 +232,40 @@ global rate_diff = (comp96_rate14 - bw_rate_96)*100
 putexcel R2 = $rate_diff, nformat(#.##)
 global comp_diff = (comp14_rate96 - bw_rate_96)*100
 putexcel S2 = $comp_diff, nformat(#.##)
-global mom_component = (mom_change / total_gap) * 100
+global mom_component = (mom_change - bw_rate_96)*100
 putexcel T2 = $mom_component, nformat(#.##)
-global partner_down_component = (partner_down_change / total_gap) * 100
+global partner_down_component = (partner_down_change - bw_rate_96)*100
 putexcel U2 = $partner_down_component, nformat(#.##)
-global partner_down_only_component = (partner_down_only_chg / total_gap) * 100
+global partner_down_only_component = (partner_down_only_chg - bw_rate_96)*100
 putexcel V2 = $partner_down_only_component, nformat(#.##)
-global partner_down_mom_component = (partner_down_mom_up_chg / total_gap) * 100
+global partner_down_mom_component = (partner_down_mom_up_chg - bw_rate_96)*100
 putexcel W2 = $partner_down_mom_component, nformat(#.##)
-global partner_leave_component = (partner_leave_change / total_gap) * 100
+global partner_leave_component = (partner_leave_change - bw_rate_96)*100
 putexcel X2 = $partner_leave_component, nformat(#.##)
-global other_hh_component = (other_hh_change / total_gap) * 100
+global other_hh_component = (other_hh_change - bw_rate_96)*100
 putexcel Y2 = $other_hh_component, nformat(#.##)
+
+putexcel T3 = formula(=T2/Q2), nformat(#.##)
+putexcel U3 = formula(=U2/Q2), nformat(#.##)
+putexcel V3 = formula(=V2/Q2), nformat(#.##)
+putexcel W3 = formula(=W2/Q2), nformat(#.##)
+putexcel X3 = formula(=X2/Q2), nformat(#.##)
+putexcel Y3 = formula(=Y2/Q2), nformat(#.##)
 
 display %9.3f ${total_gap}
 display %9.3f ${rate_diff}
 display %9.3f ${comp_diff}
+
+/* old component change
+gen mom_change =  (mt_mom_2 * mt_mom_2_bw) - (mt_mom_1 * mt_mom_1_bw)
+gen partner_down_change =  (ft_partner_down_2 * ft_partner_down_2_bw) - (ft_partner_down_1 * ft_partner_down_1_bw)
+gen partner_down_only_chg = (ft_partner_down_only_2 * ft_partner_down_only_2_bw) - (ft_partner_down_only_1 * ft_partner_down_only_1_bw)
+gen partner_down_mom_up_chg  =  (ft_partner_down_mom_2 * ft_partner_down_mom_2_bw) - (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw)
+gen partner_leave_change =  (ft_partner_leave_2 * ft_partner_leave_2_bw) - (ft_partner_leave_1 * ft_partner_leave_1_bw)
+gen other_hh_change =  (lt_other_changes_2 * lt_other_changes_2_bw) - (lt_other_changes_1 * lt_other_changes_1_bw)
+
+then just divided by total_gap
+*/
 
 *****************************
 * By education
@@ -293,13 +311,13 @@ forvalues e=1/4{
 	(lt_other_changes_`e'_2 * lt_other_changes_`e'_1_bw)
 	
 	gen total_gap_`e' = (bw_rate_14_`e' - bw_rate_96_`e')
-	gen mom_change_`e' =  (mt_mom_`e'_2 * mt_mom_`e'_2_bw) - (mt_mom_`e'_1 * mt_mom_`e'_1_bw)
-	gen partner_down_change_`e' =  (ft_partner_down_`e'_2 * ft_partner_down_`e'_2_bw) - (ft_partner_down_`e'_1 * ft_partner_down_`e'_1_bw)
-	gen partner_down_only_chg_`e' = (ft_partner_down_only_`e'_2 * ft_partner_down_only_`e'_2_bw) - (ft_partner_down_only_`e'_1 * ft_partner_down_only_`e'_1_bw)
-	gen partner_down_mom_up_chg_`e'  =  (ft_partner_down_mom_`e'_2 * ft_partner_down_mom_`e'_2_bw) - (ft_partner_down_mom_`e'_1 * ft_partner_down_mom_`e'_1_bw)
-	gen partner_leave_change_`e' =  (ft_partner_leave_`e'_2 * ft_partner_leave_`e'_2_bw) - (ft_partner_leave_`e'_1 * ft_partner_leave_`e'_1_bw)
-	gen other_hh_change_`e' =  (lt_other_changes_`e'_2 * lt_other_changes_`e'_2_bw) - (lt_other_changes_`e'_1 * lt_other_changes_`e'_1_bw)
-
+	gen mom_change_`e' =  (mt_mom_`e'_1 * mt_mom_`e'_1_bw) + (ft_partner_down_`e'_2 * ft_partner_down_`e'_2_bw) + (ft_partner_leave_`e'_2 * ft_partner_leave_`e'_2_bw) + (lt_other_changes_`e'_2 * lt_other_changes_`e'_2_bw)
+	gen partner_down_change_`e' =  (mt_mom_`e'_2 * mt_mom_`e'_2_bw) + (ft_partner_down_`e'_1 * ft_partner_down_`e'_1_bw) + (ft_partner_leave_`e'_2 * ft_partner_leave_`e'_2_bw) + (lt_other_changes_`e'_2 * lt_other_changes_`e'_2_bw)
+	gen partner_down_only_chg_`e' = (mt_mom_`e'_2 * mt_mom_`e'_2_bw) + (ft_partner_down_only_`e'_1 * ft_partner_down_only_`e'_1_bw) + (ft_partner_down_mom_`e'_2 * ft_partner_down_mom_`e'_2_bw) + (ft_partner_leave_`e'_2 * ft_partner_leave_`e'_2_bw) + (lt_other_changes_`e'_2 * lt_other_changes_`e'_2_bw)
+	gen partner_down_mom_up_chg_`e'  =   (mt_mom_`e'_2 * mt_mom_`e'_2_bw) + (ft_partner_down_only_`e'_2 * ft_partner_down_only_`e'_2_bw) + (ft_partner_down_mom_`e'_1 * ft_partner_down_mom_`e'_1_bw) + (ft_partner_leave_`e'_2 * ft_partner_leave_`e'_2_bw) + (lt_other_changes_`e'_2 * lt_other_changes_`e'_2_bw)
+	gen partner_leave_change_`e' =  (mt_mom_`e'_2 * mt_mom_`e'_2_bw) + (ft_partner_down_`e'_2 * ft_partner_down_`e'_2_bw) + (ft_partner_leave_`e'_1 * ft_partner_leave_`e'_1_bw) + (lt_other_changes_`e'_2 * lt_other_changes_`e'_2_bw)
+	gen other_hh_change_`e' =  (mt_mom_`e'_2 * mt_mom_`e'_2_bw) + (ft_partner_down_`e'_2 * ft_partner_down_`e'_2_bw) + (ft_partner_leave_`e'_2 * ft_partner_leave_`e'_2_bw) + (lt_other_changes_`e'_1 * lt_other_changes_`e'_1_bw)
+	
 	local row = `e'*2+3
 	local row2 = `e'*2+4
 	global bw_rate_96_`e' = bw_rate_96_`e'*100
@@ -312,18 +330,32 @@ forvalues e=1/4{
 	putexcel R`row' = ${rate_diff_`e'}, nformat(#.##)
 	global comp_diff_`e' = (comp14_rate96_`e' - bw_rate_96_`e')*100
 	putexcel S`row' = ${comp_diff_`e'}, nformat(#.##)
-	global mom_component_`e' = (mom_change_`e' / total_gap_`e') * 100
+	global mom_component_`e' = (mom_change_`e' - bw_rate_96_`e')*100
 	putexcel T`row' = ${mom_component_`e'}, nformat(#.##)
-	global partner_down_component_`e' = (partner_down_change_`e' / total_gap_`e') * 100
+	global partner_down_component_`e' = (partner_down_change_`e' - bw_rate_96_`e')*100
 	putexcel U`row' = ${partner_down_component_`e'}, nformat(#.##)
-	global partner_down_only_component_`e' = (partner_down_only_chg_`e' / total_gap_`e') * 100
+	global partner_down_only_component_`e' = (partner_down_only_chg_`e' - bw_rate_96_`e')*100
 	putexcel V`row' = ${partner_down_only_component_`e'}, nformat(#.##)
-	global partner_down_mom_component_`e' = (partner_down_mom_up_chg_`e' / total_gap_`e') * 100
+	global partner_down_mom_component_`e' = (partner_down_mom_up_chg_`e' - bw_rate_96_`e')*100
 	putexcel W`row' = ${partner_down_mom_component_`e'}, nformat(#.##)
-	global partner_leave_component_`e' = (partner_leave_change_`e' / total_gap_`e') * 100
+	global partner_leave_component_`e' = (partner_leave_change_`e' - bw_rate_96_`e')*100
 	putexcel X`row' = ${partner_leave_component_`e'}, nformat(#.##)
-	global other_hh_component_`e' = (other_hh_change_`e' / total_gap_`e') * 100
+	global other_hh_component_`e' = (other_hh_change_`e' - bw_rate_96_`e')*100
 	putexcel Y`row' = ${other_hh_component_`e'}, nformat(#.##)
+}
+
+local r1 "5 7 9 11"
+local r2 "6 8 10 12"
+
+forvalues e=1/4{
+    local row1: word `e' of `r1'
+	local row2: word `e' of `r2'
+	putexcel T`row2' = formula(=T`row1'/Q`row1'), nformat(#.##)
+	putexcel U`row2' = formula(=U`row1'/Q`row1'), nformat(#.##)
+	putexcel V`row2' = formula(=V`row1'/Q`row1'), nformat(#.##)
+	putexcel W`row2' = formula(=W`row1'/Q`row1'), nformat(#.##)
+	putexcel X`row2' = formula(=X`row1'/Q`row1'), nformat(#.##)
+	putexcel Y`row2' = formula(=Y`row1'/Q`row1'), nformat(#.##)
 }
 
 *****************************
@@ -370,12 +402,12 @@ forvalues r=1/4{
 	(lt_other_changes_r`r'_2 * lt_other_changes_r`r'_1_bw)
 	
 	gen total_gap_r`r' = (bw_rate_14_r`r' - bw_rate_96_r`r')
-	gen mom_change_r`r' =  (mt_mom_r`r'_2 * mt_mom_r`r'_2_bw) - (mt_mom_r`r'_1 * mt_mom_r`r'_1_bw)
-	gen partner_down_change_r`r' =  (ft_partner_down_r`r'_2 * ft_partner_down_r`r'_2_bw) - (ft_partner_down_r`r'_1 * ft_partner_down_r`r'_1_bw)
-	gen partner_down_only_chg_r`r' = (ft_partner_down_only_r`r'_2 * ft_partner_down_only_r`r'_2_bw) - (ft_partner_down_only_r`r'_1 * ft_partner_down_only_r`r'_1_bw)
-	gen partner_down_mom_up_chg_r`r'  =  (ft_partner_down_mom_r`r'_2 * ft_partner_down_mom_r`r'_2_bw) - (ft_partner_down_mom_r`r'_1 * ft_partner_down_mom_r`r'_1_bw)
-	gen partner_leave_change_r`r' =  (ft_partner_leave_r`r'_2 * ft_partner_leave_r`r'_2_bw) - (ft_partner_leave_r`r'_1 * ft_partner_leave_r`r'_1_bw)
-	gen other_hh_change_r`r' =  (lt_other_changes_r`r'_2 * lt_other_changes_r`r'_2_bw) - (lt_other_changes_r`r'_1 * lt_other_changes_r`r'_1_bw)
+	gen mom_change_r`r' =  (mt_mom_r`r'_1 * mt_mom_r`r'_1_bw) + (ft_partner_down_r`r'_2 * ft_partner_down_r`r'_2_bw) + (ft_partner_leave_r`r'_2 * ft_partner_leave_r`r'_2_bw) + (lt_other_changes_r`r'_2 * lt_other_changes_r`r'_2_bw)
+	gen partner_down_change_r`r' =  (mt_mom_r`r'_2 * mt_mom_r`r'_2_bw) + (ft_partner_down_r`r'_1 * ft_partner_down_r`r'_1_bw) + (ft_partner_leave_r`r'_2 * ft_partner_leave_r`r'_2_bw) + (lt_other_changes_r`r'_2 * lt_other_changes_r`r'_2_bw)
+	gen partner_down_only_chg_r`r' = (mt_mom_r`r'_2 * mt_mom_r`r'_2_bw) + (ft_partner_down_only_r`r'_1 * ft_partner_down_only_r`r'_1_bw) + (ft_partner_down_mom_r`r'_2 * ft_partner_down_mom_r`r'_2_bw) + (ft_partner_leave_r`r'_2 * ft_partner_leave_r`r'_2_bw) + (lt_other_changes_r`r'_2 * lt_other_changes_r`r'_2_bw)
+	gen partner_down_mom_up_chg_r`r'  =   (mt_mom_r`r'_2 * mt_mom_r`r'_2_bw) + (ft_partner_down_only_r`r'_2 * ft_partner_down_only_r`r'_2_bw) + (ft_partner_down_mom_r`r'_1 * ft_partner_down_mom_r`r'_1_bw) + (ft_partner_leave_r`r'_2 * ft_partner_leave_r`r'_2_bw) + (lt_other_changes_r`r'_2 * lt_other_changes_r`r'_2_bw)
+	gen partner_leave_change_r`r' =  (mt_mom_r`r'_2 * mt_mom_r`r'_2_bw) + (ft_partner_down_r`r'_2 * ft_partner_down_r`r'_2_bw) + (ft_partner_leave_r`r'_1 * ft_partner_leave_r`r'_1_bw) + (lt_other_changes_r`r'_2 * lt_other_changes_r`r'_2_bw)
+	gen other_hh_change_r`r' =  (mt_mom_r`r'_2 * mt_mom_r`r'_2_bw) + (ft_partner_down_r`r'_2 * ft_partner_down_r`r'_2_bw) + (ft_partner_leave_r`r'_2 * ft_partner_leave_r`r'_2_bw) + (lt_other_changes_r`r'_1 * lt_other_changes_r`r'_1_bw)
 
 	local row = `r'*2+12
 	local row2 = `r'*2+13
@@ -389,21 +421,33 @@ forvalues r=1/4{
 	putexcel R`row' = ${rate_diff_r`r'}, nformat(#.##)
 	global comp_diff_r`r' = (comp14_rate96_r`r' - bw_rate_96_r`r')*100
 	putexcel S`row' = ${comp_diff_r`r'}, nformat(#.##)
-	global mom_component_r`r' = (mom_change_r`r' / total_gap_r`r') * 100
+	global mom_component_r`r' = (mom_change_r`r' - bw_rate_96_r`r')*100
 	putexcel T`row' = ${mom_component_r`r'}, nformat(#.##)
-	global partner_down_component_r`r' = (partner_down_change_r`r' / total_gap_r`r') * 100
+	global partner_down_component_r`r' = (partner_down_change_r`r' - bw_rate_96_r`r')*100
 	putexcel U`row' = ${partner_down_component_r`r'}, nformat(#.##)
-	global partner_down_only_component_r`r' = (partner_down_only_chg_r`r' / total_gap_r`r') * 100
+	global partner_down_only_component_r`r' = (partner_down_only_chg_r`r' - bw_rate_96_r`r')*100
 	putexcel V`row' = ${partner_down_only_component_r`r'}, nformat(#.##)
-	global partner_down_mom_component_r`r' = (partner_down_mom_up_chg_r`r' / total_gap_r`r') * 100
+	global partner_down_mom_component_r`r' = (partner_down_mom_up_chg_r`r' - bw_rate_96_r`r')*100
 	putexcel W`row' = ${partner_down_mom_component_r`r'}, nformat(#.##)
-	global partner_leave_component_r`r' = (partner_leave_change_r`r' / total_gap_r`r') * 100
+	global partner_leave_component_r`r' = (partner_leave_change_r`r' - bw_rate_96_r`r')*100
 	putexcel X`row' = ${partner_leave_component_r`r'}, nformat(#.##)
-	global other_hh_component_r`r' = (other_hh_change_r`r' / total_gap_r`r') * 100
+	global other_hh_component_r`r' = (other_hh_change_r`r' - bw_rate_96_r`r')*100
 	putexcel Y`row' = ${other_hh_component_r`r'}, nformat(#.##)
 }
 
+local r1 "14 16 18 20"
+local r2 "15 17 19 21"
 
+forvalues r=1/4{
+    local row1: word `r' of `r1'
+	local row2: word `r' of `r2'
+	putexcel T`row2' = formula(=T`row1'/Q`row1'), nformat(#.##)
+	putexcel U`row2' = formula(=U`row1'/Q`row1'), nformat(#.##)
+	putexcel V`row2' = formula(=V`row1'/Q`row1'), nformat(#.##)
+	putexcel W`row2' = formula(=W`row1'/Q`row1'), nformat(#.##)
+	putexcel X`row2' = formula(=X`row1'/Q`row1'), nformat(#.##)
+	putexcel Y`row2' = formula(=Y`row1'/Q`row1'), nformat(#.##)
+}
 
 *****************************
 * Combined education
@@ -447,12 +491,12 @@ forvalues e=1/3{
 	(lt_other_changes_e`e'_2 * lt_other_changes_e`e'_1_bw)
 	
 	gen total_gap_e`e' = (bw_rate_14_e`e' - bw_rate_96_e`e')
-	gen mom_change_e`e' =  (mt_mom_e`e'_2 * mt_mom_e`e'_2_bw) - (mt_mom_e`e'_1 * mt_mom_e`e'_1_bw)
-	gen partner_down_change_e`e' =  (ft_partner_down_e`e'_2 * ft_partner_down_e`e'_2_bw) - (ft_partner_down_e`e'_1 * ft_partner_down_e`e'_1_bw)
-	gen partner_down_only_chg_e`e' = (ft_partner_down_only_e`e'_2 * ft_partner_down_only_e`e'_2_bw) - (ft_partner_down_only_e`e'_1 * ft_partner_down_only_e`e'_1_bw)
-	gen partner_down_mom_up_chg_e`e'  =  (ft_partner_down_mom_e`e'_2 * ft_partner_down_mom_e`e'_2_bw) - (ft_partner_down_mom_e`e'_1 * ft_partner_down_mom_e`e'_1_bw)
-	gen partner_leave_change_e`e' =  (ft_partner_leave_e`e'_2 * ft_partner_leave_e`e'_2_bw) - (ft_partner_leave_e`e'_1 * ft_partner_leave_e`e'_1_bw)
-	gen other_hh_change_e`e' =  (lt_other_changes_e`e'_2 * lt_other_changes_e`e'_2_bw) - (lt_other_changes_e`e'_1 * lt_other_changes_e`e'_1_bw)
+	gen mom_change_e`e' =  (mt_mom_e`e'_1 * mt_mom_e`e'_1_bw) + (ft_partner_down_e`e'_2 * ft_partner_down_e`e'_2_bw) + (ft_partner_leave_e`e'_2 * ft_partner_leave_e`e'_2_bw) + (lt_other_changes_e`e'_2 * lt_other_changes_e`e'_2_bw)
+	gen partner_down_change_e`e' =  (mt_mom_e`e'_2 * mt_mom_e`e'_2_bw) + (ft_partner_down_e`e'_1 * ft_partner_down_e`e'_1_bw) + (ft_partner_leave_e`e'_2 * ft_partner_leave_e`e'_2_bw) + (lt_other_changes_e`e'_2 * lt_other_changes_e`e'_2_bw)
+	gen partner_down_only_chg_e`e' = (mt_mom_e`e'_2 * mt_mom_e`e'_2_bw) + (ft_partner_down_only_e`e'_1 * ft_partner_down_only_e`e'_1_bw) + (ft_partner_down_mom_e`e'_2 * ft_partner_down_mom_e`e'_2_bw) + (ft_partner_leave_e`e'_2 * ft_partner_leave_e`e'_2_bw) + (lt_other_changes_e`e'_2 * lt_other_changes_e`e'_2_bw)
+	gen partner_down_mom_up_chg_e`e'  =   (mt_mom_e`e'_2 * mt_mom_e`e'_2_bw) + (ft_partner_down_only_e`e'_2 * ft_partner_down_only_e`e'_2_bw) + (ft_partner_down_mom_e`e'_1 * ft_partner_down_mom_e`e'_1_bw) + (ft_partner_leave_e`e'_2 * ft_partner_leave_e`e'_2_bw) + (lt_other_changes_e`e'_2 * lt_other_changes_e`e'_2_bw)
+	gen partner_leave_change_e`e' =  (mt_mom_e`e'_2 * mt_mom_e`e'_2_bw) + (ft_partner_down_e`e'_2 * ft_partner_down_e`e'_2_bw) + (ft_partner_leave_e`e'_1 * ft_partner_leave_e`e'_1_bw) + (lt_other_changes_e`e'_2 * lt_other_changes_e`e'_2_bw)
+	gen other_hh_change_e`e' =  (mt_mom_e`e'_2 * mt_mom_e`e'_2_bw) + (ft_partner_down_e`e'_2 * ft_partner_down_e`e'_2_bw) + (ft_partner_leave_e`e'_2 * ft_partner_leave_e`e'_2_bw) + (lt_other_changes_e`e'_1 * lt_other_changes_e`e'_1_bw)
 
 	local row = `e'*2+21
 	local row2 = `e'*2+22
@@ -466,20 +510,33 @@ forvalues e=1/3{
 	putexcel R`row' = ${rate_diff_e`e'}, nformat(#.##)
 	global comp_diff_e`e' = (comp14_rate96_e`e' - bw_rate_96_e`e')*100
 	putexcel S`row' = ${comp_diff_e`e'}, nformat(#.##)
-	global mom_component_e`e' = (mom_change_e`e' / total_gap_e`e') * 100
+	global mom_component_e`e' = (mom_change_e`e' - bw_rate_96_e`e')*100
 	putexcel T`row' = ${mom_component_e`e'}, nformat(#.##)
-	global partner_down_component_e`e' = (partner_down_change_e`e' / total_gap_e`e') * 100
+	global partner_down_component_e`e' = (partner_down_change_e`e' - bw_rate_96_e`e')*100
 	putexcel U`row' = ${partner_down_component_e`e'}, nformat(#.##)
-	global partner_down_only_component_e`e' = (partner_down_only_chg_e`e' / total_gap_e`e') * 100
+	global partner_down_only_component_e`e' = (partner_down_only_chg_e`e' - bw_rate_96_e`e')*100
 	putexcel V`row' = ${partner_down_only_component_e`e'}, nformat(#.##)
-	global partner_down_mom_component_e`e' = (partner_down_mom_up_chg_e`e' / total_gap_e`e') * 100
+	global partner_down_mom_component_e`e' = (partner_down_mom_up_chg_e`e' - bw_rate_96_e`e')*100
 	putexcel W`row' = ${partner_down_mom_component_e`e'}, nformat(#.##)
-	global partner_leave_component_e`e' = (partner_leave_change_e`e' / total_gap_e`e') * 100
+	global partner_leave_component_e`e' = (partner_leave_change_e`e' - bw_rate_96_e`e')*100
 	putexcel X`row' = ${partner_leave_component_e`e'}, nformat(#.##)
-	global other_hh_component_e`e' = (other_hh_change_e`e' / total_gap_e`e') * 100
+	global other_hh_component_e`e' = (other_hh_change_e`e' - bw_rate_96_e`e')*100
 	putexcel Y`row' = ${other_hh_component_e`e'}, nformat(#.##)
 }
 
+local r1 "23 25 27"
+local r2 "24 26 28"
+
+forvalues e=1/3{
+    local row1: word `e' of `r1'
+	local row2: word `e' of `r2'
+	putexcel T`row2' = formula(=T`row1'/Q`row1'), nformat(#.##)
+	putexcel U`row2' = formula(=U`row1'/Q`row1'), nformat(#.##)
+	putexcel V`row2' = formula(=V`row1'/Q`row1'), nformat(#.##)
+	putexcel W`row2' = formula(=W`row1'/Q`row1'), nformat(#.##)
+	putexcel X`row2' = formula(=X`row1'/Q`row1'), nformat(#.##)
+	putexcel Y`row2' = formula(=Y`row1'/Q`row1'), nformat(#.##)
+}
 
 ********************************************************************************
 * Second specification: "Mom" is reference category, rest are unique
@@ -607,10 +664,10 @@ gen e2_bw_rate_14 = (mt2_mom_2 * mt2_mom_2_bw) + (ft2_partner_down_2 * ft2_partn
 gen e2_comp96_rate14 = (mt2_mom_1 * mt2_mom_2_bw) + (ft2_partner_down_1 * ft2_partner_down_2_bw) + (ft2_partner_leave_1 * ft2_partner_leave_2_bw) + (lt2_other_changes_1 * lt2_other_changes_2_bw)
 gen e2_comp14_rate96 = (mt2_mom_2 * mt2_mom_1_bw) + (ft2_partner_down_2 * ft2_partner_down_1_bw) + (ft2_partner_leave_2 * ft2_partner_leave_1_bw) + (lt2_other_changes_2 * lt2_other_changes_1_bw)
 gen e2_total_gap = (e2_bw_rate_14 - e2_bw_rate_96)
-gen e2_mom_change =  (mt2_mom_2 * mt2_mom_2_bw) - (mt2_mom_1 * mt2_mom_1_bw)
-gen e2_partner_down_change =  (ft2_partner_down_2 * ft2_partner_down_2_bw) - (ft2_partner_down_1 * ft2_partner_down_1_bw)
-gen e2_partner_leave_change =  (ft2_partner_leave_2 * ft2_partner_leave_2_bw) - (ft2_partner_leave_1 * ft2_partner_leave_1_bw)
-gen e2_other_hh_change =  (lt2_other_changes_2 * lt2_other_changes_2_bw) - (lt2_other_changes_1 * lt2_other_changes_1_bw)
+gen e2_mom_change =  (mt2_mom_1 * mt2_mom_1_bw) + (ft2_partner_down_2 * ft2_partner_down_2_bw) + (ft2_partner_leave_2 * ft2_partner_leave_2_bw) + (lt2_other_changes_2 * lt2_other_changes_2_bw)
+gen e2_partner_down_change =  (mt2_mom_2 * mt2_mom_2_bw) + (ft2_partner_down_1 * ft2_partner_down_1_bw) + (ft2_partner_leave_2 * ft2_partner_leave_2_bw) + (lt2_other_changes_2 * lt2_other_changes_2_bw)
+gen e2_partner_leave_change =  (mt2_mom_2 * mt2_mom_2_bw) + (ft2_partner_down_2 * ft2_partner_down_2_bw) + (ft2_partner_leave_1 * ft2_partner_leave_1_bw) + (lt2_other_changes_2 * lt2_other_changes_2_bw)
+gen e2_other_hh_change =  (mt2_mom_2 * mt2_mom_2_bw) + (ft2_partner_down_2 * ft2_partner_down_2_bw) + (ft2_partner_leave_2 * ft2_partner_leave_2_bw) + (lt2_other_changes_1 * lt2_other_changes_1_bw)
 
 global e2_bw_rate_96 = e2_bw_rate_96*100
 putexcel L2 = $e2_bw_rate_96, nformat(#.##)
@@ -622,18 +679,32 @@ global e2_rate_diff = (e2_comp96_rate14 - e2_bw_rate_96)*100
 putexcel N2 = $e2_rate_diff, nformat(#.##)
 global e2_comp_diff = (e2_comp14_rate96 - e2_bw_rate_96)*100
 putexcel O2 = $e2_comp_diff, nformat(#.##)
-global e2_mom_component = (e2_mom_change / e2_total_gap) * 100
+global e2_mom_component = (e2_mom_change - e2_bw_rate_96)*100
 putexcel P2 = $e2_mom_component, nformat(#.##)
-global e2_partner_down_component = (e2_partner_down_change / e2_total_gap) * 100
+global e2_partner_down_component = (e2_partner_down_change - e2_bw_rate_96)*100
 putexcel Q2 = $e2_partner_down_component, nformat(#.##)
-global e2_partner_leave_component = (e2_partner_leave_change / e2_total_gap) * 100
+global e2_partner_leave_component = (e2_partner_leave_change - e2_bw_rate_96)*100
 putexcel R2 = $e2_partner_leave_component, nformat(#.##)
-global e2_other_hh_component = (e2_other_hh_change / e2_total_gap) * 100
+global e2_other_hh_component = (e2_other_hh_change - e2_bw_rate_96)*100
 putexcel S2 = $e2_other_hh_component, nformat(#.##)
 
 display %9.3f ${e2_total_gap}
 display %9.3f ${e2_rate_diff}
 display %9.3f ${e2_comp_diff}
+
+putexcel P3 = formula(=P2/M2), nformat(#.##)
+putexcel Q3 = formula(=Q2/M2), nformat(#.##)
+putexcel R3 = formula(=R2/M2), nformat(#.##)
+putexcel S3 = formula(=S2/M2), nformat(#.##)
+
+
+/* old component defs:
+gen e2_mom_change =  (mt2_mom_2 * mt2_mom_2_bw) - (mt2_mom_1 * mt2_mom_1_bw)
+gen e2_partner_down_change =  (ft2_partner_down_2 * ft2_partner_down_2_bw) - (ft2_partner_down_1 * ft2_partner_down_1_bw)
+gen e2_partner_leave_change =  (ft2_partner_leave_2 * ft2_partner_leave_2_bw) - (ft2_partner_leave_1 * ft2_partner_leave_1_bw)
+gen e2_other_hh_change =  (lt2_other_changes_2 * lt2_other_changes_2_bw) - (lt2_other_changes_1 * lt2_other_changes_1_bw)
+*/
+
 
 *****************************
 * By education
@@ -673,11 +744,12 @@ forvalues e=1/4{
 	(lt2_other_changes_`e'_2 * lt2_other_changes_`e'_1_bw)
 	
 	gen e2_total_gap_`e' = (e2_bw_rate_14_`e' - e2_bw_rate_96_`e')
-	gen e2_mom_change_`e' =  (mt2_mom_`e'_2 * mt2_mom_`e'_2_bw) - (mt2_mom_`e'_1 * mt2_mom_`e'_1_bw)
-	gen e2_partner_down_change_`e' =  (ft2_partner_down_`e'_2 * ft2_partner_down_`e'_2_bw) - (ft2_partner_down_`e'_1 * ft2_partner_down_`e'_1_bw)
-	gen e2_partner_leave_change_`e' =  (ft2_partner_leave_`e'_2 * ft2_partner_leave_`e'_2_bw) - (ft2_partner_leave_`e'_1 * ft2_partner_leave_`e'_1_bw)
-	gen e2_other_hh_change_`e' =  (lt2_other_changes_`e'_2 * lt2_other_changes_`e'_2_bw) - (lt2_other_changes_`e'_1 * lt2_other_changes_`e'_1_bw)
-
+	gen e2_mom_change_`e' =  (mt2_mom_`e'_1 * mt2_mom_`e'_1_bw) + (ft2_partner_down_`e'_2 * ft2_partner_down_`e'_2_bw) + (ft2_partner_leave_`e'_2 * ft2_partner_leave_`e'_2_bw) + (lt2_other_changes_`e'_2 * lt2_other_changes_`e'_2_bw)
+	gen e2_partner_down_change_`e' =  (mt2_mom_`e'_2 * mt2_mom_`e'_2_bw) + (ft2_partner_down_`e'_1 * ft2_partner_down_`e'_1_bw) + (ft2_partner_leave_`e'_2 * ft2_partner_leave_`e'_2_bw) + (lt2_other_changes_`e'_2 * lt2_other_changes_`e'_2_bw)
+	gen e2_partner_leave_change_`e' =  (mt2_mom_`e'_2 * mt2_mom_`e'_2_bw) + (ft2_partner_down_`e'_2 * ft2_partner_down_`e'_2_bw) + (ft2_partner_leave_`e'_1 * ft2_partner_leave_`e'_1_bw) + (lt2_other_changes_`e'_2 * lt2_other_changes_`e'_2_bw)
+	gen e2_other_hh_change_`e' =  (mt2_mom_`e'_2 * mt2_mom_`e'_2_bw) + (ft2_partner_down_`e'_2 * ft2_partner_down_`e'_2_bw) + (ft2_partner_leave_`e'_2 * ft2_partner_leave_`e'_2_bw) + (lt2_other_changes_`e'_1 * lt2_other_changes_`e'_1_bw)
+	
+	
 	local row = `e'*2+3
 	local row2 = `e'*2+4
 	global e2_bw_rate_96_`e' = e2_bw_rate_96_`e'*100
@@ -690,15 +762,28 @@ forvalues e=1/4{
 	putexcel N`row' = ${e2_rate_diff_`e'}, nformat(#.##)
 	global e2_comp_diff_`e' = (e2_comp14_rate96_`e' - e2_bw_rate_96_`e')*100
 	putexcel O`row' = ${e2_comp_diff_`e'}, nformat(#.##)
-	global e2_mom_component_`e' = (e2_mom_change_`e' / e2_total_gap_`e') * 100
+	global e2_mom_component_`e' = (e2_mom_change_`e' - e2_bw_rate_96_`e')*100
 	putexcel P`row' = ${e2_mom_component_`e'}, nformat(#.##)
-	global e2_partner_down_component_`e' = (e2_partner_down_change_`e' / e2_total_gap_`e') * 100
+	global e2_partner_down_component_`e' = (e2_partner_down_change_`e' - e2_bw_rate_96_`e')*100
 	putexcel Q`row' = ${e2_partner_down_component_`e'}, nformat(#.##)
-	global e2_partner_leave_component_`e' = (e2_partner_leave_change_`e' / e2_total_gap_`e') * 100
+	global e2_partner_leave_component_`e' = (e2_partner_leave_change_`e'- e2_bw_rate_96_`e')*100
 	putexcel R`row' = ${e2_partner_leave_component_`e'}, nformat(#.##)
-	global e2_other_hh_component_`e' = (e2_other_hh_change_`e' / e2_total_gap_`e') * 100
+	global e2_other_hh_component_`e' = (e2_other_hh_change_`e' - e2_bw_rate_96_`e')*100
 	putexcel S`row' = ${e2_other_hh_component_`e'}, nformat(#.##)
 }
+
+local r1 "5 7 9 11"
+local r2 "6 8 10 12"
+
+forvalues e=1/4{
+    local row1: word `e' of `r1'
+	local row2: word `e' of `r2'
+	putexcel P`row2' = formula(=P`row1'/M`row1'), nformat(#.##)
+	putexcel Q`row2' = formula(=Q`row1'/M`row1'), nformat(#.##)
+	putexcel R`row2' = formula(=R`row1'/M`row1'), nformat(#.##)
+	putexcel S`row2' = formula(=S`row1'/M`row1'), nformat(#.##)
+}
+
 
 *****************************
 * By race
@@ -738,10 +823,10 @@ forvalues r=1/4{
 	(lt2_other_changes_r`r'_2 * lt2_other_changes_r`r'_1_bw)
 	
 	gen e2_total_gap_r`r' = (e2_bw_rate_14_r`r' - e2_bw_rate_96_r`r')
-	gen e2_mom_change_r`r' =  (mt2_mom_r`r'_2 * mt2_mom_r`r'_2_bw) - (mt2_mom_r`r'_1 * mt2_mom_r`r'_1_bw)
-	gen e2_partner_down_change_r`r' =  (ft2_partner_down_r`r'_2 * ft2_partner_down_r`r'_2_bw) - (ft2_partner_down_r`r'_1 * ft2_partner_down_r`r'_1_bw)
-	gen e2_partner_leave_change_r`r' =  (ft2_partner_leave_r`r'_2 * ft2_partner_leave_r`r'_2_bw) - (ft2_partner_leave_r`r'_1 * ft2_partner_leave_r`r'_1_bw)
-	gen e2_other_hh_change_r`r' =  (lt2_other_changes_r`r'_2 * lt2_other_changes_r`r'_2_bw) - (lt2_other_changes_r`r'_1 * lt2_other_changes_r`r'_1_bw)
+	gen e2_mom_change_r`r' =  (mt2_mom_r`r'_1 * mt2_mom_r`r'_1_bw) + (ft2_partner_down_r`r'_2 * ft2_partner_down_r`r'_2_bw) + (ft2_partner_leave_r`r'_2 * ft2_partner_leave_r`r'_2_bw) + (lt2_other_changes_r`r'_2 * lt2_other_changes_r`r'_2_bw)
+	gen e2_partner_down_change_r`r' =  (mt2_mom_r`r'_2 * mt2_mom_r`r'_2_bw) + (ft2_partner_down_r`r'_1 * ft2_partner_down_r`r'_1_bw) + (ft2_partner_leave_r`r'_2 * ft2_partner_leave_r`r'_2_bw) + (lt2_other_changes_r`r'_2 * lt2_other_changes_r`r'_2_bw)
+	gen e2_partner_leave_change_r`r' =  (mt2_mom_r`r'_2 * mt2_mom_r`r'_2_bw) + (ft2_partner_down_r`r'_2 * ft2_partner_down_r`r'_2_bw) + (ft2_partner_leave_r`r'_1 * ft2_partner_leave_r`r'_1_bw) + (lt2_other_changes_r`r'_2 * lt2_other_changes_r`r'_2_bw)
+	gen e2_other_hh_change_r`r' =  (mt2_mom_r`r'_2 * mt2_mom_r`r'_2_bw) + (ft2_partner_down_r`r'_2 * ft2_partner_down_r`r'_2_bw) + (ft2_partner_leave_r`r'_2 * ft2_partner_leave_r`r'_2_bw) + (lt2_other_changes_r`r'_1 * lt2_other_changes_r`r'_1_bw)
 
 	local row = `r'*2+12
 	local row2 = `r'*2+13
@@ -755,17 +840,27 @@ forvalues r=1/4{
 	putexcel N`row' = ${e2_rate_diff_r`r'}, nformat(#.##)
 	global e2_comp_diff_r`r' = (e2_comp14_rate96_r`r' - e2_bw_rate_96_r`r')*100
 	putexcel O`row' = ${e2_comp_diff_r`r'}, nformat(#.##)
-	global e2_mom_component_r`r' = (e2_mom_change_r`r' / e2_total_gap_r`r') * 100
+	global e2_mom_component_r`r' = (e2_mom_change_r`r' - e2_bw_rate_96_r`r')*100
 	putexcel P`row' = ${e2_mom_component_r`r'}, nformat(#.##)
-	global e2_partner_down_component_r`r' = (e2_partner_down_change_r`r' / e2_total_gap_r`r') * 100
+	global e2_partner_down_component_r`r' = (e2_partner_down_change_r`r' - e2_bw_rate_96_r`r')*100
 	putexcel Q`row' = ${e2_partner_down_component_r`r'}, nformat(#.##)
-	global e2_partner_leave_component_r`r' = (e2_partner_leave_change_r`r' / e2_total_gap_r`r') * 100
+	global e2_partner_leave_component_r`r' = (e2_partner_leave_change_r`r' - e2_bw_rate_96_r`r')*100
 	putexcel R`row' = ${e2_partner_leave_component_r`r'}, nformat(#.##)
-	global e2_other_hh_component_r`r' = (e2_other_hh_change_r`r' / e2_total_gap_r`r') * 100
+	global e2_other_hh_component_r`r' = (e2_other_hh_change_r`r' - e2_bw_rate_96_r`r')*100
 	putexcel S`row' = ${e2_other_hh_component_r`r'}, nformat(#.##)
 }
 
+local r1 "14 16 18 20"
+local r2 "15 17 19 21"
 
+forvalues r=1/4{
+    local row1: word `r' of `r1'
+	local row2: word `r' of `r2'
+	putexcel P`row2' = formula(=P`row1'/M`row1'), nformat(#.##)
+	putexcel Q`row2' = formula(=Q`row1'/M`row1'), nformat(#.##)
+	putexcel R`row2' = formula(=R`row1'/M`row1'), nformat(#.##)
+	putexcel S`row2' = formula(=S`row1'/M`row1'), nformat(#.##)
+}
 
 *****************************
 * Combined education
@@ -806,10 +901,10 @@ forvalues e=1/3{
 	(lt2_other_changes_e`e'_2 * lt2_other_changes_e`e'_1_bw)
 	
 	gen e2_total_gap_e`e' = (e2_bw_rate_14_e`e' - e2_bw_rate_96_e`e')
-	gen e2_mom_change_e`e' =  (mt2_mom_e`e'_2 * mt2_mom_e`e'_2_bw) - (mt2_mom_e`e'_1 * mt2_mom_e`e'_1_bw)
-	gen e2_partner_down_change_e`e' =  (ft2_partner_down_e`e'_2 * ft2_partner_down_e`e'_2_bw) - (ft2_partner_down_e`e'_1 * ft2_partner_down_e`e'_1_bw)
-	gen e2_partner_leave_change_e`e' =  (ft2_partner_leave_e`e'_2 * ft2_partner_leave_e`e'_2_bw) - (ft2_partner_leave_e`e'_1 * ft2_partner_leave_e`e'_1_bw)
-	gen e2_other_hh_change_e`e' =  (lt2_other_changes_e`e'_2 * lt2_other_changes_e`e'_2_bw) - (lt2_other_changes_e`e'_1 * lt2_other_changes_e`e'_1_bw)
+	gen e2_mom_change_e`e' =  (mt2_mom_e`e'_1 * mt2_mom_e`e'_1_bw) + (ft2_partner_down_e`e'_2 * ft2_partner_down_e`e'_2_bw) + (ft2_partner_leave_e`e'_2 * ft2_partner_leave_e`e'_2_bw) + (lt2_other_changes_e`e'_2 * lt2_other_changes_e`e'_2_bw)
+	gen e2_partner_down_change_e`e' =  (mt2_mom_e`e'_2 * mt2_mom_e`e'_2_bw) + (ft2_partner_down_e`e'_1 * ft2_partner_down_e`e'_1_bw) + (ft2_partner_leave_e`e'_2 * ft2_partner_leave_e`e'_2_bw) + (lt2_other_changes_e`e'_2 * lt2_other_changes_e`e'_2_bw)
+	gen e2_partner_leave_change_e`e' =  (mt2_mom_e`e'_2 * mt2_mom_e`e'_2_bw) + (ft2_partner_down_e`e'_2 * ft2_partner_down_e`e'_2_bw) + (ft2_partner_leave_e`e'_1 * ft2_partner_leave_e`e'_1_bw) + (lt2_other_changes_e`e'_2 * lt2_other_changes_e`e'_2_bw)
+	gen e2_other_hh_change_e`e' =  (mt2_mom_e`e'_2 * mt2_mom_e`e'_2_bw) + (ft2_partner_down_e`e'_2 * ft2_partner_down_e`e'_2_bw) + (ft2_partner_leave_e`e'_2 * ft2_partner_leave_e`e'_2_bw) + (lt2_other_changes_e`e'_1 * lt2_other_changes_e`e'_1_bw)
 
 	local row = `e'*2+21
 	local row2 = `e'*2+22
@@ -823,14 +918,26 @@ forvalues e=1/3{
 	putexcel N`row' = ${e2_rate_diff_e`e'}, nformat(#.##)
 	global e2_comp_diff_e`e' = (e2_comp14_rate96_e`e' - e2_bw_rate_96_e`e')*100
 	putexcel O`row' = ${e2_comp_diff_e`e'}, nformat(#.##)
-	global e2_mom_component_e`e' = (e2_mom_change_e`e' / e2_total_gap_e`e') * 100
+	global e2_mom_component_e`e' = (e2_mom_change_e`e' - e2_bw_rate_96_e`e')*100
 	putexcel P`row' = ${e2_mom_component_e`e'}, nformat(#.##)
-	global e2_partner_down_component_e`e' = (e2_partner_down_change_e`e' / e2_total_gap_e`e') * 100
+	global e2_partner_down_component_e`e' = (e2_partner_down_change_e`e' - e2_bw_rate_96_e`e')*100
 	putexcel Q`row' = ${e2_partner_down_component_e`e'}, nformat(#.##)
-	global e2_partner_leave_component_e`e' = (e2_partner_leave_change_e`e' / e2_total_gap_e`e') * 100
+	global e2_partner_leave_component_e`e' = (e2_partner_leave_change_e`e' - e2_bw_rate_96_e`e')*100
 	putexcel R`row' = ${e2_partner_leave_component_e`e'}, nformat(#.##)
-	global e2_other_hh_component_e`e' = (e2_other_hh_change_e`e' / e2_total_gap_e`e') * 100
+	global e2_other_hh_component_e`e' = (e2_other_hh_change_e`e' - e2_bw_rate_96_e`e')*100
 	putexcel S`row' = ${e2_other_hh_component_e`e'}, nformat(#.##)
+}
+
+local r1 "23 25 27"
+local r2 "24 26 28"
+
+forvalues e=1/3{
+    local row1: word `e' of `r1'
+	local row2: word `e' of `r2'
+	putexcel P`row2' = formula(=P`row1'/M`row1'), nformat(#.##)
+	putexcel Q`row2' = formula(=Q`row1'/M`row1'), nformat(#.##)
+	putexcel R`row2' = formula(=R`row1'/M`row1'), nformat(#.##)
+	putexcel S`row2' = formula(=S`row1'/M`row1'), nformat(#.##)
 }
 
 *****************************
