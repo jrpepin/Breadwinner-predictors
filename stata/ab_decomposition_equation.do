@@ -1000,12 +1000,16 @@ svy: tab survey trans_bw60_alt2 if (bw60[_n-1]==0 | bw60[_n-1]==.) & year==(year
 ********************************************************************************
 * Some exploration
 ********************************************************************************
+log using "$logdir/exploratory_data.log", replace
+
 browse SSUID PNUM year earnings thearn_alt earnings_ratio bw60 bw50 trans_bw60_alt2
 
 gen earnings_ratio_m = earnings_ratio
 replace earnings_ratio=0 if earnings_ratio==.
 
-tabstat earnings_ratio, by(survey_yr)
+tabstat earnings_ratio, by(survey_yr) statistics(mean p50)
+tabstat earnings_ratio if bw60==1, by(survey_yr) statistics(mean p50)
+tabstat earnings_ratio if trans_bw60_alt2==1, by(survey_yr) statistics(mean p50)
 
 sum earnings_ratio if survey_yr==1, detail
 sum earnings_ratio if survey_yr==2, detail
@@ -1015,6 +1019,42 @@ label define ratio 0 "0" 1 "0.0-25%" 2 "25-49%" 3 "50-60%" 4 "60-75%" 5 "75%-99%
 label values earn_ratio_gp ratio
 
 tab survey_yr earn_ratio_gp, row
+
+tabstat thearn_alt, by(survey_yr) statistics(mean p50)
+tabstat thearn_alt, by(bw60) statistics(mean p50) // on average, female bws hh earnings are lower, BUT doesn't change upon transition for those households specifically?
+tabstat thearn_alt, by(trans_bw60_alt2) statistics(mean p50) // on average, female bws hh earnings are lower, BUT doesn't change upon transition for those households specifically?
+
+tabstat thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], statistics(mean p50) // this is average POST transition - 35952.83
+tabstat thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , statistics(mean p50) // pre? 40092.59
+
+tabstat thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, statistics(mean p50)
+tabstat thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, statistics(mean p50)
+
+tabstat thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
+tabstat thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
+
+tabstat earnings if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], statistics(mean p50)
+tabstat earnings if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , statistics(mean p50)
+
+tabstat earnings if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, statistics(mean p50)
+tabstat earnings if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, statistics(mean p50)
+
+tabstat earnings if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
+tabstat earnings if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
+
+tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], statistics(mean p50)
+tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , statistics(mean p50)
+
+tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, statistics(mean p50)
+tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, statistics(mean p50)
+
+tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
+tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
+
+log close
+
+
+*tabstat thearn_alt[_n-1] if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) // does this work for PRE? NO
 
 /*
 
