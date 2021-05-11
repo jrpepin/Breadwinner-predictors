@@ -13,7 +13,7 @@ di "$S_DATE"
 * The data files used in this script are the compressed data files that we
 * created from the Census data files. 
 
-use "$SIPP14keep/sipp96_data.dta", clear
+use "$SIPP96keep/sipp96_data.dta", clear
 
 ********************************************************************************
 * Create and format variables
@@ -475,4 +475,4 @@ restore
 
 */
 
-save "$SIPP14keep/sipp96tpearn_all", replace
+save "$SIPP96keep/sipp96tpearn_all", replace

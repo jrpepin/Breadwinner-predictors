@@ -9,12 +9,7 @@
 * A1. ENVIRONMENT
 ********************************************************************************
 
-* The current directory is assumed to be the stata directory within the stata sub-directory.
-* cd ".../Breadwinner-predictors/stata" 
-
-// Run the setup script
-	do "00_setup_breadwinner_environment"
-
+* Before running this code, be sure to look at the README.md file
 ********************************************************************************
 * A2. DATA
 ********************************************************************************

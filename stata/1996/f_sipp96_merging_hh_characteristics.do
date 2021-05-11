@@ -34,7 +34,7 @@ rename from_num PNUM
 save "$tempdir/s96_relationship_details_wide", replace 
 
 * Final sample file:
-use "$SIPP14keep/sipp96tpearn_all", clear // created in measures and sample
+use "$SIPP96keep/sipp96tpearn_all", clear // created in measures and sample
 
 merge 1:1 SSUID ERESIDENCEID panelmonth PNUM using "$tempdir/s96_relationship_details_wide.dta"
 
@@ -44,7 +44,7 @@ tab hhsize if _merge==1 // confirming that the unmatched in master (_merge==1) a
 
 drop from_* eprlpn* erelat* // just want to use the "to" attributes aka others in HH. Will use original file for respondent's characteristics. This will help simplify. also removing old person level variables; will use ones I added
 
-save "$SIPP14keep/sipp96tpearn_rel.dta", replace
+save "$SIPP96keep/sipp96tpearn_rel.dta", replace
 
 // union status recodes - compare these to using simplistic gain or lose partner / gain or lose spouse later on - also concerned here, on matching of spouse and marital status
 
@@ -107,4 +107,4 @@ replace status_b1 = 1 if (yrfirstbirth-tlmyear) <=6 & status_b1==. // there are 
 label define birth_status 1 "Married" 2 "Never Married" 3  "Widowed" 4 "Divorced or Separated"
 label values status_b1 birth_status
 
-save "$SIPP14keep/sipp96tpearn_rel.dta", replace
+save "$SIPP96keep/sipp96tpearn_rel.dta", replace

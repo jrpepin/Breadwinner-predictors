@@ -17,7 +17,7 @@ di "$S_DATE"
 ********************************************************************************
 * Create descrptive statistics to prep for annualized variables
 ********************************************************************************
-use "$SIPP14keep/sipp96tpearn_rel.dta", clear
+use "$SIPP96keep/sipp96tpearn_rel.dta", clear
 
 // Create variables with the first and last month of observation by year
    egen startmonth=min(monthcode), by(SSUID PNUM year)
@@ -389,4 +389,4 @@ replace to_earnings`r'=. if to_mis_earnings`r'==.
 	replace bw60_alt= 0 					if hh_noearnings==1
 	*/
 	
-save "$SIPP14keep/sipp96_annual_bw_status.dta", replace
+save "$SIPP96keep/sipp96_annual_bw_status.dta", replace

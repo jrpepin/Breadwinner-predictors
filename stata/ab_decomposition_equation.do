@@ -12,7 +12,7 @@ di "$S_DATE"
 
 * File used was created in aa_combined_models.do
 
-use "$SIPP14keep/combined_annual_bw_status.dta", clear
+use "$combined_data/combined_annual_bw_status.dta", clear
 
 sort SSUID PNUM year
 
@@ -942,7 +942,7 @@ forvalues e=1/3{
 
 *****************************
 // Create html document to describe results
-dyndoc "$SIPP2014_code/Predictor_Decomposition.md", saving($results/Predictor_Decomposition.html) replace
+dyndoc "$bw_base_code/Predictor_Decomposition.md", saving($results/Predictor_Decomposition.html) replace
 
 
 

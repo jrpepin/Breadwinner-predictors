@@ -12,7 +12,7 @@ di "$S_DATE"
 * each person's relationship to every other person in the household by month
 
 // Import relationship data
-use "$SIPP14keep/sipp96_hhdata.dta", clear
+use "$SIPP96keep/sipp96_hhdata.dta", clear
 
 // exploring HH roster
 // browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
@@ -31,7 +31,7 @@ reshape wide PNUM errp,i(SSUID ERESIDENCEID panelmonth) j(person)
 
 save "$tempdir/sipp96_hh_rel_wide.dta", replace
 
-use "$SIPP14keep/sipp96_hhdata.dta", clear	
+use "$SIPP96keep/sipp96_hhdata.dta", clear	
 drop erelat* eprlpn* // removing these to avoid confusion - only accurate for wave 2
 
 merge m:1 SSUID ERESIDENCEID panelmonth using "$tempdir/sipp96_hh_rel_wide.dta"
@@ -114,7 +114,7 @@ use "$tempdir/s96_rel_pairs_bymonth.dta", clear
 // first need a view of "to_num's" relationship
 rename from_num PNUM
 
-merge m:1 SSUID ERESIDENCEID PNUM panelmonth using "$SIPP14keep/sipp96_hhdata.dta", keepusing(errp)
+merge m:1 SSUID ERESIDENCEID PNUM panelmonth using "$SIPP96keep/sipp96_hhdata.dta", keepusing(errp)
 drop _merge
 
 rename PNUM from_num
@@ -293,7 +293,7 @@ drop _merge
 
 local keepvars "thtotinc thpov efkind tftotinc esex wpfinwgt tage ems epnspous epnmom epndad etypmom etypdad ulftmain uentmain tpearn programs benefits renroll eenlevel epdjbthn ejobcntr edisabl edisprev ersnowrk eawop eptwrk eptresn rmesr rwksperm ersend1 ejbhrs1 tpmsum1 epayhr1 tpyrate1 rpyper1 ejbind1 tjbocc1 ersend2 ejbhrs2 tpmsum2 epayhr2 tpyrate2 rpyper2 ejbind2 tjbocc2 epatyp5 emarpth exmar tfmyear tlmyear tfrchl tfrinhh tmomchl emomlivh efbrthmo tfbrthyr ragfbrth elbirtmo tlbirtyr efblivnw elblivnw earnings race educ employ jobchange_1 jobchange_2 better_job hourly_est1 hourly_est2 avg_wk_rate avg_mo_hrs"
 
-merge m:1 SSUID ERESIDENCEID from_num panelmonth using "$SIPP14keep/sipp96_hhdata.dta", keepusing(`keepvars')
+merge m:1 SSUID ERESIDENCEID from_num panelmonth using "$SIPP96keep/sipp96_hhdata.dta", keepusing(`keepvars')
 
 foreach var in `keepvars'{
     rename `var' from_`var'
@@ -301,7 +301,7 @@ foreach var in `keepvars'{
 
 drop _merge // assuming using only are people who live by themselves
 
-merge m:1 SSUID ERESIDENCEID to_num panelmonth using "$SIPP14keep/sipp96_hhdata.dta", keepusing(`keepvars')
+merge m:1 SSUID ERESIDENCEID to_num panelmonth using "$SIPP96keep/sipp96_hhdata.dta", keepusing(`keepvars')
 
 foreach var in `keepvars'{
     rename `var' to_`var'

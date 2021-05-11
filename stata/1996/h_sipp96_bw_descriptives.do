@@ -1,7 +1,7 @@
 ********************************************************************************
 * Import data  & create breadwinning measures
 ********************************************************************************
-use "$SIPP14keep/sipp96_annual_bw_status.dta", clear
+use "$SIPP96keep/sipp96_annual_bw_status.dta", clear
 
 
 ********************************************************************************
@@ -1941,4 +1941,4 @@ forvalues s=1/2{
 
 
 
-save "$SIPP14keep/96_bw_descriptives.dta", replace
+save "$SIPP96keep/96_bw_descriptives.dta", replace

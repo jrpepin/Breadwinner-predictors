@@ -141,4 +141,4 @@ browse ssuid epppnum epnmom hhmom1 hhmom2 person esex tage errp ehrefper epnspou
 * browse ssuid epppnum ehhnumpp errp esex tage if errp==2 & ehhnumpp > 1
 * browse ssuid epppnum ehhnumpp errp esex tage if ssuid == "019052123067" // unmarried partners considered "not relatives", so 2 people in HH, 1 could be ref w/ no relatives, other then unmarried parner
 
-save "$SIPP14keep/sipp96_data.dta", replace
+save "$SIPP96keep/sipp96_data.dta", replace
