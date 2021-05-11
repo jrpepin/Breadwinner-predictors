@@ -21,7 +21,7 @@ di "$S_DATE"
 * EXTRACT 1 -- Type 1 (interviewed household members) variables
 ********************************************************************************
 clear
-
+set maxvar 32000
 	
 forvalues wave=1/4 {
     use "$SIPP2014/pu2014w`wave'_compressed"

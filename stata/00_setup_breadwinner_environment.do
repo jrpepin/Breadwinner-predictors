@@ -1,24 +1,13 @@
 *-------------------------------------------------------------------------------
 * BREADWINNER PROJECT
 * setup_breadwinner_environment.do
-* Kelly Raley and Joanna Pepin
+
 *-------------------------------------------------------------------------------
-
-* NOTE: This assumes that you have egenmore installed. If you do not have
-* egenmore installed ssc install the program.
-
-* The current directory is assumed to be the base project directory.
-**  cd "C:\Users\Joanna\Dropbox\Repositories\SIPP_Breadwinner"
 
 ********************************************************************************
 * Setup project macros
 ********************************************************************************
 global bw_base_code "`c(pwd)'" 	/// Creating macro of project working directory
-
-* Project default is that we don't write over existing files.
-* Change this in your project setup file if you really want,
-* but for archiving replace is (generally) not allowed.
-global replace ""
 
 ********************************************************************************
 * Setup personal file paths
@@ -61,11 +50,14 @@ if ("$logdir" == "") {
     exit
 }
 
+set maxvar 5500
+
 ********************************************************************************
 * Check for package dependencies 
 ********************************************************************************
 * This checks for packages that the user should install prior to running the project do files.
 
+/*
 // fre: https://ideas.repec.org/c/boc/bocode/s456835.html
 capture : which fre
 if (_rc) {
@@ -119,3 +111,4 @@ if (_rc) {
 
     exit 199
 }
+*/
