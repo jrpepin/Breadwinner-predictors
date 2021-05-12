@@ -18,3 +18,10 @@ global SIPP14keep 		"$homedir/projects/breadwinner-predictors/data"
 
 // SIPP 1996
 global SIPP1996			"$homedir/data/sipp/1996"
+global SIPP1996tm 		"/data/sipp/1996_TM/StataData"
+global SIPP1996_code 		"$projcode/stata/1996"
+global SIPP96keep 		"$homedir/projects/breadwinner-predictor/data/keep/1996"
+
+// combined data
+
+global combined_data 		"$homedir/projects/breadwinner-predictor/data/keep/combined"

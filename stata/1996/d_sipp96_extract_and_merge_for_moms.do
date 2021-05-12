@@ -63,7 +63,7 @@ sort ssuid epppnum rhcalyr rhcalmn
 * Merging records from topical module 2 (fertility, marriage, relationships) 
 * for variables needed in anaylsis
 ********************************************************************************
-use "$SIPP1996/sip96t2.dta", clear
+use "$SIPP1996tm/sip96t2.dta", clear
 
 keep 	swave wpfinwgt ssuid epppnum eentaid shhadid eppintvw erelat* eprlpn*		/// /* TECHNICAL & HH */
 		tfbrthyr efbrthmo tlbirtyr elbirtmo ragfbrth tmomchl tfrchl 				/// /* FERTILITY */

@@ -16,3 +16,17 @@ do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
 
 // 1996 SIPP analysis
 do "$SIPP1996_code/breadwinner-predictorsSIPP96.do"
+
+// Appends 2014 and 1996 files and executes analysis
+	log using "$logdir/combined_models.log", replace
+	do aa_combined_models.do
+	log close
+	
+********************************************************************************
+* D1. DECOMPOSITION ANALYSIS
+********************************************************************************
+
+// Appends 2014 and 1996 files and executes analysis
+	log using "$logdir/decomposition_equation.log", replace
+	do ab_decomposition_equation.do
+	log close
