@@ -80,7 +80,7 @@ replace earnup_excl=0 if earn_lose==1
 gen earndown_excl=earndown8_hh_all
 replace earndown_excl=0 if earn_lose==1
 
-
+/*
 *****************************************************************************************
 **Rest of below is me trying to figure out the collinearity problem
 

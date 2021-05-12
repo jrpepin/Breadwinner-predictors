@@ -57,6 +57,15 @@ set maxvar 5500
 ********************************************************************************
 * This checks for packages that the user should install prior to running the project do files.
 
+// fre: https://ideas.repec.org/c/boc/bocode/s456835.html
+capture : which fitstat
+if (_rc) {
+    display as error in smcl `"Please install package {it:fitstat} from SSC in order to run these do-files;"' _newline ///
+        `"you can do so by clicking this link: {stata "ssc install fitstat":auto-install fitstat}"'
+    exit 199
+}
+
+
 /*
 // fre: https://ideas.repec.org/c/boc/bocode/s456835.html
 capture : which fre
