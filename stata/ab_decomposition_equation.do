@@ -1,7 +1,7 @@
 *-------------------------------------------------------------------------------
 * BREADWINNER PROJECT
 * decomposition_equation.do
-* Kim McErlean, Kelly Raley
+* Kelly Raley and Joanna Pepin
 *-------------------------------------------------------------------------------
 di "$S_DATE"
 
@@ -10,7 +10,8 @@ di "$S_DATE"
 ********************************************************************************
 * This file pulls values for the decomposition equation
 
-* person-year file created in aa_combined_models.do
+* File used was created in aa_combined_models.do
+
 use "$combined_data/combined_annual_bw_status.dta", clear
 
 sort SSUID PNUM year
@@ -29,28 +30,13 @@ svyset [pweight = wpfinwgt]
 
 recode partner_lose (2/6=1)
 
-preserve
+
 ********************************************************************************
 * First specification: "partner" is reference category, rest are unique
 ********************************************************************************
 
-* restrict sample to years with a previous year
-keep if year==(year[_n-1]+1)
-
-* but if you delete the years without preceding years, then the origin year no longer has a preceding year. 
-* the file would be better structured to have breadwinning status in this year AND next year on the same record. 
-* this is easy to do with reshape
-
-gen sameperson=0
-replace sameperson=1 if SSUID=(SSUID[_n-1]) & PNUM=(PNUM[_n-1])
-
-
 *Dt-l: mothers not breadwinning at t-1
-svy: tab survey bw60, row  
-
-* restrict to mothers not breadwinning in *this* year, b/c we are calculating transitions into breadwinning between this year and next
-* and previous observation is within the same individual (why not make this explicit?)
-keep if bw60[_n-1]==0 & if year==(year[_n-1]+1)
+svy: tab survey bw60 if year==(year[_n+1]-1), row // to ensure consecutive years, aka she is available to transition to BW the next year
 
 *Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
 
@@ -58,8 +44,9 @@ gen mt_mom = 0
 replace mt_mom = 1 if earnup8_all==1 & earn_lose==0 & earndown8_hh_all==0
 replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom==0 // to capture those outside the 8% threshold (v. small amount)
 
-svy: tab survey mt_mom, row
+svy: tab survey mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1), row
 
+svy: mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
 svy: mean mt_mom if survey==1996
 
 *Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
