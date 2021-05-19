@@ -15,10 +15,10 @@ Of the total <<dd_di: %9.2f $total_gap >>% difference, <<dd_di: %9.2f $rate_diff
 Of the total <<dd_di: %9.2f $total_gap >>% difference, <<dd_di: %9.2f $comp_diff >>% can be explained by compositional differences between the two surveys (e.g. how many people experienced the events).
 
 Further breaking down the gap:
-<<dd_di: %9.2f $mom_component >>% could be attributed to the mother increasing component;
-<<dd_di: %9.2f $partner_down_component >>% could be attributed to the partner earnings decreasing component;
-<<dd_di: %9.2f $partner_leave_component >>% could be attributed to the partner leaving component;
-<<dd_di: %9.2f $other_hh_component >>% could be attributed to the other HH members losing earnings or leaving component.
+<<dd_di: %9.2f $mom_compt_x >>% could be attributed to the mother increasing component;
+<<dd_di: %9.2f $partner_down_compt_x >>% could be attributed to the partner earnings decreasing component;
+<<dd_di: %9.2f $partner_leave_compt_x >>% could be attributed to the partner leaving component;
+<<dd_di: %9.2f $other_hh_compt_x >>% could be attributed to the other HH members losing earnings or leaving component.
 
 
 
@@ -35,7 +35,7 @@ Further breaking down the gap:
 
 | Group	        	 |   Mom Component                      | Partner Down									 |Partner Left		     						 | Other HH Down/Left						   |
 |:-------------------|:-------------------------------------|:-----------------------------------------------|:----------------------------------------------|:----------------------------------------|
-|	Overall	    	 | <<dd_di: %9.2f $mom_component >>%	| <<dd_di: %9.2f $partner_down_component >>%     | <<dd_di: %9.2f $partner_leave_component >>%   | <<dd_di: %9.2f $other_hh_component >>%  |
+|	Overall	    	 | <<dd_di: %9.2f $mom_compt_x >>%	| <<dd_di: %9.2f $partner_down_compt_x >>%     | <<dd_di: %9.2f $partner_leave_compt_x >>%   | <<dd_di: %9.2f $other_hh_compt_x >>%  |
 |	College Educated | <<dd_di: %9.2f $mom_component_4 >>%	| <<dd_di: %9.2f $partner_down_component_4 >>%   | <<dd_di: %9.2f $partner_leave_component_4 >>% | <<dd_di: %9.2f $other_hh_component_4 >>% |
 |	Some College	 | <<dd_di: %9.2f $mom_component_3 >>%	| <<dd_di: %9.2f $partner_down_component_3 >>%   | <<dd_di: %9.2f $partner_leave_component_3 >>% | <<dd_di: %9.2f $other_hh_component_3 >>% |
 |	HS Degree		 | <<dd_di: %9.2f $mom_component_2 >>%	| <<dd_di: %9.2f $partner_down_component_2 >>%   | <<dd_di: %9.2f $partner_leave_component_2 >>% | <<dd_di: %9.2f $other_hh_component_2 >>% |
@@ -56,7 +56,7 @@ Further breaking down the gap:
 
 | Group	        	 |   Mom Component                      | Partner Down  								| Partner Left     								 | Other HH Down/Left						 |
 |:-------------------|:-------------------------------------|:----------------------------------------------|:-----------------------------------------------|:----------------------------------------|
-|	Overall	    	 | <<dd_di: %9.2f $mom_component >>%	| <<dd_di: %9.2f $partner_down_component >>%    | <<dd_di: %9.2f $partner_leave_component >>%    | <<dd_di: %9.2f $other_hh_component >>%    |
+|	Overall	    	 | <<dd_di: %9.2f $mom_compt_x >>%	| <<dd_di: %9.2f $partner_down_compt_x >>%    | <<dd_di: %9.2f $partner_leave_compt_x >>%    | <<dd_di: %9.2f $other_hh_compt_x >>%    |
 |	NH White	 	 | <<dd_di: %9.2f $mom_component_r1 >>%	| <<dd_di: %9.2f $partner_down_component_r1 >>% | <<dd_di: %9.2f $partner_leave_component_r1 >>% | <<dd_di: %9.2f $other_hh_component_r1 >>% |
 |	Black		 	 | <<dd_di: %9.2f $mom_component_r2 >>%	| <<dd_di: %9.2f $partner_down_component_r2 >>% | <<dd_di: %9.2f $partner_leave_component_r2 >>% | <<dd_di: %9.2f $other_hh_component_r2 >>% |
 |	Hispanic 		 | <<dd_di: %9.2f $mom_component_r4 >>%	| <<dd_di: %9.2f $partner_down_component_r4 >>% | <<dd_di: %9.2f $partner_leave_component_r4 >>% | <<dd_di: %9.2f $other_hh_component_r4 >>% |
@@ -77,7 +77,7 @@ Further breaking down the gap:
 
 | Group	        	 |   Mom Component                      | Partner Down 									| Partner Left     								 | Other HH Down/Left						 |
 |:-------------------|:-------------------------------------|:----------------------------------------------|:-----------------------------------------------|:----------------------------------------|
-|	Overall	    	 | <<dd_di: %9.2f $mom_component >>%	| <<dd_di: %9.2f $partner_down_component >>%    | <<dd_di: %9.2f $partner_leave_component >>%    | <<dd_di: %9.2f $other_hh_component >>%    |
+|	Overall	    	 | <<dd_di: %9.2f $mom_compt_x >>%	| <<dd_di: %9.2f $partner_down_compt_x >>%    | <<dd_di: %9.2f $partner_leave_compt_x>>%    | <<dd_di: %9.2f $other_hh_compt_x >>%    |
 |	HS or Less	 	 | <<dd_di: %9.2f $mom_component_e1 >>%	| <<dd_di: %9.2f $partner_down_component_e1 >>% | <<dd_di: %9.2f $partner_leave_component_e1 >>% | <<dd_di: %9.2f $other_hh_component_e1 >>% |
 |	Some College 	 | <<dd_di: %9.2f $mom_component_e2 >>%	| <<dd_di: %9.2f $partner_down_component_e2 >>% | <<dd_di: %9.2f $partner_leave_component_e2 >>% | <<dd_di: %9.2f $other_hh_component_e2 >>% |
 |	College Plus 	 | <<dd_di: %9.2f $mom_component_e3 >>%	| <<dd_di: %9.2f $partner_down_component_e3 >>% | <<dd_di: %9.2f $partner_leave_component_e3 >>% | <<dd_di: %9.2f $other_hh_component_e3 >>% |
