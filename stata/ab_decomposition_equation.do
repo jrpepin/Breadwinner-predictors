@@ -164,7 +164,6 @@ putexcel F1 = "Partner lost earnings and mom went up", border(bottom)
 putexcel G1 = "Partner lost earnings and mom up AND became BW", border(bottom)
 putexcel H1 = "Partner lost earnings only", border(bottom)
 putexcel I1 = "Partner lost earnings only AND became BW", border(bottom)
-
 putexcel J1 = "Partner left", border(bottom)
 putexcel K1 = "Partner left AND became BW", border(bottom)
 putexcel L1 = "Other member lost earnings / left", border(bottom)
@@ -225,28 +224,28 @@ gen partner_leave_change_y =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_2 * ft
 gen other_hh_change_y =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_2 * ft_partner_down_2_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
 */
 
-global bw_rate_96 = bw_rate_96*100
-putexcel N2 = $bw_rate_96, nformat(#.##)
-global bw_rate_14 = bw_rate_14*100
-putexcel N3 = $bw_rate_14, nformat(#.##)
-global total_gap = (bw_rate_14 - bw_rate_96)*100
-putexcel O2 = $total_gap, nformat(#.##)
-global rate_diff = (comp96_rate14 - bw_rate_96)*100
-putexcel P2 = $rate_diff, nformat(#.##)
-global comp_diff = (comp14_rate96 - bw_rate_96)*100
-putexcel Q2 = $comp_diff, nformat(#.##)
+global bw_rate_96 = bw_rate_96
+putexcel N2 = $bw_rate_96, nformat(#.##%)
+global bw_rate_14 = bw_rate_14
+putexcel N3 = $bw_rate_14, nformat(#.##%)
+global total_gap = (bw_rate_14 - bw_rate_96)
+putexcel O2 = $total_gap, nformat(#.##%)
+global rate_diff = (comp96_rate14 - bw_rate_96)
+putexcel P2 = $rate_diff, nformat(#.##%)
+global comp_diff = (comp14_rate96 - bw_rate_96)
+putexcel Q2 = $comp_diff, nformat(#.##%)
 
 // 1996 as reference
-global mom_compt_x = ((mom_change_x - bw_rate_96) / total_gap) *100
-putexcel R2 = $mom_compt_x, nformat(#.##)
-global partner_down_mom_compt_x = ((partner_down_mom_up_chg_x - bw_rate_96) / total_gap) *100
-putexcel S2 = $partner_down_mom_compt_x, nformat(#.##)
-global partner_down_only_compt_x = ((partner_down_only_chg_x - bw_rate_96) / total_gap) *100
-putexcel T2 = $partner_down_only_compt_x, nformat(#.##)
-global partner_leave_compt_x = ((partner_leave_change_x - bw_rate_96) / total_gap) *100
-putexcel U2 = $partner_leave_compt_x, nformat(#.##)
-global other_hh_compt_x = ((other_hh_change_x - bw_rate_96) / total_gap) *100
-putexcel V2 = $other_hh_compt_x, nformat(#.##)
+global mom_compt_x = ((mom_change_x - bw_rate_96) / total_gap)
+putexcel R2 = $mom_compt_x, nformat(#.##%)
+global partner_down_mom_compt_x = ((partner_down_mom_up_chg_x - bw_rate_96) / total_gap)
+putexcel S2 = $partner_down_mom_compt_x, nformat(#.##%)
+global partner_down_only_compt_x = ((partner_down_only_chg_x - bw_rate_96) / total_gap)
+putexcel T2 = $partner_down_only_compt_x, nformat(#.##%)
+global partner_leave_compt_x = ((partner_leave_change_x - bw_rate_96) / total_gap)
+putexcel U2 = $partner_leave_compt_x, nformat(#.##%)
+global other_hh_compt_x = ((other_hh_change_x - bw_rate_96) / total_gap)
+putexcel V2 = $other_hh_compt_x, nformat(#.##%)
 
 /* 2014 as reference - matches above so cut
 global mom_compt_y = (bw_rate_14 - mom_change_y)*100
@@ -327,27 +326,27 @@ forvalues e=1/4{
 	
 	local row = `e'*2+3
 	local row2 = `e'*2+4
-	global bw_rate_96_`e' = bw_rate_96_`e'*100
-	putexcel N`row' = ${bw_rate_96_`e'}, nformat(#.##)
-	global bw_rate_14_`e' = bw_rate_14_`e'*100
-	putexcel N`row2' = ${bw_rate_14_`e'}, nformat(#.##)
-	global total_gap_`e' = (bw_rate_14_`e' - bw_rate_96_`e')*100
-	putexcel O`row' = ${total_gap_`e'}, nformat(#.##)
-	global rate_diff_`e' = (comp96_rate14_`e' - bw_rate_96_`e')*100
-	putexcel P`row' = ${rate_diff_`e'}, nformat(#.##)
-	global comp_diff_`e' = (comp14_rate96_`e' - bw_rate_96_`e')*100
-	putexcel Q`row' = ${comp_diff_`e'}, nformat(#.##)
+	global bw_rate_96_`e' = bw_rate_96_`e'
+	putexcel N`row' = ${bw_rate_96_`e'}, nformat(#.##%)
+	global bw_rate_14_`e' = bw_rate_14_`e'
+	putexcel N`row2' = ${bw_rate_14_`e'}, nformat(#.##%)
+	global total_gap_`e' = (bw_rate_14_`e' - bw_rate_96_`e')
+	putexcel O`row' = ${total_gap_`e'}, nformat(#.##%)
+	global rate_diff_`e' = (comp96_rate14_`e' - bw_rate_96_`e')
+	putexcel P`row' = ${rate_diff_`e'}, nformat(#.##%)
+	global comp_diff_`e' = (comp14_rate96_`e' - bw_rate_96_`e')
+	putexcel Q`row' = ${comp_diff_`e'}, nformat(#.##%)
 	
-	global mom_component_`e' = ((mom_change_`e' - bw_rate_96_`e') / total_gap_`e') *100
-	putexcel R`row' = ${mom_component_`e'}, nformat(#.##)
-	global partner_down_mom_component_`e' = ((partner_down_mom_up_chg_`e' - bw_rate_96_`e') / total_gap_`e') *100
-	putexcel S`row' = ${partner_down_mom_component_`e'}, nformat(#.##)
-	global partner_down_only_component_`e' = ((partner_down_only_chg_`e' - bw_rate_96_`e') / total_gap_`e') *100
-	putexcel T`row' = ${partner_down_only_component_`e'}, nformat(#.##)
-	global partner_leave_component_`e' = ((partner_leave_change_`e' - bw_rate_96_`e') / total_gap_`e') *100
-	putexcel U`row' = ${partner_leave_component_`e'}, nformat(#.##)
-	global other_hh_component_`e' = ((other_hh_change_`e' - bw_rate_96_`e') / total_gap_`e') *100
-	putexcel V`row' = ${other_hh_component_`e'}, nformat(#.##)
+	global mom_component_`e' = ((mom_change_`e' - bw_rate_96_`e') / total_gap_`e')
+	putexcel R`row' = ${mom_component_`e'}, nformat(#.##%)
+	global partner_down_mom_component_`e' = ((partner_down_mom_up_chg_`e' - bw_rate_96_`e') / total_gap_`e')
+	putexcel S`row' = ${partner_down_mom_component_`e'}, nformat(#.##%)
+	global partner_down_only_component_`e' = ((partner_down_only_chg_`e' - bw_rate_96_`e') / total_gap_`e')
+	putexcel T`row' = ${partner_down_only_component_`e'}, nformat(#.##%)
+	global partner_leave_component_`e' = ((partner_leave_change_`e' - bw_rate_96_`e') / total_gap_`e')
+	putexcel U`row' = ${partner_leave_component_`e'}, nformat(#.##%)
+	global other_hh_component_`e' = ((other_hh_change_`e' - bw_rate_96_`e') / total_gap_`e')
+	putexcel V`row' = ${other_hh_component_`e'}, nformat(#.##%)
 }
 
 
@@ -400,27 +399,27 @@ forvalues r=1/4{
 	
 	local row = `r'*2+12
 	local row2 = `r'*2+13
-	global bw_rate_96_r`r' = bw_rate_96_r`r'*100
-	putexcel N`row' = ${bw_rate_96_r`r'}, nformat(#.##)
-	global bw_rate_14_r`r' = bw_rate_14_r`r'*100
-	putexcel N`row2' = ${bw_rate_14_r`r'}, nformat(#.##)
-	global total_gap_r`r' = (bw_rate_14_r`r' - bw_rate_96_r`r')*100
-	putexcel O`row' = ${total_gap_r`r'}, nformat(#.##)
-	global rate_diff_r`r' = (comp96_rate14_r`r' - bw_rate_96_r`r')*100
-	putexcel P`row' = ${rate_diff_r`r'}, nformat(#.##)
-	global comp_diff_r`r' = (comp14_rate96_r`r' - bw_rate_96_r`r')*100
-	putexcel Q`row' = ${comp_diff_r`r'}, nformat(#.##)
+	global bw_rate_96_r`r' = bw_rate_96_r`r'
+	putexcel N`row' = ${bw_rate_96_r`r'}, nformat(#.##%)
+	global bw_rate_14_r`r' = bw_rate_14_r`r'
+	putexcel N`row2' = ${bw_rate_14_r`r'}, nformat(#.##%)
+	global total_gap_r`r' = (bw_rate_14_r`r' - bw_rate_96_r`r')
+	putexcel O`row' = ${total_gap_r`r'}, nformat(#.##%)
+	global rate_diff_r`r' = (comp96_rate14_r`r' - bw_rate_96_r`r')
+	putexcel P`row' = ${rate_diff_r`r'}, nformat(#.##%)
+	global comp_diff_r`r' = (comp14_rate96_r`r' - bw_rate_96_r`r')
+	putexcel Q`row' = ${comp_diff_r`r'}, nformat(#.##%)
 	
-	global mom_component_r`r' = ((mom_change_r`r' - bw_rate_96_r`r') / total_gap_r`r') *100
-	putexcel R`row' = ${mom_component_r`r'}, nformat(#.##)
-	global partner_down_mom_component_r`r' = ((partner_down_mom_up_chg_r`r' - bw_rate_96_r`r') / total_gap_r`r') *100
-	putexcel S`row' = ${partner_down_mom_component_r`r'}, nformat(#.##)
-	global partner_down_only_component_r`r' = ((partner_down_only_chg_r`r' - bw_rate_96_r`r') / total_gap_r`r') *100
-	putexcel T`row' = ${partner_down_only_component_r`r'}, nformat(#.##)
-	global partner_leave_component_r`r' = ((partner_leave_change_r`r' - bw_rate_96_r`r') / total_gap_r`r') *100
-	putexcel U`row' = ${partner_leave_component_r`r'}, nformat(#.##)
-	global other_hh_component_r`r' = ((other_hh_change_r`r' - bw_rate_96_r`r') / total_gap_r`r') *100
-	putexcel V`row' = ${other_hh_component_r`r'}, nformat(#.##)
+	global mom_component_r`r' = ((mom_change_r`r' - bw_rate_96_r`r') / total_gap_r`r')
+	putexcel R`row' = ${mom_component_r`r'}, nformat(#.##%)
+	global partner_down_mom_component_r`r' = ((partner_down_mom_up_chg_r`r' - bw_rate_96_r`r') / total_gap_r`r')
+	putexcel S`row' = ${partner_down_mom_component_r`r'}, nformat(#.##%)
+	global partner_down_only_component_r`r' = ((partner_down_only_chg_r`r' - bw_rate_96_r`r') / total_gap_r`r')
+	putexcel T`row' = ${partner_down_only_component_r`r'}, nformat(#.##%)
+	global partner_leave_component_r`r' = ((partner_leave_change_r`r' - bw_rate_96_r`r') / total_gap_r`r')
+	putexcel U`row' = ${partner_leave_component_r`r'}, nformat(#.##%)
+	global other_hh_component_r`r' = ((other_hh_change_r`r' - bw_rate_96_r`r') / total_gap_r`r')
+	putexcel V`row' = ${other_hh_component_r`r'}, nformat(#.##%)
 }
 
 
@@ -471,27 +470,27 @@ forvalues e=1/3{
 	
 	local row = `e'*2+21
 	local row2 = `e'*2+22
-	global bw_rate_96_e`e' = bw_rate_96_e`e'*100
-	putexcel N`row' = ${bw_rate_96_e`e'}, nformat(#.##)
-	global bw_rate_14_e`e' = bw_rate_14_e`e'*100
-	putexcel N`row2' = ${bw_rate_14_e`e'}, nformat(#.##)
-	global total_gap_e`e' = (bw_rate_14_e`e' - bw_rate_96_e`e')*100
-	putexcel O`row' = ${total_gap_e`e'}, nformat(#.##)
-	global rate_diff_e`e' = (comp96_rate14_e`e' - bw_rate_96_e`e')*100
-	putexcel P`row' = ${rate_diff_e`e'}, nformat(#.##)
-	global comp_diff_e`e' = (comp14_rate96_e`e' - bw_rate_96_e`e')*100
-	putexcel Q`row' = ${comp_diff_e`e'}, nformat(#.##)
+	global bw_rate_96_e`e' = bw_rate_96_e`e'
+	putexcel N`row' = ${bw_rate_96_e`e'}, nformat(#.##%)
+	global bw_rate_14_e`e' = bw_rate_14_e`e'
+	putexcel N`row2' = ${bw_rate_14_e`e'}, nformat(#.##%)
+	global total_gap_e`e' = (bw_rate_14_e`e' - bw_rate_96_e`e')
+	putexcel O`row' = ${total_gap_e`e'}, nformat(#.##%)
+	global rate_diff_e`e' = (comp96_rate14_e`e' - bw_rate_96_e`e')
+	putexcel P`row' = ${rate_diff_e`e'}, nformat(#.##%)
+	global comp_diff_e`e' = (comp14_rate96_e`e' - bw_rate_96_e`e')
+	putexcel Q`row' = ${comp_diff_e`e'}, nformat(#.##%)
 	
-	global mom_component_e`e' = ((mom_change_e`e' - bw_rate_96_e`e') / total_gap_e`e') *100
-	putexcel R`row' = ${mom_component_e`e'}, nformat(#.##)
-	global partner_down_mom_component_e`e' = ((partner_down_mom_up_chg_e`e' - bw_rate_96_e`e') / total_gap_e`e') *100
-	putexcel S`row' = ${partner_down_mom_component_e`e'}, nformat(#.##)
-	global partner_down_only_component_e`e' = ((partner_down_only_chg_e`e' - bw_rate_96_e`e') / total_gap_e`e') *100
-	putexcel T`row' = ${partner_down_only_component_e`e'}, nformat(#.##)
-	global partner_leave_component_e`e' = ((partner_leave_change_e`e' - bw_rate_96_e`e') / total_gap_e`e') *100
-	putexcel U`row' = ${partner_leave_component_e`e'}, nformat(#.##)
-	global other_hh_component_e`e' = ((other_hh_change_e`e' - bw_rate_96_e`e') / total_gap_e`e') *100
-	putexcel V`row' = ${other_hh_component_e`e'}, nformat(#.##)
+	global mom_component_e`e' = ((mom_change_e`e' - bw_rate_96_e`e') / total_gap_e`e')
+	putexcel R`row' = ${mom_component_e`e'}, nformat(#.##%)
+	global partner_down_mom_component_e`e' = ((partner_down_mom_up_chg_e`e' - bw_rate_96_e`e') / total_gap_e`e')
+	putexcel S`row' = ${partner_down_mom_component_e`e'}, nformat(#.##%)
+	global partner_down_only_component_e`e' = ((partner_down_only_chg_e`e' - bw_rate_96_e`e') / total_gap_e`e')
+	putexcel T`row' = ${partner_down_only_component_e`e'}, nformat(#.##%)
+	global partner_leave_component_e`e' = ((partner_leave_change_e`e' - bw_rate_96_e`e') / total_gap_e`e')
+	putexcel U`row' = ${partner_leave_component_e`e'}, nformat(#.##%)
+	global other_hh_component_e`e' = ((other_hh_change_e`e' - bw_rate_96_e`e') / total_gap_e`e')
+	putexcel V`row' = ${other_hh_component_e`e'}, nformat(#.##%)
 }
 
 ********************************************************************************
@@ -899,6 +898,71 @@ forvalues e=1/3{
 *****************************
 // Create html document to describe results
 dyndoc "$bw_base_code/Predictor_Decomposition.md", saving($results/Predictor_Decomposition.html) replace
+
+********************************************************************************
+* Creating tables for paper
+********************************************************************************
+
+// Table 1: Overall descriptives 
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table1) replace
+putexcel A1 = "Event"
+putexcel B1 = "1996 Incidence"
+putexcel C1 = "2014 Incidence"
+putexcel A2 = "Mothers with an increase in earnings"
+putexcel A3 = "Mothers with an increase in earnings AND became BW"
+putexcel A4 = "Partner lost earnings and mom went up"
+putexcel A5 = "Partner lost earnings and mom up AND became BW"
+putexcel A6 = "Partner lost earnings only"
+putexcel A7 = "Partner lost earnings only AND became BW"
+putexcel A8 = "Partner left"
+putexcel A9= "Partner left AND became BW"
+putexcel A10 = "Other member lost earnings / left"
+putexcel A11 = "Other member lost earnings / left AND became BW"
+putexcel A12 = "Rate of transition to BW"
+
+
+local colu "B C"
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		forvalues y=1/2{
+			local col: word `y' of `colu'
+			local row1 = `i'*2
+			local row2 = `i'*2+1
+			putexcel `col'`row1' = matrix(`var'_`y'), nformat(#.##%)
+			putexcel `col'`row2' = matrix(`var'_`y'_bw), nformat(#.##%)
+		}
+	local ++i
+}
+
+putexcel B12 = $bw_rate_96, nformat(#.##%)
+putexcel C12 = $bw_rate_14, nformat(#.##%)
+
+
+// Table 2: Change Components
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table2) modify
+putexcel A1 = "Component"
+putexcel B1 = "Percent of Change Explained"
+putexcel A2 = "Total Gap to Explain"
+putexcel A3 = "Rate Component"
+putexcel A4 = "Composition Component"
+putexcel A5 = "Mom Component"
+putexcel A6 = "Partner Down Mom Up Component"
+putexcel A7 = "Partner Down Only Component"
+putexcel A8 = "Partner Left Component"
+putexcel A9 = "Other HH Change Component"
+
+
+putexcel B2 = $total_gap, nformat(#.##%)
+putexcel B3 = formula($rate_diff / $total_gap), nformat(#.##%)
+putexcel B4 = formula($comp_diff / $total_gap), nformat(#.##%)
+putexcel B5 = $mom_compt_x, nformat(#.##%)
+putexcel B6 = $partner_down_mom_compt_x, nformat(#.##%)
+putexcel B7 = $partner_down_only_compt_x, nformat(#.##%)
+putexcel B8 = $partner_leave_compt_x, nformat(#.##%)
+putexcel B9 = $other_hh_compt_x, nformat(#.##%)
 
 
 ********************************************************************************
