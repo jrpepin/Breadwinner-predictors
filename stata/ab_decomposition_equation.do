@@ -920,6 +920,7 @@ putexcel A9= "Partner left AND became BW"
 putexcel A10 = "Other member lost earnings / left"
 putexcel A11 = "Other member lost earnings / left AND became BW"
 putexcel A12 = "Rate of transition to BW"
+putexcel A13 = "Mothers not breadwinning at time t-1"
 
 
 local colu "B C"
@@ -939,6 +940,14 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 putexcel B12 = $bw_rate_96, nformat(#.##%)
 putexcel C12 = $bw_rate_14, nformat(#.##%)
 
+sum base_1
+replace base_1 = r(mean)
+sum base_2
+replace base_2 = r(mean)
+global base_1 = base_1
+global base_2 = base_2
+putexcel B13 = $base_1
+putexcel C13 = $base_2
 
 // Table 2: Change Components
 
@@ -954,7 +963,6 @@ putexcel A7 = "Partner Down Only Component"
 putexcel A8 = "Partner Left Component"
 putexcel A9 = "Other HH Change Component"
 
-
 putexcel B2 = $total_gap, nformat(#.##%)
 putexcel B3 = formula($rate_diff / $total_gap), nformat(#.##%)
 putexcel B4 = formula($comp_diff / $total_gap), nformat(#.##%)
@@ -963,6 +971,60 @@ putexcel B6 = $partner_down_mom_compt_x, nformat(#.##%)
 putexcel B7 = $partner_down_only_compt_x, nformat(#.##%)
 putexcel B8 = $partner_leave_compt_x, nformat(#.##%)
 putexcel B9 = $other_hh_compt_x, nformat(#.##%)
+
+// Table 3: Change Components by Education and Race
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table3) modify
+putexcel A2 = "Component"
+putexcel B1:E1 = "Percent of Change Explained", merge hcenter
+putexcel B2 = ("Less than HS") C2 = ("HS Degree") D2 = ("Some College") E2 = ("College Plus") 
+putexcel A3 = "Total Gap to Explain"
+putexcel A4 = "Rate Component"
+putexcel A5 = "Composition Component"
+putexcel A6 = "Mom Component"
+putexcel A7 = "Partner Down Mom Up Component"
+putexcel A8 = "Partner Down Only Component"
+putexcel A9 = "Partner Left Component"
+putexcel A10 = "Other HH Change Component"
+
+local col1 "B C D E"
+
+forvalues e=1/4{
+    local col: word `e' of `col1'
+	putexcel `col'3 = ${total_gap_`e'}, nformat(#.##%)
+	putexcel `col'4 = formula(${rate_diff_`e'} / ${total_gap_`e'}), nformat(#.##%)
+	putexcel `col'5 = formula(${comp_diff_`e'} / ${total_gap_`e'}), nformat(#.##%)
+	putexcel `col'6 = ${mom_component_`e'}, nformat(#.##%)
+	putexcel `col'7 = ${partner_down_mom_component_`e'}, nformat(#.##%)
+	putexcel `col'8 = ${partner_down_only_component_`e'}, nformat(#.##%)
+	putexcel `col'9 = ${partner_leave_component_`e'}, nformat(#.##%)
+	putexcel `col'10 = ${other_hh_component_`e'}, nformat(#.##%)
+}
+
+putexcel A13 = "Component"
+putexcel B13 = ("NH White") C13 = ("Black") D13 = ("NH Asian") E13 = ("Hispanic") 
+putexcel A14 = "Total Gap to Explain"
+putexcel A15 = "Rate Component"
+putexcel A16 = "Composition Component"
+putexcel A17 = "Mom Component"
+putexcel A18 = "Partner Down Mom Up Component"
+putexcel A19 = "Partner Down Only Component"
+putexcel A20 = "Partner Left Component"
+putexcel A21 = "Other HH Change Component"
+
+local col1 "B C D E"
+
+forvalues r=1/4{
+    local col: word `r' of `col1'
+	putexcel `col'14 = ${total_gap_r`r'}, nformat(#.##%)
+	putexcel `col'15 = formula(${rate_diff_r`r'} / ${total_gap_r`r'}), nformat(#.##%)
+	putexcel `col'16 = formula(${comp_diff_r`r'} / ${total_gap_r`r'}), nformat(#.##%)
+	putexcel `col'17 = ${mom_component_r`r'}, nformat(#.##%)
+	putexcel `col'18 = ${partner_down_mom_component_r`r'}, nformat(#.##%)
+	putexcel `col'19 = ${partner_down_only_component_r`r'}, nformat(#.##%)
+	putexcel `col'20 = ${partner_leave_component_r`r'}, nformat(#.##%)
+	putexcel `col'21 = ${other_hh_component_r`r'}, nformat(#.##%)
+}
 
 
 ********************************************************************************
