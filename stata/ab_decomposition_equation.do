@@ -1026,6 +1026,50 @@ forvalues r=1/4{
 	putexcel `col'21 = ${other_hh_component_r`r'}, nformat(#.##%)
 }
 
+// Table 4: Median Income Change
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
+putexcel A1:D1 = "Changes in Median Household Income upon BW Transition", merge hcenter
+putexcel B2 = ("1996") C2 = ("2014") D2 = ("total")
+putexcel A3 = "Pre-Transition Median HH Income"
+putexcel A4 = "Post-Transition Median HH Income"
+putexcel A5 = "Percent Change Post Transition"
+
+sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
+putexcel B3=`r(p50)', nformat(###,###)
+sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
+putexcel B4=`r(p50)', nformat(###,###)
+
+sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
+putexcel C3=`r(p50)', nformat(###,###)
+sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
+putexcel C4=`r(p50)', nformat(###,###)
+
+sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
+putexcel D3=`r(p50)', nformat(###,###)
+sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], detail // post
+putexcel D4=`r(p50)', nformat(###,###)
+
+putexcel B5=formula((B4-B3)/B3), nformat(#.##%)
+putexcel C5=formula((C4-C3)/C3), nformat(#.##%)
+putexcel D5=formula((D4-D3)/D3), nformat(#.##%)
+
+putexcel B8:E8 = "Total Change", merge hcenter
+putexcel B9 = ("Less than HS") C9 = ("HS Degree") D9 = ("Some College") E9 = ("College Plus")
+putexcel A10 = "Pre-Transition Median HH Income"
+putexcel A11 = "Post-Transition Median HH Income"
+putexcel A12 = "Percent Change Post Transition"
+
+local col1 "B C D E"
+
+forvalues e=1/4{
+    local col: word `e' of `col1'
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e', detail // pre
+	putexcel `col'10=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post
+	putexcel `col'11=`r(p50)', nformat(###,###)
+	putexcel `col'12=formula((`col'11-`col'10)/`col'10), nformat(#.##%)
+}
 
 ********************************************************************************
 * Some exploration
