@@ -20,24 +20,11 @@ di "$S_DATE"
 ********************************************************************************
 use "$SIPP14keep/sipp14tpearn_rel", clear
 
-//browse SSUID PNUM year panelmonth if inlist(SSUID, "000418500162", "000418209903", "000418334944")
-
 // Create variables with the first and last month of observation by year
    egen startmonth=min(monthcode), by(SSUID PNUM year)
    egen lastmonth =max(monthcode), by(SSUID PNUM year)
    
-   * All months have the same number of observations (12) within year
-   * so this wasn't necessary.
-   order 	SSUID PNUM year startmonth lastmonth
-   list 	SSUID PNUM year startmonth lastmonth in 1/5, clean
-   sort 	SSUID PNUM year panelmonth
-
-* Prep for counting the total number of months breadwinning for the year. 
-* NOTE: This isn't our primary measure.
-   gen mbw50=1 if earnings > .5*thearn_alt & !missing(earnings) & !missing(thearn_alt)	// 50% threshold
-   gen mbw60=1 if earnings > .6*thearn_alt & !missing(earnings) & !missing(thearn_alt)	// 60% threshold
-   
-// Create indicators of transitions into marriage/cohabitation or out of marriage/cohabitation
+// Creating partner status variables needed for reshape
 
 	egen statuses = nvals(marital_status),	by(SSUID ERESIDENCEID PNUM year) // first examining how many people have more than 2 statuses in a year (aka changed status more than 1 time)
 	// browse SSUID PNUM panelmonth marital_status statuses // if statuses>2
@@ -58,77 +45,7 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	gen 	start_partner=partner if monthcode==startmonth
 	gen 	last_partner=partner 	if monthcode==lastmonth
 	
-	// getting ready to create indicators of various status changes THROUGHOUT the year
-	* Single -> Cohabit 
-	by SSUID PNUM (panelmonth), sort: gen sing_coh = (marital_status==2 & inlist(marital_status[_n-1],3,4,5)) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // including divorced / widowed plus unpartnered here as single, does that make sense? with this method, any changes from december to janary will be captured in the january year. to avoid that, add year to by.
-	// browse SSUID PNUM panelmonth marital_status statuses sing_coh if statuses==2 - validate this first one
-	* Single -> Married
-	by SSUID PNUM (panelmonth), sort: gen sing_mar = (marital_status==1 & inlist(marital_status[_n-1],3,4,5)) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // including divorced / widowed plus unpartnered here as single, does that make sense?
-	* Cohab -> Married
-	by SSUID PNUM (panelmonth), sort: gen coh_mar = (marital_status==1 & marital_status[_n-1]==2) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Cohab -> Single
-	by SSUID PNUM (panelmonth), sort: gen coh_diss = (inlist(marital_status,3,4,5) & marital_status[_n-1]==2) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Marry -> Dissolve
-	by SSUID PNUM (panelmonth), sort: gen marr_diss = (marital_status==4 & marital_status[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Marry -> Widow
-	by SSUID PNUM (panelmonth), sort: gen marr_wid = (marital_status==3 & marital_status[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Marry -> Cohabit
-	by SSUID PNUM (panelmonth), sort: gen marr_coh = (marital_status==2 & marital_status[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	
-// indicators of someone leaving household DURING the year -- revisit this. am I capturing mother at all, or ALL OTHERS?
-	// browse SSUID PNUM panelmonth hhsize numearner other_earner
-	
-	* Anyone left - hhsize change
-	by SSUID PNUM (panelmonth), sort: gen hh_lose = (hhsize < hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Earner left - other earner left AND hh size change
-	by SSUID PNUM (panelmonth), sort: gen earn_lose = (other_earner < other_earner[_n-1]) & (hhsize < hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Earner became non-earner - other earner down AND hh size stayed the same
-	by SSUID PNUM (panelmonth), sort: gen earn_non = (other_earner < other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Anyone came - hhsize change
-	by SSUID PNUM (panelmonth), sort: gen hh_gain = (hhsize > hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Earner came - other earner came AND hh size change
-	by SSUID PNUM (panelmonth), sort: gen earn_gain = (other_earner > other_earner[_n-1]) & (hhsize > hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Non-earner became earner - other earner up AND hh size stayed the same
-	by SSUID PNUM (panelmonth), sort: gen non_earn = (other_earner > other_earner[_n-1]) & (hhsize==hhsize[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Respondent became earner
-	by SSUID PNUM (panelmonth), sort: gen resp_earn = (earnings!=. & (earnings[_n-1]==. | earnings[_n-1]==0)) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Respondent became non-earner
-	by SSUID PNUM (panelmonth), sort: gen resp_non = ((earnings==. | earnings==0) & earnings[_n-1]!=.) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Gained partner // validate with above status measures
-	by SSUID PNUM (panelmonth), sort: gen partner_gain = (spartner > spartner[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Lost partner // validate with above status measures
-	by SSUID PNUM (panelmonth), sort: gen partner_lose = (spartner < spartner[_n-1]) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]	
-		
-// Create indicator of birth during the year
-	drop tcbyr_8-tcbyr_20 // suppressed variables, no observations
-	gen birth=1 if (tcbyr_1==year | tcbyr_2==year | tcbyr_3==year | tcbyr_4==year | tcbyr_5==year | tcbyr_6==year | tcbyr_7==year)
-	gen first_birth=1 if (yrfirstbirth==year)
-	// browse birth year tcbyr*
-	
-// create indicators of job changes
-**Respondent
-	// Employment Status
-	* Full-Time to Part-Time
-	by SSUID PNUM (panelmonth), sort: gen full_part = (ft_pt==2 & ft_pt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is based on a recode of number of hours worked per week. I am not sure if there is a better way to get this. that is what the sipp uses to ask why a respondent works less than 35 hours
-	* Full-Time to No Job
-	by SSUID PNUM (panelmonth), sort: gen full_no = (ft_pt==. & ft_pt[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Part-Time to No Job
-	by SSUID PNUM (panelmonth), sort: gen part_no = (ft_pt==. & ft_pt[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Part-Time to Full-Time
-	by SSUID PNUM (panelmonth), sort: gen part_full = (ft_pt==1 & ft_pt[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* No Job to Part-Time
-	by SSUID PNUM (panelmonth), sort: gen no_part = (ft_pt==2 & ft_pt[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	* No Job to Full-Time
-	by SSUID PNUM (panelmonth), sort: gen no_full = (ft_pt==1 & ft_pt[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	
-// Education
-	// highest educational attainment only measured yearly, so will test yearly educational changes, as well as school enrollment. testing monthly, but will also add to annualize file
-	by SSUID PNUM (panelmonth), sort: gen educ_change = (educ>educ[_n-12])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // make sure this creates the 0s I want, for people who didn't get more education
-	by SSUID PNUM (panelmonth), sort: gen enrolled_yes = (renroll==1 & renroll[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	by SSUID PNUM (panelmonth), sort: gen enrolled_no = (renroll==2 & renroll[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-
-**Partner
-	* first get partner specific variables
+	// get partner specific variables
 	gen spousenum=.
 	forvalues n=1/22{
 	replace spousenum=`n' if relationship`n'==1
@@ -150,23 +67,173 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	replace educ_sp=to_educ`n' if spart_num==`n'
 	}
 
-	* Full-Time to Part-Time
-	by SSUID PNUM (panelmonth), sort: gen full_part_sp = (ft_pt_sp==2 & ft_pt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is based on a recode of number of hours worked per week. I am not sure if there is a better way to get this. that is what the sipp uses to ask why a respondent works less than 35 hours
-	* Full-Time to No Job
-	by SSUID PNUM (panelmonth), sort: gen full_no_sp = (ft_pt_sp==. & ft_pt_sp[_n-1]==1)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Part-Time to No Job
-	by SSUID PNUM (panelmonth), sort: gen part_no_sp = (ft_pt_sp==. & ft_pt_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* Part-Time to Full-Time
-	by SSUID PNUM (panelmonth), sort: gen part_full_sp = (ft_pt_sp==1 & ft_pt_sp[_n-1]==2)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
-	* No Job to Part-Time
-	by SSUID PNUM (panelmonth), sort: gen no_part_sp = (ft_pt_sp==2 & ft_pt_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
-	* No Job to Full-Time
-	by SSUID PNUM (panelmonth), sort: gen no_full_sp = (ft_pt_sp==1 & ft_pt_sp[_n-1]==.)  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] 
 	
-// Education
-	// highest educational attainment only measured yearly, so will test yearly educational changes, as well as school enrollment. testing monthly, but will also add to annualize file
-	by SSUID PNUM (panelmonth), sort: gen educ_change_sp = (educ_sp > educ_sp[_n-12])  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // make sure this creates the 0s I want, for people who didn't get more education
+// getting ready to create indicators of various status changes THROUGHOUT the year
+drop _merge
+local reshape_vars marital_status hhsize other_earner earnings spartner ft_pt educ renroll ft_pt_sp educ_sp
 
+keep `reshape_vars' SSUID PNUM panelmonth
+ 
+// Reshape the data wide (1 person per row)
+reshape wide `reshape_vars', i(SSUID PNUM) j(panelmonth)
+
+	// marital status variables
+	gen sing_coh1=0
+	gen sing_mar1=0
+	gen coh_mar1=0
+	gen coh_diss1=0
+	gen marr_diss1=0
+	gen marr_wid1=0
+	gen marr_coh1=0
+
+	forvalues m=2/48{
+		local l				=`m'-1
+		
+		gen sing_coh`m'	=  marital_status`m'==2 & inlist(marital_status`l',3,4,5)
+		gen sing_mar`m'	=  marital_status`m'==1 & inlist(marital_status`l',3,4,5)
+		gen coh_mar`m'	=  marital_status`m'==1 & marital_status`l'==2
+		gen coh_diss`m'	=  inlist(marital_status`m',3,4,5) & marital_status`l'==2
+		gen marr_diss`m'=  marital_status`m'==4 & marital_status`l'==1
+		gen marr_wid`m'	=  marital_status`m'==3 & marital_status`l'==1
+		gen marr_coh`m'	=  marital_status`m'==2 & marital_status`l'==1
+	}
+
+	// browse marital_status2 marital_status3 sing_coh3 sing_mar3 coh_mar3 coh_diss3 marr_diss3 marr_wid3 marr_coh3
+	
+	// indicators of someone leaving household DURING the year
+		gen hh_lose1=0
+		gen earn_lose1=0
+		gen earn_non1=0
+		gen hh_gain1=0
+		gen earn_gain1=0
+		gen non_earn1=0
+		gen resp_earn1=0
+		gen resp_non1=0
+		gen partner_gain1=0
+		gen partner_lose1=0
+
+	forvalues m=2/48{
+		local l				=`m'-1
+		
+		gen hh_lose`m'		=  hhsize`m' < hhsize`l'
+		gen earn_lose`m'	=  other_earner`m' < other_earner`l' & hhsize`m' < hhsize`l'
+		gen earn_non`m'		=  other_earner`m' < other_earner`l' & hhsize`m' == hhsize`l'
+		gen hh_gain`m'		=  hhsize`m' > hhsize`l'
+		gen earn_gain`m'	=  other_earner`m' > other_earner`l' & hhsize`m' > hhsize`l'
+		gen non_earn`m'		=  other_earner`m' > other_earner`l' & hhsize`m' == hhsize`l'
+		gen resp_earn`m'	= earnings`m'!=. & (earnings`l'==. | earnings`l'==0)
+		gen resp_non`m'		=  (earnings`m'==. | earnings`m'==0) & earnings`l'!=.
+		gen partner_gain`m'	=  spartner`m' > spartner`l'
+		gen partner_lose`m'	=  spartner`m' < spartner`l'
+	}
+	
+	// create indicators of job / education changes: respondent
+		gen full_part1=0
+		gen full_no1=0
+		gen part_no1=0
+		gen part_full1=0
+		gen no_part1=0
+		gen no_full1=0
+		gen educ_change1=0
+		gen enrolled_yes1=0
+		gen enrolled_no1=0
+		
+	forvalues m=2/48{
+		local l				=`m'-1
+		
+		gen full_part`m'	=  ft_pt`m'==2 & ft_pt`l'==1
+		gen full_no`m'		=  ft_pt`m'==. & ft_pt`l'==1
+		gen part_no`m'		=  ft_pt`m'==. & ft_pt`l'==2
+		gen part_full`m'	=  ft_pt`m'==1 & ft_pt`l'==2
+		gen no_part`m'		=  ft_pt`m'==2 & ft_pt`l'==.
+		gen no_full`m'		=  ft_pt`m'==1 & ft_pt`l'==.
+		gen educ_change`m'	=  educ`m'>educ`l' // education only measured annually but I think this will capture if it changes in the first month of the year? which is fine?
+		gen enrolled_yes`m'	=  renroll`m'==1 & renroll`l'==2
+		gen enrolled_no`m'	=  renroll`m'==2 & renroll`l'==1
+	}
+	
+	// create indicators of job / education changes: partner
+		gen full_part_sp1=0
+		gen full_no_sp1=0
+		gen part_no_sp1=0
+		gen part_full_sp1=0
+		gen no_part_sp1=0
+		gen no_full_sp1=0
+		gen educ_change_sp1=0
+		
+	forvalues m=2/48{
+		local l				=`m'-1
+		
+		gen full_part_sp`m'		=  ft_pt_sp`m'==2 & ft_pt_sp`l'==1
+		gen full_no_sp`m'		=  ft_pt_sp`m'==. & ft_pt_sp`l'==1
+		gen part_no_sp`m'		=  ft_pt_sp`m'==. & ft_pt_sp`l'==2
+		gen part_full_sp`m'		=  ft_pt_sp`m'==1 & ft_pt_sp`l'==2
+		gen no_part_sp`m'		=  ft_pt_sp`m'==2 & ft_pt_sp`l'==.
+		gen no_full_sp`m'		=  ft_pt_sp`m'==1 & ft_pt_sp`l'==.
+		gen educ_change_sp`m'	=  educ_sp`m'>educ_sp`l'
+	}
+		
+// Reshape data back to long format
+reshape long `reshape_vars' sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh ///
+hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn resp_non partner_gain partner_lose ///
+full_part full_no part_no part_full no_part no_full educ_change enrolled_yes enrolled_no ///
+full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp educ_change_sp, i(SSUID PNUM) j(panelmonth)
+
+save "$tempdir/reshape_transitions.dta", replace
+
+
+//*Back to original and testing match
+
+use "$SIPP14keep/sipp14tpearn_rel", clear
+
+drop _merge
+merge 1:1 SSUID PNUM panelmonth using "$tempdir/reshape_transitions.dta"
+
+tab marital_status _merge, m // all missing
+tab educ _merge, m
+drop if _merge==2
+	
+// Create variables with the first and last month of observation by year
+   egen startmonth=min(monthcode), by(SSUID PNUM year)
+   egen lastmonth =max(monthcode), by(SSUID PNUM year)
+   
+   * All months have the same number of observations (12) within year
+   * so this wasn't necessary.
+   order 	SSUID PNUM year startmonth lastmonth
+   list 	SSUID PNUM year startmonth lastmonth in 1/5, clean
+   sort 	SSUID PNUM year panelmonth
+
+* Prep for counting the total number of months breadwinning for the year. 
+* NOTE: This isn't our primary measure.
+   gen mbw50=1 if earnings > .5*thearn_alt & !missing(earnings) & !missing(thearn_alt)	// 50% threshold
+   gen mbw60=1 if earnings > .6*thearn_alt & !missing(earnings) & !missing(thearn_alt)	// 60% threshold
+   
+// Create indicator of birth during the year
+	drop tcbyr_8-tcbyr_20 // suppressed variables, no observations
+	gen birth=1 if (tcbyr_1==year | tcbyr_2==year | tcbyr_3==year | tcbyr_4==year | tcbyr_5==year | tcbyr_6==year | tcbyr_7==year)
+	gen first_birth=1 if (yrfirstbirth==year)
+	// browse birth year tcbyr*
+
+// Readding partner status variables
+
+	egen statuses = nvals(marital_status),	by(SSUID ERESIDENCEID PNUM year) // first examining how many people have more than 2 statuses in a year (aka changed status more than 1 time)
+	// browse SSUID PNUM panelmonth marital_status statuses // if statuses>2
+	tab statuses // okay very small percent - will use last status change OR if I do as separate columns, she can get both captured?
+	
+	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
+	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
+
+	// Create a combined spouse & partner indicator
+	gen 	spartner=1 	if spouse==1 | partner==1
+	replace spartner=0 	if spouse==0 & partner==0
+	
+	// Create indicators of partner presence at the first and last month of observation by year
+	gen 	start_spartner=spartner if monthcode==startmonth
+	gen 	last_spartner=spartner 	if monthcode==lastmonth
+	gen 	start_spouse=spouse if monthcode==startmonth
+	gen 	last_spouse=spouse 	if monthcode==lastmonth
+	gen 	start_partner=partner if monthcode==startmonth
+	gen 	last_partner=partner 	if monthcode==lastmonth
 	
 // Create basic indictor to identify months observed when data is collapsed
 	gen one=1
