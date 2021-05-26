@@ -903,9 +903,185 @@ dyndoc "$bw_base_code/Predictor_Decomposition.md", saving($results/Predictor_Dec
 * Creating tables for paper
 ********************************************************************************
 
-// Table 1: Overall descriptives 
+drop base_1 base_2
 
+// Table 1: Sample descriptives
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table1) replace
+putexcel B2 = "Total Sample"
+putexcel C2 = "1996 SIPP"
+putexcel D2 = "2014 SIPP"
+putexcel A3 = "No. of respondents"
+putexcel A4 = "No. of person-years"
+putexcel A5 = "Years of eligibility to transition to primary earning status"
+putexcel A6 = "No. of transitions to primary earning status"
+putexcel A7 = "Median HH income at time t-1"
+putexcel A8 = "Mothers' median income at time t-1"
+putexcel A9 = "Race/ethnicity"
+putexcel A10 = "Non-Hispanic White", txtindent(4)
+putexcel A11 = "Black", txtindent(4)
+putexcel A12 = "Non-Hispanic Asian", txtindent(4)
+putexcel A13 = "Hispanic", txtindent(4)
+putexcel A14 = "Education"
+putexcel A15 = "Less than HS", txtindent(4)
+putexcel A16 = "HS Degree", txtindent(4)
+putexcel A17 = "Some College", txtindent(4)
+putexcel A18 = "College Plus", txtindent(4)
+putexcel A19 = "Relationship Status"
+putexcel A20 = "Married", txtindent(4)
+putexcel A21 = "Cohabitating", txtindent(4)
+putexcel A22 = "Single", txtindent(4)
+putexcel A23 = "Single -> Cohabit", txtindent(4)
+putexcel A24 = "Single -> Married", txtindent(4)
+putexcel A25 = "Cohabit -> Married", txtindent(4)
+putexcel A26 = "Cohabit -> Dissolved", txtindent(4)
+putexcel A27 = "Married -> Dissolved", txtindent(4)
+putexcel A28 = "Married -> Widowed", txtindent(4)
+putexcel A29 = "Married -> Cohabit", txtindent(4)
+
+local colu "C D"
+
+// there is probably a more efficient way to do this but I am currently struggling
+
+*Sample info / totals
+forvalues y=1/2{
+	local col: word `y' of `colu'
+	egen total_N_`y' = nvals(id) if survey_yr==`y'
+	sum total_N_`y'
+	replace total_N_`y' = r(mean)
+	local total_N_`y' = total_N_`y'
+	putexcel `col'3= `total_N_`y'', nformat(###,###)
+	egen total_PY_`y' = count(id) if survey_yr==`y'
+	sum total_PY_`y'
+	replace total_PY_`y' = r(mean)
+	local total_PY_`y' = total_PY_`y'
+	putexcel `col'4= `total_PY_`y'', nformat(###,###)
+	egen base_`y' = count(id) if bw60lag==0 & survey_yr==`y'
+	sum base_`y'
+	replace base_`y' = r(mean)
+	local base_`y' = base_`y'
+	putexcel `col'5= `base_`y'', nformat(###,###)
+	egen transitions_`y' = count(id) if trans_bw60_alt2==1 & survey_yr==`y'
+	sum transitions_`y'
+	replace transitions_`y' = r(mean)
+	local transitions_`y' = transitions_`y'
+	putexcel `col'6= `transitions_`y'', nformat(###,###)
+}
+
+egen total_N = nvals(id) 
+global total_N = total_N
+putexcel B3 = $total_N, nformat(###,###)
+egen total_PY = count(id)
+global total_PY = total_PY
+putexcel B4 = $total_PY, nformat(###,###)
+egen base = count(id) if bw60lag==0
+sum base
+replace base=r(mean)
+global base=base
+putexcel B5 = $base, nformat(###,###)
+egen transitions = count(id) if trans_bw60_alt2==1
+sum transitions
+replace transitions=r(mean)
+global transitions=transitions
+putexcel B6 = $transitions, nformat(###,###)
+
+*Income 
+sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, detail // is this t-1?
+putexcel B7=`r(p50)', nformat(###,###)
+sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // is this t-1?
+putexcel C7=`r(p50)', nformat(###,###)
+sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail
+putexcel D7=`r(p50)', nformat(###,###)
+
+sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, detail // is this t-1?
+putexcel B8=`r(p50)', nformat(###,###)
+sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // is this t-1?
+putexcel C8=`r(p50)', nformat(###,###)
+sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail 
+putexcel D8=`r(p50)', nformat(###,###)
+
+* Race
+forvalues r=1/4{
+	forvalues y=1/2{
+		local col: word `y' of `colu'
+		local row = `r'+9
+		egen count_r`r'_`y' = nvals(id) if survey_yr==`y' & race==`r'
+		sum count_r`r'_`y'
+		replace count_r`r'_`y' = r(mean)
+		local count_r`r'_`y' = count_r`r'_`y'
+		putexcel `col'`row'= `count_r`r'_`y'', nformat(###,###)
+	}
+	
+	egen count_r`r' = nvals(id) if race==`r'
+	sum count_r`r'
+	replace count_r`r' = r(mean)
+	local count_r`r' = count_r`r'
+	putexcel B`row' = `count_r`r'', nformat(###,###)
+}
+
+* Education
+forvalues e=1/4{
+	forvalues y=1/2{
+		local col: word `y' of `colu'
+		local row = `e'+14
+		egen count_e`e'_`y' = count(id) if survey_yr==`y' & educ==`e'
+		sum count_e`e'_`y'
+		replace count_e`e'_`y' = r(mean)
+		local count_e`e'_`y' = count_e`e'_`y'
+		putexcel `col'`row'= `count_e`e'_`y'', nformat(###,###)
+	}
+	
+	egen count_e`e' = count(id) if educ==`e'
+	sum count_e`e'
+	replace count_e`e' = r(mean)
+	local count_e`e' = count_e`e'
+	putexcel B`row' = `count_e`e'', nformat(###,###)
+}
+
+* Marital Status
+
+gen married = no_status_chg==1 & end_marital_status==1
+gen cohab = no_status_chg==1 & end_marital_status==2
+gen single = no_status_chg==1 & inlist(end_marital_status,3,4,5)
+
+local status_vars "married cohab single sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh"
+
+forvalues w=1/10 {
+	forvalues y=1/2{
+		local col: word `y' of `colu'
+		local row = `w'+19
+		local var: word `w' of `status_vars'
+		egen n_`var'_`y' = count(id) if survey_yr==`y' & `var'==1
+		sum n_`var'_`y'
+		replace n_`var'_`y' = r(mean)
+		local n_`var'_`y' = n_`var'_`y'
+		putexcel `col'`row'= `n_`var'_`y'', nformat(###,###)
+		}
+		
+	egen n_`var' = count(id) if `var'==1
+	sum n_`var'
+	replace n_`var' = r(mean)
+	local n_`var' = n_`var'
+	putexcel B`row'= `n_`var'', nformat(###,###)
+}
+
+/*
+forvalues w=1/10 {
+	forvalues y=1/2{
+		local col: word `y' of `colu'
+		local row = `w'+19
+		local var: word `w' of `status_vars'
+		sum `var' if survey_yr==`y'
+		putexcel `col'`row' = `r(mean)', nformat(#.##%)
+		}
+		
+	sum `var'
+	putexcel B`row' =`r(mean)', nformat(#.##%)
+}
+*/
+
+// Table 2: Overall equation
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table2) modify
 putexcel A1 = "Event"
 putexcel B1 = "1996 Incidence"
 putexcel C1 = "2014 Incidence"
@@ -940,18 +1116,12 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 putexcel B12 = $bw_rate_96, nformat(#.##%)
 putexcel C12 = $bw_rate_14, nformat(#.##%)
 
-sum base_1
-replace base_1 = r(mean)
-sum base_2
-replace base_2 = r(mean)
-global base_1 = base_1
-global base_2 = base_2
-putexcel B13 = $base_1
-putexcel C13 = $base_2
+putexcel B13 = `base_1'
+putexcel C13 = `base_2'
 
-// Table 2: Change Components
+// Table 3: Change Components
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table2) modify
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table3) modify
 putexcel A1 = "Component"
 putexcel B1 = "Percent of Change Explained"
 putexcel A2 = "Total Gap to Explain"
@@ -972,9 +1142,9 @@ putexcel B7 = $partner_down_only_compt_x, nformat(#.##%)
 putexcel B8 = $partner_leave_compt_x, nformat(#.##%)
 putexcel B9 = $other_hh_compt_x, nformat(#.##%)
 
-// Table 3: Change Components by Education and Race
+// Table 4: Change Components by Education and Race
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table3) modify
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
 putexcel A2 = "Component"
 putexcel B1:E1 = "Percent of Change Explained", merge hcenter
 putexcel B2 = ("Less than HS") C2 = ("HS Degree") D2 = ("Some College") E2 = ("College Plus") 
@@ -1026,9 +1196,9 @@ forvalues r=1/4{
 	putexcel `col'21 = ${other_hh_component_r`r'}, nformat(#.##%)
 }
 
-// Table 4: Median Income Change
+// Table 5: Median Income Change
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5) modify
 putexcel A1:D1 = "Changes in Median Household Income upon BW Transition", merge hcenter
 putexcel B2 = ("1996") C2 = ("2014") D2 = ("total")
 putexcel A3 = "Pre-Transition Median HH Income"
