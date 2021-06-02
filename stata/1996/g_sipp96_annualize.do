@@ -114,7 +114,7 @@ reshape wide `reshape_vars', i(SSUID PNUM) j(panelmonth)
 	forvalues m=2/51{
 		local l				=`m'-1
 		
-		gen hh_lose`m'		=  hhsize`m' < hhsize`l'
+		gen hh_lose`m'		=  (hhsize`m' < hhsize`l') & hhsize`l'!=.
 		gen earn_lose`m'	=  other_earner`m' < other_earner`l' & hhsize`m' < hhsize`l'
 		gen earn_non`m'		=  other_earner`m' < other_earner`l' & hhsize`m' == hhsize`l'
 		gen hh_gain`m'		=  hhsize`m' > hhsize`l'
@@ -122,8 +122,8 @@ reshape wide `reshape_vars', i(SSUID PNUM) j(panelmonth)
 		gen non_earn`m'		=  other_earner`m' > other_earner`l' & hhsize`m' == hhsize`l'
 		gen resp_earn`m'	= earnings`m'!=. & (earnings`l'==. | earnings`l'==0)
 		gen resp_non`m'		=  (earnings`m'==. | earnings`m'==0) & earnings`l'!=.
-		gen partner_gain`m'	=  spartner`m' > spartner`l'
-		gen partner_lose`m'	=  spartner`m' < spartner`l'
+		gen partner_gain`m'	=  (spartner`m' > spartner`l') & spartner`m'!=. 
+		gen partner_lose`m'	=  (spartner`m' < spartner`l') & spartner`l'!=.
 	}
 	
 	// create indicators of job / education changes: respondent
