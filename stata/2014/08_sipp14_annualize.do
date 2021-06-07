@@ -38,12 +38,16 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	replace spartner=0 	if spouse==0 & partner==0
 	
 	// Create indicators of partner presence at the first and last month of observation by year
-	gen 	start_spartner=spartner if monthcode==startmonth
-	gen 	last_spartner=spartner 	if monthcode==lastmonth
-	gen 	start_spouse=spouse if monthcode==startmonth
-	gen 	last_spouse=spouse 	if monthcode==lastmonth
-	gen 	start_partner=partner if monthcode==startmonth
-	gen 	last_partner=partner 	if monthcode==lastmonth
+	gen 	start_spartner=spartner 			if monthcode==startmonth
+	gen 	last_spartner=spartner 				if monthcode==lastmonth
+	gen 	start_spouse=spouse 				if monthcode==startmonth
+	gen 	last_spouse=spouse 					if monthcode==lastmonth
+	gen 	start_partner=partner 				if monthcode==startmonth
+	gen 	last_partner=partner 				if monthcode==lastmonth
+	gen 	start_marital_status=marital_status if monthcode==startmonth
+	gen 	last_marital_status=marital_status 	if monthcode==lastmonth
+	
+	// browse SSUID PNUM year monthcode startmonth lastmonth start_marital_status last_marital_status marital_status
 	
 	// get partner specific variables
 	gen spousenum=.
@@ -234,6 +238,8 @@ drop if _merge==2
 	gen 	last_spouse=spouse 	if monthcode==lastmonth
 	gen 	start_partner=partner if monthcode==startmonth
 	gen 	last_partner=partner 	if monthcode==lastmonth
+	gen 	start_marital_status=marital_status if monthcode==startmonth
+	gen 	last_marital_status=marital_status 	if monthcode==lastmonth
 	
 // Create basic indictor to identify months observed when data is collapsed
 	gen one=1
@@ -279,7 +285,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					no_full_sp educ_change_sp  											///
 			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize				/// 
 					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner			///
-					thincpovt2 pov_level											///
+					thincpovt2 pov_level start_marital_status last_marital_status		///
 					tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1					///
 					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///

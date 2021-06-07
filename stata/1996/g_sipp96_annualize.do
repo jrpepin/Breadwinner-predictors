@@ -43,6 +43,8 @@ use "$SIPP96keep/sipp96tpearn_rel.dta", clear
 	gen 	last_spouse=spouse 	if monthcode==lastmonth
 	gen 	start_partner=partner if monthcode==startmonth
 	gen 	last_partner=partner 	if monthcode==lastmonth
+	gen 	start_marital_status=marital_status if monthcode==startmonth
+	gen 	last_marital_status=marital_status 	if monthcode==lastmonth
 	
 	// get partner specific variables
 	gen spousenum=.
@@ -229,8 +231,10 @@ drop if _merge==2
 	gen 	last_spouse=spouse 	if monthcode==lastmonth
 	gen 	start_partner=partner if monthcode==startmonth
 	gen 	last_partner=partner 	if monthcode==lastmonth
-	
-**Partner - want their hours for next step
+	gen 	start_marital_status=marital_status if monthcode==startmonth
+	gen 	last_marital_status=marital_status 	if monthcode==lastmonth
+
+	**Partner - want their hours for next step
 	* first get partner specific variables
 	gen spousenum=.
 	forvalues n=1/17{
@@ -298,7 +302,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 								//
 					resp_non first_birth partner_gain partner_lose										///
 					full_part full_no part_no part_full no_part no_full									///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp				///
-			(mean) 	spouse partner wpfinwgt birth mom_panel hhsize										///
+			(mean) 	spouse partner wpfinwgt birth mom_panel hhsize start_marital_status last_marital_status		///
 					avg_mo_hrs avg_mo_hrs_sp avg_earn=earnings numearner other_earner					///
 					tpyrate1	tpyrate2 avg_wk_rate thpov												/// 		
 			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age			///

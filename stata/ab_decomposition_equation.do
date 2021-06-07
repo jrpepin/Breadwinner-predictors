@@ -930,13 +930,6 @@ putexcel A19 = "Relationship Status"
 putexcel A20 = "Married", txtindent(4)
 putexcel A21 = "Cohabitating", txtindent(4)
 putexcel A22 = "Single", txtindent(4)
-putexcel A23 = "Single -> Cohabit", txtindent(4)
-putexcel A24 = "Single -> Married", txtindent(4)
-putexcel A25 = "Cohabit -> Married", txtindent(4)
-putexcel A26 = "Cohabit -> Dissolved", txtindent(4)
-putexcel A27 = "Married -> Dissolved", txtindent(4)
-putexcel A28 = "Married -> Widowed", txtindent(4)
-putexcel A29 = "Married -> Cohabit", txtindent(4)
 
 local colu "C D"
 
@@ -1037,7 +1030,30 @@ forvalues e=1/4{
 	putexcel B`row' = `count_e`e'', nformat(###,###)
 }
 
-* Marital Status
+* Marital Status - December of prior year
+recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
+label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
+label values marital_status_t1 marr
+
+forvalues m=1/3{
+	forvalues y=1/2{
+		local col: word `y' of `colu'
+		local row = `m'+19
+		egen count_m`m'_`y' = count(id) if survey_yr==`y' & marital_status_t1==`m'
+		sum count_m`m'_`y'
+		replace count_m`m'_`y' = r(mean)
+		local count_m`m'_`y' = count_m`m'_`y'
+		putexcel `col'`row'= `count_m`m'_`y'', nformat(###,###)
+	}
+	
+	egen count_m`m' = count(id) if marital_status_t1==`m'
+	sum count_m`m'
+	replace count_m`m' = r(mean)
+	local count_m`m' = count_m`m'
+	putexcel B`row' = `count_m`m'', nformat(###,###)
+}
+
+/* Marital Status - change in year
 
 gen married = no_status_chg==1 & end_marital_status==1
 gen cohab = no_status_chg==1 & end_marital_status==2
@@ -1064,7 +1080,6 @@ forvalues w=1/10 {
 	putexcel B`row'= `n_`var'', nformat(###,###)
 }
 
-/*
 forvalues w=1/10 {
 	forvalues y=1/2{
 		local col: word `y' of `colu'
