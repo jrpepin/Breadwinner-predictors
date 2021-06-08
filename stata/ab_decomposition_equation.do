@@ -1310,6 +1310,18 @@ tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID
 tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
 tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
 
+* total earnings change of partner with mom as BW
+tabstat earn_change_sp if trans_bw60_alt2==1, by(survey) statistics(mean p50)
+tabstat earn_change_raw_sp if trans_bw60_alt2==1, by(survey) statistics(mean p50)
+
+* Earnings change of partners who experienced a decrease + mom BW	
+tabstat earn_change_sp if trans_bw60_alt2==1 & earndown8_sp_all==1, by(survey) statistics(mean p50)
+tabstat earn_change_raw_sp if trans_bw60_alt2==1 & earndown8_sp_all==1, by(survey) statistics(mean p50)
+
+* Earnings change of partners who experienced a decrease - regardless of BW status
+tabstat earn_change_sp if earndown8_sp_all==1, by(survey) statistics(mean p50)
+tabstat earn_change_raw_sp if earndown8_sp_all==1, by(survey) statistics(mean p50)
+
 log close
 
 
