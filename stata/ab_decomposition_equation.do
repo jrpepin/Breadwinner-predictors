@@ -14,6 +14,18 @@ di "$S_DATE"
 
 use "$combined_data/combined_annual_bw_status.dta", clear
 
+/* this isn't going to work because weights vary by year - also doing PY version of race
+// getting unique race counts for descriptives later. not convinced this is most efficient but struggling with how to do this with persons, not person-years, in long file with weights
+keep race SSUID PNUM year wpfinwgt
+ 
+// Reshape the data wide (1 person per row)
+reshape wide race wpfinwgt, i(SSUID PNUM) j(year)
+egen race = rowmin(race1995 race1996 race1997 race1998 race1999 race2000 race2013 race2014 race2015 race2016)
+label values race race
+
+tab race [aweight=wpfinwgt], gen(race)
+*/
+
 sort SSUID PNUM year
 
 browse SSUID PNUM year bw60 trans_bw60 earnup8_all momup_only earn_lose earndown8_hh_all
@@ -47,6 +59,7 @@ replace mt_mom = 1 if earnup8_all==1 & earn_lose==0 & earndown8_hh_all==0
 replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom==0 // to capture those outside the 8% threshold (v. small amount)
 
 svy: tab survey mt_mom if bw60lag==0, row
+tab survey mt_mom if bw60lag==0 [aweight = wpfinwgt], row // validating this is the same as svy
 
 *Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
 
@@ -916,17 +929,17 @@ putexcel A5 = "Years of eligibility to transition to primary earning status"
 putexcel A6 = "No. of transitions to primary earning status"
 putexcel A7 = "Median HH income at time t-1"
 putexcel A8 = "Mothers' median income at time t-1"
-putexcel A9 = "Race/ethnicity"
+putexcel A9 = "Race/ethnicity (time-invariant)"
 putexcel A10 = "Non-Hispanic White", txtindent(4)
 putexcel A11 = "Black", txtindent(4)
 putexcel A12 = "Non-Hispanic Asian", txtindent(4)
 putexcel A13 = "Hispanic", txtindent(4)
-putexcel A14 = "Education"
+putexcel A14 = "Education (time-varying)"
 putexcel A15 = "Less than HS", txtindent(4)
 putexcel A16 = "HS Degree", txtindent(4)
 putexcel A17 = "Some College", txtindent(4)
 putexcel A18 = "College Plus", txtindent(4)
-putexcel A19 = "Relationship Status"
+putexcel A19 = "Relationship Status (time-varying)"
 putexcel A20 = "Married", txtindent(4)
 putexcel A21 = "Cohabitating", txtindent(4)
 putexcel A22 = "Single", txtindent(4)
@@ -935,7 +948,7 @@ local colu "C D"
 
 // there is probably a more efficient way to do this but I am currently struggling
 
-*Sample info / totals
+*Sample total
 forvalues y=1/2{
 	local col: word `y' of `colu'
 	egen total_N_`y' = nvals(id) if survey_yr==`y'
@@ -948,16 +961,6 @@ forvalues y=1/2{
 	replace total_PY_`y' = r(mean)
 	local total_PY_`y' = total_PY_`y'
 	putexcel `col'4= `total_PY_`y'', nformat(###,###)
-	egen base_`y' = count(id) if bw60lag==0 & survey_yr==`y'
-	sum base_`y'
-	replace base_`y' = r(mean)
-	local base_`y' = base_`y'
-	putexcel `col'5= `base_`y'', nformat(###,###)
-	egen transitions_`y' = count(id) if trans_bw60_alt2==1 & survey_yr==`y'
-	sum transitions_`y'
-	replace transitions_`y' = r(mean)
-	local transitions_`y' = transitions_`y'
-	putexcel `col'6= `transitions_`y'', nformat(###,###)
 }
 
 egen total_N = nvals(id) 
@@ -966,92 +969,121 @@ putexcel B3 = $total_N, nformat(###,###)
 egen total_PY = count(id)
 global total_PY = total_PY
 putexcel B4 = $total_PY, nformat(###,###)
-egen base = count(id) if bw60lag==0
-sum base
-replace base=r(mean)
-global base=base
-putexcel B5 = $base, nformat(###,###)
-egen transitions = count(id) if trans_bw60_alt2==1
-sum transitions
-replace transitions=r(mean)
-global transitions=transitions
-putexcel B6 = $transitions, nformat(###,###)
+
+*Transitions
+gen eligible=(bw60lag==0)
+replace eligible=. if bw60lag==.
+gen transitioned=0
+replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
+replace transitioned=. if trans_bw60_alt2==.
+// svy: tab eligible, obs
+// this is what it needs to match: svy: tab survey trans_bw60_alt2 if bw60lag==0, row
+
+local colu "C D"
+
+forvalues y=1/2{
+	local col: word `y' of `colu'
+	sum eligible [aweight=wpfinwgt] if survey_yr==`y'
+	putexcel `col'5=(`r(mean)'*`r(N)'), nformat(###,###)
+	sum transitioned [aweight=wpfinwgt] if survey_yr==`y'
+	putexcel `col'6=(`r(mean)'*`r(N)'), nformat(###,###)
+}
+
+sum eligible [aweight=wpfinwgt]
+putexcel B5=(`r(mean)'*`r(N)'), nformat(###,###)
+sum transitioned [aweight=wpfinwgt]
+putexcel B6=(`r(mean)'*`r(N)'), nformat(###,###)
 
 *Income 
-sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, detail // is this t-1?
+* HH
+sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID  [aweight=wpfinwgt], detail // is this t-1?
 putexcel B7=`r(p50)', nformat(###,###)
-sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // is this t-1?
+sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aweight=wpfinwgt], detail // is this t-1?
 putexcel C7=`r(p50)', nformat(###,###)
-sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail
+sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail
 putexcel D7=`r(p50)', nformat(###,###)
 
-sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, detail // is this t-1?
+*Mother
+sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID [aweight=wpfinwgt], detail // is this t-1?
 putexcel B8=`r(p50)', nformat(###,###)
-sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // is this t-1?
+sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aweight=wpfinwgt], detail // is this t-1?
 putexcel C8=`r(p50)', nformat(###,###)
-sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail 
+sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail 
 putexcel D8=`r(p50)', nformat(###,###)
 
 * Race
-forvalues r=1/4{
-	forvalues y=1/2{
-		local col: word `y' of `colu'
-		local row = `r'+9
-		egen count_r`r'_`y' = nvals(id) if survey_yr==`y' & race==`r'
-		sum count_r`r'_`y'
-		replace count_r`r'_`y' = r(mean)
-		local count_r`r'_`y' = count_r`r'_`y'
-		putexcel `col'`row'= `count_r`r'_`y'', nformat(###,###)
+tab race [aweight=wpfinwgt], gen(race)
+// test: svy: mean race1
+
+local colu "C D"
+local i=1
+
+foreach var in race1 race2 race3 race4{
+		
+		forvalues y=1/2{
+			local col: word `y' of `colu'
+			local row = `i'+9
+			svy: mean `var' if survey_yr==`y'
+			matrix `var'_`y' = e(b)
+			putexcel `col'`row' = matrix(`var'_`y'), nformat(#.##%)
+		}
+		
+		svy: mean `var'
+		matrix `var' = e(b)
+		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		local ++i
 	}
-	
-	egen count_r`r' = nvals(id) if race==`r'
-	sum count_r`r'
-	replace count_r`r' = r(mean)
-	local count_r`r' = count_r`r'
-	putexcel B`row' = `count_r`r'', nformat(###,###)
-}
 
 * Education
-forvalues e=1/4{
-	forvalues y=1/2{
-		local col: word `y' of `colu'
-		local row = `e'+14
-		egen count_e`e'_`y' = count(id) if survey_yr==`y' & educ==`e'
-		sum count_e`e'_`y'
-		replace count_e`e'_`y' = r(mean)
-		local count_e`e'_`y' = count_e`e'_`y'
-		putexcel `col'`row'= `count_e`e'_`y'', nformat(###,###)
+tab educ [aweight=wpfinwgt], gen(educ)
+// test: svy: mean educ1
+
+local colu "C D"
+local i=1
+
+foreach var in educ1 educ2 educ3 educ4{
+		
+		forvalues y=1/2{
+			local col: word `y' of `colu'
+			local row = `i'+14
+			svy: mean `var' if survey_yr==`y'
+			matrix `var'_`y' = e(b)
+			putexcel `col'`row' = matrix(`var'_`y'), nformat(#.##%)
+		}
+		
+		svy: mean `var'
+		matrix `var' = e(b)
+		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		local ++i
 	}
 	
-	egen count_e`e' = count(id) if educ==`e'
-	sum count_e`e'
-	replace count_e`e' = r(mean)
-	local count_e`e' = count_e`e'
-	putexcel B`row' = `count_e`e'', nformat(###,###)
-}
 
 * Marital Status - December of prior year
 recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
 label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
 label values marital_status_t1 marr
 
-forvalues m=1/3{
-	forvalues y=1/2{
-		local col: word `y' of `colu'
-		local row = `m'+19
-		egen count_m`m'_`y' = count(id) if survey_yr==`y' & marital_status_t1==`m'
-		sum count_m`m'_`y'
-		replace count_m`m'_`y' = r(mean)
-		local count_m`m'_`y' = count_m`m'_`y'
-		putexcel `col'`row'= `count_m`m'_`y'', nformat(###,###)
+tab marital_status_t1 [aweight=wpfinwgt], gen(marst)
+
+local colu "C D"
+local i=1
+
+foreach var in marst1 marst2 marst3{
+		
+		forvalues y=1/2{
+			local col: word `y' of `colu'
+			local row = `i'+19
+			svy: mean `var' if survey_yr==`y'
+			matrix `var'_`y' = e(b)
+			putexcel `col'`row' = matrix(`var'_`y'), nformat(#.##%)
+		}
+		
+		svy: mean `var'
+		matrix `var' = e(b)
+		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		local ++i
 	}
-	
-	egen count_m`m' = count(id) if marital_status_t1==`m'
-	sum count_m`m'
-	replace count_m`m' = r(mean)
-	local count_m`m' = count_m`m'
-	putexcel B`row' = `count_m`m'', nformat(###,###)
-}
+
 
 /* Marital Status - change in year
 

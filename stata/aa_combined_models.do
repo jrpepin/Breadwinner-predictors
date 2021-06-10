@@ -45,6 +45,13 @@ gen survey=.
 replace survey=1996 if inrange(year,1995,2000)
 replace survey=2014 if inrange(year,2013,2016)
 
+// Missing value check - key IVs (DV handled elsewhere / meant to have missing because not always eligible, etc.)
+tab race, m
+tab educ, m // .02%
+drop if educ==.
+tab last_marital_status, m // .02%
+drop if last_marital_status==.
+
 save "$combined_data/combined_annual_bw_status.dta", replace
 
 /* investigations
