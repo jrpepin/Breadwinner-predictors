@@ -1319,39 +1319,84 @@ putexcel B5=formula((B4-B3)/B3), nformat(#.##%)
 putexcel C5=formula((C4-C3)/C3), nformat(#.##%)
 putexcel D5=formula((D4-D3)/D3), nformat(#.##%)
 
-putexcel B8:E8 = "Total Change", merge hcenter
-putexcel B9 = ("Less than HS") C9 = ("HS Degree") D9 = ("Some College") E9 = ("College Plus")
+putexcel B8:D8 = "Less than HS", merge hcenter
+putexcel E8:G8 = "HS Degree", merge hcenter
+putexcel H8:J8 = "Some College", merge hcenter
+putexcel K8:M8 = "College Plus", merge hcenter
+putexcel B9 = ("1996") E9 = ("1996") H9 = ("1996") K9 = ("1996")
+putexcel C9 = ("2014") F9 = ("2014") I9 = ("2014") L9 = ("2014")
+putexcel D9 = ("Total") G9 = ("Total") J9 = ("Total") M9 = ("Total")
 putexcel A10 = "Pre-Transition Median HH Income"
 putexcel A11 = "Post-Transition Median HH Income"
 putexcel A12 = "Percent Change Post Transition"
 
-local col1 "B C D E"
+local colu1 "B E H K"
+local colu2 "C F I L"
+local colu3 "D G J M"
 
 forvalues e=1/4{
-    local col: word `e' of `col1'
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e', detail // pre
-	putexcel `col'10=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post
-	putexcel `col'11=`r(p50)', nformat(###,###)
-	putexcel `col'12=formula((`col'11-`col'10)/`col'10), nformat(#.##%)
+    local col1: word `e' of `colu1'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==1, detail // pre-1996
+	putexcel `col1'10=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==1, detail // post-1996
+	putexcel `col1'11=`r(p50)', nformat(###,###)
+	putexcel `col1'12=formula((`col1'11-`col1'10)/`col1'10), nformat(#.##%)
+	
+	local col2: word `e' of `colu2'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==2, detail // pre-2014
+	putexcel `col2'10=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==2, detail // post-2014
+	putexcel `col2'11=`r(p50)', nformat(###,###)
+	putexcel `col2'12=formula((`col2'11-`col2'10)/`col2'10), nformat(#.##%)
+	
+	local col3: word `e' of `colu3'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e', detail // pre-total
+	putexcel `col3'10=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post-total
+	putexcel `col3'11=`r(p50)', nformat(###,###)
+	putexcel `col3'12=formula((`col3'11-`col3'10)/`col3'10), nformat(#.##%)
 }
 
-putexcel B15:E15 = "Total Change", merge hcenter
-putexcel B16 = ("NW White") C16 = ("Black") D16 = ("NH Asian") E16 = ("Hispanic")
+putexcel B15:D15 = "NH White", merge hcenter
+putexcel E15:G15 = "Black", merge hcenter
+putexcel H15:J15 = "NH Asian", merge hcenter
+putexcel K15:M15 = "Hisapnic", merge hcenter
+putexcel B16 = ("1996") E16 = ("1996") H16 = ("1996") K16 = ("1996")
+putexcel C16 = ("2014") F16 = ("2014") I16 = ("2014") L16 = ("2014")
+putexcel D16 = ("Total") G16 = ("Total") J16 = ("Total") M16 = ("Total")
 putexcel A17 = "Pre-Transition Median HH Income"
 putexcel A18 = "Post-Transition Median HH Income"
 putexcel A19 = "Percent Change Post Transition"
 
-local col1 "B C D E"
+local colu1 "B E H K"
+local colu2 "C F I L"
+local colu3 "D G J M"
 
 forvalues r=1/4{
-    local col: word `r' of `col1'
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre
-	putexcel `col'17=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post
-	putexcel `col'18=`r(p50)', nformat(###,###)
-	putexcel `col'19=formula((`col'18-`col'17)/`col'17), nformat(#.##%)
+    local col1: word `r' of `colu1'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
+	putexcel `col1'17=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
+	putexcel `col1'18=`r(p50)', nformat(###,###)
+	putexcel `col1'19=formula((`col1'18-`col1'17)/`col1'17), nformat(#.##%)
+	
+	local col2: word `r' of `colu2'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
+	putexcel `col2'17=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
+	putexcel `col2'18=`r(p50)', nformat(###,###)
+	putexcel `col2'19=formula((`col2'18-`col2'17)/`col2'17), nformat(#.##%)
+	
+	local col3: word `r' of `colu3'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre-total
+	putexcel `col3'17=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post-total
+	putexcel `col3'18=`r(p50)', nformat(###,###)
+	putexcel `col3'19=formula((`col3'18-`col3'17)/`col3'17), nformat(#.##%)
 }
+
+
+// Figure 1: Bar Chart for income
 
 ********************************************************************************
 * Some exploration
