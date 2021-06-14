@@ -1129,21 +1129,32 @@ forvalues w=1/10 {
 // Table 2: Overall equation
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table2) modify
-putexcel A1 = "Event"
-putexcel B1 = "1996 Incidence"
-putexcel C1 = "2014 Incidence"
-putexcel A2 = "Mothers with an increase in earnings"
-putexcel A3 = "Mothers with an increase in earnings AND became BW"
-putexcel A4 = "Partner lost earnings and mom went up"
-putexcel A5 = "Partner lost earnings and mom up AND became BW"
-putexcel A6 = "Partner lost earnings only"
-putexcel A7 = "Partner lost earnings only AND became BW"
-putexcel A8 = "Partner left"
-putexcel A9= "Partner left AND became BW"
-putexcel A10 = "Other member lost earnings / left"
-putexcel A11 = "Other member lost earnings / left AND became BW"
-putexcel A12 = "Rate of transition to BW"
-putexcel A13 = "Mothers not breadwinning at time t-1"
+putexcel B1:C1 = "Total", merge border(bottom)
+putexcel D1:K1 = "Education", merge border(bottom)
+putexcel L1:S1 = "Race / ethnicity", merge border(bottom)
+putexcel B2:C2 = "Total", merge border(bottom)
+putexcel D2:E2 = "Less than HS", merge
+putexcel F2:G2 = "HS Degree", merge
+putexcel H2:I2 = "Some College", merge
+putexcel J2:K2 = "College Plus", merge
+putexcel L2:M2 = "NH White", merge
+putexcel N2:O2 = "Black", merge
+putexcel P2:Q2 = "NH Asian", merge
+putexcel R2:S2 = "Hispanic", merge
+putexcel A3 = "Event"
+putexcel B3 = ("1996") D3 = ("1996") F3 = ("1996") H3 = ("1996") J3 = ("1996") L3 = ("1996") N3 = ("1996") P3 = ("1996") R3 = ("1996")
+putexcel C3 = ("2014") E3 = ("2014") G3 = ("2014") I3 = ("2014") K3 = ("2014") M3 = ("2014") O3 = ("2014") Q3 = ("2014") S3 = ("2014")
+putexcel A4 = "Mothers with an increase in earnings"
+putexcel A5 = "Mothers with an increase in earnings AND became BW"
+putexcel A6 = "Partner lost earnings and mom went up"
+putexcel A7 = "Partner lost earnings and mom up AND became BW"
+putexcel A8 = "Partner lost earnings only"
+putexcel A9 = "Partner lost earnings only AND became BW"
+putexcel A10 = "Partner left"
+putexcel A11= "Partner left AND became BW"
+putexcel A12 = "Other member lost earnings / left"
+putexcel A13 = "Other member lost earnings / left AND became BW"
+putexcel A14 = "Rate of transition to BW"
 
 
 local colu "B C"
@@ -1152,49 +1163,86 @@ local i=1
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
 		forvalues y=1/2{
 			local col: word `y' of `colu'
-			local row1 = `i'*2
-			local row2 = `i'*2+1
+			local row1 = `i'*2+2
+			local row2 = `i'*2+3
 			putexcel `col'`row1' = matrix(`var'_`y'), nformat(#.##%)
 			putexcel `col'`row2' = matrix(`var'_`y'_bw), nformat(#.##%)
 		}
 	local ++i
 }
 
-putexcel B12 = $bw_rate_96, nformat(#.##%)
-putexcel C12 = $bw_rate_14, nformat(#.##%)
+putexcel B14 = $bw_rate_96, nformat(#.##%)
+putexcel C14 = $bw_rate_14, nformat(#.##%)
 
-putexcel B13 = `base_1'
-putexcel C13 = `base_2'
+forvalues e=1/4{
+local colu1 "D E"
+local colu2 "F G"
+local colu3 "H I"
+local colu4 "J K"
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	forvalues y=1/2{
+		local col: word `y' of `colu`e''
+		local row1=`i'*2+2
+		local row2=`i'*2+3
+		putexcel `col'`row1' = matrix(`var'_`e'_`y'), nformat(#.##%)
+		putexcel `col'`row2' = matrix(`var'_`e'_`y'_bw), nformat(#.##%)
+		}
+	local ++i
+	}
+}
+
+
+forvalues e=1/4{
+	local column1 "D F H J"
+	local column2 "E G I K"
+
+	local col1: word `e' of `column1'
+	local col2: word `e' of `column2'
+	putexcel `col1'14 = ${bw_rate_96_`e'}, nformat(#.##%)
+	putexcel `col2'14 = ${bw_rate_14_`e'}, nformat(#.##%)
+}
+
+forvalues r=1/4{
+local colu1 "L M"
+local colu2 "N O"
+local colu3 "P Q"
+local colu4 "R S"
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	forvalues y=1/2{
+		local col: word `y' of `colu`r''
+		local row1=`i'*2+2
+		local row2=`i'*2+3
+		putexcel `col'`row1' = matrix(`var'_r`r'_`y'), nformat(#.##%)
+		putexcel `col'`row2' = matrix(`var'_r`r'_`y'_bw), nformat(#.##%)
+		}
+	local ++i
+	}
+}
+
+
+forvalues r=1/4{
+	local column1 "L N P R"
+	local column2 "M O Q S"
+
+	local col1: word `r' of `column1'
+	local col2: word `r' of `column2'
+	putexcel `col1'14 = ${bw_rate_96_r`r'}, nformat(#.##%)
+	putexcel `col2'14 = ${bw_rate_14_r`r'}, nformat(#.##%)
+}
 
 // Table 3: Change Components
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table3) modify
 putexcel A1 = "Component"
-putexcel B1 = "Percent of Change Explained"
-putexcel A2 = "Total Gap to Explain"
-putexcel A3 = "Rate Component"
-putexcel A4 = "Composition Component"
-putexcel A5 = "Mom Component"
-putexcel A6 = "Partner Down Mom Up Component"
-putexcel A7 = "Partner Down Only Component"
-putexcel A8 = "Partner Left Component"
-putexcel A9 = "Other HH Change Component"
-
-putexcel B2 = $total_gap, nformat(#.##%)
-putexcel B3 = formula($rate_diff / $total_gap), nformat(#.##%)
-putexcel B4 = formula($comp_diff / $total_gap), nformat(#.##%)
-putexcel B5 = $mom_compt_x, nformat(#.##%)
-putexcel B6 = $partner_down_mom_compt_x, nformat(#.##%)
-putexcel B7 = $partner_down_only_compt_x, nformat(#.##%)
-putexcel B8 = $partner_leave_compt_x, nformat(#.##%)
-putexcel B9 = $other_hh_compt_x, nformat(#.##%)
-
-// Table 4: Change Components by Education and Race
-
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
-putexcel A2 = "Component"
-putexcel B1:E1 = "Percent of Change Explained", merge hcenter
-putexcel B2 = ("Less than HS") C2 = ("HS Degree") D2 = ("Some College") E2 = ("College Plus") 
+putexcel B1 = "Total"
+putexcel C1:F1 = "Education", merge
+putexcel G1:J1 = "Race / Ethnicity", merge
+putexcel C2 = ("Less than HS") D2 = ("HS Degree") E2 = ("Some College") F2 = ("College Plus") 
+putexcel G2 = ("NH White") H2 = ("Black") I2 = ("NH Asian") J2 = ("Hispanic") 
 putexcel A3 = "Total Gap to Explain"
 putexcel A4 = "Rate Component"
 putexcel A5 = "Composition Component"
@@ -1204,7 +1252,18 @@ putexcel A8 = "Partner Down Only Component"
 putexcel A9 = "Partner Left Component"
 putexcel A10 = "Other HH Change Component"
 
-local col1 "B C D E"
+putexcel B3 = $total_gap, nformat(#.##%)
+putexcel B4 = formula($rate_diff / $total_gap), nformat(#.##%)
+putexcel B5 = formula($comp_diff / $total_gap), nformat(#.##%)
+putexcel B6 = $mom_compt_x, nformat(#.##%)
+putexcel B7 = $partner_down_mom_compt_x, nformat(#.##%)
+putexcel B8 = $partner_down_only_compt_x, nformat(#.##%)
+putexcel B9 = $partner_leave_compt_x, nformat(#.##%)
+putexcel B10 = $other_hh_compt_x, nformat(#.##%)
+
+* Education and Race
+
+local col1 "C D E F"
 
 forvalues e=1/4{
     local col: word `e' of `col1'
@@ -1218,34 +1277,23 @@ forvalues e=1/4{
 	putexcel `col'10 = ${other_hh_component_`e'}, nformat(#.##%)
 }
 
-putexcel A13 = "Component"
-putexcel B13 = ("NH White") C13 = ("Black") D13 = ("NH Asian") E13 = ("Hispanic") 
-putexcel A14 = "Total Gap to Explain"
-putexcel A15 = "Rate Component"
-putexcel A16 = "Composition Component"
-putexcel A17 = "Mom Component"
-putexcel A18 = "Partner Down Mom Up Component"
-putexcel A19 = "Partner Down Only Component"
-putexcel A20 = "Partner Left Component"
-putexcel A21 = "Other HH Change Component"
-
-local col1 "B C D E"
+local col1 "G H I J"
 
 forvalues r=1/4{
     local col: word `r' of `col1'
-	putexcel `col'14 = ${total_gap_r`r'}, nformat(#.##%)
-	putexcel `col'15 = formula(${rate_diff_r`r'} / ${total_gap_r`r'}), nformat(#.##%)
-	putexcel `col'16 = formula(${comp_diff_r`r'} / ${total_gap_r`r'}), nformat(#.##%)
-	putexcel `col'17 = ${mom_component_r`r'}, nformat(#.##%)
-	putexcel `col'18 = ${partner_down_mom_component_r`r'}, nformat(#.##%)
-	putexcel `col'19 = ${partner_down_only_component_r`r'}, nformat(#.##%)
-	putexcel `col'20 = ${partner_leave_component_r`r'}, nformat(#.##%)
-	putexcel `col'21 = ${other_hh_component_r`r'}, nformat(#.##%)
+	putexcel `col'3 = ${total_gap_r`r'}, nformat(#.##%)
+	putexcel `col'4 = formula(${rate_diff_r`r'} / ${total_gap_r`r'}), nformat(#.##%)
+	putexcel `col'5 = formula(${comp_diff_r`r'} / ${total_gap_r`r'}), nformat(#.##%)
+	putexcel `col'6 = ${mom_component_r`r'}, nformat(#.##%)
+	putexcel `col'7 = ${partner_down_mom_component_r`r'}, nformat(#.##%)
+	putexcel `col'8 = ${partner_down_only_component_r`r'}, nformat(#.##%)
+	putexcel `col'9 = ${partner_leave_component_r`r'}, nformat(#.##%)
+	putexcel `col'10 = ${other_hh_component_r`r'}, nformat(#.##%)
 }
 
-// Table 5: Median Income Change
+// Table 4: Median Income Change
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5) modify
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
 putexcel A1:D1 = "Changes in Median Household Income upon BW Transition", merge hcenter
 putexcel B2 = ("1996") C2 = ("2014") D2 = ("total")
 putexcel A3 = "Pre-Transition Median HH Income"
@@ -1286,6 +1334,23 @@ forvalues e=1/4{
 	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post
 	putexcel `col'11=`r(p50)', nformat(###,###)
 	putexcel `col'12=formula((`col'11-`col'10)/`col'10), nformat(#.##%)
+}
+
+putexcel B15:E15 = "Total Change", merge hcenter
+putexcel B16 = ("NW White") C16 = ("Black") D16 = ("NH Asian") E16 = ("Hispanic")
+putexcel A17 = "Pre-Transition Median HH Income"
+putexcel A18 = "Post-Transition Median HH Income"
+putexcel A19 = "Percent Change Post Transition"
+
+local col1 "B C D E"
+
+forvalues r=1/4{
+    local col: word `r' of `col1'
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre
+	putexcel `col'17=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post
+	putexcel `col'18=`r(p50)', nformat(###,###)
+	putexcel `col'19=formula((`col'18-`col'17)/`col'17), nformat(#.##%)
 }
 
 ********************************************************************************
