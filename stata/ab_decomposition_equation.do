@@ -1294,6 +1294,92 @@ forvalues r=1/4{
 // Table 4: Median Income Change
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
+putexcel A1 = "Category"
+putexcel B1 = "Label"
+putexcel I1 = "Value"
+putexcel C1 = ("Pre_1996") D1 = ("Post_1996") E1 = ("Change_1996")
+putexcel F1 = ("Pre_2014") G1 = ("Post_2014") H1 = ("Change_2014")
+putexcel A2 = ("Total") B2 = ("Total")
+putexcel A3:A6 = "Education", merge vcenter
+putexcel B3 = ("Less than HS") B4 = ("HS Degree") B5 = ("Some College") B6 = ("College Plus") 
+putexcel I3 = (1) I4 = (2) I5 = (3) I6 = (4) 
+putexcel A7:A10 = "Race", merge vcenter
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+putexcel I7 = (5) I8 = (6) I9 = (7) I10 = (8) 
+
+sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
+putexcel C2=`r(p50)', nformat(###,###)
+sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
+putexcel D2=`r(p50)', nformat(###,###)
+putexcel E2=formula((D2-C2)/C2), nformat(#.##%)
+
+sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
+putexcel F2=`r(p50)', nformat(###,###)
+sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
+putexcel G2=`r(p50)', nformat(###,###)
+putexcel H2=formula((G2-F2)/F2), nformat(#.##%)
+
+/*
+sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
+putexcel D3=`r(p50)', nformat(###,###)
+sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], detail // post
+putexcel D4=`r(p50)', nformat(###,###)
+*/
+
+local row1 "3 4 5 6"
+
+forvalues e=1/4{
+    local row: word `e' of `row1'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==1, detail // pre-1996
+	putexcel C`row'=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==1, detail // post-1996
+	putexcel D`row'=`r(p50)', nformat(###,###)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==2, detail // pre-2014
+	putexcel F`row'=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==2, detail // post-2014
+	putexcel G`row'=`r(p50)', nformat(###,###)
+	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
+	
+	/*
+	local col3: word `e' of `colu3'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e', detail // pre-total
+	putexcel `col3'10=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post-total
+	putexcel `col3'11=`r(p50)', nformat(###,###)
+	putexcel `col3'12=formula((`col3'11-`col3'10)/`col3'10), nformat(#.##%)
+	*/
+}
+
+local row2 "7 8 9 10"
+
+forvalues r=1/4{
+    local row: word `r' of `row2'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
+	putexcel C`row'=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
+	putexcel D`row'=`r(p50)', nformat(###,###)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
+	putexcel F`row'=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
+	putexcel G`row'=`r(p50)', nformat(###,###)
+	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
+		
+	/*
+	local col3: word `r' of `colu3'	
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre-total
+	putexcel `col3'17=`r(p50)', nformat(###,###)
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post-total
+	putexcel `col3'18=`r(p50)', nformat(###,###)
+	putexcel `col3'19=formula((`col3'18-`col3'17)/`col3'17), nformat(#.##%)
+	*/
+}
+
+/* Old format
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
 putexcel A1:D1 = "Changes in Median Household Income upon BW Transition", merge hcenter
 putexcel B2 = ("1996") C2 = ("2014") D2 = ("total")
 putexcel A3 = "Pre-Transition Median HH Income"
@@ -1394,13 +1480,27 @@ forvalues r=1/4{
 	putexcel `col3'18=`r(p50)', nformat(###,###)
 	putexcel `col3'19=formula((`col3'18-`col3'17)/`col3'17), nformat(#.##%)
 }
-
+*/
 
 // Figure 1: Bar Chart for income
+
+import excel "$results/Breadwinner_Predictor_Tables.xlsx", sheet(Table4) firstrow case(lower) clear
+
+destring value, replace
+
+label define categories 1 "Less than HS" 2 "HS Degree" 3 "Some College" 4 "College Plus" 5 "NH White" 6 "Black" 7 "NH Asian" 8 "Hispanic"
+label values value categories
+
+graph bar change_1996 change_2014 if category=="Education", over(value) blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("by education") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small))
+graph export "$results/Income_Education.png", as(png) name("Graph") replace
+
+graph bar change_1996 change_2014 if category=="Race", over(value) blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("by race / ethnicity") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small))
+graph export "$results/Income_Race.png", as(png) name("Graph") replace
 
 ********************************************************************************
 * Some exploration
 ********************************************************************************
+/* Commenting this out since I am now using an excel file in the step above this
 log using "$logdir/exploratory_data.log", replace
 
 browse SSUID PNUM year earnings thearn_alt earnings_ratio bw60 bw50 trans_bw60_alt2
@@ -1466,7 +1566,7 @@ tabstat earn_change_raw_sp if earndown8_sp_all==1, by(survey) statistics(mean p5
 
 log close
 
-
+*/
 *tabstat thearn_alt[_n-1] if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) // does this work for PRE? NO
 
 /*
