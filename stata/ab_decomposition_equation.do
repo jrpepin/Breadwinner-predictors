@@ -1130,20 +1130,19 @@ forvalues w=1/10 {
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table2) modify
 putexcel B1:C1 = "Total", merge border(bottom)
-putexcel D1:K1 = "Education", merge border(bottom)
-putexcel L1:S1 = "Race / ethnicity", merge border(bottom)
+putexcel D1:I1 = "Education", merge border(bottom)
+putexcel J1:Q1 = "Race / ethnicity", merge border(bottom)
 putexcel B2:C2 = "Total", merge border(bottom)
-putexcel D2:E2 = "Less than HS", merge
-putexcel F2:G2 = "HS Degree", merge
-putexcel H2:I2 = "Some College", merge
-putexcel J2:K2 = "College Plus", merge
-putexcel L2:M2 = "NH White", merge
-putexcel N2:O2 = "Black", merge
-putexcel P2:Q2 = "NH Asian", merge
-putexcel R2:S2 = "Hispanic", merge
+putexcel D2:E2 = "HS Degree or Less", merge
+putexcel F2:G2 = "Some College", merge
+putexcel H2:I2 = "College Plus", merge
+putexcel J2:K2 = "NH White", merge
+putexcel L2:M2 = "Black", merge
+putexcel N2:O2 = "NH Asian", merge
+putexcel P2:Q2 = "Hispanic", merge
 putexcel A3 = "Event"
-putexcel B3 = ("1996") D3 = ("1996") F3 = ("1996") H3 = ("1996") J3 = ("1996") L3 = ("1996") N3 = ("1996") P3 = ("1996") R3 = ("1996")
-putexcel C3 = ("2014") E3 = ("2014") G3 = ("2014") I3 = ("2014") K3 = ("2014") M3 = ("2014") O3 = ("2014") Q3 = ("2014") S3 = ("2014")
+putexcel B3 = ("1996") D3 = ("1996") F3 = ("1996") H3 = ("1996") J3 = ("1996") L3 = ("1996") N3 = ("1996") P3 = ("1996")
+putexcel C3 = ("2014") E3 = ("2014") G3 = ("2014") I3 = ("2014") K3 = ("2014") M3 = ("2014") O3 = ("2014") Q3 = ("2014")
 putexcel A4 = "Mothers with an increase in earnings"
 putexcel A5 = "Mothers with an increase in earnings AND became BW"
 putexcel A6 = "Partner lost earnings and mom went up"
@@ -1174,11 +1173,10 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 putexcel B14 = $bw_rate_96, nformat(#.##%)
 putexcel C14 = $bw_rate_14, nformat(#.##%)
 
-forvalues e=1/4{
+forvalues e=1/3{
 local colu1 "D E"
 local colu2 "F G"
 local colu3 "H I"
-local colu4 "J K"
 local i=1
 
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
@@ -1186,29 +1184,30 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 		local col: word `y' of `colu`e''
 		local row1=`i'*2+2
 		local row2=`i'*2+3
-		putexcel `col'`row1' = matrix(`var'_`e'_`y'), nformat(#.##%)
-		putexcel `col'`row2' = matrix(`var'_`e'_`y'_bw), nformat(#.##%)
+		putexcel `col'`row1' = matrix(`var'_e`e'_`y'), nformat(#.##%)
+		putexcel `col'`row2' = matrix(`var'_e`e'_`y'_bw), nformat(#.##%)
 		}
 	local ++i
 	}
 }
 
 
-forvalues e=1/4{
-	local column1 "D F H J"
-	local column2 "E G I K"
+forvalues e=1/3{
+	local column1 "D F H"
+	local column2 "E G I"
 
 	local col1: word `e' of `column1'
 	local col2: word `e' of `column2'
-	putexcel `col1'14 = ${bw_rate_96_`e'}, nformat(#.##%)
-	putexcel `col2'14 = ${bw_rate_14_`e'}, nformat(#.##%)
+	putexcel `col1'14 = ${bw_rate_96_e`e'}, nformat(#.##%)
+	putexcel `col2'14 = ${bw_rate_14_e`e'}, nformat(#.##%)
 }
 
 forvalues r=1/4{
-local colu1 "L M"
-local colu2 "N O"
-local colu3 "P Q"
-local colu4 "R S"
+local colu1 "J K"
+local colu2 "L M"
+local colu3 "N O"
+local colu4 "P Q"
+
 local i=1
 
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
@@ -1225,8 +1224,8 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 
 
 forvalues r=1/4{
-	local column1 "L N P R"
-	local column2 "M O Q S"
+	local column1 "J L N P"
+	local column2 "K M O Q"
 
 	local col1: word `r' of `column1'
 	local col2: word `r' of `column2'
@@ -1239,10 +1238,10 @@ forvalues r=1/4{
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table3) modify
 putexcel A1 = "Component"
 putexcel B1 = "Total"
-putexcel C1:F1 = "Education", merge
-putexcel G1:J1 = "Race / Ethnicity", merge
-putexcel C2 = ("Less than HS") D2 = ("HS Degree") E2 = ("Some College") F2 = ("College Plus") 
-putexcel G2 = ("NH White") H2 = ("Black") I2 = ("NH Asian") J2 = ("Hispanic") 
+putexcel C1:E1 = "Education", merge
+putexcel F1:I1 = "Race / Ethnicity", merge
+putexcel C2 = ("HS or Less") D2 = ("Some College") E2 = ("College Plus") 
+putexcel F2 = ("NH White") G2 = ("Black") H2 = ("NH Asian") I2 = ("Hispanic") 
 putexcel A3 = "Total Gap to Explain"
 putexcel A4 = "Rate Component"
 putexcel A5 = "Composition Component"
@@ -1263,21 +1262,21 @@ putexcel B10 = $other_hh_compt_x, nformat(#.##%)
 
 * Education and Race
 
-local col1 "C D E F"
+local col1 "C D E"
 
-forvalues e=1/4{
+forvalues e=1/3{
     local col: word `e' of `col1'
-	putexcel `col'3 = ${total_gap_`e'}, nformat(#.##%)
-	putexcel `col'4 = formula(${rate_diff_`e'} / ${total_gap_`e'}), nformat(#.##%)
-	putexcel `col'5 = formula(${comp_diff_`e'} / ${total_gap_`e'}), nformat(#.##%)
-	putexcel `col'6 = ${mom_component_`e'}, nformat(#.##%)
-	putexcel `col'7 = ${partner_down_mom_component_`e'}, nformat(#.##%)
-	putexcel `col'8 = ${partner_down_only_component_`e'}, nformat(#.##%)
-	putexcel `col'9 = ${partner_leave_component_`e'}, nformat(#.##%)
-	putexcel `col'10 = ${other_hh_component_`e'}, nformat(#.##%)
+	putexcel `col'3 = ${total_gap_e`e'}, nformat(#.##%)
+	putexcel `col'4 = formula(${rate_diff_e`e'} / ${total_gap_e`e'}), nformat(#.##%)
+	putexcel `col'5 = formula(${comp_diff_e`e'} / ${total_gap_e`e'}), nformat(#.##%)
+	putexcel `col'6 = ${mom_component_e`e'}, nformat(#.##%)
+	putexcel `col'7 = ${partner_down_mom_component_e`e'}, nformat(#.##%)
+	putexcel `col'8 = ${partner_down_only_component_e`e'}, nformat(#.##%)
+	putexcel `col'9 = ${partner_leave_component_e`e'}, nformat(#.##%)
+	putexcel `col'10 = ${other_hh_component_e`e'}, nformat(#.##%)
 }
 
-local col1 "G H I J"
+local col1 "F G H I"
 
 forvalues r=1/4{
     local col: word `r' of `col1'
@@ -1300,24 +1299,24 @@ putexcel I1 = "Value"
 putexcel C1 = ("Pre_1996") D1 = ("Post_1996") E1 = ("Change_1996")
 putexcel F1 = ("Pre_2014") G1 = ("Post_2014") H1 = ("Change_2014")
 putexcel A2 = ("Total") B2 = ("Total")
-putexcel A3:A6 = "Education", merge vcenter
-putexcel B3 = ("Less than HS") B4 = ("HS Degree") B5 = ("Some College") B6 = ("College Plus") 
-putexcel I3 = (1) I4 = (2) I5 = (3) I6 = (4) 
-putexcel A7:A10 = "Race", merge vcenter
-putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
-putexcel I7 = (5) I8 = (6) I9 = (7) I10 = (8) 
+putexcel A3:A5 = "Education"
+putexcel B3 = ("HS or Less") B4 = ("Some College") B5 = ("College Plus") 
+putexcel I3 = (1) I4 = (2) I5 = (3)
+putexcel A6:A9 = "Race"
+putexcel B6 = ("NH White") B7 = ("Black") B8 = ("NH Asian") B9 = ("Hispanic") 
+putexcel I6 = (4) I7 = (5) I8 = (6) I9 = (7) 
 
 sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
 putexcel C2=`r(p50)', nformat(###,###)
 sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
 putexcel D2=`r(p50)', nformat(###,###)
-putexcel E2=formula((D2-C2)/C2), nformat(#.##%)
+putexcel E2=formula(=(D2-C2)/C2), nformat(#.##%)
 
 sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
 putexcel F2=`r(p50)', nformat(###,###)
 sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
 putexcel G2=`r(p50)', nformat(###,###)
-putexcel H2=formula((G2-F2)/F2), nformat(#.##%)
+putexcel H2=formula(=(G2-F2)/F2), nformat(#.##%)
 
 /*
 sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
@@ -1326,33 +1325,33 @@ sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[
 putexcel D4=`r(p50)', nformat(###,###)
 */
 
-local row1 "3 4 5 6"
+local row1 "3 4 5"
 
-forvalues e=1/4{
+forvalues e=1/3{
     local row: word `e' of `row1'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==1, detail // pre-1996
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1, detail // pre-1996
 	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==1, detail // post-1996
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1, detail // post-1996
 	putexcel D`row'=`r(p50)', nformat(###,###)
 	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
 	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==2, detail // pre-2014
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2, detail // pre-2014
 	putexcel F`row'=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==2, detail // post-2014
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2, detail // post-2014
 	putexcel G`row'=`r(p50)', nformat(###,###)
 	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
 	
 	/*
 	local col3: word `e' of `colu3'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e', detail // pre-total
+	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e', detail // pre-total
 	putexcel `col3'10=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post-total
+	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e', detail // post-total
 	putexcel `col3'11=`r(p50)', nformat(###,###)
 	putexcel `col3'12=formula((`col3'11-`col3'10)/`col3'10), nformat(#.##%)
 	*/
 }
 
-local row2 "7 8 9 10"
+local row2 "6 7 8 9"
 
 forvalues r=1/4{
     local row: word `r' of `row2'	
@@ -1377,6 +1376,7 @@ forvalues r=1/4{
 	putexcel `col3'19=formula((`col3'18-`col3'17)/`col3'17), nformat(#.##%)
 	*/
 }
+
 
 /* Old format
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
@@ -1484,11 +1484,11 @@ forvalues r=1/4{
 
 // Figure 1: Bar Chart for income
 
-import excel "$results/Breadwinner_Predictor_Tables.xlsx", sheet(Table4) firstrow case(lower) clear
+***************************************** NOTE: sometimes this is working for me directly and othertimes, it is not. The best way I have found at the moment is to have to open and paste the formulas in Table 4 as values. I appreciate this is not sustainable. I am going to work on hardcoding so this step is not necessary, but I need a break from attempting to figure this out. Clearing doesn't work, putexcel save / clear doesn't work. I can't figure out what I am doing when it does work and when it doesn't**************88
 
-destring value, replace
+import excel "$results/Breadwinner_Predictor_Tables", sheet(Table4) firstrow case(lower) clear
 
-label define categories 1 "Less than HS" 2 "HS Degree" 3 "Some College" 4 "College Plus" 5 "NH White" 6 "Black" 7 "NH Asian" 8 "Hispanic"
+label define categories 1 "HS or Less" 2 "Some College" 3 "College Plus" 4 "NH White" 5 "Black" 6 "NH Asian" 7 "Hispanic"
 label values value categories
 
 graph bar change_1996 change_2014 if category=="Education", over(value) blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("by education") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small))
@@ -1496,6 +1496,9 @@ graph export "$results/Income_Education.png", as(png) name("Graph") replace
 
 graph bar change_1996 change_2014 if category=="Race", over(value) blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("by race / ethnicity") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small))
 graph export "$results/Income_Race.png", as(png) name("Graph") replace
+
+graph bar change_1996 change_2014 if category=="Total", blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("overall") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small)) bargap(10)  outergap(*5) 
+graph export "$results/Income_Total.png", as(png) name("Graph") replace
 
 ********************************************************************************
 * Some exploration
