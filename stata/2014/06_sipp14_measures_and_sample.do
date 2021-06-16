@@ -348,8 +348,12 @@ save "$tempdir/sipp14tpearn_fullsamp", replace
 
 // Create a macro with the total number of respondents in the dataset.
 	egen all = nvals(idnum)
-	global allindividuals = all
-	di "$allindividuals"
+	global allindividuals14 = all
+	di "$allindividuals14"
+	
+	egen all_py = count(idnum)
+	global allpersonyears14 = all_py
+	di "$allpersonyears14"
 
 * Next, keep only the respondents that meet sample criteria
 
@@ -359,8 +363,12 @@ save "$tempdir/sipp14tpearn_fullsamp", replace
 	
 	// Creates a macro with the total number of women in the dataset.
 	egen	allwomen 	= nvals(idnum) if esex == 2
-	global 	allwomen_n 	= allwomen
-	di "$allwomen_n"
+	global 	allwomen_n14 	= allwomen
+	di "$allwomen_n14"
+	
+	egen	allwomen_py 	= count(idnum) if esex == 2
+	global 	allwomen_py14 	= allwomen_py
+	di "$allwomen_py14"
 
 	egen everman = min(esex) , by(idnum) // Identify if ever reported as a man (inconsistency).
 	unique idnum, by(everman)
@@ -369,8 +377,12 @@ save "$tempdir/sipp14tpearn_fullsamp", replace
 	
 	// Creates a macro with the ADJUSTED total number of women in the dataset.
 	egen	women 	= nvals(idnum)
-	global 	women_n = women
-	di "$women_n"
+	global 	women_n14 = women
+	di "$women_n14"
+	
+	egen	women_py14	= count(idnum)
+	global 	women_py14 = women_py14
+	di "$women_py14"
 
 	// browse durmom_1st year yrfirstbirth tcbyr* if durmom_1st<=0
 	// browse durmom_1st year yrfirstbirth tcbyr* if yrfirstbirth >=2013 &!missing(yrfirstbirth)
@@ -383,16 +395,25 @@ save "$tempdir/sipp14tpearn_fullsamp", replace
 	
 	// Creates a macro with the total number of mothers in the dataset.
 	egen	mothers = nvals(idnum)
-	global mothers_n = mothers
-	di "$mothers_n"
+	global mothers_n14 = mothers
+	di "$mothers_n14"
+	
+	egen	mothers_py = count(idnum)
+	global mothers_py14 = mothers_py
+	di "$mothers_py14"
 
 * Keep mothers that meet our criteria: 18 years or less since last birth OR became a mother during panel (we want data starting 1 year prior to motherhood)
 	keep if (durmom>=0 & durmom < 19) | (mom_panel==1 & durmom_1st>=-1)
 	
 	// Creates a macro with the total number of mothers left in the dataset.
 	egen	mothers_sample = nvals(idnum)
-	global mothers_sample = mothers_sample
-	di "$mothers_sample"
+	global mothers_sample_n14 = mothers_sample
+	di "$mothers_sample_n14"
+	
+	egen	mothers_sample_py = count(idnum)
+	global mothers_sample_py14 = mothers_sample_py
+	di "$mothers_sample_py14"
+	
 	
 // Consider dropping respondents who have an error in birthyear
 	* (year of first birth is > respondents year of birth+9)
@@ -446,10 +467,10 @@ drop if _merge==2
 	di "$newsamplesize"
 
 // Make sure starting sample size is consistent.
-	di "$mothers_sample"
+	di "$mothers_sample_n14"
 	di "$newsamplesize"
 
-	if ("$newsamplesize" == "$mothers_sample") {
+	if ("$newsamplesize" == "$mothers_sample_n14") {
 		display "Success! Sample sizes consistent."
 		}
 		else {
@@ -494,6 +515,15 @@ drop if _merge==2
 	replace children_ever=1 if inrange(maxchildren,1,10)
 	
 	keep if maxchildren >= 1 | mom_panel==1	// Keep only moms with kids in household. for those who became a mom in the panel, I think sometimes child not recorded in 1st year of birth
+	
+// Final sample size
+	egen		hhmom	= nvals(idnum)
+	global 		hhmom_n14 = hhmom
+	di "$hhmom_n14"
+	
+	egen		hhmom_py	= count(idnum)
+	global 		hhmom_py14 = hhmom_py
+	di "$hhmom_py14"
 
 // Creates a macro with the total number of mothers in the dataset.
 preserve
@@ -504,5 +534,9 @@ preserve
 	di "$hhmom_n"
 	drop idnum hhmom
 restore
+	
+// create output of sample size with restrictions
+dyndoc "$SIPP2014_code/sample_size_2014.md", saving($results/sample_size_2014.html) replace
+
 	
 save "$SIPP14keep/sipp14tpearn_all", replace
