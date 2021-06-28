@@ -9,6 +9,8 @@ version 16
 ********************************************************************************
 global bw_base_code "`c(pwd)'" 	/// Creating macro of project working directory
 
+global inflate_adj 1.509 /// Creating a macro to set the adjustment for setting 1996 $ to 2014 - this way, only need to change in 1 place
+
 ********************************************************************************
 * Setup personal file paths
 ********************************************************************************

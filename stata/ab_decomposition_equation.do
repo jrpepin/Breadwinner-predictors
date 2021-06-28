@@ -45,6 +45,15 @@ recode partner_lose (2/6=1)
 gen bw60lag = 0 if bw60[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 replace bw60lag =1 if  bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 
+// creating earnings variables adjusted for inflation
+gen earnings_adj = earnings
+replace earnings_adj = (earnings*$inflate_adj) if survey==1996
+	// browse survey earnings earnings_adj
+	// tabstat earnings, by(survey)
+	// tabstat earnings_adj, by(survey)
+gen thearn_adj = thearn_alt
+replace thearn_adj = (thearn_alt*$inflate_adj) if survey==1996
+
 ********************************************************************************
 * First specification: "partner" is reference category, rest are unique
 ********************************************************************************
@@ -927,8 +936,8 @@ putexcel A3 = "No. of respondents"
 putexcel A4 = "No. of person-years"
 putexcel A5 = "Years of eligibility to transition to primary earning status"
 putexcel A6 = "No. of transitions to primary earning status"
-putexcel A7 = "Median HH income at time t-1"
-putexcel A8 = "Mothers' median income at time t-1"
+putexcel A7 = "Median HH income at time t-1 (inflation-adjusted)"
+putexcel A8 = "Mothers' median income at time t-1 (inflation-adjusted)"
 putexcel A9 = "Race/ethnicity (time-invariant)"
 putexcel A10 = "Non-Hispanic White", txtindent(4)
 putexcel A11 = "Black", txtindent(4)
@@ -996,19 +1005,19 @@ putexcel B6=(`r(mean)'*`r(N)'), nformat(###,###)
 
 *Income 
 * HH
-sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID  [aweight=wpfinwgt], detail // is this t-1?
+sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID  [aweight=wpfinwgt], detail // is this t-1?
 putexcel B7=`r(p50)', nformat(###,###)
-sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aweight=wpfinwgt], detail // is this t-1?
+sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aweight=wpfinwgt], detail // is this t-1?
 putexcel C7=`r(p50)', nformat(###,###)
-sum thearn_alt if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail
+sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail
 putexcel D7=`r(p50)', nformat(###,###)
 
 *Mother
-sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID [aweight=wpfinwgt], detail // is this t-1?
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID [aweight=wpfinwgt], detail // is this t-1?
 putexcel B8=`r(p50)', nformat(###,###)
-sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aweight=wpfinwgt], detail // is this t-1?
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aweight=wpfinwgt], detail // is this t-1?
 putexcel C8=`r(p50)', nformat(###,###)
-sum earnings if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail 
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail 
 putexcel D8=`r(p50)', nformat(###,###)
 
 * Race
@@ -1306,22 +1315,22 @@ putexcel A6:A9 = "Race"
 putexcel B6 = ("NH White") B7 = ("Black") B8 = ("NH Asian") B9 = ("Hispanic") 
 putexcel I6 = (4) I7 = (5) I8 = (6) I9 = (7) 
 
-sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
 putexcel C2=`r(p50)', nformat(###,###)
-sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
 putexcel D2=`r(p50)', nformat(###,###)
 putexcel E2=formula(=(D2-C2)/C2), nformat(#.##%)
 
-sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
 putexcel F2=`r(p50)', nformat(###,###)
-sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
 putexcel G2=`r(p50)', nformat(###,###)
 putexcel H2=formula(=(G2-F2)/F2), nformat(#.##%)
 
 /*
-sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
 putexcel D3=`r(p50)', nformat(###,###)
-sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], detail // post
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], detail // post
 putexcel D4=`r(p50)', nformat(###,###)
 */
 
@@ -1329,23 +1338,23 @@ local row1 "3 4 5"
 
 forvalues e=1/3{
     local row: word `e' of `row1'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1, detail // pre-1996
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1, detail // pre-1996
 	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1, detail // post-1996
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1, detail // post-1996
 	putexcel D`row'=`r(p50)', nformat(###,###)
 	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
 	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2, detail // pre-2014
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2, detail // pre-2014
 	putexcel F`row'=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2, detail // post-2014
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2, detail // post-2014
 	putexcel G`row'=`r(p50)', nformat(###,###)
 	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
 	
 	/*
 	local col3: word `e' of `colu3'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e', detail // pre-total
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e', detail // pre-total
 	putexcel `col3'10=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e', detail // post-total
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e', detail // post-total
 	putexcel `col3'11=`r(p50)', nformat(###,###)
 	putexcel `col3'12=formula((`col3'11-`col3'10)/`col3'10), nformat(#.##%)
 	*/
@@ -1355,23 +1364,23 @@ local row2 "6 7 8 9"
 
 forvalues r=1/4{
     local row: word `r' of `row2'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
 	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
 	putexcel D`row'=`r(p50)', nformat(###,###)
 	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
 	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
 	putexcel F`row'=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
 	putexcel G`row'=`r(p50)', nformat(###,###)
 	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
 		
 	/*
 	local col3: word `r' of `colu3'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre-total
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre-total
 	putexcel `col3'17=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post-total
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post-total
 	putexcel `col3'18=`r(p50)', nformat(###,###)
 	putexcel `col3'19=formula((`col3'18-`col3'17)/`col3'17), nformat(#.##%)
 	*/
