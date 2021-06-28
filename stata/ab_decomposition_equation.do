@@ -929,13 +929,14 @@ drop base_1 base_2
 
 // Table 1: Sample descriptives
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table1) replace
+putexcel A1:D1 = "Unweighted Ns", merge border(bottom) hcenter bold
 putexcel B2 = "Total Sample"
 putexcel C2 = "1996 SIPP"
 putexcel D2 = "2014 SIPP"
 putexcel A3 = "No. of respondents"
 putexcel A4 = "No. of person-years"
-putexcel A5 = "Years of eligibility to transition to primary earning status"
-putexcel A6 = "No. of transitions to primary earning status"
+putexcel A5 = "No. of transitions to primary earning status"
+putexcel A6:D6 = "Weighted Descriptives", merge border(bottom) hcenter bold
 putexcel A7 = "Median HH income at time t-1 (inflation-adjusted)"
 putexcel A8 = "Mothers' median income at time t-1 (inflation-adjusted)"
 putexcel A9 = "Race/ethnicity (time-invariant)"
@@ -992,16 +993,16 @@ local colu "C D"
 
 forvalues y=1/2{
 	local col: word `y' of `colu'
-	sum eligible [aweight=wpfinwgt] if survey_yr==`y'
+	** sum eligible if survey_yr==`y'
+	** putexcel `col'5=(`r(mean)'*`r(N)'), nformat(###,###)
+	sum transitioned if survey_yr==`y'
 	putexcel `col'5=(`r(mean)'*`r(N)'), nformat(###,###)
-	sum transitioned [aweight=wpfinwgt] if survey_yr==`y'
-	putexcel `col'6=(`r(mean)'*`r(N)'), nformat(###,###)
 }
 
-sum eligible [aweight=wpfinwgt]
+** sum eligible
+** putexcel B5=(`r(mean)'*`r(N)'), nformat(###,###)
+sum transitioned
 putexcel B5=(`r(mean)'*`r(N)'), nformat(###,###)
-sum transitioned [aweight=wpfinwgt]
-putexcel B6=(`r(mean)'*`r(N)'), nformat(###,###)
 
 *Income 
 * HH
@@ -1142,104 +1143,119 @@ putexcel B1:C1 = "Total", merge border(bottom)
 putexcel D1:I1 = "Education", merge border(bottom)
 putexcel J1:Q1 = "Race / ethnicity", merge border(bottom)
 putexcel B2:C2 = "Total", merge border(bottom)
-putexcel D2:E2 = "HS Degree or Less", merge
-putexcel F2:G2 = "Some College", merge
-putexcel H2:I2 = "College Plus", merge
-putexcel J2:K2 = "NH White", merge
-putexcel L2:M2 = "Black", merge
-putexcel N2:O2 = "NH Asian", merge
-putexcel P2:Q2 = "Hispanic", merge
-putexcel A3 = "Event"
-putexcel B3 = ("1996") D3 = ("1996") F3 = ("1996") H3 = ("1996") J3 = ("1996") L3 = ("1996") N3 = ("1996") P3 = ("1996")
-putexcel C3 = ("2014") E3 = ("2014") G3 = ("2014") I3 = ("2014") K3 = ("2014") M3 = ("2014") O3 = ("2014") Q3 = ("2014")
-putexcel A4 = "Mothers with an increase in earnings"
-putexcel A5 = "Mothers with an increase in earnings AND became BW"
-putexcel A6 = "Partner lost earnings and mom went up"
-putexcel A7 = "Partner lost earnings and mom up AND became BW"
-putexcel A8 = "Partner lost earnings only"
-putexcel A9 = "Partner lost earnings only AND became BW"
-putexcel A10 = "Partner left"
-putexcel A11= "Partner left AND became BW"
-putexcel A12 = "Other member lost earnings / left"
-putexcel A13 = "Other member lost earnings / left AND became BW"
-putexcel A14 = "Rate of transition to BW"
+putexcel D2:E2 = "HS Degree or Less", merge border(bottom)
+putexcel F2:G2 = "Some College", merge border(bottom)
+putexcel H2:I2 = "College Plus", merge border(bottom)
+putexcel J2:K2 = "NH White", merge border(bottom)
+putexcel L2:M2 = "Black", merge border(bottom)
+putexcel N2:O2 = "NH Asian", merge border(bottom)
+putexcel P2:Q2 = "Hispanic", merge border(bottom)
+putexcel A3:Q3 = "1996 precipitating events", merge hcenter bold border(bottom)
+putexcel A4 = "Event"
+putexcel B4 = ("All events") D4 = ("All events") F4 = ("All events") H4 = ("All events") J4 = ("All events") L4 = ("All events") N4 = ("All events") P4 = ("All events")
+putexcel C4 = ("Event precipitated") E4 = ("Event precipitated") G4 = ("Event precipitated") I4 = ("Event precipitated") K4 = ("Event precipitated") M4 = ("Event precipitated") O4 = ("Event precipitated") Q4 = ("Event precipitated")
+putexcel A5 = "Mothers only an increase in earnings"
+putexcel A6 = "Mothers increase in earnings and partner lost earnings"
+putexcel A7 = "Partner lost earnings only"
+putexcel A8 = "Partner left"
+putexcel A9 = "Other member lost earnings / left"
+putexcel A10 = "Rate of transition to BW"
 
+putexcel A11:Q11 = "2014 precipitating events", merge hcenter bold border(bottom)
+putexcel A12 = "Event"
+putexcel B12 = ("All events") D12 = ("All events") F12 = ("All events") H12 = ("All events") J12 = ("All events") L12 = ("All events") N12 = ("All events") P12 = ("All events")
+putexcel C12 = ("Event precipitated") E12 = ("Event precipitated") G12 = ("Event precipitated") I12 = ("Event precipitated") K12 = ("Event precipitated") M12 = ("Event precipitated") O12 = ("Event precipitated") Q12 = ("Event precipitated")
+putexcel A13 = "Mothers only an increase in earnings"
+putexcel A14 = "Mothers increase in earnings and partner lost earnings"
+putexcel A15 = "Partner lost earnings only"
+putexcel A16 = "Partner left"
+putexcel A17 = "Other member lost earnings / left"
+putexcel A18 = "Rate of transition to BW"
 
-local colu "B C"
 local i=1
 
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-		forvalues y=1/2{
-			local col: word `y' of `colu'
-			local row1 = `i'*2+2
-			local row2 = `i'*2+3
-			putexcel `col'`row1' = matrix(`var'_`y'), nformat(#.##%)
-			putexcel `col'`row2' = matrix(`var'_`y'_bw), nformat(#.##%)
-		}
-	local ++i
+		local row = `i'+4
+		putexcel B`row' = matrix(`var'_1), nformat(#.##%)
+		putexcel C`row' = matrix(`var'_1_bw), nformat(#.##%)
+		local ++i
 }
 
-putexcel B14 = $bw_rate_96, nformat(#.##%)
-putexcel C14 = $bw_rate_14, nformat(#.##%)
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local row = `i'+7
+		putexcel B`row' = matrix(`var'_2), nformat(#.##%)
+		putexcel C`row' = matrix(`var'_2_bw), nformat(#.##%)
+		local ++i
+}
+
+putexcel C10 = $bw_rate_96, nformat(#.##%)
+putexcel C18 = $bw_rate_14, nformat(#.##%)
 
 forvalues e=1/3{
-local colu1 "D E"
-local colu2 "F G"
-local colu3 "H I"
+local colu1 "D F H"
+local colu2 "E G I"
 local i=1
 
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	forvalues y=1/2{
-		local col: word `y' of `colu`e''
-		local row1=`i'*2+2
-		local row2=`i'*2+3
-		putexcel `col'`row1' = matrix(`var'_e`e'_`y'), nformat(#.##%)
-		putexcel `col'`row2' = matrix(`var'_e`e'_`y'_bw), nformat(#.##%)
-		}
-	local ++i
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local col1: word `e' of `colu1'
+		local col2: word `e' of `colu2'
+		local row=`i'+4
+		putexcel `col1'`row' = matrix(`var'_e`e'_1), nformat(#.##%)
+		putexcel `col2'`row' = matrix(`var'_e`e'_1_bw), nformat(#.##%)
+		local ++i
+	}
+
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local col1: word `e' of `colu1'
+		local col2: word `e' of `colu2'
+		local row=`i'+7
+		putexcel `col1'`row' = matrix(`var'_e`e'_2), nformat(#.##%)
+		putexcel `col2'`row' = matrix(`var'_e`e'_2_bw), nformat(#.##%)
+		local ++i
 	}
 }
 
 
 forvalues e=1/3{
-	local column1 "D F H"
-	local column2 "E G I"
-
+	local column1 "E G I"
 	local col1: word `e' of `column1'
-	local col2: word `e' of `column2'
-	putexcel `col1'14 = ${bw_rate_96_e`e'}, nformat(#.##%)
-	putexcel `col2'14 = ${bw_rate_14_e`e'}, nformat(#.##%)
+	putexcel `col1'10 = ${bw_rate_96_e`e'}, nformat(#.##%)
+	putexcel `col1'18 = ${bw_rate_14_e`e'}, nformat(#.##%)
 }
 
 forvalues r=1/4{
-local colu1 "J K"
-local colu2 "L M"
-local colu3 "N O"
-local colu4 "P Q"
+local colu1 "J L N P"
+local colu2 "K M O Q"
 
 local i=1
 
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	forvalues y=1/2{
-		local col: word `y' of `colu`r''
-		local row1=`i'*2+2
-		local row2=`i'*2+3
-		putexcel `col'`row1' = matrix(`var'_r`r'_`y'), nformat(#.##%)
-		putexcel `col'`row2' = matrix(`var'_r`r'_`y'_bw), nformat(#.##%)
-		}
-	local ++i
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local col1: word `r' of `colu1'
+		local col2: word `r' of `colu2'
+		local row=`i'+4
+		putexcel `col1'`row' = matrix(`var'_r`r'_1), nformat(#.##%)
+		putexcel `col2'`row' = matrix(`var'_r`r'_1_bw), nformat(#.##%)
+		local ++i
+	}
+
+	
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local col1: word `r' of `colu1'
+		local col2: word `r' of `colu2'
+		local row=`i'+7
+		putexcel `col1'`row' = matrix(`var'_r`r'_2), nformat(#.##%)
+		putexcel `col2'`row' = matrix(`var'_r`r'_2_bw), nformat(#.##%)
+		local ++i
 	}
 }
 
 
 forvalues r=1/4{
-	local column1 "J L N P"
-	local column2 "K M O Q"
+	local column1 "K M O Q"
 
 	local col1: word `r' of `column1'
-	local col2: word `r' of `column2'
-	putexcel `col1'14 = ${bw_rate_96_r`r'}, nformat(#.##%)
-	putexcel `col2'14 = ${bw_rate_14_r`r'}, nformat(#.##%)
+	putexcel `col1'10 = ${bw_rate_96_r`r'}, nformat(#.##%)
+	putexcel `col1'18 = ${bw_rate_14_r`r'}, nformat(#.##%)
 }
 
 // Table 3: Change Components
