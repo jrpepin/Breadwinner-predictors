@@ -1318,53 +1318,66 @@ forvalues r=1/4{
 // Table 4: Median Income Change
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
-putexcel A1 = "Category"
-putexcel B1 = "Label"
-putexcel I1 = "Value"
-putexcel C1 = ("Pre_1996") D1 = ("Post_1996") E1 = ("Change_1996")
-putexcel F1 = ("Pre_2014") G1 = ("Post_2014") H1 = ("Change_2014")
-putexcel A2 = ("Total") B2 = ("Total")
-putexcel A3:A5 = "Education"
-putexcel B3 = ("HS or Less") B4 = ("Some College") B5 = ("College Plus") 
-putexcel I3 = (1) I4 = (2) I5 = (3)
-putexcel A6:A9 = "Race"
-putexcel B6 = ("NH White") B7 = ("Black") B8 = ("NH Asian") B9 = ("Hispanic") 
-putexcel I6 = (4) I7 = (5) I8 = (6) I9 = (7) 
+putexcel A1 = "category"
+putexcel B1 = "label"
+putexcel C1 = "time"
+putexcel D1 = "year"
+putexcel E1 = "dollars_adj"
+putexcel A2:A7 = "Education"
+putexcel A8:A15 = "Race"
+putexcel A16:A17 = "Total"
+putexcel B2:B3 = ("HS or Less") B4:B5 = ("Some College") B6:B7 = ("College Plus") 
+putexcel B8:B9 = ("NH White") B10:B11 = ("Black") B12:B13 = ("NH Asian") B14:B15 = ("Hispanic") 
+putexcel B16:B17 = "Total"
+putexcel C2 = ("Post") C4 = ("Post") C6 = ("Post") C8 = ("Post") C10 = ("Post") C12 = ("Post") C14 = ("Post") C16 = ("Post")
+putexcel C3 = ("Pre") C5 = ("Pre") C7 = ("Pre") C9 = ("Pre") C11 = ("Pre") C13 = ("Pre") C15 = ("Pre") C17 = ("Pre")
+putexcel D2:D17 = "1996"
 
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
-putexcel C2=`r(p50)', nformat(###,###)
+putexcel A18:A23 = "Education"
+putexcel A24:A31 = "Race"
+putexcel A32:A33 = "Total"
+putexcel B18:B19 = ("HS or Less") B20:B21 = ("Some College") B22:B23 = ("College Plus") 
+putexcel B24:B25 = ("NH White") B26:B27 = ("Black") B28:B29 = ("NH Asian") B30:B31 = ("Hispanic") 
+putexcel B32:B33 = "Total"
+putexcel C18 = ("Post") C20 = ("Post") C22 = ("Post") C24 = ("Post") C26 = ("Post") C28 = ("Post") C30 = ("Post") C32 = ("Post")
+putexcel C19 = ("Pre") C21 = ("Pre") C23 = ("Pre") C25 = ("Pre") C27 = ("Pre") C29 = ("Pre") C31 = ("Pre") C33 = ("Pre")
+putexcel D18:D33 = "2014"
+
+// putexcel I3 = (1) I4 = (2) I5 = (3)
+// putexcel I6 = (4) I7 = (5) I8 = (6) I9 = (7) 
+
 sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
-putexcel D2=`r(p50)', nformat(###,###)
-putexcel E2=formula(=(D2-C2)/C2), nformat(#.##%)
+putexcel E16=`r(p50)', nformat(###,###)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
+putexcel E17=`r(p50)', nformat(###,###)
+// putexcel E2=formula(=(D2-C2)/C2), nformat(#.##%)
 
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
-putexcel F2=`r(p50)', nformat(###,###)
 sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
-putexcel G2=`r(p50)', nformat(###,###)
-putexcel H2=formula(=(G2-F2)/F2), nformat(#.##%)
+putexcel E32 =`r(p50)', nformat(###,###)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
+putexcel E33=`r(p50)', nformat(###,###)
+// putexcel H2=formula(=(G2-F2)/F2), nformat(#.##%)
 
-/*
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
-putexcel D3=`r(p50)', nformat(###,###)
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], detail // post
-putexcel D4=`r(p50)', nformat(###,###)
-*/
 
-local row1 "3 4 5"
+local row1x "2 4 6"
+local row2x "3 5 7"
+local row3x "18 20 22"
+local row4x "19 21 23"
 
 forvalues e=1/3{
-    local row: word `e' of `row1'	
-	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1, detail // pre-1996
-	putexcel C`row'=`r(p50)', nformat(###,###)
+    local row1: word `e' of `row1x'	
+	local row2: word `e' of `row2x'
 	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1, detail // post-1996
-	putexcel D`row'=`r(p50)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel E`row1'=`r(p50)', nformat(###,###)
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1, detail // pre-1996
+	putexcel E`row2'=`r(p50)', nformat(###,###)
 	
-	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2, detail // pre-2014
-	putexcel F`row'=`r(p50)', nformat(###,###)
+	local row3: word `e' of `row3x'	
+	local row4: word `e' of `row4x'
 	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2, detail // post-2014
-	putexcel G`row'=`r(p50)', nformat(###,###)
-	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
+	putexcel E`row3'=`r(p50)', nformat(###,###)
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2, detail // pre-2014
+	putexcel E`row4'=`r(p50)', nformat(###,###)
 	
 	/*
 	local col3: word `e' of `colu3'	
@@ -1376,21 +1389,25 @@ forvalues e=1/3{
 	*/
 }
 
-local row2 "6 7 8 9"
+local row1x "8 10 12 14"
+local row2x "9 11 13 15"
+local row3x "24 26 28 30"
+local row4x "25 27 29 31"
 
 forvalues r=1/4{
-    local row: word `r' of `row2'	
-	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
-	putexcel C`row'=`r(p50)', nformat(###,###)
+    local row1: word `r' of `row1x'	
+	local row2: word `r' of `row2x'	
 	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
-	putexcel D`row'=`r(p50)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	
-	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
-	putexcel F`row'=`r(p50)', nformat(###,###)
+	putexcel E`row1'=`r(p50)', nformat(###,###)
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
+	putexcel E`row2'=`r(p50)', nformat(###,###)
+
+    local row3: word `r' of `row3x'	
+	local row4: word `r' of `row4x'	
 	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
-	putexcel G`row'=`r(p50)', nformat(###,###)
-	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
+	putexcel E`row3'=`r(p50)', nformat(###,###)
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
+	putexcel E`row4'=`r(p50)', nformat(###,###)
 		
 	/*
 	local col3: word `r' of `colu3'	
