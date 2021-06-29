@@ -30,3 +30,12 @@ do "$SIPP1996_code/breadwinner-predictorsSIPP96.do"
 	log using "$logdir/decomposition_equation.log", replace
 	do ab_decomposition_equation.do
 	log close
+
+********************************************************************************
+* E1. PAPERS FOR TABLE
+********************************************************************************
+
+// Creates descriptive tables and decomposition results in Excel
+	log using "$logdir/tables_for_paper.log", replace
+	do ac_tables_for_paper.do
+	log close
