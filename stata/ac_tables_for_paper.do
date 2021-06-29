@@ -616,8 +616,54 @@ forvalues r=1/4{
 }
 */
 
-// Figure 1: Bar Chart for income
+// Figure 1: Pie Chart for Incidence
+putexcel set "$results/Breadwinner_Predictor_Fig1", sheet(Fig1) replace
+putexcel A1 = "Event"
+putexcel B1 = "Year"
+putexcel C1 = "All_events"
+putexcel D1 = "Event_precipitated"
+putexcel A2:A3 = "Mothers only an increase in earnings"
+putexcel A4:A5 = "Mothers increase in earnings and partner lost earnings"
+putexcel A6:A7 = "Partner lost earnings only"
+putexcel A8:A9 = "Partner left"
+putexcel A10:A11 = "Other member lost earnings / left"
+putexcel A12:A13 = "No Changes"
+putexcel B2 = ("1996") B4 = ("1996") B6 = ("1996") B8 = ("1996") B10 = ("1996") B12 = ("1996") 
+putexcel B3 = ("2014") B5 = ("2014") B7 = ("2014") B9 = ("2014") B11 = ("2014") B13 = ("2014")
 
+local i=1
+local row1 "2 4 6 8 10 3 5 7 9 11"
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local row: word `i' of `row1'
+		putexcel C`row' = matrix(`var'_1), nformat(#.##%)
+		putexcel D`row' = matrix(`var'_1_bw), nformat(#.##%)
+		local ++i
+}
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		local row: word `i' of `row1'
+		putexcel C`row' = matrix(`var'_2), nformat(#.##%)
+		putexcel D`row' = matrix(`var'_2_bw), nformat(#.##%)
+		local ++i
+}
+
+putexcel C12 = formula(1-(C2+C4+C6+C8+C10)), nformat(#.##%)
+putexcel C13 = formula(1-(C3+C5+C7+C9+C11)), nformat(#.##%)
+
+import excel "$results/Breadwinner_Predictor_Fig1", sheet(Fig1) firstrow case(lower) clear
+
+graph pie all_events if year=="1996", over(event) title("1996 Incidence of Precipitating Events") plabel(_all percent, color(white) format(%4.1f)) sort descending ///
+pie(1, color(gs10)) pie(2, color(navy)) pie(3, color(green)) pie(4, color(orange)) pie(5, color(maroon)) pie(6, color(purple))
+graph export "$results/Events_1996.png", as(png) name("Graph") replace
+
+graph pie all_events if year=="2014", over(event) title("2014 Incidence of Precipitating Events") plabel(_all percent, color(white) format(%4.1f)) sort descending ///
+pie(1, color(gs10)) pie(2, color(navy)) pie(3, color(green)) pie(4, color(orange)) pie(5, color(maroon)) pie(6, color(purple))
+graph export "$results/Events_2014.png", as(png) name("Graph") replace
+
+// Figure 2: Bar Chart for income
+
+/* commenting out - moving to R
 ***************************************** NOTE: sometimes this is working for me directly and othertimes, it is not. The best way I have found at the moment is to have to open and paste the formulas in Table 4 as values. I appreciate this is not sustainable. I am going to work on hardcoding so this step is not necessary, but I need a break from attempting to figure this out. Clearing doesn't work, putexcel save / clear doesn't work. I can't figure out what I am doing when it does work and when it doesn't**************88
 
 import excel "$results/Breadwinner_Predictor_Tables", sheet(Table4) firstrow case(lower) clear
@@ -633,6 +679,9 @@ graph export "$results/Income_Race.png", as(png) name("Graph") replace
 
 graph bar change_1996 change_2014 if category=="Total", blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("overall") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small)) bargap(10)  outergap(*5) 
 graph export "$results/Income_Total.png", as(png) name("Graph") replace
+*/
+
+/*------------------------------------------------------------------------------------------------------*/
 
 ********************************************************************************
 * Some exploration
