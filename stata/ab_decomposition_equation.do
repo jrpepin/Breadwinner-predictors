@@ -53,6 +53,8 @@ replace earnings_adj = (earnings*$inflate_adj) if survey==1996
 	// tabstat earnings_adj, by(survey)
 gen thearn_adj = thearn_alt
 replace thearn_adj = (thearn_alt*$inflate_adj) if survey==1996
+gen earnings_sp_adj = earnings_a_sp
+replace earnings_sp_adj = (earnings_a_sp*$inflate_adj) if survey==1996
 
 ********************************************************************************
 * First specification: "partner" is reference category, rest are unique
