@@ -963,107 +963,185 @@ forvalues r=1/4{
 	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
 }
 
-/* Old format
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
-putexcel A1:D1 = "Changes in Median Household Income upon BW Transition", merge hcenter
-putexcel B2 = ("1996") C2 = ("2014") D2 = ("total")
-putexcel A3 = "Pre-Transition Median HH Income"
-putexcel A4 = "Post-Transition Median HH Income"
-putexcel A5 = "Percent Change Post Transition"
 
-sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
-putexcel B3=`r(p50)', nformat(###,###)
-sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
-putexcel B4=`r(p50)', nformat(###,###)
+// Table 5:  HH raw income change with each breadwinner component
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5-raw) modify
+putexcel A3 = "Event"
+putexcel B3 = "Year"
+putexcel C3 = ("All_events") E3 = ("All_events") G3 = ("All_events") I3 = ("All_events") K3 = ("All_events") M3 = ("All_events") O3 = ("All_events") Q3 = ("All_events")
+putexcel D3 = ("Event_precipitated") F3 = ("Event_precipitated") H3 = ("Event_precipitated") J3 = ("Event_precipitated") L3 = ("Event_precipitated") N3 = ("Event_precipitated") ///
+		P3 = ("Event_precipitated") R3 = ("Event_precipitated")
+putexcel C1:D1 = "Total", merge border(bottom)
+putexcel E1:J1 = "Education", merge border(bottom)
+putexcel K1:R1 = "Race / ethnicity", merge border(bottom)
+putexcel C2:D2 = "Total", merge border(bottom)
+putexcel E2:F2 = "HS Degree or Less", merge border(bottom)
+putexcel G2:H2 = "Some College", merge border(bottom)
+putexcel I2:J2 = "College Plus", merge border(bottom)
+putexcel K2:L2 = "NH White", merge border(bottom)
+putexcel M2:N2 = "Black", merge border(bottom)
+putexcel O2:P2 = "NH Asian", merge border(bottom)
+putexcel Q2:R2 = "Hispanic", merge border(bottom)
+putexcel A4:A5 = "Mothers only an increase in earnings"
+putexcel A6:A7 = "Mothers increase in earnings and partner lost earnings"
+putexcel A8:A9 = "Partner lost earnings only"
+putexcel A10:A11 = "Partner left"
+putexcel A12:A13 = "Other member lost earnings / left"
+putexcel B4 = ("1996") B6 = ("1996") B8 = ("1996") B10 = ("1996") B12 = ("1996")
+putexcel B5 = ("2014") B7 = ("2014") B9 = ("2014") B11 = ("2014") B13 = ("2014")
 
-sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
-putexcel C3=`r(p50)', nformat(###,###)
-sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
-putexcel C4=`r(p50)', nformat(###,###)
+* All mothers who experienced a change
+local i=1
 
-sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , detail // pre
-putexcel D3=`r(p50)', nformat(###,###)
-sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], detail // post
-putexcel D4=`r(p50)', nformat(###,###)
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+2
+		
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post - is this the same as bw60lag==0? okay yes
+	local p50_post =`r(p50)'
+	putexcel C`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
 
-putexcel B5=formula((B4-B3)/B3), nformat(#.##%)
-putexcel C5=formula((C4-C3)/C3), nformat(#.##%)
-putexcel D5=formula((D4-D3)/D3), nformat(#.##%)
+	local row2 = `i'*2+3
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel C`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
 
-putexcel B8:D8 = "Less than HS", merge hcenter
-putexcel E8:G8 = "HS Degree", merge hcenter
-putexcel H8:J8 = "Some College", merge hcenter
-putexcel K8:M8 = "College Plus", merge hcenter
-putexcel B9 = ("1996") E9 = ("1996") H9 = ("1996") K9 = ("1996")
-putexcel C9 = ("2014") F9 = ("2014") I9 = ("2014") L9 = ("2014")
-putexcel D9 = ("Total") G9 = ("Total") J9 = ("Total") M9 = ("Total")
-putexcel A10 = "Pre-Transition Median HH Income"
-putexcel A11 = "Post-Transition Median HH Income"
-putexcel A12 = "Percent Change Post Transition"
-
-local colu1 "B E H K"
-local colu2 "C F I L"
-local colu3 "D G J M"
-
-forvalues e=1/4{
-    local col1: word `e' of `colu1'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==1, detail // pre-1996
-	putexcel `col1'10=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==1, detail // post-1996
-	putexcel `col1'11=`r(p50)', nformat(###,###)
-	putexcel `col1'12=formula((`col1'11-`col1'10)/`col1'10), nformat(#.##%)
-	
-	local col2: word `e' of `colu2'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e' & survey_yr==2, detail // pre-2014
-	putexcel `col2'10=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e' & survey_yr==2, detail // post-2014
-	putexcel `col2'11=`r(p50)', nformat(###,###)
-	putexcel `col2'12=formula((`col2'11-`col2'10)/`col2'10), nformat(#.##%)
-	
-	local col3: word `e' of `colu3'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ==`e', detail // pre-total
-	putexcel `col3'10=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ==`e', detail // post-total
-	putexcel `col3'11=`r(p50)', nformat(###,###)
-	putexcel `col3'12=formula((`col3'11-`col3'10)/`col3'10), nformat(#.##%)
+	local ++i
 }
 
-putexcel B15:D15 = "NH White", merge hcenter
-putexcel E15:G15 = "Black", merge hcenter
-putexcel H15:J15 = "NH Asian", merge hcenter
-putexcel K15:M15 = "Hisapnic", merge hcenter
-putexcel B16 = ("1996") E16 = ("1996") H16 = ("1996") K16 = ("1996")
-putexcel C16 = ("2014") F16 = ("2014") I16 = ("2014") L16 = ("2014")
-putexcel D16 = ("Total") G16 = ("Total") J16 = ("Total") M16 = ("Total")
-putexcel A17 = "Pre-Transition Median HH Income"
-putexcel A18 = "Post-Transition Median HH Income"
-putexcel A19 = "Percent Change Post Transition"
+* Mothers who experienced change AND became BW
+local i=1
 
-local colu1 "B E H K"
-local colu2 "C F I L"
-local colu3 "D G J M"
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+2
+		
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
 
+	local row2 = `i'*2+3
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	
+	local ++i
+}
+
+
+local col1x "E G I"
+local col2x "F H J"
+forvalues e=1/3{
+local i = 1
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+    local col1: word `e' of `col1x'	
+	local col2: word `e' of `col2x'
+	local row1 = `i'*2+2
+	local row2 = `i'*2+3
+	
+* All changes - 1996	
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1  & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1  & educ_gp==`e', detail // post 
+	local p50_post =`r(p50)'
+	putexcel `col1'`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	
+* BW changes - 1996
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
+* All changes - 2014
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & educ_gp==`e', detail  // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	
+* BW changes - 2014
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	
+	local ++i
+	}
+}
+
+local col1x "K M O Q"
+local col2x "L N P R"
 forvalues r=1/4{
-    local col1: word `r' of `colu1'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
-	putexcel `col1'17=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
-	putexcel `col1'18=`r(p50)', nformat(###,###)
-	putexcel `col1'19=formula((`col1'18-`col1'17)/`col1'17), nformat(#.##%)
+local i = 1
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+    local col1: word `r' of `col1x'	
+	local col2: word `r' of `col2x'
+	local row1 = `i'*2+2
+	local row2 = `i'*2+3
 	
-	local col2: word `r' of `colu2'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
-	putexcel `col2'17=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
-	putexcel `col2'18=`r(p50)', nformat(###,###)
-	putexcel `col2'19=formula((`col2'18-`col2'17)/`col2'17), nformat(#.##%)
+* All changes - 1996	
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1  & race==`r', detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1  & race==`r', detail // post 
+	local p50_post =`r(p50)'
+	putexcel `col1'`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
 	
-	local col3: word `r' of `colu3'	
-	sum thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r', detail // pre-total
-	putexcel `col3'17=`r(p50)', nformat(###,###)
-	sum thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r', detail // post-total
-	putexcel `col3'18=`r(p50)', nformat(###,###)
-	putexcel `col3'19=formula((`col3'18-`col3'17)/`col3'17), nformat(#.##%)
+* BW changes - 1996
+	sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & race==`r', detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
+* All changes - 2014
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & race==`r', detail  // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	
+* BW changes - 2014; there is a capture here because race of 3 has no observations for partner-left and became BW
+	capture sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & race==`r', detail // pre
+	capture local p50_pre =`r(p50)'
+	capture sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & race==`r', detail // post
+	capture local p50_post =`r(p50)'
+	capture putexcel `col2'`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	
+	local ++i
+	}
+}
+
+putexcel P11 = 0 // this is to cover the above point about no observations
+
+/*for raw change
+* All mothers who experienced a change
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+2
+		
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post - is this the same as bw60lag==0? okay yes
+	local p50_post =`r(p50)'
+	putexcel C`row1'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(###,###)
+
+	local row2 = `i'*2+3
+	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel C`row2'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(###,###)
+
+	local ++i
 }
 */
 
