@@ -830,6 +830,139 @@ forvalues r=1/4{
 	putexcel U`row'=formula((S`row'-R`row')), nformat(###,###)
 }
 
+// Table 4b: Mother's Income Change
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4b) modify
+putexcel A1:J1 = "Median Income Gain for Mothers - Total", merge border(bottom) hcenter
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel C2 = ("Pre_1996") D2 = ("Post_1996") E2 = ("% Change_1996") F2 = ("$ Change_1996")
+putexcel G2 = ("Pre_2014") H2 = ("Post_2014") I2 = ("% Change_2014") J2 = ("$ Change_2014")
+putexcel A3 = ("Total") B3 = ("Total")
+putexcel A4:A6 = "Education"
+putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
+putexcel A7:A10 = "Race"
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+
+putexcel A12:J12 = "Median Income Gain for Mothers - Mother became BW", merge border(bottom) hcenter
+putexcel A13 = "Category"
+putexcel B13 = "Label"
+putexcel C13 = ("Pre_1996") D13 = ("Post_1996") E13 = ("% Change_1996") F13 = ("$ Change_1996")
+putexcel G13 = ("Pre_2014") H13 = ("Post_2014") I13 = ("% Change_2014") J13 = ("$ Change_2014")
+putexcel A14 = ("Total") B14 = ("Total")
+putexcel A15:A17 = "Education"
+putexcel B15 = ("HS or Less") B16 = ("Some College") B17 = ("College Plus") 
+putexcel A18:A21 = "Race"
+putexcel B18 = ("NH White") B19 = ("Black") B20 = ("NH Asian") B21 = ("Hispanic") 
+
+* All mothers who gained earnings
+* do we want pre and post or can I just get the average change?
+* like mean earn_change_raw if earn_change_raw < 0?
+
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre
+putexcel C3=`r(p50)', nformat(###,###)
+sum earnings_adj if survey_yr==1 & earn_change_raw>0, detail // post change
+putexcel D3=`r(p50)', nformat(###,###)
+putexcel E3=formula(=(D3-C3)/C3), nformat(#.##%)
+putexcel F3=formula(=D3-C3), nformat(###,###)
+
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre
+putexcel G3=`r(p50)', nformat(###,###)
+sum earnings_adj if survey_yr==2 & earn_change_raw>0, detail // post change
+putexcel H3=`r(p50)', nformat(###,###)
+putexcel I3=formula(=(H3-G3)/G3), nformat(#.##%)
+putexcel J3=formula(=H3-G3), nformat(###,###)
+
+local row1 "4 5 6"
+forvalues e=1/3{
+    local row: word `e' of `row1'	
+	
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0 & educ_gp==`e', detail // pre
+	putexcel C`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if survey_yr==1 & earn_change_raw>0  & educ_gp==`e', detail // post change
+	putexcel D`row'=`r(p50)', nformat(###,###)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
+	
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0 & educ_gp==`e', detail // pre
+	putexcel G`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if survey_yr==2 & earn_change_raw>0  & educ_gp==`e', detail // post change
+	putexcel H`row'=`r(p50)', nformat(###,###)
+	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
+	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
+}
+
+local row2 "7 8 9 10"
+forvalues r=1/4{
+    local row: word `r' of `row2'	
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0 & race==`r', detail // pre
+	putexcel C`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if survey_yr==1 & earn_change_raw>0  & race==`r', detail // post change
+	putexcel D`row'=`r(p50)', nformat(###,###)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
+	
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0 & race==`r', detail // pre
+	putexcel G`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if survey_yr==2 & earn_change_raw>0  & race==`r', detail // post change
+	putexcel H`row'=`r(p50)', nformat(###,###)
+	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
+	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
+}
+
+
+* Just those where mother became BW (and she gained earnings loss)
+sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre
+putexcel C14=`r(p50)', nformat(###,###)
+sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & earn_change_raw>0, detail // post
+putexcel D14=`r(p50)', nformat(###,###)
+putexcel E14=formula(=(D14-C14)/C14), nformat(#.##%)
+putexcel F14=formula(=D14-C14), nformat(###,###)
+
+sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0, detail  // pre
+putexcel G14=`r(p50)', nformat(###,###)
+sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & earn_change_raw>0, detail // post
+putexcel H14=`r(p50)', nformat(###,###)
+putexcel I14=formula(=(H14-G14)/G14), nformat(#.##%)
+putexcel J14=formula(=H14-G14), nformat(###,###)
+
+local row1 "15 16 17"
+forvalues e=1/3{
+    local row: word `e' of `row1'	
+	
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre-1996
+	putexcel C`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1 & earn_change_raw>0, detail // post-1996
+	putexcel D`row'=`r(p50)', nformat(###,###)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
+		
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre-2014
+	putexcel G`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2 & earn_change_raw>0, detail // post-2014
+	putexcel H`row'=`r(p50)', nformat(###,###)
+	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
+	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
+}
+
+local row2 "18 19 20 21"
+forvalues r=1/4{
+    local row: word `r' of `row2'	
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre-1996
+	putexcel C`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1 & earn_change_raw>0, detail // post-1996
+	putexcel D`row'=`r(p50)', nformat(###,###)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
+		
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre-2014
+	putexcel G`row'=`r(p50)', nformat(###,###)
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2 & earn_change_raw>0, detail // post-2014
+	putexcel H`row'=`r(p50)', nformat(###,###)
+	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
+	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
+}
+
 /* Old format
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
 putexcel A1:D1 = "Changes in Median Household Income upon BW Transition", merge hcenter
