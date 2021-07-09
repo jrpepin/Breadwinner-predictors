@@ -73,7 +73,7 @@
 	log using "$logdir/bw_descriptives.log", replace
 	do "$SIPP2014_code/09_sipp14_bw_descriptives.do"
 	log close
-	do "$SIPP2014_code/09a_sipp14_bw_descriptives_matrix.do"
+* 	do "$SIPP2014_code/09a_sipp14_bw_descriptives_matrix.do" // archived descriptives
 	
 
 // Create sample descriptive statistics
