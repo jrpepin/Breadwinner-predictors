@@ -228,8 +228,8 @@ drop if _merge==2
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
 
 	// Create a combined spouse & partner indicator
-	gen 	spartner=1 	if spouse==1 | partner==1
-	replace spartner=0 	if spouse==0 & partner==0
+*	gen 	spartner=1 	if spouse==1 | partner==1
+*	replace spartner=0 	if spouse==0 & partner==0
 	
 	// Create indicators of partner presence at the first and last month of observation by year
 	gen 	start_spartner=spartner if monthcode==startmonth
