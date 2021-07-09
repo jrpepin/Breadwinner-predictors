@@ -12,16 +12,16 @@ global results 			"$homedir/projects/breadwinner-predictors/results"
 
 * PROJECT SPECIFIC MACROS-------------------------------------------------------
 // SIPP 2014
-global SIPP2014 		"$homedir/data/sipp/2014"
-global SIPP2014_code 	"$projcode/stata"
-global SIPP14keep 		"$homedir/projects/breadwinner-predictors/data"
+global SIPP2014 		"$homedir/data/sipp/2014" // where SIPP 2014 data are saved
+global SIPP2014_code 	"$projcode/stata/2014"    // where the 2014 .d0 files are saved
+global SIPP14keep 		"$homedir/projects/breadwinner-predictors/data" // where processed 2014 data are saved
 
 // SIPP 1996
 global SIPP1996			"$homedir/data/sipp/1996"
 global SIPP1996tm 		"/data/sipp/1996_TM/StataData"
-global SIPP1996_code 		"$projcode/stata/1996"
+global SIPP1996_code 	"$projcode/stata/1996"
 global SIPP96keep 		"$homedir/projects/breadwinner-predictor/data/keep/1996"
 
 // combined data
 
-global combined_data 		"$homedir/projects/breadwinner-predictor/data/keep/combined"
+global combined_data 	"$homedir/projects/breadwinner-predictor/data/keep/combined"

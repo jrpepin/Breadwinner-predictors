@@ -10,21 +10,22 @@ cd ./stata
 
 do 00_setup_breadwinner_environment.do
 
-// 2014 SIPP analysis
+// 2014 SIPP data processing
 
 do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
 
-// 1996 SIPP analysis
+// 1996 SIPP data processing
 do "$SIPP1996_code/breadwinner-predictorsSIPP96.do"
+
+********************************************************************************
+* D1. DECOMPOSITION ANALYSIS
+********************************************************************************
 
 // Appends 2014 and 1996 files and executes analysis
 	log using "$logdir/combined_models.log", replace
 	do aa_combined_models.do
 	log close
 	
-********************************************************************************
-* D1. DECOMPOSITION ANALYSIS
-********************************************************************************
 
 // Appends 2014 and 1996 files and executes analysis
 	log using "$logdir/decomposition_equation.log", replace
@@ -32,7 +33,7 @@ do "$SIPP1996_code/breadwinner-predictorsSIPP96.do"
 	log close
 
 ********************************************************************************
-* E1. PAPERS FOR TABLE
+* E1. TABLES FOR PAPER
 ********************************************************************************
 
 // Creates descriptive tables and decomposition results in Excel
