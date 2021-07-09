@@ -40,9 +40,6 @@ forvalues wave=1/4 {
 			echld_mnyn epayhelp elist eworkmore																					/// /* CHILD CARE */
 			
 	
-// Make the person number identifier numeric
-		 * destring pnum, replace /// Already numeric
-	
 // Make the six digit identifier for residence addresses numeric
 		replace eresidenceid=subinstr(eresidenceid,"A","1",.)
         replace eresidenceid=subinstr(eresidenceid,"B","2",.)
@@ -77,9 +74,7 @@ forvalues wave=1/4 {
 			eresidenceid 	et2_lno* 							/// 
 			et2_mth* 		rrel*			rrel_pnum*			/// /* HOUSEHOLD */
 			et2_sex* 		tage			tt2_age* 				/* DEMOGRAPHIC */	
-		
-// Make the person number identifier numeric	
-		 * destring pnum, replace /// Already numeric	 
+		 
 
 // Make the six digit identifier for residence addresses numeric
 		replace eresidenceid=subinstr(eresidenceid,"A","1",.)

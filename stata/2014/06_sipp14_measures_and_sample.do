@@ -157,8 +157,7 @@ browse SSUID PNUM year panelmonth swave durmom durmom_1st first_wave yrfirstbirt
    replace check=1 if ageb1==tage_fb & tage_fb!=.
    replace check=0 if ageb1!=tage_fb
    
-//   browse tage_fb ageb1 check if check==0 // comparing calculated v. recoded age at first birth. if anything tage_fb is one year younger, probably because based on specific date not just year-  use that?
-   
+  
 
 ********************************************************************************
 * Variable recodes
@@ -183,7 +182,7 @@ label values race race
 
 * age at 1st birth: this exists as TAGE_FB
 
-* marital status at 1st birth: not 100% sure. TYEAR_FB is year of first birth. we also have first and current marriage year. HOWEVER, if divorced, do not have that information. Would need to merge with SSA supplement
+* marital status at 1st birth: computed in step 07, need to merge with SSA
 
 * educational attainment: use EEDUC
 recode eeduc (31/38=1)(39=2)(40/42=3)(43/46=4), gen(educ)
@@ -195,10 +194,8 @@ drop eeduc
 * subsequent birth: can use TCBYR* to get year of each birth, so will get a flag if that occurs during survey waves.
 
 * partner status: can use ems for marriage. for cohabiting unions, need to use relationship codes. will recode this in a later step (may already happen in step 4)
-	* need to code as like year status, did they lose a partner at all, add one, in that year - need to think about this more
 
-* employment change: use rmesr? but this is the question around like # of jobs - RMESR is OVERALL employment status, but then could have went from 2 jobs to 1 job and still be "employed" - do we care about that?! also put with hours to get FT / PT?
-	* also use ENJFLAG - says if no-job or not
+* employment change: 
 
 recode rmesr (1=1) (2/5=2) (6/7=3) (8=4), gen(employ)
 label define employ 1 "Full Time" 2 "Part Time" 3 "Not Working - Looking" 4 "Not Working - Not Looking" // this is probably oversimplified at the moment
@@ -245,8 +242,6 @@ recode tjb`job'_occ (0010/0960=1)(1005/1980=2)(2000/2970=3)(3000/3550=4)(3600/46
 label values occ_`job' occupation
 drop tjb`job'_occ
 }
-
-* employer change: do we want any employer characteristics? could / would industry go here?
 
 //misc variables
 * Disability status
@@ -318,7 +313,7 @@ recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), g
 label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
 label values whynowork whynowork
 
-*poverty - think I did this too early // revisit
+*poverty
 recode thincpov (0/0.499=1) (.500/1.249=2) (1.250/1.499=3) (1.500/1.849=4) (1.850/1.999=5) (2.000/3.999=6) (4.000/1000=7), gen(pov_level)
 label define pov_level 1 "< 50%" 2 "50-125%" 3 "125-150%" 4 "150-185%" 5 "185-200%" 6 "200-400%" 7 "400%+" // http://neocando.case.edu/cando/pdf/CensusPovertyandIncomeIndicators.pdf - to determine thresholds
 label values pov_level pov_level
@@ -332,12 +327,10 @@ save "$tempdir/sipp14tpearn_fullsamp", replace
 ********************************************************************************
 * Create the analytic sample
 ********************************************************************************
-* Keep observations of women in first 18 years since first or last birth. 
+* Keep observations of women in first 18 years since last birth. 
 * Durmom is wave specific. So a mother who was durmom=19 in wave 3 is still in the sample 
 * in waves 1 and 2.
 
-* Note that we don't restrict the sample to mothers coresident with minor 
-* children (below) anymore. At least not for now, to allow robustness checks.
 
 * First, create an id variable per person
 	sort SSUID PNUM
@@ -437,7 +430,7 @@ drop if _merge==2
 
 // browse SSUID PNUM year panelmonth durmom minorbiochildren if inlist(SSUID, "000418500162", "000418209903", "000418334944") - okay yes so no minor children, so they're getting dropped. is this concerning?
 
-// Fix household compposition variables for unmatched individuals who live alone (_merge==1)
+// Fix household composition variables for unmatched individuals who live alone (_merge==1)
 	* Relationship_pairs_bymonth has one record per person living with PNUM. 
 	* We deleted records where "from_num==to_num." (compute_relationships.do)
 	* So, individuals living alone are not in the data.
