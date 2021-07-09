@@ -1,9 +1,12 @@
 *-------------------------------------------------------------------------------
 * BREADWINNER PROJECT
-* breadwinnner14.do
-* Kelly Raley and Joanna Pepin
+* breadwinner-predictorsSIPP96.do
+* Kelly Raley, Joanna Pepin, and Kim McErlean
 *-------------------------------------------------------------------------------
-* The goal of these files is to create estimates of breadwinning
+* The goal of these files is to create estimates of breadwinning over time and
+* what determines entrance into breadwinning
+
+* Before running this code, be sure to look at the README.md file
 
 ********************************************************************************
 * A1. ENVIRONMENT
@@ -12,12 +15,12 @@
 	* First, create a personal setup file using the setup_example.do script as a 
 	* template and save this file in the base project directory.
 
-	* Second, run the setup_breadwinnerNLSY97_environment script to set the project 
+	* Second, run the 00_setup_breadwinner_environment script to set the project 
 	* filepaths and macros.
 
 //------------------------------------------------------------------------------
 
-* The current directory is assumed to be the stata directory within the NLSY sub-directory.
+* The current directory is assumed to be the stata sub-directory.
 * cd ".../Breadwinner-predictors/stata" 
 
 clear all 

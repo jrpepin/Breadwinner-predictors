@@ -1,19 +1,37 @@
 *-------------------------------------------------------------------------------
 * BREADWINNER PROJECT
 * breadwinnner-predictorsSIPP14.do
-* Kelly Raley and Joanna Pepin
+* Kelly Raley, Joanna Pepin, and Kim McErlean
 *-------------------------------------------------------------------------------
-* The goal of these files is to create estimates of breadwinning
+* The goal of these files is to create estimates of breadwinning over time and
+* what determines entrance into breadwinning
+
+* Before running this code, be sure to look at the README.md files
 
 ********************************************************************************
 * A1. ENVIRONMENT
 ********************************************************************************
+* There are two scripts users need to run before running the first .do file. 
+	* First, create a personal setup file using the setup_example.do script as a 
+	* template and save this file in the base project directory.
 
-* Before running this code, be sure to look at the README.md file
+	* Second, run the 00_setup_breadwinner_environment script to set the project 
+	* filepaths and macros.
+
+//------------------------------------------------------------------------------
+
+* The current directory is assumed to be the stata sub-directory.
+* cd ".../Breadwinner-predictors/stata" 
+
+clear all 
+
+set maxvar 5500
+
 ********************************************************************************
 * A2. DATA
 ********************************************************************************
-* This project uses Wave 1-4 of the 2014 SIPP data files. They can be downloaded here:
+* This project uses Wave 1-4 of the 2014 SIPP data files as well as the
+* Social Security Supplement file. The files can be downloaded here:
 * https://www.census.gov/programs-surveys/sipp/data/datasets.html
 
 // Extract the variables for this project
