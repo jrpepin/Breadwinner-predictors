@@ -11,7 +11,6 @@ di "$S_DATE"
 * Create basic descriptive statistics of sample as well as others in the HH
 
 * The data file used in this script was produced by bw_descriptives.do
-* It is NOT yet restricted to mothers living with minor children.
 
 ********************************************************************************
 * Import data
@@ -36,7 +35,7 @@ replace total_max_earner=who_max_earn if (earnings==. & hh_earn_max>0 & hh_earn_
 replace total_max_earner=99 if (earnings>0 & earnings!=. & hh_earn_max==.) | (hh_earn_max < earnings & earnings!=. & hh_earn_max!=.)
 
 gen total_max_earner2=total_max_earner
-replace total_max_earner2=100 if total_max_earner==99 & (hh_earn_max==0 | hh_earn_max==.)
+replace total_max_earner2=100 if total_max_earner==99 & (hh_earn_max==0 | hh_earn_max==.) // splitting out mothers who are primary earners because no one else is an earner in HH
 
 browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner total_max_earner2 to_earnings*
 

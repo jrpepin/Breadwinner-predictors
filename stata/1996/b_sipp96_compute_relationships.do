@@ -10,6 +10,8 @@ di "$S_DATE"
 ********************************************************************************
 * This script uses the core and wave 2 topical files to attempt to describe 
 * each person's relationship to every other person in the household by month
+* Unlike the 2014 SIPP, when HH relationships are asked in every wave, detailed
+* HH relationships are only asked in the wave 2 topical module
 
 // Import relationship data
 use "$SIPP96keep/sipp96_hhdata.dta", clear
@@ -157,7 +159,7 @@ preserve
 collapse (min) minrel=relationship (max) maxrel=relationship (p50) commonrel=relationship (mean) relationship, by(RREL errp)
 restore
 
-// recoding remaining missing
+// recoding remaining missing - this was all done based on a manual assessment of relationships
 replace relationship = 99 if errp == 1 & RREL == 1 & _merge==1 & relationship==.
 replace relationship = 99 if errp == 1 & RREL == 2 & _merge==1 & relationship==.
 replace relationship = 1 if errp == 1 & RREL == 3 & _merge==1 & relationship==.

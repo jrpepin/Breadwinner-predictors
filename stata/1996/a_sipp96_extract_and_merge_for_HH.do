@@ -85,7 +85,6 @@ sort ssuid eentaid epppnum swave srefmon
 
 merge m:1 ssuid eentaid epppnum using "$tempdir/sipp96_mod2_hhmerge.dta"
 
-// browse ssuid epppnum rhcalyr rhcalmn eppintvw tfbrthyr tlbirtyr
 
 // browse ssuid epppnum rhcalyr rhcalmn eppintvw esex swave _merge if _merge==1 // what are defining characteristics of those unmatched? are there any?
 tab swave if _merge==1 // okay mostly people in other waves, so probably attrition or new people - will leave in sample for now
@@ -194,19 +193,6 @@ replace `var' =0 if `var'==2
 
 egen programs = rowtotal ( rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 )
 egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
-
-
-/* revisit this coding - trying to prioritize basic estimates
-
-* occupation change (https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html)...do we care about industry change? (industry codes: https://www.naics.com/search/)
-label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 "Healthcare" 5 "Service" 6 "Sales" 7 "Office / Admin" 8 "Farming" 9 "Construction" 10 "Maintenance" 11 "Production" 12 "Transportation" 13 "Military" 
-
-forvalues job=1/7{ 
-destring tjb`job'_occ, replace
-recode tjb`job'_occ (0010/0960=1)(1005/1980=2)(2000/2970=3)(3000/3550=4)(3600/4655=5)(4700/4965=6)(5000/5940=7)(6005/6130=8)(6200/6950=9)(7000/7640=10)(7700/8990=11)(9000/9760=12)(9800/9840=13), gen(occ_`job')
-label values occ_`job' occupation
-drop tjb`job'_occ
-}
 
 
 //misc variables

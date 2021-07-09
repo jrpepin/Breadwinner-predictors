@@ -101,7 +101,7 @@ reshape wide `reshape_vars', i(SSUID PNUM) j(panelmonth)
 
 	// browse marital_status2 marital_status3 sing_coh3 sing_mar3 coh_mar3 coh_diss3 marr_diss3 marr_wid3 marr_coh3
 	
-	// indicators of someone leaving household DURING the year
+	// indicators of someone leaving or entering household DURING the year
 		gen hh_lose1=0
 		gen earn_lose1=0
 		gen earn_non1=0

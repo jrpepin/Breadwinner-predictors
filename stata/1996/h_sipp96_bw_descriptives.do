@@ -1,3 +1,19 @@
+*-------------------------------------------------------------------------------
+* BREADWINNER PROJECT
+* bw_descriptives.do
+* Kelly Raley and Joanna Pepin
+*-------------------------------------------------------------------------------
+di "$S_DATE"
+version 16
+********************************************************************************
+* DESCRIPTION
+********************************************************************************
+* Create basic descriptive statistics of what events preceded breadwinning
+* for mothers who became breadwinners during the panel
+
+* The data file used in this script was produced by annualize.do
+
+
 ********************************************************************************
 * Import data  & create breadwinning measures
 ********************************************************************************
@@ -104,11 +120,6 @@ label values educ educ
 
 label define race 1 "NH White" 2 "Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
 label values race race
-
-/*
-label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 "Healthcare" 5 "Service" 6 "Sales" 7 "Office / Admin" 8 "Farming" 9 "Construction" 10 "Maintenance" 11 "Production" 12 "Transportation" 13 "Military" 
-label values st_occ* end_occ* occupation
-*/
 
 label define employ 1 "Full Time" 2 "Part Time" 3 "Not Working - Looking" 4 "Not Working - Not Looking" // this is probably oversimplified at the moment
 label values st_employ end_employ employ

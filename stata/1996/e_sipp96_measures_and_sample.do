@@ -52,7 +52,7 @@ browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
 
     egen first_wave = min(swave), by(SSUID PNUM)	
 	
-// Create an indictor of the birth year of the first child - using the variables that already exist, but leaving names to be consistent with 2014, just in case we ever merge
+// Create an indictor of the birth year of the first child - using the variables that already exist, but leaving names to be consistent with 2014, for when we merge
     gen yrfirstbirth = tfbrthyr 
 
 // create an indicator of birth year of the last child
@@ -120,9 +120,7 @@ label values educ educ
 drop eeducate
 
 
-
-* employment changes: use rmesr? but this is the question around like # of jobs - RMESR is OVERALL employment status, but then could have went from 2 jobs to 1 job and still be "employed" - do we care about that?! also put with hours to get FT / PT?
-	* also use ENJFLAG - says if no-job or not
+* employment changes: 
 
 recode rmesr (1=1) (2/5=2) (6/7=3) (8=4) (-1=.), gen(employ)
 label define employ 1 "Full Time" 2 "Part Time" 3 "Not Working - Looking" 4 "Not Working - Not Looking" // this is probably oversimplified at the moment
@@ -184,92 +182,6 @@ egen programs = rowtotal ( rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 )
 egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
 
 drop rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf
-
-/* revisit this coding - trying to prioritize basic estimates
-
-* occupation change (https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html)...do we care about industry change? (industry codes: https://www.naics.com/search/)
-label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 "Healthcare" 5 "Service" 6 "Sales" 7 "Office / Admin" 8 "Farming" 9 "Construction" 10 "Maintenance" 11 "Production" 12 "Transportation" 13 "Military" 
-
-forvalues job=1/7{ 
-destring tjb`job'_occ, replace
-recode tjb`job'_occ (0010/0960=1)(1005/1980=2)(2000/2970=3)(3000/3550=4)(3600/4655=5)(4700/4965=6)(5000/5940=7)(6005/6130=8)(6200/6950=9)(7000/7640=10)(7700/8990=11)(9000/9760=12)(9800/9840=13), gen(occ_`job')
-label values occ_`job' occupation
-drop tjb`job'_occ
-}
-
-* employer change: do we want any employer characteristics? could / would industry go here?
-
-
-//misc variables
-* Disability status
-// EFINDJOB (seems more restrictive than EDISABL, which is about limits, find job is about difficult finding ANY job) EDISABL RDIS_ALT (alt includes job rrlated disability measures whereas RDIS doesn't, but theeir differences are very neglible so relying on the more comprehensive one)
-// relabeling so the Nos are 0 not 2
-foreach var in efindjob edisabl rdis_alt{
-replace `var' =0 if `var'==2
-}
-
-
-* Child care ease of use
-foreach var in echld_mnyn elist eworkmore{
-replace `var'=0 if `var'==2
-}
-
-
-* reasons for moving
-
-recode eehc_why (1/3=1) (4/7=2) (8/12=3) (13=4) (14=5) (15=7) (16=6), gen(moves)
-label define moves 1 "Family reason" 2 "Job reason" 3 "House/Neighborhood" 4 "Disaster" 5 "Evicted" 6 "Other" 7 "Did not Move"
-label values moves moves
-
-recode eehc_why (1=1) (2=2) (3/14=3) (15=4) (16=3), gen(hh_move)
-label define hh_move 1 "Relationship Change" 2 "Independence" 3 "Other" 4 "Did not Move"
-label values hh_move hh_move
-
-
-* Reasons for leaving employer
-label define leave_job 1 "Fired" 2 "Other Involuntary Reason" 3 "Quit Voluntarily" 4 "Retired" 5 "Childcare-related" 6 "Other personal reason" 7 "Illness" 8 "In School"
-
-forvalues job=1/7{ 
-recode ejb`job'_rsend (5=1)(1/4=2)(6=2)(7/9=3)(10=4)(11=5)(12=6)(16=6)(13/14=7)(15=8), gen(leave_job`job')
-label values leave_job`job' leave_job
-drop ejb`job'_rsend
-}
-
-* Reasons for work schedule
-label define schedule 1 "Involuntary" 2 "Pay" 3 "Childcare" 4 "Other Voluntary"
-
-forvalues job=1/7{
-recode ejb`job'_wsmnr (1/3=1) (4=2) (5=3) (6/8=4), gen(why_schedule`job') 
-label values why_schedule`job' schedule
-drop ejb`job'_wsmnr
-}
-
-* Why not working - this is a series of variables not one variable, so first checking for how many people gave more than one reason, then recoding
-forvalues n=1/12{
-replace enj_nowrk`n'=0 if enj_nowrk`n'==2
-} // recoding nos to 0 instead of 2
-
-egen count_nowork = rowtotal(enj_nowrk1-enj_nowrk12)
-//browse count_nowork ENJ_NO*
-tab count_nowork
-
-gen why_nowork=.
-forvalues n=1/12{
-replace why_nowork = `n' if enj_nowrk`n'==1 & count_nowork==1
-}
-
-replace why_nowork=13 if count_nowork>=2 & !missing(count_nowork)
-
-recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), gen(whynowork)
-label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
-label values whynowork whynowork
-
-*poverty - think I did this too early // revisit
-recode thincpov (0/0.499=1) (.500/1.249=2) (1.250/1.499=3) (1.500/1.849=4) (1.850/1.999=5) (2.000/3.999=6) (4.000/1000=7), gen(pov_level)
-label define pov_level 1 "< 50%" 2 "50-125%" 3 "125-150%" 4 "150-185%" 5 "185-200%" 6 "200-400%" 7 "400%+" // http://neocando.case.edu/cando/pdf/CensusPovertyandIncomeIndicators.pdf - to determine thresholds
-label values pov_level pov_level
-// drop thincpov
-*/
 
 
 save "$tempdir/sipp96tpearn_fullsamp", replace
@@ -501,7 +413,6 @@ preserve
 	drop idnum hhmom
 restore
 
-*/
 
 // create output of sample size with restrictions
 dyndoc "$SIPP1996_code/sample_size_1996.md", saving($results/sample_size_1996.html) replace

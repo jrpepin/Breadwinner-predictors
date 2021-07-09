@@ -19,12 +19,6 @@ drop _merge pair
 rename errp from_rel
 rename RREL to_rel
 
-// bysort SSUID ERESIDENCEID (from_num): gen person2 = _n
-// bysort SSUID ERESIDENCEID (from_num): egen person2 = rank(from_num), unique
-// bysort SSUID ERESIDENCEID from_num to_num panelmonth: replace person = person[1] 
-// browse SSUID ERESIDENCEID from_num to_num panelmonth person
-// browse SSUID ERESIDENCEID from_num to_num panelmonth person person2 if SSUID == "489226451420"
-
 // browse SSUID ERESIDENCEID from_num to_num panelmonth person
 
 reshape wide to_num relationship from_rel to_rel from_sex to_sex from_age to_age from_thtotinc from_thpov from_efkind from_tftotinc from_wpfinwgt from_ems from_epnspous from_epnmom from_epndad from_etypmom from_etypdad from_ulftmain from_uentmain from_tpearn from_renroll from_eenlevel from_epdjbthn from_ejobcntr from_edisabl from_edisprev from_ersnowrk from_eawop from_eptwrk from_eptresn from_rmesr from_rwksperm from_ersend1 from_ejbhrs1 from_tpmsum1 from_epayhr1 from_tpyrate1 from_rpyper1 from_ejbind1 from_tjbocc1 from_ersend2 from_ejbhrs2 from_tpmsum2 from_epayhr2 from_tpyrate2 from_rpyper2 from_ejbind2 from_tjbocc2 from_epatyp5 from_emarpth from_exmar from_tfmyear from_tlmyear from_tfrchl from_tfrinhh from_tmomchl from_emomlivh from_efbrthmo from_tfbrthyr from_ragfbrth from_elbirtmo from_tlbirtyr from_efblivnw from_elblivnw from_earnings from_race from_educ from_employ from_jobchange_1 from_jobchange_2 from_better_job from_hourly_est1 from_hourly_est2 from_avg_wk_rate from_avg_mo_hrs from_programs from_benefits to_thtotinc to_thpov to_efkind to_tftotinc to_wpfinwgt to_ems to_epnspous to_epnmom to_epndad to_etypmom to_etypdad to_ulftmain to_uentmain to_tpearn to_renroll to_eenlevel to_epdjbthn to_ejobcntr to_edisabl to_edisprev to_ersnowrk to_eawop to_eptwrk to_eptresn to_rmesr to_rwksperm to_ersend1 to_ejbhrs1 to_tpmsum1 to_epayhr1 to_tpyrate1 to_rpyper1 to_ejbind1 to_tjbocc1 to_ersend2 to_ejbhrs2 to_tpmsum2 to_epayhr2 to_tpyrate2 to_rpyper2 to_ejbind2 to_tjbocc2 to_epatyp5 to_emarpth to_exmar to_tfmyear to_tlmyear to_tfrchl to_tfrinhh to_tmomchl to_emomlivh to_efbrthmo to_tfbrthyr to_ragfbrth to_elbirtmo to_tlbirtyr to_efblivnw to_elblivnw to_earnings to_race to_educ to_employ to_jobchange_1 to_jobchange_2 to_better_job to_hourly_est1 to_hourly_est2 to_avg_wk_rate to_avg_mo_hrs to_programs to_benefits,i(SSUID ERESIDENCEID from_num panelmonth) j(person)
@@ -102,7 +96,7 @@ browse SSUID PNUM yrfirstbirth ems exmar tfmyear tsmyear tlmyear ewidiv* tfsyear
 // filling in ones I have to guesstimate
 replace status_b1 = 1 if (yrfirstbirth-tlmyear) <=6 & status_b1==. // there are a lot of people who were married, are now separated, but then only have a first marriage year, not a separation year, so using time frame to guesstimate - using longer frame here because think cohab births less of an issue
 
-// some people just don't have marriage dates, but have statues of like divorced / married
+// some people just don't have marriage dates, but have statuses of like divorced / married
 
 label define birth_status 1 "Married" 2 "Never Married" 3  "Widowed" 4 "Divorced or Separated"
 label values status_b1 birth_status
