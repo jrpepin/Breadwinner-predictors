@@ -9,3 +9,4 @@ QA_sipp14.do
 *.gz
 output/
 x_*
+*.Rhistory
