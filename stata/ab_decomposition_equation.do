@@ -14,18 +14,6 @@ di "$S_DATE"
 
 use "$combined_data/combined_annual_bw_status.dta", clear
 
-/* this isn't going to work because weights vary by year - also doing PY version of race
-// getting unique race counts for descriptives later. not convinced this is most efficient but struggling with how to do this with persons, not person-years, in long file with weights
-keep race SSUID PNUM year wpfinwgt
- 
-// Reshape the data wide (1 person per row)
-reshape wide race wpfinwgt, i(SSUID PNUM) j(year)
-egen race = rowmin(race1995 race1996 race1997 race1998 race1999 race2000 race2013 race2014 race2015 race2016)
-label values race race
-
-tab race [aweight=wpfinwgt], gen(race)
-*/
-
 sort SSUID PNUM year
 
 browse SSUID PNUM year bw60 trans_bw60 earnup8_all momup_only earn_lose earndown8_hh_all

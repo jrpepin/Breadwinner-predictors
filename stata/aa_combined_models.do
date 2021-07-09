@@ -12,6 +12,10 @@ di "$S_DATE"
 * measures of household changes
 
 * Files used were created in sipp14_bw_descriptives and sipp96_bw_descriptives
+* Note: we are currently not using the models here, but this combined file
+* is then used for the decomposition, so this step is still needed. 
+* I have commented out the models for now, in case we ever revisit - there
+* was too much collinearity.
 
 ********************************************************************************
 * First need to append the 2014 and 1996 files
@@ -65,8 +69,7 @@ browse momup_only momup_anydown momup_othleft momup_anyup momno_hhdown momno_oth
 ********************************************************************************
 * now specify models
 ********************************************************************************
-//use "$SIPP14keep/combined_annual_bw_status.dta", clear
-
+/*
 gen dv=trans_bw60==1
 replace dv=. if trans_bw60==. // recoding so only can be 0 or 1 - currently has missing values because we have been counting first year as "ineligible" since we don't know history. decide if that should stay?
 
@@ -86,6 +89,7 @@ gen earnup_excl=earnup8_all
 replace earnup_excl=0 if earn_lose==1
 gen earndown_excl=earndown8_hh_all
 replace earndown_excl=0 if earn_lose==1
+*/
 
 /*
 *****************************************************************************************

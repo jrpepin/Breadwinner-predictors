@@ -12,6 +12,7 @@ di "$S_DATE"
 * as well as tables for the results of the decomposition equation
 
 * File used was created in ab_decomposition_equation.do
+* Note: this relies on macros created in step ab, so cannot run this in isolation
 
 use "$tempdir/combined_bw_equation.dta", clear
 
@@ -1210,151 +1211,8 @@ graph bar change_1996 change_2014 if category=="Total", blabel(bar, format(%9.2f
 graph export "$results/Income_Total.png", as(png) name("Graph") replace
 */
 
-/*------------------------------------------------------------------------------------------------------*/
-
-********************************************************************************
-* Some exploration
-********************************************************************************
-/* Commenting this out since I am now using an excel file in the step above this
-log using "$logdir/exploratory_data.log", replace
-
-browse SSUID PNUM year earnings thearn_alt earnings_ratio bw60 bw50 trans_bw60_alt2
-
-gen earnings_ratio_m = earnings_ratio
-replace earnings_ratio=0 if earnings_ratio==.
-
-tabstat earnings_ratio, by(survey_yr) statistics(mean p50)
-tabstat earnings_ratio if bw60==1, by(survey_yr) statistics(mean p50)
-tabstat earnings_ratio if trans_bw60_alt2==1, by(survey_yr) statistics(mean p50)
-
-sum earnings_ratio if survey_yr==1, detail
-sum earnings_ratio if survey_yr==2, detail
-
-recode earnings_ratio (0=0) (0.00000001/0.249999999=1) (.2500000/.499999=2) (.50000/.599999=3) (.600000/.7499999=4) (.7500000/.999999=5) (1=6), gen(earn_ratio_gp)
-label define ratio 0 "0" 1 "0.0-25%" 2 "25-49%" 3 "50-60%" 4 "60-75%" 5 "75%-99%" 6 "100%"
-label values earn_ratio_gp ratio
-
-tab survey_yr earn_ratio_gp, row
-
-tabstat thearn_alt, by(survey_yr) statistics(mean p50)
-tabstat thearn_alt, by(bw60) statistics(mean p50) // on average, female bws hh earnings are lower, BUT doesn't change upon transition for those households specifically?
-tabstat thearn_alt, by(trans_bw60_alt2) statistics(mean p50) // on average, female bws hh earnings are lower, BUT doesn't change upon transition for those households specifically?
-
-tabstat thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], statistics(mean p50) // this is average POST transition - 35952.83
-tabstat thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , statistics(mean p50) // pre? 40092.59
-
-tabstat thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, statistics(mean p50)
-tabstat thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, statistics(mean p50)
-
-tabstat thearn_alt if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
-tabstat thearn_alt if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
-
-tabstat earnings if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], statistics(mean p50)
-tabstat earnings if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , statistics(mean p50)
-
-tabstat earnings if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, statistics(mean p50)
-tabstat earnings if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, statistics(mean p50)
-
-tabstat earnings if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
-tabstat earnings if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
-
-tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1], statistics(mean p50)
-tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID , statistics(mean p50)
-
-tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, statistics(mean p50)
-tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, statistics(mean p50)
-
-tabstat earnings_ratio if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, statistics(mean p50)
-tabstat earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, statistics(mean p50)
-
-* total earnings change of partner with mom as BW
-tabstat earn_change_sp if trans_bw60_alt2==1, by(survey) statistics(mean p50)
-tabstat earn_change_raw_sp if trans_bw60_alt2==1, by(survey) statistics(mean p50)
-
-* Earnings change of partners who experienced a decrease + mom BW	
-tabstat earn_change_sp if trans_bw60_alt2==1 & earndown8_sp_all==1, by(survey) statistics(mean p50)
-tabstat earn_change_raw_sp if trans_bw60_alt2==1 & earndown8_sp_all==1, by(survey) statistics(mean p50)
-
-* Earnings change of partners who experienced a decrease - regardless of BW status
-tabstat earn_change_sp if earndown8_sp_all==1, by(survey) statistics(mean p50)
-tabstat earn_change_raw_sp if earndown8_sp_all==1, by(survey) statistics(mean p50)
-
-log close
-
-*/
-*tabstat thearn_alt[_n-1] if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) // does this work for PRE? NO
 
 /*
-
-********************************************************************************
-* Original specification (results presented in 4/22 meeting)
-********************************************************************************
-* we changed breakdowns to isolate partner. Before we isolated declines v. left.
-
-
-*Dt-l: mothers not breadwinning at t-1
-svy: tab survey bw60 if year==(year[_n+1]-1), row // to ensure consecutive years, aka she is available to transition to BW the next year
-
-*Mt = The proportion of mothers who experienced an increase in earnings. This is equal to the number of mothers who experienced an increase in earnings divided by Dt-1. Mothers only included if no one else in the HH experienced a change.
-
-gen mt_mom = 0
-replace mt_mom = 1 if earnup8_all==1 & earn_lose==0 & earndown8_hh_all==0
-replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom==0 // to capture those outside the 8% threshold (v. small amount)
-
-svy: tab survey mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
-svy: mean mt_mom if bw60[_n-1]==0 & year==(year[_n-1]+1) & survey==1996
-svy: mean mt_mom if survey==1996
-
-*Bmt = the proportion of mothers who experience an increase in earnings that became breadwinners. This is equal to the number of mothers who experience an increase in earnings and became breadwinners divided by Mt.
-
-svy: tab mt_mom trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-svy: tab mt_mom trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
-*Ft = the proportion of mothers who had another household member lose earnings. If mothers earnings also went up, they are captured here, not above.
-gen ft_hh = 0
-replace ft_hh = 1 if earn_lose==0 & earndown8_hh_all==1
-replace ft_hh = 1 if earn_lose==0 & (earn_change_hh<0 & earn_change_hh>-.08) & (earn_change >0 & earn_change <.08) & ft_hh==0 // to capture those outside the 8% threshold (v. small amount)
-
-svy: tab survey ft_hh if bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
-	** Breaking down the ft_hh into partner and all other
-
-	gen ft_partner=0
-	replace ft_partner = 1 if earn_lose==0 & earnup8_all==0 & earndown8_sp_all==1 & earndown8_oth_all==0 // also saying NO ONE else in hh's earnings could go down, JUST partner
-
-	gen ft_other=0
-	replace ft_other = 1 if earn_lose==0 & earndown8_hh_all==1 & ((earnup8_all==1 & earndown8_sp_all==1) | (earndown8_sp_all==1 & earndown8_oth_all==1))
-	replace ft_other = 1 if ft_hh==1 & ft_partner==0 & ft_other==0
-
-	browse ft_hh ft_partner mt_mom earn_lose thearn thearn_alt earnings earnings_a_sp hh_earn other_earn earnup8_all earndown8_sp_all earndown8_oth_all ///
-	earndown8_hh_all earn_change_sp earn_change_hh earn_change_oth if ft_hh==0 & ft_partner==1
-	
-	svy: tab survey ft_partner if bw60[_n-1]==0 & year==(year[_n-1]+1), row
-	svy: tab survey ft_other if bw60[_n-1]==0 & year==(year[_n-1]+1), row
-	
-	gen ft_overlap=0
-	replace ft_overlap = 1 if earn_lose==0 & earnup8_all==1 & earndown8_sp_all==1
-
-*Bft = the proportion of mothers who had another household member lose earnings that became breadwinners
-svy: tab ft_hh trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-svy: tab ft_hh trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row 
-
-svy: tab ft_partner trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row 
-svy: tab ft_partner trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row 
-
-svy: tab ft_other trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-svy: tab ft_other trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
-*Lt = the proportion of mothers who stopped living with someone who was an earner. This is the main category, such that if mother's earnings went up or HH earnings went down AND someone left, they will be here.
-	
-svy: tab survey earn_lose if bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
-
-*BLt = the proportion of mothers who stopped living with someone who was an earner that became a Breadwinner
-svy: tab earn_lose trans_bw60_alt2 if survey==1996 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-svy: tab earn_lose trans_bw60_alt2 if survey==2014 & bw60[_n-1]==0 & year==(year[_n-1]+1), row
-
 ********************************************************************************
 * Limited to children in residence at start and end of year
 ********************************************************************************
