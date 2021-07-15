@@ -988,8 +988,11 @@ putexcel A6:A7 = "Mothers increase in earnings and partner lost earnings"
 putexcel A8:A9 = "Partner lost earnings only"
 putexcel A10:A11 = "Partner left"
 putexcel A12:A13 = "Other member lost earnings / left"
-putexcel B4 = ("1996") B6 = ("1996") B8 = ("1996") B10 = ("1996") B12 = ("1996")
-putexcel B5 = ("2014") B7 = ("2014") B9 = ("2014") B11 = ("2014") B13 = ("2014")
+putexcel A15 = "Mothers increase in earnings and partner lost earnings"
+putexcel A16:A17 = "Mother earnings gain"
+putexcel A18:A19 = "Partner earnings loss"
+putexcel B4 = ("1996") B6 = ("1996") B8 = ("1996") B10 = ("1996") B12 = ("1996") B16 = ("1996") B18 = ("1996")
+putexcel B5 = ("2014") B7 = ("2014") B9 = ("2014") B11 = ("2014") B13 = ("2014") B17 = ("2014") B19 = ("2014")
 
 * All mothers who experienced a change
 local i=1
@@ -1035,6 +1038,54 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 	local ++i
 }
 
+// Mother's change only for when mom up but partner down
+* All
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1, detail // post - is this the same as bw60lag==0? okay yes
+	local p50_post =`r(p50)'
+	putexcel C16=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel C17=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+*BW only
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D16=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D17=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
+// Partners's change only for when mom up but partner down
+* All
+	sum earnings_sp_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1, detail // post - is this the same as bw60lag==0? okay yes
+	local p50_post =`r(p50)'
+	putexcel C18=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_sp_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel C19=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+*BW only
+	sum earnings_sp_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D18=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_sp_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D19=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
 
 local col1x "E G I"
 local col2x "F H J"
@@ -1076,6 +1127,55 @@ local i = 1
 	
 	local ++i
 	}
+	
+// Mother's change only for when mom up but partner down
+* All
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'16=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'17=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+*BW only
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'16=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'17=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
+// Partners's change only for when mom up but partner down
+* All
+	sum earnings_sp_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & educ_gp==`e', detail // post - is this the same as bw60lag==0? okay yes
+	local p50_post =`r(p50)'
+	putexcel `col1'18=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_sp_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'19=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+*BW only
+	sum earnings_sp_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'18=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_sp_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & educ_gp==`e', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & educ_gp==`e', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'19=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
 }
 
 local col1x "K M O Q"
@@ -1118,6 +1218,54 @@ local i = 1
 	
 	local ++i
 	}
+	
+// Mother's change only for when mom up but partner down
+* All
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & race==`r', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'16=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & race==`r', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'17=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+*BW only
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & race==`r', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'16=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & race==`r', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'17=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+
+// Partners's change only for when mom up but partner down
+* All
+	sum earnings_sp_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & race==`r', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & race==`r', detail // post - is this the same as bw60lag==0? okay yes
+	local p50_post =`r(p50)'
+	putexcel `col1'18=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_sp_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & race==`r', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col1'19=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+*BW only
+	sum earnings_sp_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & ft_partner_down_mom[_n+1]==1 & race==`r', detail // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'18=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
+	sum earnings_sp_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1 & race==`r', detail  // pre
+	local p50_pre =`r(p50)'
+	sum earnings_sp_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1 & race==`r', detail // post
+	local p50_post =`r(p50)'
+	putexcel `col2'19=formula(=(`p50_post' - `p50_pre')), nformat(###,###)
 }
 
 putexcel P11 = 0 // this is to cover the above point about no observations
