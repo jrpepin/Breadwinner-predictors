@@ -530,7 +530,22 @@ forvalues r=1/4{
 	*/
 }
 
-// Table 4a: Partner's income change
+	**Exploratory: who's income goes up, down, stays the same
+	// browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2
+	by SSUID PNUM (year), sort: gen hh_income_chg = ((thearn_adj-thearn_adj[_n-1])/thearn_adj[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+	by SSUID PNUM (year), sort: gen hh_income_raw = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+	browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
+	
+	inspect hh_income_raw // almost split 50/50 negative v. positive
+	sum hh_income_raw, detail // i am now wondering - is this the better way to do it?
+	gen hh_chg_value=.
+	replace hh_chg_value = 0 if hh_income_raw <0
+	replace hh_chg_value = 1 if hh_income_raw >0 & hh_income_raw!=.
+	tab hh_chg_value
+	sum hh_income_raw if hh_chg_value==0, detail
+	sum hh_income_raw if hh_chg_value==1, detail
+
+	// Table 4a: Partner's income change
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4a) modify
 putexcel A1:J1 = "Median Income Loss for Partners - Total", merge border(bottom) hcenter
