@@ -544,7 +544,20 @@ forvalues r=1/4{
 	tab hh_chg_value
 	sum hh_income_raw if hh_chg_value==0, detail
 	sum hh_income_raw if hh_chg_value==1, detail
-
+	
+	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
+	graph export "$results/HH_Income_Change.png", as(png) name("Graph") replace
+	
+	*Mother
+	by SSUID PNUM (year), sort: gen mom_income_raw = ((earnings_adj-earnings_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+	histogram mom_income_raw if mom_income_raw > -50000 & mom_income_raw <50000, percent xlabel(-50000(10000)50000) title("Mom's income change upon transition to BW") xtitle("Mom's income change")	
+	graph export "$results/Mom_Income_Change.png", as(png) name("Graph") replace
+	
+	*Partner
+	by SSUID PNUM (year), sort: gen partner_income_raw = ((earnings_sp_adj-earnings_sp_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+	histogram partner_income_raw if partner_income_raw > -50000 & partner_income_raw <50000, percent xlabel(-50000(10000)50000) title("Partner's income change upon transition to BW") xtitle("Partner's income change")
+	graph export "$results/Partner_Income_Change.png", as(png) name("Graph") replace
+	
 	// Table 4a: Partner's income change
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4a) modify
