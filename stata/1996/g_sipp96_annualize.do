@@ -124,8 +124,8 @@ reshape wide `reshape_vars', i(SSUID PNUM) j(panelmonth)
 		gen non_earn`m'		=  other_earner`m' > other_earner`l' & hhsize`m' == hhsize`l'
 		gen resp_earn`m'	= earnings`m'!=. & (earnings`l'==. | earnings`l'==0)
 		gen resp_non`m'		=  (earnings`m'==. | earnings`m'==0) & earnings`l'!=.
-		gen partner_gain`m'	=  (spartner`m' > spartner`l') & spartner`m'!=. 
-		gen partner_lose`m'	=  (spartner`m' < spartner`l') & spartner`l'!=.
+		gen partner_gain`m'	=  spartner`m' ==1 & (spartner`l'==. | spartner`l'==0)
+		gen partner_lose`m'	=  (spartner`m'==. | spartner`m'==0) & spartner`l' == 1
 	}
 	
 	// create indicators of job / education changes: respondent

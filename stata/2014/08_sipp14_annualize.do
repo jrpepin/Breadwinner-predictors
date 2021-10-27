@@ -127,9 +127,13 @@ reshape wide `reshape_vars', i(SSUID PNUM) j(panelmonth)
 		gen non_earn`m'		=  other_earner`m' > other_earner`l' & hhsize`m' == hhsize`l'
 		gen resp_earn`m'	= earnings`m'!=. & (earnings`l'==. | earnings`l'==0)
 		gen resp_non`m'		=  (earnings`m'==. | earnings`m'==0) & earnings`l'!=.
-		gen partner_gain`m'	=  spartner`m' > spartner`l'
-		gen partner_lose`m'	=  spartner`m' < spartner`l'
+		gen partner_gain`m'	=  spartner`m' ==1 & (spartner`l'==. | spartner`l'==0)
+		gen partner_lose`m'	=  (spartner`m'==. | spartner`m'==0) & spartner`l' == 1
 	}
+	
+	* egen partner_lose_sum = rowtotal(partner_lose*)
+	* browse partner_lose* spartner* if partner_lose_sum > 0
+	
 	
 	// create indicators of job / education changes: respondent
 		gen full_part1=0
@@ -226,6 +230,34 @@ drop if _merge==2
 	
 	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
+	
+/* exploration
+browse SSUID PNUM year monthcode partner_lose
+tab monthcode partner_lose, column
+
+	gen spousenum=.
+	forvalues n=1/22{
+	replace spousenum=`n' if relationship`n'==1
+	}
+
+	gen partnernum=.
+	forvalues n=1/22{
+	replace partnernum=`n' if relationship`n'==2
+	}
+
+	gen spart_num=spousenum
+	replace spart_num=partnernum if spart_num==.
+
+	gen earnings_sp=.
+	gen earnings_a_sp=.
+
+	forvalues n=1/22{
+	replace earnings_sp=to_TPEARN`n' if spart_num==`n'
+	replace earnings_a_sp=to_earnings`n' if spart_num==`n' // use this one
+	}
+	
+browse SSUID PNUM year monthcode spartner partner_lose earnings earnings_a_sp thearn_alt mbw60 //  ems ems_ehc
+*/
 
 	// Create a combined spouse & partner indicator
 *	gen 	spartner=1 	if spouse==1 | partner==1
