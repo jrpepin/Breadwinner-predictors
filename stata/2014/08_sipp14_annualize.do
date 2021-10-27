@@ -268,6 +268,30 @@ browse SSUID PNUM year monthcode panelmonth partner_lose month_left timing_left
 	
 browse SSUID PNUM year monthcode spartner partner_lose earnings earnings_a_sp thearn_alt mbw60 //  ems ems_ehc
 
+// change in earnings within year
+gen earnings_z = earnings
+replace earnings_z = 0 if earnings==.
+
+by SSUID PNUM (panelmonth), sort: gen earn_change = ((earnings_z -earnings_z[_n-1])/earnings_z [_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+by SSUID PNUM (panelmonth), sort: gen earn_change_raw = (earnings_z -earnings_z[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+
+browse SSUID PNUM year monthcode earnings earn_change earn_change_raw
+
+gen earnings_z_sp = earnings_a_sp
+replace earnings_z_sp = 0 if earnings_a_sp==.
+
+by SSUID PNUM (panelmonth), sort: gen earn_change_sp = ((earnings_z_sp -earnings_z_sp[_n-1])/earnings_z_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+by SSUID PNUM (panelmonth), sort: gen earn_change_raw_sp = (earnings_z_sp -earnings_z_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+
+browse SSUID PNUM year monthcode earnings_z_sp earn_change_sp earn_change_raw_sp
+
+sum earnings_z, detail
+sum earn_change, detail
+sum earn_change_raw, detail
+sum earnings_z_sp, detail
+sum earn_change_sp, detail
+sum earn_change_raw_sp, detail
+
 preserve
 
 collapse 	(sum) earnings earnings_a_sp thearn_alt to_earnings* /// 
