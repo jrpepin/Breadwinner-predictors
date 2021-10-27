@@ -232,8 +232,18 @@ drop if _merge==2
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
 	
 /* exploration
-browse SSUID PNUM year monthcode partner_lose
+browse SSUID PNUM year monthcode panelmonth partner_lose
 tab monthcode partner_lose, column
+
+bysort SSUID PNUM year (monthcode): egen month_left = min(monthcode) if partner_lose==1
+bysort SSUID PNUM year (month_left): replace month_left = month_left[1]
+sort SSUID PNUM year monthcode
+browse SSUID PNUM year monthcode panelmonth partner_lose month_left
+
+gen timing_left=.
+replace timing_left=0 if monthcode <= month_left & month_left!=.
+replace timing_left=1 if monthcode > month_left & month_left!=.
+browse SSUID PNUM year monthcode panelmonth partner_lose month_left timing_left
 
 	gen spousenum=.
 	forvalues n=1/22{
@@ -257,6 +267,83 @@ tab monthcode partner_lose, column
 	}
 	
 browse SSUID PNUM year monthcode spartner partner_lose earnings earnings_a_sp thearn_alt mbw60 //  ems ems_ehc
+
+preserve
+
+collapse 	(sum) earnings earnings_a_sp thearn_alt to_earnings* /// 
+			(mean) partner_lose partner_gain 					///
+			(max) relationship*, ///
+			by(SSUID PNUM year timing_left)
+			
+
+egen hh_earn_max = rowmax (to_earnings1-to_earnings22)
+// browse SSUID PNUM year hh_earn_max earnings to_earnings* 
+
+gen who_max_earn=.
+forvalues n=1/22{
+replace who_max_earn=relationship`n' if to_earnings`n'==hh_earn_max
+}
+
+// browse SSUID PNUM year who_max_earn hh_earn_max earnings to_earnings* relationship*
+
+gen total_max_earner=.
+replace total_max_earner=who_max_earn if (earnings==. & hh_earn_max>0 & hh_earn_max!=.) | (hh_earn_max > earnings & earnings!=. & hh_earn_max!=.)
+replace total_max_earner=99 if (earnings>0 & earnings!=. & hh_earn_max==.) | (hh_earn_max < earnings & earnings!=. & hh_earn_max!=.)
+
+gen total_max_earner2=total_max_earner
+replace total_max_earner2=100 if total_max_earner==99 & (hh_earn_max==0 | hh_earn_max==.) // splitting out the "self" view to delineate between hh where mother is primary earner because she is the only earner
+
+browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner total_max_earner2 to_earnings*
+
+
+#delimit ;
+label define rel2 1 "Spouse"
+                  2 "Unmarried partner"
+                  3 "Biological parent"
+                  4 "Biological child"
+                  5 "Step parent"
+                  6 "Step child"
+                  7 "Adoptive parent"
+                  8 "Adoptive child"
+                  9 "Grandparent"
+                 10 "Grandchild"
+                 11 "Biological siblings"
+                 12 "Half siblings"
+                 13 "Step siblings"
+                 14 "Adopted siblings"
+                 15 "Other siblings"
+                 16 "In-law"
+                 17 "Aunt, Uncle, Niece, Nephew"
+                 18 "Other relationship"   
+                 19 "Foster parent/Child"
+                 20 "Other non-relative"
+                 99 "self" 
+				 100 "self - no other earners" ;
+
+#delimit cr
+
+label values who_max_earn total_max_earner* rel2
+
+gen bw60 = (earnings > .6*thearn_alt) 
+gen earnings_ratio = earnings / thearn_alt
+
+sum earnings_ratio if timing_left==1, detail
+
+tab who_max_earn if bw60==1
+replace who_max_earn=99 if who_max_earn==. & bw60==1
+
+tab who_max_earn if timing_left==1
+
+bysort SSUID PNUM year: egen total_earnings = total(earnings)
+bysort SSUID PNUM year: egen total_hh_earn = total(thearn_alt)
+gen total_ratio = total_earnings / total_hh_earn
+gen total_bw = (total_ratio>.6)
+
+tab bw60 total_bw if timing_left==1, row
+
+browse SSUID PNUM year timing_left who_max_earn hh_earn_max earnings thearn_alt earnings_a_sp earnings_ratio total_ratio partner_lose partner_gain bw60 if timing_left!=.
+
+restore
 */
 
 	// Create a combined spouse & partner indicator

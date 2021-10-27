@@ -224,6 +224,34 @@ drop if _merge==2
 	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
 	
+/* exploration
+browse SSUID PNUM year monthcode partner_lose spartner
+tab monthcode partner_lose, column
+
+	gen spousenum=.
+	forvalues n=1/17{
+	replace spousenum=`n' if relationship`n'==1
+	}
+
+	gen partnernum=.
+	forvalues n=1/17{
+	replace partnernum=`n' if relationship`n'==2
+	}
+
+	gen spart_num=spousenum
+	replace spart_num=partnernum if spart_num==.
+
+	gen earnings_sp=.
+	gen earnings_a_sp=.
+
+	forvalues n=1/17{
+	replace earnings_sp=to_tpearn`n' if spart_num==`n'
+	replace earnings_a_sp=to_earnings`n' if spart_num==`n' // use this one
+	}
+	
+browse SSUID PNUM year monthcode spartner partner_lose earnings earnings_a_sp thearn_alt mbw60 //  ems ems_ehc
+*/
+	
 	// Create indicators of partner presence at the first and last month of observation by year
 	gen 	start_spartner=spartner if monthcode==startmonth
 	gen 	last_spartner=spartner 	if monthcode==lastmonth
