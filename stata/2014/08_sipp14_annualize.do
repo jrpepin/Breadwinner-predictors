@@ -367,7 +367,49 @@ label define rel2 1 "Spouse"
 
 #delimit cr
 
-label values who_max_earn total_max_earner* rel2
+label values who_max_earn total_max_earner* relationship* rel2
+
+gen parent=0
+forvalues r=1/22{
+    replace parent=parent+1 if inlist(relationship`r',3,5,7)
+}
+
+gen other_rel=0
+forvalues r=1/22{
+    replace other_rel=other_rel+1 if inrange(relationship`r',9,19)
+}
+
+gen other_non_rel=0
+forvalues r=1/22{
+    replace other_non_rel=other_non_rel+1 if relationship`r'==20
+}
+
+browse SSUID PNUM year timing_left parent other_rel other_non_rel
+
+sum parent if timing_left==0
+sum parent if timing_left==1
+sum other_rel if timing_left==0
+sum other_rel if timing_left==1
+sum other_non_rel if timing_left==0
+sum other_non_rel if timing_left==1
+
+gen parent_enter=0
+replace parent_enter=1 if timing_left==1 & timing_left[_n-1]==0 & parent > parent[_n-1]
+replace parent_enter=. if timing_left==.
+
+gen rel_enter=0
+replace rel_enter=1 if timing_left==1 & timing_left[_n-1]==0 & other_rel > other_rel[_n-1]
+replace rel_enter=. if timing_left==.
+
+gen non_rel_enter=0
+replace non_rel_enter=1 if timing_left==1 & timing_left[_n-1]==0 & other_non_rel > other_non_rel[_n-1]
+replace non_rel_enter=. if timing_left==.
+
+browse SSUID PNUM year timing_left parent other_rel other_non_rel parent_enter rel_enter non_rel_enter
+
+tab parent_enter if timing_left==1
+tab rel_enter if timing_left==1
+tab non_rel_enter if timing_left==1
 
 gen bw60 = (earnings > .6*thearn_alt) 
 gen earnings_ratio = earnings / thearn_alt
