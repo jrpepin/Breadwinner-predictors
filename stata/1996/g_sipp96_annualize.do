@@ -278,6 +278,27 @@ by SSUID PNUM (panelmonth), sort: gen earn_change_raw_sp = (earnings_z_sp -earni
 
 browse SSUID PNUM year monthcode earnings_z_sp earn_change_sp earn_change_raw_sp
 
+bysort SSUID PNUM year (monthcode): egen month_lost10 = min(monthcode) if earn_change_sp<=-.10000000000000000000
+bysort SSUID PNUM year (month_lost10): replace month_lost10 = month_lost10[1]
+gen month_lost10_flag = 1 if month_lost10 == monthcode
+sort SSUID PNUM year monthcode
+browse SSUID PNUM year monthcode panelmonth earnings_z_sp earn_change_sp month_lost10 month_lost10_flag
+
+bysort SSUID PNUM year (monthcode): egen month_lost50 = min(monthcode) if earn_change_sp<=-.5000000000000000000
+bysort SSUID PNUM year (month_lost50): replace month_lost50 = month_lost50[1]
+gen month_lost50_flag = 1 if month_lost50 == monthcode
+
+bysort SSUID PNUM year (monthcode): egen month_lost100 = min(monthcode) if earn_change_sp<=-1
+bysort SSUID PNUM year (month_lost100): replace month_lost100 = month_lost100[1]
+gen month_lost100_flag = 1 if month_lost100 == monthcode
+
+sort SSUID PNUM year monthcode
+browse SSUID PNUM year monthcode panelmonth earnings_z_sp earn_change_sp month_lost10 month_lost10_flag month_lost50 month_lost50_flag month_lost100 month_lost100_flag
+
+tab monthcode month_lost10_flag, column
+tab monthcode month_lost50_flag, column
+tab monthcode month_lost100_flag, column
+
 sum earnings_z, detail
 sum earn_change, detail
 sum earn_change_raw, detail
