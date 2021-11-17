@@ -184,6 +184,20 @@ full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp educ_chang
 
 save "$tempdir/reshape_transitions_96.dta", replace
 
+// exporting table to get 2014 correction
+
+use "$SIPP96keep/sipp96tpearn_rel.dta", clear
+
+drop _merge
+merge 1:1 SSUID PNUM panelmonth using "$tempdir/reshape_transitions_96.dta"
+drop if _merge==2
+
+// preserve
+collapse 	(sum) partner_lose, by(monthcode)
+egen total_N=total(partner_lose)
+gen distro=partner_lose/total_N
+save "$tempdir/96_partner_distro.dta", replace
+
 //*Back to original and testing match
 
 use "$SIPP96keep/sipp96tpearn_rel.dta", clear
@@ -223,6 +237,7 @@ drop if _merge==2
 	
 	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
+	
 	
 /* exploration
 browse SSUID PNUM year monthcode partner_lose spartner

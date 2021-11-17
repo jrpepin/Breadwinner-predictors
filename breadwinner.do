@@ -10,12 +10,13 @@ cd ./stata
 
 do 00_setup_breadwinner_environment.do
 
-// 2014 SIPP data processing
-
-do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
-
 // 1996 SIPP data processing
 do "$SIPP1996_code/breadwinner-predictorsSIPP96.do"
+
+// 2014 SIPP data processing
+do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
+
+
 
 ********************************************************************************
 * D1. DECOMPOSITION ANALYSIS
