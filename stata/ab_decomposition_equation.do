@@ -118,8 +118,11 @@ svy: tab lt_other_changes trans_bw60_alt2 if survey==2014 & bw60lag==0, row
 
 
 *validate
-svy: tab survey trans_bw60_alt2, row
+// svy: tab survey trans_bw60_alt2, row
 svy: tab survey trans_bw60_alt2 if bw60lag==0, row
+tab survey trans_bw60_alt2 if bw60lag==0, row // unweighted
+tab survey trans_bw60_alt2 if bw60lag==0 [aweight = wpfinwgt], row  // validating this is same as svy
+tab survey trans_bw60_alt2 if bw60lag==0 [aweight = correction], row  // comparison to unweighted - partner left correction
 
 // figuring out how to add in mothers who had their first birth in a panel
 browse SSUID PNUM year firstbirth bw60 trans_bw60

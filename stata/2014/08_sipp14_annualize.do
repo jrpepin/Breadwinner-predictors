@@ -189,6 +189,26 @@ full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp educ_chang
 
 save "$tempdir/reshape_transitions.dta", replace
 
+// creating table to make the ratio to use for the weight correction
+
+use "$SIPP14keep/sipp14tpearn_rel", clear
+
+drop _merge
+merge 1:1 SSUID PNUM panelmonth using "$tempdir/reshape_transitions.dta"
+drop if _merge==2
+
+// preserve
+collapse 	(sum) partner_lose, by(monthcode)
+egen total_N14=total(partner_lose)
+gen distro14=partner_lose/total_N14
+rename partner_lose partner_lose14
+
+merge 1:1 monthcode using "$tempdir/96_partner_distro.dta"
+drop _merge
+
+gen ratio = distro / distro14
+
+save "$tempdir/partner_distro_lookup.dta", replace
 
 //*Back to original and testing match
 
@@ -200,6 +220,10 @@ merge 1:1 SSUID PNUM panelmonth using "$tempdir/reshape_transitions.dta"
 tab marital_status _merge, m // all missing
 tab educ _merge, m
 drop if _merge==2
+
+	* adding the ratio column to use for the weight correction
+	drop _merge
+	merge m:1 monthcode using "$tempdir/partner_distro_lookup.dta"
 	
 // Create variables with the first and last month of observation by year
    egen startmonth=min(monthcode), by(SSUID PNUM year)
@@ -231,6 +255,20 @@ drop if _merge==2
 	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
 	
+	
+// adding column for weight adjustment for partner_lose
+bysort SSUID PNUM (year): egen year_left = min(year) if partner_lose==1
+bysort SSUID PNUM year monthcode (year_left): replace year_left = year_left[1]
+
+browse SSUID PNUM year monthcode partner_lose year_left
+
+gen correction=1
+replace correction = ratio if year == year_left
+
+browse SSUID PNUM year monthcode partner_lose year_left ratio correction
+
+sum correction
+
 /* exploration
 browse SSUID PNUM year monthcode panelmonth partner_lose
 tab monthcode partner_lose, column
@@ -489,7 +527,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					full_part full_no part_no part_full no_part no_full educ_change		///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
 					no_full_sp educ_change_sp  											///
-			(mean) 	spouse partner numtype2 wpfinwgt birth mom_panel hhsize				/// 
+			(mean) 	spouse partner numtype2 wpfinwgt correction birth mom_panel hhsize	/// 
 					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner			///
 					thincpovt2 pov_level start_marital_status last_marital_status		///
 					tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1					///
