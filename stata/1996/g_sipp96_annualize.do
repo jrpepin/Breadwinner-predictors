@@ -238,6 +238,11 @@ drop if _merge==2
 	replace spouse	=1 	if spouse 	> 1 // one case has 2 spouses
 	replace partner	=1 	if partner 	> 1 // 36 cases of 2-3 partners
 	
+// creating indicator of year partner left to count person-months to troubleshoot
+bysort SSUID PNUM (year): egen year_left = min(year) if partner_lose==1
+bysort SSUID PNUM year (year_left): replace year_left = year_left[1]
+
+tab monthcode if year == year_left
 	
 /* exploration
 browse SSUID PNUM year monthcode partner_lose spartner

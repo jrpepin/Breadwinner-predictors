@@ -224,6 +224,10 @@ drop if _merge==2
 	* adding the ratio column to use for the weight correction
 	drop _merge
 	merge m:1 monthcode using "$tempdir/partner_distro_lookup.dta"
+
+	
+	* browse SSUID PNUM monthcode partner spouse relationship2 pairtype2 marital_status partner_lose if pairtype2==2
+
 	
 // Create variables with the first and last month of observation by year
    egen startmonth=min(monthcode), by(SSUID PNUM year)
@@ -258,7 +262,7 @@ drop if _merge==2
 	
 // adding column for weight adjustment for partner_lose
 bysort SSUID PNUM (year): egen year_left = min(year) if partner_lose==1
-bysort SSUID PNUM year monthcode (year_left): replace year_left = year_left[1]
+bysort SSUID PNUM year (year_left): replace year_left = year_left[1]
 
 browse SSUID PNUM year monthcode partner_lose year_left
 
@@ -304,7 +308,47 @@ browse SSUID PNUM year monthcode panelmonth partner_lose month_left timing_left
 	replace earnings_a_sp=to_earnings`n' if spart_num==`n' // use this one
 	}
 	
-browse SSUID PNUM year monthcode spartner partner_lose earnings earnings_a_sp thearn_alt mbw60 //  ems ems_ehc
+	gen pairtype_sp=.
+	forvalues n=1/22{
+	    replace pairtype_sp = pairtype`n' if spart_num==`n'
+	}
+	
+	
+sort SSUID PNUM panelmonth
+replace pairtype_sp=pairtype_sp[_n-1] if partner_lose==1  & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==(panelmonth[_n-1]+1)
+	
+browse SSUID PNUM year monthcode spartner partner_lose earnings earnings_a_sp thearn_alt mbw60 pairtype_sp //  ems ems_ehc
+
+tab pairtype_sp if partner_lose==1
+replace pairtype_sp =0 if pairtype_sp==.
+
+bysort SSUID PNUM year (pairtype_sp): egen pairtype_sp_ch=max(pairtype_sp)
+sort SSUID PNUM panelmonth
+browse SSUID PNUM year monthcode spartner spart_num partner_lose earnings earnings_a_sp pairtype_sp pairtype_sp_ch
+
+	* want examples of SSUIDs to investigate WHY there aren't all the person-months - do I have in main file and I lost along way, or were never there??
+	* 000418209316 - only up to month 7, year 2014 - but that's nothing to do with partner, because partner left month 1...
+	* 000860215173 - only up to month 2, year 2015 - partner left month 1
+
+// troubleshooting why the distribution doesn't match 1996
+browse monthcode SSUID year year_left partner_lose correction
+
+tab monthcode partner_lose [aweight=correction], column
+tab monthcode partner_lose if pairtype_sp_ch==2 [aweight=correction], column
+tab monthcode partner_lose if pairtype_sp_ch==1 [aweight=correction], column
+
+tab monthcode if year == year_left & pairtype_sp_ch==2 // why is distribution RIGHT for type 2 but not type 1? Am i artificially doing this somehow?!
+tab monthcode if year == year_left & pairtype_sp_ch==1
+
+tab monthcode if year == year_left & year==2013
+tab monthcode if year == year_left & year==2014
+tab monthcode if year == year_left & year==2015
+tab monthcode if year == year_left & year==2016
+
+tab monthcode if year == year_left & year==2013 & pairtype_sp_ch==1
+tab monthcode if year == year_left & year==2014 & pairtype_sp_ch==1 // 7.8-8.9
+tab monthcode if year == year_left & year==2015 & pairtype_sp_ch==1  // 7.6-9.6
+tab monthcode if year == year_left & year==2016 & pairtype_sp_ch==1 // gets WORSE with each year- is it just drop-off?? 7.0-9.7
 
 // change in earnings within year
 gen earnings_z = earnings

@@ -69,6 +69,9 @@ replace marital_status=5 if ems_ehc==6 & partner==0
 label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-Unpartnered" 5 "Never Married- Not partnered"
 label values marital_status marital_status
 
+* tab relationship2 if pairtype2==2
+* browse SSUID PNUM partner spouse relationship2 pairtype2 marital_status if pairtype2==2
+
 // earner status recodes
 gen other_earner=numearner if tpearn==.
 replace other_earner=(numearner-1) if tpearn!=.

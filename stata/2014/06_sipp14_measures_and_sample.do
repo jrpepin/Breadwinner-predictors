@@ -323,6 +323,12 @@ save "$tempdir/sipp14tpearn_fullsamp", replace
 
 // browse SSUID PNUM year panelmonth durmom if inlist(SSUID, "000418500162", "000418209903", "000418334944")
 
+// browse SSUID PNUM year monthcode if inlist(SSUID,"000418209316", "000860215173")
+
+* (from step 8) want examples of SSUIDs to investigate WHY there aren't all the person-months - do I have in main file and I lost along way, or were never there??
+	* 000418209316 (103) - only up to month 7, year 2014 - but that's nothing to do with partner, because partner left month 1...
+	* 000860215173 (201) - only up to month 2, year 2015 - partner left month 1
+
 
 ********************************************************************************
 * Create the analytic sample
@@ -533,3 +539,10 @@ dyndoc "$SIPP2014_code/sample_size_2014.md", saving($results/sample_size_2014.ht
 
 	
 save "$SIPP14keep/sipp14tpearn_all", replace
+
+// browse SSUID PNUM year monthcode if inlist(SSUID,"000418209316", "000860215173")
+
+* (from step 8) want examples of SSUIDs to investigate WHY there aren't all the person-months - do I have in main file and I lost along way, or were never there??
+	* 000418209316 (103) - only up to month 7, year 2014 - but that's nothing to do with partner, because partner left month 1...
+	* 000860215173 (201) - only up to month 2, year 2015 - partner left month 1
+
