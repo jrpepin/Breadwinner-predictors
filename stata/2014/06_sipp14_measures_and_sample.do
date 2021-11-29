@@ -57,9 +57,10 @@ clear
    }
    
    
-   tab monthcode 
-   tab monthcode [aweight=wpfinwgt]
-
+	replace wpfinwgt=0 if wpfinwgt==. // per this user note: https://www.census.gov/programs-surveys/sipp/tech-documentation/user-notes/2014-w4-usernotes/2014w4-prob-wpfinwgt.html
+	tab monthcode 
+	tab monthcode [aweight=wpfinwgt]
+   
 // mover variable changed between waves 1 and 2 so recoding so file will append properly
 gen mover=.
 replace mover=tmover if inrange(swave, 2,4)
