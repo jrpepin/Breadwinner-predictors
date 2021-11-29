@@ -55,6 +55,10 @@ clear
    forvalues w=2/4{
       append using "$tempdir/sipp14tpearn`w'"
    }
+   
+   
+   tab monthcode 
+   tab monthcode [aweight=wpfinwgt]
 
 // mover variable changed between waves 1 and 2 so recoding so file will append properly
 gen mover=.

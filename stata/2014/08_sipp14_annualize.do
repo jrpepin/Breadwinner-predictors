@@ -339,6 +339,7 @@ tab monthcode partner_lose if pairtype_sp_ch==1 [aweight=correction], column
 
 tab monthcode if year == year_left & pairtype_sp_ch==2 // why is distribution RIGHT for type 2 but not type 1? Am i artificially doing this somehow?!
 tab monthcode if year == year_left & pairtype_sp_ch==1
+tab monthcode if year == year_left [aweight=wpfinwgt]
 
 tab monthcode if year == year_left & year==2013
 tab monthcode if year == year_left & year==2014

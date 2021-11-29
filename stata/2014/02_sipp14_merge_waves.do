@@ -35,6 +35,9 @@ drop TMOVER RMOVER
 // allmonths14.dta is a long-form dataset including all the waves from SIPP2014
 save "$SIPP14keep/allmonths14.dta", replace
 
+tab MONTHCODE if PNUM==RFAMREFWT2
+tab MONTHCODE if PNUM==RFAMREFWT2 & swave==1
+
 ********************************************************************************
 * Merge waves for type 2 (former household residents)
 ********************************************************************************
