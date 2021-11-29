@@ -723,6 +723,23 @@ forvalues r=1/4{
 	histogram mom_income_raw if mom_income_raw > -50000 & mom_income_raw <50000, percent xlabel(-50000(10000)50000) title("Mom's income change upon transition to BW") xtitle("Mom's income change")	
 	graph export "$results/Mom_Income_Change.png", as(png) name("Graph") replace
 	
+	* raw earnings
+	histogram earnings_adj if earnings_adj <75000, percent
+	histogram earnings_adj if trans_bw60_alt2==1 & earnings_adj <100000, percent
+	graph export "$results/Mom_Income_BW.png", as(png) name("Graph") replace
+	
+	
+	sum earnings_adj if trans_bw60_alt2==1 & thearn_adj[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1), detail
+	histogram earnings_adj if trans_bw60_alt2==1 & thearn_adj[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & thearn_adj<60000, percent
+	graph export "$results/Mom_Income_BW_Zero.png", as(png) name("Graph") replace
+	
+	tab trans_bw60_alt2, m
+	tab trans_bw60_alt2 if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1),m  //2,903
+	tab trans_bw60_alt2 if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & thearn_adj[_n-1]==0,m // 686 (24%) - also higher incidence of female becoming breadwinner following a $0 year than there is in other years
+	tab trans_bw60_alt2 if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & thearn_adj[_n-1]>0,m  // 2,217
+	
+	* earnings after year of HH having 0 earnings
+	
 	*Partner
 	by SSUID PNUM (year), sort: gen partner_income_raw = ((earnings_sp_adj-earnings_sp_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
 	histogram partner_income_raw if partner_income_raw > -50000 & partner_income_raw <50000, percent xlabel(-50000(10000)50000) title("Partner's income change upon transition to BW") xtitle("Partner's income change")
