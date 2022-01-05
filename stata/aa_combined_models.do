@@ -64,6 +64,9 @@ merge m:1 year end_hhsize end_minorchildren using "$projcode/stata/poverty_thres
 
 browse year SSUID end_hhsize end_minorchildren threshold
 
+drop if _merge==2
+drop _merge
+
 save "$combined_data/combined_annual_bw_status.dta", replace
 
 /* investigations

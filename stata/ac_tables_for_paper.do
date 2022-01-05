@@ -1082,6 +1082,99 @@ forvalues r=1/4{
 	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
 }
 
+// Table 4c: HH Income-to-Poverty Change
+browse SSUID year end_hhsize end_minorchildren threshold thearn_adj
+gen inc_pov = thearn_adj / threshold
+
+browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4c) modify
+
+putexcel A1:H1 = "Median HH Income-to-Poverty Change - Mother became BW", merge border(bottom) hcenter
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel C2 = ("Pre_1996") D2 = ("Post_1996") E2 = ("% Change_1996")
+putexcel F2 = ("Pre_2014") G2 = ("Post_2014") H2 = ("% Change_2014")
+putexcel A3 = ("Total") B3 = ("Total")
+putexcel A4:A6 = "Education"
+putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
+//putexcel I3 = (1) I4 = (2) I5 = (3)
+putexcel A7:A10 = "Race"
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+
+putexcel J1:Q1 = "Mean HH Income-to-Poverty Change - Mother became BW", merge border(bottom) hcenter
+putexcel J2 = "Category"
+putexcel K2 = "Label" 
+putexcel L2 = ("Pre_1996") M2 = ("Post_1996") N2 = ("% Change_1996") 
+putexcel O2 = ("Pre_2014") P2 = ("Post_2014") Q2 = ("% Change_2014")
+putexcel J3 = ("Total") K3 = ("Total")
+putexcel J4:J6 = "Education"
+putexcel K4= ("HS or Less") K5 = ("Some College") K6 = ("College Plus") 
+putexcel J7:J10 = "Race"
+putexcel K7 = ("NH White") K8 = ("Black") K9 = ("NH Asian") K10 = ("Hispanic") 
+
+sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1, detail // pre
+putexcel C3=`r(p50)', nformat(###,###.#)
+putexcel L3=`r(mean)', nformat(###,###.#)
+sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1, detail // post
+putexcel D3=`r(p50)', nformat(###,###.#)
+putexcel M3=`r(mean)', nformat(###,###.#)
+putexcel E3=formula(=(D3-C3)/C3), nformat(#.##%)
+putexcel N3=formula(=(M3-L3)/L3), nformat(#.##%)
+
+sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre
+putexcel F3=`r(p50)', nformat(###,###.#)
+putexcel O3=`r(mean)', nformat(###,###.#)
+sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post
+putexcel G3=`r(p50)', nformat(###,###.#)
+putexcel P3=`r(mean)', nformat(###,###.#)
+putexcel H3=formula(=(G3-F3)/F3), nformat(#.##%)
+putexcel Q3=formula(=(P3-O3)/O3), nformat(#.##%)
+
+local row1 "4 5 6"
+forvalues e=1/3{
+    local row: word `e' of `row1'	
+	
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1, detail // pre-1996
+	putexcel C`row'=`r(p50)', nformat(###,###.#)
+	putexcel L`row'=`r(mean)', nformat(###,###.#)
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1, detail // post-1996
+	putexcel D`row'=`r(p50)', nformat(###,###.#)
+	putexcel M`row'=`r(mean)', nformat(###,###.#)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel N`row'=formula((M`row'-L`row')/L`row'), nformat(#.##%)
+		
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2, detail // pre-2014
+	putexcel F`row'=`r(p50)', nformat(###,###.#)
+	putexcel O`row'=`r(mean)', nformat(###,###.#)
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2, detail // post-2014
+	putexcel G`row'=`r(p50)', nformat(###,###.#)
+	putexcel P`row'=`r(mean)', nformat(###,###.#)
+	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
+	putexcel Q`row'=formula((P`row'-O`row')/O`row'), nformat(#.##%)
+}
+
+local row2 "7 8 9 10"
+forvalues r=1/4{
+    local row: word `r' of `row2'	
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1, detail // pre-1996
+	putexcel C`row'=`r(p50)', nformat(###,###.#)
+	putexcel L`row'=`r(mean)', nformat(###,###.#)
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1, detail // post-1996
+	putexcel D`row'=`r(p50)', nformat(###,###.#)
+	putexcel M`row'=`r(mean)', nformat(###,###.#)
+	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
+	putexcel N`row'=formula((M`row'-L`row')/L`row'), nformat(#.##%)
+		
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2, detail // pre-2014
+	putexcel F`row'=`r(p50)', nformat(###,###.#)
+	putexcel O`row'=`r(mean)', nformat(###,###.#)
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2, detail // post-2014
+	putexcel G`row'=`r(p50)', nformat(###,###.#)
+	putexcel P`row'=`r(mean)', nformat(###,###.#)
+	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
+	putexcel Q`row'=formula((P`row'-O`row')/O`row'), nformat(#.##%)
+}
 
 // Table 5:  HH raw income change with each breadwinner component
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5-raw) modify
