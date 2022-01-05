@@ -519,6 +519,11 @@ gen to_mis_earnings`r'=to_earnings`r'
 	}
 }
 
+foreach var of varlist hhsize minorchildren{
+	gen st_`var' = `var'
+	gen end_`var' = `var'
+}
+
 // need to retain missings for earnings when annualizing (sum treats missing as 0) - currently with msum1, 0 means either none or not in universe, so will use hours to deduce if it should be missing or 0 (because for hours, 0 was just not in universe)
 
 replace tpearn = . if avg_mo_hrs ==.
@@ -535,9 +540,9 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 								//
 					resp_non first_birth partner_gain partner_lose										///
 					full_part full_no part_no part_full no_part no_full									///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp				///
-			(mean) 	spouse partner wpfinwgt birth mom_panel hhsize start_marital_status last_marital_status		///
-					avg_mo_hrs avg_mo_hrs_sp avg_earn=earnings numearner other_earner					///
-					tpyrate1	tpyrate2 avg_wk_rate thpov												/// 		
+			(mean) 	spouse partner wpfinwgt birth mom_panel avg_hhsize=hhsize start_marital_status 	///
+					last_marital_status	avg_mo_hrs avg_mo_hrs_sp avg_earn=earnings numearner			///
+					other_earner tpyrate1	tpyrate2 avg_wk_rate thpov									/// 		
 			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age			///
 					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth status_b1 minors_fy ///
 					start_spartner last_spartner start_spouse last_spouse start_partner last_partner	///
@@ -550,7 +555,6 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 								//
 			(firstnm) st_*																				/// will cover all (mother + hh per recodes) 
 			(lastnm) end_*,																				///
 			by(SSUID PNUM year)
-
 		
 			
 // Fix identifiers greater than 1

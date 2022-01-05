@@ -559,6 +559,11 @@ gen to_mis_TMWKHRS`r'=to_TMWKHRS`r'
 	}
 }
 
+foreach var of varlist hhsize minorchildren{
+	gen st_`var' = `var'
+	gen end_`var' = `var'
+}
+
 // need to retain missings for earnings when annualizing (sum treats missing as 0)
 
 bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn)
@@ -575,10 +580,10 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					full_part full_no part_no part_full no_part no_full educ_change		///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
 					no_full_sp educ_change_sp  											///
-			(mean) 	spouse partner numtype2 wpfinwgt correction birth mom_panel hhsize	/// 
-					avg_hrs=tmwkhrs avg_earn=earnings  numearner other_earner			///
-					thincpovt2 pov_level start_marital_status last_marital_status		///
-					tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1					///
+			(mean) 	spouse partner numtype2 wpfinwgt correction birth mom_panel			/// 
+					avg_hhsize = hhsize avg_hrs=tmwkhrs avg_earn=earnings  numearner 	///
+					other_earner thincpovt2 pov_level start_marital_status 				///
+					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1	///
 					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
 					prebiochildren race educ tceb oldest_age ejb*_payhr1 				///
