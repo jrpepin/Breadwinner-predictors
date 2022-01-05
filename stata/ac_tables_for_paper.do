@@ -725,12 +725,12 @@ forvalues r=1/4{
 	
 	* raw earnings
 	histogram earnings_adj if earnings_adj <75000, percent
-	histogram earnings_adj if trans_bw60_alt2==1 & earnings_adj <100000, percent
+	histogram earnings_adj if trans_bw60_alt2==1 & earnings_adj <100000, percent title("Mom's income when she is BW")
 	graph export "$results/Mom_Income_BW.png", as(png) name("Graph") replace
 	
 	
 	sum earnings_adj if trans_bw60_alt2==1 & thearn_adj[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1), detail
-	histogram earnings_adj if trans_bw60_alt2==1 & thearn_adj[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & thearn_adj<60000, percent
+	histogram earnings_adj if trans_bw60_alt2==1 & thearn_adj[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & thearn_adj<60000, percent title("Mom's income when she is BW year after $0 in HH earnings")
 	graph export "$results/Mom_Income_BW_Zero.png", as(png) name("Graph") replace
 	
 	tab trans_bw60_alt2, m
