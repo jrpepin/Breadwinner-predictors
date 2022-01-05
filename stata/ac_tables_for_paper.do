@@ -1086,7 +1086,31 @@ forvalues r=1/4{
 browse SSUID year end_hhsize end_minorchildren threshold thearn_adj
 gen inc_pov = thearn_adj / threshold
 
-browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov
+by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
+by SSUID PNUM (year), sort: gen inc_pov_change_raw = (inc_pov-inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
+
+replace inc_pov_change = 1 if inc_pov_change==. & inc_pov_change_raw > 0 & inc_pov_change_raw!=.
+gen inc_pov_up =.
+replace inc_pov_up = 1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=.
+replace inc_pov_up = 2 if inc_pov_change==1
+replace inc_pov_up = 0 if inc_pov_change_raw < 0 & inc_pov_change_raw!=.
+
+tab inc_pov_up if trans_bw60_alt2==1
+sum inc_pov_change_raw if inc_pov_up==1 & trans_bw60_alt2==1, detail
+sum inc_pov_change_raw if inc_pov_up==0 & trans_bw60_alt2==1, detail
+
+gen inc_pov_percent=.
+replace inc_pov_percent = 1 if inc_pov_change > 0 & inc_pov_change <0.5
+replace inc_pov_percent = 2 if inc_pov_change > 0.5 & inc_pov_change!=.
+replace inc_pov_percent = 3 if inc_pov_change < 0 & inc_pov_change > -0.5
+replace inc_pov_percent = 4 if inc_pov_change < -0.5
+replace inc_pov_percent = 5 if inc_pov_change == 1
+
+label define inc_pov_percent 1 "<50% Up" 2 ">50% Up" 3 "<50% Down" 4 ">50% Down" 5 "Change from 0"
+label values inc_pov_percent inc_pov_percent
+
+browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov trans_bw60_alt2 bw60 inc_pov_change inc_pov_change_raw inc_pov_up inc_pov_percent
+
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4c) modify
 
@@ -1175,6 +1199,73 @@ forvalues r=1/4{
 	putexcel H`row'=formula((G`row'-F`row')/F`row'), nformat(#.##%)
 	putexcel Q`row'=formula((P`row'-O`row')/O`row'), nformat(#.##%)
 }
+
+
+putexcel C13:G13 = "1996", merge border(bottom) hcenter
+putexcel H13:L13 = "2014", merge border(bottom) hcenter
+putexcel A14 = "Category"
+putexcel B14 = "Label" 
+putexcel A15 = ("Total") B15 = ("Total")
+putexcel A16:A18 = "Education"
+putexcel B16= ("HS or Less") B17 = ("Some College") B18 = ("College Plus") 
+putexcel A19:A22 = "Race"
+putexcel B19 = ("NH White") B20 = ("Black") B21 = ("NH Asian") B22 = ("Hispanic") 
+putexcel C14= ("<50% Up") D14 = ("<50% Up") E14 = ("<50% Down") F14 = (">50% Down") G14 = ("Change from 0") 
+putexcel H14= ("<50% Up") I14 = ("<50% Up") J14 = ("<50% Down") K14 = (">50% Down") L14 = ("Change from 0") 
+
+tab inc_pov_percent, gen(inc_pov_pct)
+
+local colu1 "C D E F G"
+local colu2 "H I J K L"
+
+forvalues i=1/5{
+	local col1: word `i' of `colu1'
+	local col2: word `i' of `colu2'
+	sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==1, detail // 1996
+	putexcel `col1'15=`r(mean)', nformat(#.##%)
+	sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==2, detail // 2014
+	putexcel `col2'15=`r(mean)', nformat(#.##%)
+}
+
+local row1 "16 17 18"
+forvalues e=1/3{
+	local row: word `e' of `row1'
+		forvalues i=1/5{
+		local col1: word `i' of `colu1'
+		local col2: word `i' of `colu2'
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==1 & educ_gp==`e', detail // 1996
+		putexcel `col1'`row'=`r(mean)', nformat(#.##%)
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==2 & educ_gp==`e', detail // 2014
+		putexcel `col2'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+local row1 "19 20 21 22"
+forvalues r=1/4{
+	local row: word `r' of `row1'
+		forvalues i=1/5{
+		local col1: word `i' of `colu1'
+		local col2: word `i' of `colu2'
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==1 & race==`r', detail // 1996
+		putexcel `col1'`row'=`r(mean)', nformat(#.##%)
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==2 & race==`r', detail // 2014
+		putexcel `col2'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+	
+/*
+forvalues y=1/2{
+	tab inc_pov_percent if trans_bw60_alt2==1 & survey_yr==`y'
+	forvalues e=1/3{
+		display "`y'," "`e'"
+		tab inc_pov_percent if trans_bw60_alt2==1 & survey_yr==`y' & educ_gp==`e'
+	}
+	forvalues r=1/4{
+		display "`y'," "`r'"
+		tab inc_pov_percent if trans_bw60_alt2==1 & survey_yr==`y' & race==`r'
+	}
+}
+*/
 
 // Table 5:  HH raw income change with each breadwinner component
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5-raw) modify
