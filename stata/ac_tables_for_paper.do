@@ -2172,6 +2172,9 @@ tabstat earnings_ratio_mis, by(survey) stats(mean p50)
 tabstat earnings_ratio_mis if trans_bw60_alt2==1, by(survey) stats(mean p50)
 * Mean: 84.6% to 84.0% P50: 88.2% to 84.9%
 
+tabstat mom_part if survey==1996, by(educ_gp) stats(mean p50)
+tabstat mom_part if survey==2014, by(educ_gp) stats(mean p50)
+
 
 ********************************************************************************
 * Figures
