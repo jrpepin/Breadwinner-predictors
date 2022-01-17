@@ -1763,6 +1763,98 @@ local i = 1
 
 }
 
+// Table 5a:  HH income-to-poverty change with each breadwinner component
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5a) modify
+putexcel C1:D1 = "Total change - raw", merge border(bottom)
+putexcel E1:F1 = "Total change - percent", merge border(bottom)
+putexcel A3 = "Event"
+putexcel B3 = "Year"
+putexcel C2 = ("All_events") E2 = ("All_events") 
+putexcel D2 = ("Event_precipitated") F2 = ("Event_precipitated")
+putexcel A3:A4 = "Mothers only an increase in earnings"
+putexcel A5:A6 = "Mothers increase in earnings and partner lost earnings"
+putexcel A7:A8 = "Partner lost earnings only"
+putexcel A9:A10 = "Partner left"
+putexcel A11:A12 = "Other member lost earnings / left"
+putexcel B3 = ("1996") B5 = ("1996") B7 = ("1996") B9 = ("1996") B11 = ("1996")
+putexcel B4 = ("2014") B6 = ("2014") B8 = ("2014") B10 = ("2014") B12 = ("2014")
+putexcel G1:L1 = "Event_precipitated", merge border(bottom)
+putexcel G2 = "<50% Up"
+putexcel H2 = ">50% Up"
+putexcel I2 = "<50% Down"
+putexcel J2 = ">50% Down"
+putexcel K2 = "Change from 0: below 1"
+putexcel L2 = "Change from 0: above 1"
+
+*Raw
+* All mothers who experienced a change
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+1
+		
+	sum inc_pov if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum inc_pov if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel C`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
+	putexcel E`row1'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
+
+	local row2 = `i'*2+2
+	sum inc_pov if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum inc_pov if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel C`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
+	putexcel E`row2'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
+
+	local ++i
+}
+
+* Mothers who experienced change AND became BW
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+1
+		
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
+	local p50_pre =`r(p50)'
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
+	putexcel F`row1'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
+
+	local row2 = `i'*2+2
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
+	local p50_pre =`r(p50)'
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
+	local p50_post =`r(p50)'
+	putexcel D`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
+	putexcel F`row2'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
+	
+	local ++i
+}
+
+* Percent change
+//tab inc_pov_percent if trans_bw60_alt2==1 & survey_yr==1 & mt_mom==1
+
+local x=1
+local colu1 "G H I J K L"
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	forvalues i=1/6{
+		local col1: word `i' of `colu1'
+		local row1 = `x'*2+1
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==1 & `var'==1, detail // 1996
+		putexcel `col1'`row1'=`r(mean)', nformat(#.##%)
+		
+		local row2 = `x'*2+2
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1, detail // 2014
+		putexcel `col1'`row2'=`r(mean)', nformat(#.##%)
+	}
+local ++x
+}
+
 // Table 6: Mother's Hours Change
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table6) modify
