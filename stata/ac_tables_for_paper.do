@@ -1110,8 +1110,22 @@ replace inc_pov_percent = 6 if inc_pov_change == 1 & inc_pov_change_raw >= 1 & i
 label define inc_pov_percent 1 "<50% Up" 2 ">50% Up" 3 "<50% Down" 4 ">50% Down" 5 "Change from 0: below 1" 6 "Change from 0: above 1"
 label values inc_pov_percent inc_pov_percent
 
-browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov trans_bw60_alt2 bw60 inc_pov_change inc_pov_change_raw inc_pov_up inc_pov_percent
+gen inc_pov_move=.
+replace inc_pov_move = 1 if inc_pov_change > 0 & inc_pov_change!=.
+replace inc_pov_move = 2 if inc_pov_change < 0 & inc_pov_change!=.
+replace inc_pov_move = 3 if inc_pov_change == 1
 
+label define inc_pov_move 1 "Ratio Up" 2 "Ratio Down" 3 "Change from 0"
+label values inc_pov_move inc_pov_move
+
+gen inc_pov_flag=.
+replace inc_pov_flag=1 if inc_pov >=1.5 & inc_pov!=.
+replace inc_pov_flag=0 if inc_pov <1.5 & inc_pov!=.
+
+browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov trans_bw60_alt2 bw60 inc_pov_change inc_pov_change_raw inc_pov_move inc_pov_flag // inc_pov_percent inc_pov_up
+
+tab inc_pov_percent, gen(inc_pov_pct)
+tab inc_pov_move, gen(inc_pov_mv)
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4c) modify
 
@@ -1213,8 +1227,6 @@ putexcel A19:A22 = "Race"
 putexcel B19 = ("NH White") B20 = ("Black") B21 = ("NH Asian") B22 = ("Hispanic") 
 putexcel C14= ("<50% Up") D14 = (">50% Up") E14 = ("<50% Down") F14 = (">50% Down") G14 = ("Change from 0: below 1") H14 = ("Change from 0: above 1") 
 putexcel I14= ("<50% Up") J14 = (">50% Up") K14 = ("<50% Down") L14 = (">50% Down") M14 = ("Change from 0: below 1") N14 = ("Change from 0: above 1") 
-
-tab inc_pov_percent, gen(inc_pov_pct)
 
 local colu1 "C D E F G H"
 local colu2 "I J K L M N"
@@ -1765,94 +1777,238 @@ local i = 1
 
 // Table 5a:  HH income-to-poverty change with each breadwinner component
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5a) modify
-putexcel C1:D1 = "Total change - raw", merge border(bottom)
-putexcel E1:F1 = "Total change - percent", merge border(bottom)
+putexcel C2:F2 = "Overview", merge border(bottom) hcenter
+putexcel C3 = ("Incidence") D3 = ("% Ratio Up") E3 = ("% Ratio Down") F3 = ("% Change from 0")
+putexcel G1:L1 = "Total", merge border(bottom) hcenter
+putexcel G2:I2 = "Pre Transition", merge border(bottom) hcenter
+putexcel J2:L2 = "Post Transition", merge border(bottom) hcenter
+putexcel G3 = ("Ratio") H3 = ("% Above 1.5") I3 = ("% Below 1.5")
+putexcel J3 = ("Ratio") K3 = ("% Above 1.5") L3 = ("% Below 1.5")
+putexcel M1:R1 = "Ratio went up", merge border(bottom) hcenter
+putexcel M2:O2 = "Pre Transition", merge border(bottom) hcenter
+putexcel P2:R2 = "Post Transition", merge border(bottom) hcenter
+putexcel M3 = ("Ratio") N3 = ("% Above 1.5") O3 = ("% Below 1.5")
+putexcel P3 = ("Ratio") Q3 = ("% Above 1.5") R3 = ("% Below 1.5")
+putexcel S1:X1 = "Ratio went down", merge border(bottom) hcenter
+putexcel S2:U2 = "Pre Transition", merge border(bottom) hcenter
+putexcel V2:X2 = "Post Transition", merge border(bottom) hcenter
+putexcel S3 = ("Ratio") T3 = ("% Above 1.5") U3 = ("% Below 1.5")
+putexcel V3 = ("Ratio") W3 = ("% Above 1.5") X3 = ("% Below 1.5")
+putexcel Y1:AD1 = "Change from 0", merge border(bottom) hcenter
+putexcel Y2:AA2 = "Pre Transition", merge border(bottom) hcenter
+putexcel AB2:AD2 = "Post Transition", merge border(bottom) hcenter
+putexcel Y3 = ("Ratio") Z3 = ("% Above 1.5") AA3 = ("% Below 1.5")
+putexcel AB3 = ("Ratio") AC3 = ("% Above 1.5") AD3 = ("% Below 1.5")
 putexcel A3 = "Event"
 putexcel B3 = "Year"
-putexcel C2 = ("All_events") E2 = ("All_events") 
-putexcel D2 = ("Event_precipitated") F2 = ("Event_precipitated")
-putexcel A3:A4 = "Mothers only an increase in earnings"
-putexcel A5:A6 = "Mothers increase in earnings and partner lost earnings"
-putexcel A7:A8 = "Partner lost earnings only"
-putexcel A9:A10 = "Partner left"
-putexcel A11:A12 = "Other member lost earnings / left"
-putexcel B3 = ("1996") B5 = ("1996") B7 = ("1996") B9 = ("1996") B11 = ("1996")
-putexcel B4 = ("2014") B6 = ("2014") B8 = ("2014") B10 = ("2014") B12 = ("2014")
-putexcel G1:L1 = "Event_precipitated", merge border(bottom)
-putexcel G2 = "<50% Up"
-putexcel H2 = ">50% Up"
-putexcel I2 = "<50% Down"
-putexcel J2 = ">50% Down"
-putexcel K2 = "Change from 0: below 1"
-putexcel L2 = "Change from 0: above 1"
+putexcel A4:A5 = "Mothers only an increase in earnings"
+putexcel A6:A7 = "Mothers increase in earnings and partner lost earnings"
+putexcel A8:A9 = "Partner lost earnings only"
+putexcel A10:A11 = "Partner left"
+putexcel A12:A13 = "Other member lost earnings / left"
+putexcel B4 = ("1996") B6 = ("1996") B8 = ("1996") B10 = ("1996") B12 = ("1996")
+putexcel B5 = ("2014") B7 = ("2014") B9 = ("2014") B11 = ("2014") B13 = ("2014")
 
-*Raw
-* All mothers who experienced a change
-local i=1
-
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	local row1 = `i'*2+1
-		
-	sum inc_pov if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
-	local p50_pre =`r(p50)'
-	sum inc_pov if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post
-	local p50_post =`r(p50)'
-	putexcel C`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
-	putexcel E`row1'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
-
-	local row2 = `i'*2+2
-	sum inc_pov if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
-	local p50_pre =`r(p50)'
-	sum inc_pov if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
-	local p50_post =`r(p50)'
-	putexcel C`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
-	putexcel E`row2'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
-
-	local ++i
-}
 
 * Mothers who experienced change AND became BW
+* Overview
+local x=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `x'*2+2
+	sum `var' if trans_bw60_alt2==1 & survey_yr==1 // 1996
+	putexcel C`row1'=`r(mean)', nformat(#.##%)
+	
+	local row2 = `x'*2+3
+	sum `var' if trans_bw60_alt2==1 & survey_yr==2 // 2014
+	putexcel C`row2'=`r(mean)', nformat(#.##%)
+
+	local ++x
+}
+
+* Percent change
+//tab inc_pov_move if trans_bw60_alt2==1 & survey_yr==1 & mt_mom==1
+
+local x=1
+local colu1 "D E F"
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	forvalues i=1/3{
+		local col1: word `i' of `colu1'
+		local row1 = `x'*2+2
+		sum inc_pov_mv`i' if trans_bw60_alt2==1 & survey_yr==1 & `var'==1, detail // 1996
+		putexcel `col1'`row1'=`r(mean)', nformat(#.##%)
+		
+		local row2 = `x'*2+3
+		sum inc_pov_mv`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1, detail // 2014
+		putexcel `col1'`row2'=`r(mean)', nformat(#.##%)
+	}
+local ++x
+}
+
+*Total Change
 local i=1
 
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	local row1 = `i'*2+1
+	local row1 = `i'*2+2
 		
-	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
-	local p50_pre =`r(p50)'
-	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post
-	local p50_post =`r(p50)'
-	putexcel D`row1'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
-	putexcel F`row1'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre 1996
+	putexcel G`row1' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail
+	putexcel H`row1' = `r(mean)', nformat(#.##%)
+	putexcel I`row1' = (1-`r(mean)'), nformat(#.##%)
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post 1996
+	putexcel J`row1'  =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail 
+	putexcel K`row1' = `r(mean)', nformat(#.##%)
+	putexcel L`row1' = (1-`r(mean)'), nformat(#.##%)
 
-	local row2 = `i'*2+2
-	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
-	local p50_pre =`r(p50)'
-	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
-	local p50_post =`r(p50)'
-	putexcel D`row2'=formula(=(`p50_post' - `p50_pre')), nformat(###,###.#)
-	putexcel F`row2'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(##.#%)
+	local row2 = `i'*2+3
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre 2014
+	putexcel G`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail
+	putexcel H`row2' = `r(mean)', nformat(#.##%)
+	putexcel I`row2' = (1-`r(mean)'), nformat(#.##%)	
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post 2014
+	putexcel J`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail 
+	putexcel K`row2' = `r(mean)', nformat(#.##%)
+	putexcel L`row2' = (1-`r(mean)'), nformat(#.##%)
 	
 	local ++i
 }
 
-* Percent change
-//tab inc_pov_percent if trans_bw60_alt2==1 & survey_yr==1 & mt_mom==1
+// browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov trans_bw60_alt2 bw60 inc_pov_change inc_pov_change_raw inc_pov_move inc_pov_flag
 
-local x=1
-local colu1 "G H I J K L"
+*Ratio went up
+local i=1
 
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	forvalues i=1/6{
-		local col1: word `i' of `colu1'
-		local row1 = `x'*2+1
-		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==1 & `var'==1, detail // 1996
-		putexcel `col1'`row1'=`r(mean)', nformat(#.##%)
+	local row1 = `i'*2+2
 		
-		local row2 = `x'*2+2
-		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1, detail // 2014
-		putexcel `col1'`row2'=`r(mean)', nformat(#.##%)
-	}
-local ++x
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & inc_pov_move[_n+1]==1, detail // pre 1996
+	putexcel M`row1' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & inc_pov_move[_n+1]==1, detail
+	putexcel N`row1' = `r(mean)', nformat(#.##%)
+	putexcel O`row1' = (1-`r(mean)'), nformat(#.##%)
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & inc_pov_move==1, detail // post 1996
+	putexcel P`row1'  =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & inc_pov_move==1, detail 
+	putexcel Q`row1' = `r(mean)', nformat(#.##%)
+	putexcel R`row1' = (1-`r(mean)'), nformat(#.##%)
+
+	local row2 = `i'*2+3
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & inc_pov_move[_n+1]==1, detail  // pre 2014
+	putexcel M`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & inc_pov_move[_n+1]==1, detail
+	putexcel N`row2' = `r(mean)', nformat(#.##%)
+	putexcel O`row2' = (1-`r(mean)'), nformat(#.##%)	
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & inc_pov_move==1, detail // post 2014
+	putexcel P`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & inc_pov_move==1, detail 
+	putexcel Q`row2' = `r(mean)', nformat(#.##%)
+	putexcel R`row2' = (1-`r(mean)'), nformat(#.##%)
+	
+	local ++i
+}
+
+*Ratio went down
+local i=1
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+2
+		
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & inc_pov_move[_n+1]==2, detail // pre 1996
+	putexcel S`row1' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & inc_pov_move[_n+1]==2, detail
+	putexcel T`row1' = `r(mean)', nformat(#.##%)
+	putexcel U`row1' = (1-`r(mean)'), nformat(#.##%)
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & inc_pov_move==2, detail // post 1996
+	putexcel V`row1'  =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & inc_pov_move==2, detail 
+	putexcel W`row1' = `r(mean)', nformat(#.##%)
+	putexcel X`row1' = (1-`r(mean)'), nformat(#.##%)
+
+	local row2 = `i'*2+3
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & inc_pov_move[_n+1]==2, detail  // pre 2014
+	putexcel S`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & inc_pov_move[_n+1]==2, detail
+	putexcel T`row2' = `r(mean)', nformat(#.##%)
+	putexcel U`row2' = (1-`r(mean)'), nformat(#.##%)	
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & inc_pov_move==2, detail // post 2014
+	putexcel V`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & inc_pov_move==2, detail 
+	putexcel W`row2' = `r(mean)', nformat(#.##%)
+	putexcel X`row2' = (1-`r(mean)'), nformat(#.##%)
+	
+	local ++i
+}
+
+*Change from 0
+// have to split this because partner down / partner down + mom up don't have any observations for change from 0
+
+sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & mt_mom[_n+1]==1 & inc_pov_move[_n+1]==3, detail // pre 1996
+putexcel Y4 =`r(p50)', nformat(#.#)
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & mt_mom[_n+1]==1 & inc_pov_move[_n+1]==3, detail
+putexcel Z4 = `r(mean)', nformat(#.##%)
+putexcel AA4 = (1-`r(mean)'), nformat(#.##%)
+
+sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & mt_mom==1 & inc_pov_move==3, detail // post 1996
+putexcel AB4  =`r(p50)', nformat(#.#)
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & mt_mom==1 & inc_pov_move==3, detail 
+putexcel AC4 = `r(mean)', nformat(#.##%)
+putexcel AD4 = (1-`r(mean)'), nformat(#.##%)
+
+sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & mt_mom[_n+1]==1 & inc_pov_move[_n+1]==3, detail  // pre 2014
+putexcel Y5 =`r(p50)', nformat(#.#)
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & mt_mom[_n+1]==1 & inc_pov_move[_n+1]==3, detail
+putexcel Z5 = `r(mean)', nformat(#.##%)
+putexcel AA5 = (1-`r(mean)'), nformat(#.##%)
+
+sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & mt_mom==1 & inc_pov_move==3, detail // post 2014
+putexcel AB5 =`r(p50)', nformat(#.#)
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & mt_mom==1 & inc_pov_move==3, detail 
+putexcel AC5 = `r(mean)', nformat(#.##%)
+putexcel AD5 = (1-`r(mean)'), nformat(#.##%)
+
+	
+local i=4
+
+foreach var in ft_partner_leave lt_other_changes{
+	local row1 = `i'*2+2
+		
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & inc_pov_move[_n+1]==3, detail // pre 1996
+	putexcel Y`row1' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1 & inc_pov_move[_n+1]==3, detail
+	putexcel Z`row1' = `r(mean)', nformat(#.##%)
+	putexcel AA`row1' = (1-`r(mean)'), nformat(#.##%)
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & inc_pov_move==3, detail // post 1996
+	putexcel AB`row1'  =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1 & inc_pov_move==3, detail 
+	putexcel AC`row1' = `r(mean)', nformat(#.##%)
+	putexcel AD`row1' = (1-`r(mean)'), nformat(#.##%)
+
+	local row2 = `i'*2+3
+	sum inc_pov if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & inc_pov_move[_n+1]==3, detail  // pre 2014
+	putexcel Y`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1 & inc_pov_move[_n+1]==3, detail
+	putexcel Z`row2' = `r(mean)', nformat(#.##%)
+	putexcel AA`row2' = (1-`r(mean)'), nformat(#.##%)	
+	
+	sum inc_pov if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & inc_pov_move==3, detail // post 2014
+	putexcel AB`row2' =`r(p50)', nformat(#.#)
+	sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1 & inc_pov_move==3, detail 
+	putexcel AC`row2' = `r(mean)', nformat(#.##%)
+	putexcel AD`row2' = (1-`r(mean)'), nformat(#.##%)
+	
+	local ++i
 }
 
 // Table 6: Mother's Hours Change
