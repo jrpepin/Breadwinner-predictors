@@ -527,6 +527,11 @@ putexcel A7 = "Mothers increase in earnings"
 putexcel A8 = "Partner lost earnings"
 putexcel A9 = "Mothers increase in earnings & partner lost earnings"
 putexcel A10 = "Other member lost earnings / left"
+putexcel A12 = "Partner left - rate"
+putexcel A13 = "Mothers increase in earnings - rate"
+putexcel A14 = "Partner lost earnings - rate"
+putexcel A15 = "Mothers increase in earnings & partner lost earnings - rate"
+putexcel A16 = "Other member lost earnings / left - rate"
 
 
 putexcel B3 = $total_gap, nformat(#.##%)
@@ -537,6 +542,12 @@ putexcel B7 = $mom_compt_x, nformat(#.##%)
 putexcel B8 = $partner_down_only_compt_x, nformat(#.##%)
 putexcel B9 = $partner_down_mom_compt_x, nformat(#.##%)
 putexcel B10 = $other_hh_compt_x, nformat(#.##%)
+putexcel B12 = $partner_leave_compt_r, nformat(#.##%)
+putexcel B13 = $mom_compt_r, nformat(#.##%)
+putexcel B14 = $partner_down_only_compt_r, nformat(#.##%)
+putexcel B15 = $partner_down_mom_compt_r, nformat(#.##%)
+putexcel B16 = $other_hh_compt_r, nformat(#.##%)
+
 
 * Education and Race
 
@@ -552,6 +563,11 @@ forvalues e=1/3{
 	putexcel `col'8 = ${partner_down_only_component_e`e'}, nformat(#.##%)
 	putexcel `col'9 = ${partner_down_mom_component_e`e'}, nformat(#.##%)
 	putexcel `col'10 = ${other_hh_component_e`e'}, nformat(#.##%)
+	putexcel `col'12 = ${partner_leave_component_e`e'_rt}, nformat(#.##%)
+	putexcel `col'13 = ${mom_component_e`e'_rt}, nformat(#.##%)
+	putexcel `col'14 = ${partner_down_only_comp_e`e'_rt}, nformat(#.##%)
+	putexcel `col'15 = ${partner_down_mom_component_e`e'_rt}, nformat(#.##%)
+	putexcel `col'16 = ${other_hh_component_e`e'_rt}, nformat(#.##%)
 }
 
 local col1 "F G H I"
@@ -566,6 +582,11 @@ forvalues r=1/4{
 	putexcel `col'8 = ${partner_down_only_component_r`r'}, nformat(#.##%)
 	putexcel `col'9 = ${partner_down_mom_component_r`r'}, nformat(#.##%)
 	putexcel `col'10 = ${other_hh_component_r`r'}, nformat(#.##%)
+	putexcel `col'12 = ${partner_leave_component_r`r'_rt}, nformat(#.##%)
+	putexcel `col'13 = ${mom_component_r`r'_rt}, nformat(#.##%)
+	putexcel `col'14 = ${partner_down_only_comp_r`r'_rt}, nformat(#.##%)
+	putexcel `col'15 = ${partner_down_mom_component_r`r'_rt}, nformat(#.##%)
+	putexcel `col'16 = ${other_hh_component_r`r'_rt}, nformat(#.##%)
 }
 
 local col1 "J K L M"
@@ -580,6 +601,11 @@ forvalues a=1/4{
 	putexcel `col'8 = ${partner_down_only_component_a`a'}, nformat(#.##%)
 	putexcel `col'9 = ${partner_down_mom_component_a`a'}, nformat(#.##%)
 	putexcel `col'10 = ${other_hh_component_a`a'}, nformat(#.##%)
+	putexcel `col'12 = ${partner_leave_component_a`a'_rt}, nformat(#.##%)
+	putexcel `col'13 = ${mom_component_a`a'_rt}, nformat(#.##%)
+	putexcel `col'14 = ${partner_down_only_comp_a`a'_rt}, nformat(#.##%)
+	putexcel `col'15 = ${partner_down_mom_component_a`a'_rt}, nformat(#.##%)
+	putexcel `col'16 = ${other_hh_component_a`a'_rt}, nformat(#.##%)
 }
 
 local col1 "N O"
@@ -594,6 +620,11 @@ forvalues s=1/2{
 	putexcel `col'8 = ${partner_down_only_component_s`s'}, nformat(#.##%)
 	putexcel `col'9 = ${partner_down_mom_component_s`s'}, nformat(#.##%)
 	putexcel `col'10 = ${other_hh_component_s`s'}, nformat(#.##%)
+	putexcel `col'12 = ${partner_leave_component_s`s'_rt}, nformat(#.##%)
+	putexcel `col'13 = ${mom_component_s`s'_rt}, nformat(#.##%)
+	putexcel `col'14 = ${partner_down_only_comp_s`s'_rt}, nformat(#.##%)
+	putexcel `col'15 = ${partner_down_mom_component_s`s'_rt}, nformat(#.##%)
+	putexcel `col'16 = ${other_hh_component_s`s'_rt}, nformat(#.##%)
 }
 
 // Table 4: Median Income Change
