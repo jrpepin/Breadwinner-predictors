@@ -1201,3 +1201,22 @@ dyndoc "$bw_base_code/Predictor_Decomposition.md", saving($results/Predictor_Dec
 drop base_1 base_2
 
 save "$tempdir/combined_bw_equation.dta", replace
+
+// investigations
+* how many moms who had a birth in the panel were breadwinners at the time of birth
+browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_marital_status if mom_panel==1
+
+unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
+// or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298
+tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth
+tab bw60_mom if year==yrfirstbirth-1 & mom_panel==1 // year prior - 104, but we only have 468 records here - don't have year prior for all, so probably less useful
+
+
+label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-Unpartnered" 5 "Never Married- Not partnered"
+label values st_marital_status end_marital_status marital_status
+
+gen end_partner_status=.
+replace end_partner_status=1 if inlist(end_marital_status,1,2)
+replace end_partner_status=0 if inrange(end_marital_status,3,5)
+
+tab end_partner_status if bw60_mom==1 & firstbirth==1 & mom_panel==1 // base should be 231, what % partnered v. not - 0=45.45%; 1=54.55%, but total sample is 72% partnered, so single overrepresented
