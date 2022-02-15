@@ -42,7 +42,7 @@ gen yrfirstbirth=year if firstbirth==1
 bysort SSUID PNUM (yrfirstbirth): replace yrfirstbirth=yrfirstbirth[1]
 // browse SSUID PNUM year mom_panel firstbirth yrfirstbirth
 
-keep `keep_vars'
+keep `keep_vars' st_occ_* end_occ_*
 
 append using "$tempdir/sipp96_to_append.dta"
 
