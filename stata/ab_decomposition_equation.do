@@ -1238,7 +1238,10 @@ tab end_occ_code1 if bw60_mom==1 & firstbirth==0 & survey==2014
 * c. are breadwinners at any point during the SIPP panel (including those breadwinning older children at t1 but not necessarily at their first childs birth)
 tab end_occ_code1 if bw60_mom==1 & survey==2014
 
-// detaile occupation
+// detailed occupation
+bysort SSUID PNUM (bw60_mom): egen ever_bw60 = max(bw60_mom)
+browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom ever_bw60 earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
+
 * Can we get the top 10 occupations  in 2014 listed for moms who:
 * a. are breadwinners at birth. bw60_mom==1 & firstbirth==1 & mom_panel==1
 tab end_tjb1_occ if bw60_mom==1 & firstbirth==1 & mom_panel==1 & survey==2014, sort
@@ -1247,9 +1250,15 @@ tab end_tjb1_occ if bw60_mom==1 & firstbirth==1 & mom_panel==1 & survey==2014, s
 tab end_tjb1_occ if bw60_mom==1 & firstbirth==0 & survey==2014, sort
 
 * c. are breadwinners at any point during the SIPP panel (including those breadwinning older children at t1 but not necessarily at their first childs birth)
-tab end_tjb1_occ if bw60_mom==1 & survey==2014, sort
+tab end_tjb1_occ if bw60_mom==1 & survey==2014, sort // occupation at time of BW
+tab end_tjb1_occ if ever_bw60==1 & survey==2014, sort // occupation if ever a BW
 
 *d. all moms
 tab end_tjb1_occ if survey==2014, sort
+
+
+// chi-square for bw v. not
+tab end_occ_code1 ever_bw60 if survey==2014, col
+tab end_occ_code1 ever_bw60 if survey==2014, chi2
 
 log close
