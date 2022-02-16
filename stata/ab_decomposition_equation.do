@@ -1222,19 +1222,34 @@ gen end_partner_status=.
 replace end_partner_status=1 if inlist(end_marital_status,1,2)
 replace end_partner_status=0 if inrange(end_marital_status,3,5)
 
-tab end_partner_status if bw60_mom==1 & firstbirth==1 & mom_panel==1 // base should be 231, what % partnered v. not - 0=45.45%; 1=54.55%, but total sample is 72% partnered, so single overrepresented
+tab end_partner_status if bw60_mom==1 & firstbirth==1 & mom_panel==1 // base should be 231, what % partnered v. not - 0=47%; 1=53%, but total sample is 72% partnered, so single overrepresented
 
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
-browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_1 mom_panel
+browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
 
+// occ codes
 * Can we get the top 10 occupations  in 2014 listed for moms who:
 * a. are breadwinners at birth. bw60_mom==1 & firstbirth==1 & mom_panel==1
-tab end_occ_1 if bw60_mom==1 & firstbirth==1 & mom_panel==1 & survey==2014
+tab end_occ_code1 if bw60_mom==1 & firstbirth==1 & mom_panel==1 & survey==2014
 
 * b. become breadwinners over the course of the SIPP but not at birth
-tab end_occ_1 if bw60_mom==1 & firstbirth==0 & survey==2014
+tab end_occ_code1 if bw60_mom==1 & firstbirth==0 & survey==2014
 
 * c. are breadwinners at any point during the SIPP panel (including those breadwinning older children at t1 but not necessarily at their first childs birth)
-tab end_occ_1 if bw60_mom==1 & survey==2014
+tab end_occ_code1 if bw60_mom==1 & survey==2014
+
+// detaile occupation
+* Can we get the top 10 occupations  in 2014 listed for moms who:
+* a. are breadwinners at birth. bw60_mom==1 & firstbirth==1 & mom_panel==1
+tab end_tjb1_occ if bw60_mom==1 & firstbirth==1 & mom_panel==1 & survey==2014, sort
+
+* b. become breadwinners over the course of the SIPP but not at birth
+tab end_tjb1_occ if bw60_mom==1 & firstbirth==0 & survey==2014, sort
+
+* c. are breadwinners at any point during the SIPP panel (including those breadwinning older children at t1 but not necessarily at their first childs birth)
+tab end_tjb1_occ if bw60_mom==1 & survey==2014, sort
+
+*d. all moms
+tab end_tjb1_occ if survey==2014, sort
 
 log close

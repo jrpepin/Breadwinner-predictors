@@ -541,7 +541,7 @@ restore
 ********************************************************************************
 // Creating variables to prep for annualizing
 
-foreach var of varlist employ ft_pt ems_ehc rmnumjobs marital_status occ_*{ 
+foreach var of varlist employ ft_pt ems_ehc rmnumjobs marital_status occ_code* tjb*_occ{ 
     gen st_`var'=`var'
     gen end_`var'=`var'
 }
@@ -642,6 +642,7 @@ replace to_TMWKHRS`r'=. if to_mis_TMWKHRS`r'==.
 
 // label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 "Healthcare" 5 "Service" 6 "Sales" 7 "Office / Admin" 8 "Farming" 9 "Construction" 10 "Maintenance" 11 "Production" 12 "Transportation" 13 "Military" 
 label values st_occ_* end_occ_* occupation
+label values st_tjb*_occ end_tjb*_occ occ
 
 // Create annual breadwinning indicators
 

@@ -243,9 +243,9 @@ label define occupation 1 "Management" 2 "STEM" 3 "Education / Legal / Media" 4 
 
 forvalues job=1/7{ 
 destring tjb`job'_occ, replace
-recode tjb`job'_occ (0010/0960=1)(1005/1980=2)(2000/2970=3)(3000/3550=4)(3600/4655=5)(4700/4965=6)(5000/5940=7)(6005/6130=8)(6200/6950=9)(7000/7640=10)(7700/8990=11)(9000/9760=12)(9800/9840=13), gen(occ_`job')
-label values occ_`job' occupation
-drop tjb`job'_occ
+recode tjb`job'_occ (0010/0960=1)(1005/1980=2)(2000/2970=3)(3000/3550=4)(3600/4655=5)(4700/4965=6)(5000/5940=7)(6005/6130=8)(6200/6950=9)(7000/7640=10)(7700/8990=11)(9000/9760=12)(9800/9840=13), gen(occ_code`job')
+label values occ_code`job' occupation
+// drop tjb`job'_occ
 }
 
 //misc variables
