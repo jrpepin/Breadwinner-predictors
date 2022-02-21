@@ -1224,6 +1224,17 @@ replace end_partner_status=0 if inrange(end_marital_status,3,5)
 
 tab end_partner_status if bw60_mom==1 & firstbirth==1 & mom_panel==1 // base should be 231, what % partnered v. not - 0=47%; 1=53%, but total sample is 72% partnered, so single overrepresented
 
+* ever breadwinning status
+gen bw60_all = bw60_mom
+replace bw60_all = 0 if mom_panel==1 & year < yrfirstbirth
+bysort SSUID PNUM (bw60_all): egen ever_bw60 = max(bw60_all)
+// bysort SSUID PNUM (bw60_mom): egen ever_bw60 = max(bw60_mom)
+browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom bw60_all ever_bw60 earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
+
+unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
+unique SSUID PNUM if survey==1996, by(ever_bw60) // 0=8171, 1=4779, total=12950
+unique SSUID PNUM if survey==2014, by(ever_bw60) // 0=6175, 1=3571, total=9746
+
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
 
@@ -1239,9 +1250,6 @@ tab end_occ_code1 if bw60_mom==1 & firstbirth==0 & survey==2014
 tab end_occ_code1 if bw60_mom==1 & survey==2014
 
 // detailed occupation
-bysort SSUID PNUM (bw60_mom): egen ever_bw60 = max(bw60_mom)
-browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom ever_bw60 earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
-
 * Can we get the top 10 occupations  in 2014 listed for moms who:
 * a. are breadwinners at birth. bw60_mom==1 & firstbirth==1 & mom_panel==1
 tab end_tjb1_occ if bw60_mom==1 & firstbirth==1 & mom_panel==1 & survey==2014, sort
