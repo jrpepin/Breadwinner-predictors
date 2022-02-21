@@ -29,10 +29,12 @@ browse serial year pernum hhincome incwage mom_earn_pct
 gen bw=1 if mom_earn_pct>=0.6000000
 gen co_bw=1 if mom_earn_pct<0.600000 & mom_earn_pct >=0.4000000
 gen no_bw=1 if mom_earn_pct<0.400000
+gen bw_25=1 if mom_earn_pct>=0.2500000
 
 replace bw=0 if bw==.
 replace co_bw=0 if co_bw==.
 replace no_bw=0 if no_bw==.
+replace bw_25=0 if bw_25==.
 
 browse serial year pernum hhincome incwage mom_earn_pct bw co_bw
 browse serial year pernum hhincome incwage mom_earn_pct bw co_bw no_bw if bw==0 & co_bw==0 & no_bw==0
@@ -45,7 +47,7 @@ gen mothers=1
 
 preserve
 
-collapse (sum) mothers bw co_bw no_bw, by(year)
+collapse (sum) mothers bw co_bw no_bw bw_25, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
