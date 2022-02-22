@@ -129,7 +129,8 @@ browse SSUID PNUM year firstbirth bw60 trans_bw60
 
 svy: tab survey firstbirth, row
 svy: tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1
-
+tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 [aweight = wpfinwgt]
+unique SSUID if firstbirth==1, by(bw60_mom)
 
 ********************************************************************************
 * Putting Equation 1 into Excel

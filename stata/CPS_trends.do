@@ -1,6 +1,35 @@
 use "$CPS/bw_1967_2021.dta", clear
+replace incwage=0 if incwage==99999999
+replace incwage=0 if incwage==99999998
 
+/*keep year serial pernum incwage
+rename pernum spouse
+rename incwage incwage_sp
+*/
+drop *_mom *_mom2
+order year serial pernum
+reshape wide month-incwage_sp, i(year serial) j(pernum)
+/* ds id year, not
+reshape wide `r(varlist)', i(id) j(year)
+*/
+
+keep year serial incwage*
+drop *_sp*
+save "$tempdir/cps_wage_match.dta", replace
+
+use "$CPS/bw_1967_2021.dta", clear
 // doesn't need to be annualized, already annual - only month is march
+* before dropping anything, calculate HH income based on just wages, not total income
+replace incwage=0 if incwage==99999999
+replace incwage=0 if incwage==99999998
+egen hh_earnings = total(incwage), by(serial year)
+
+browse year serial pernum hhincome hh_earnings incwage
+
+*Adding something to later match to get partner earnings
+drop spouse
+gen spouse=sploc
+
 // 1967 has a lot of missing info...
 drop if year==1967
 
@@ -20,11 +49,26 @@ keep if yngch<=18
 
 save "$tempdir/cps_mothers_over_time.dta", replace
 
+* add spouse earnings
+merge m:1 serial year using  "$tempdir/cps_wage_match.dta"
+drop if _merge==2
+drop _merge
+
+drop incwage_sp
+gen incwage_sp=.
+forvalues p=1/26{
+	replace incwage_sp = incwage`p' if sploc==`p'
+}
+
+browse year serial pernum sploc incwage incwage_sp incwage* 
+
+gen single_mom=(sploc==0)
+
 // calculate breadwinners v. co-breadwinner mothers
-gen mom_earn_pct = incwage/hhincome
+gen mom_earn_pct = incwage/hh_earnings
 replace mom_earn_pct = 0 if mom_earn_pct==.
 
-browse serial year pernum hhincome incwage mom_earn_pct
+browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct spouse
 
 gen bw=1 if mom_earn_pct>=0.6000000
 gen co_bw=1 if mom_earn_pct<0.600000 & mom_earn_pct >=0.4000000
@@ -36,8 +80,8 @@ replace co_bw=0 if co_bw==.
 replace no_bw=0 if no_bw==.
 replace bw_25=0 if bw_25==.
 
-browse serial year pernum hhincome incwage mom_earn_pct bw co_bw
-browse serial year pernum hhincome incwage mom_earn_pct bw co_bw no_bw if bw==0 & co_bw==0 & no_bw==0
+browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw
+browse serial year pernum hh_earnings incwage mom_earn_pct bw co_bw no_bw if bw==0 & co_bw==0 & no_bw==0
 
 *making a column to sum all mothers when I collapse
 gen mothers=1
@@ -47,7 +91,7 @@ gen mothers=1
 
 preserve
 
-collapse (sum) mothers bw co_bw no_bw bw_25, by(year)
+collapse (sum) mothers bw co_bw no_bw bw_25 single_mom, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
