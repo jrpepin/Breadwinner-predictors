@@ -63,6 +63,7 @@ forvalues p=1/26{
 browse year serial pernum sploc incwage incwage_sp incwage* 
 
 gen single_mom=(sploc==0)
+gen single_mom_work=(single_mom==1 & incwage >0)
 
 // calculate breadwinners v. co-breadwinner mothers
 gen mom_earn_pct = incwage/hh_earnings
@@ -83,6 +84,30 @@ replace bw_25=0 if bw_25==.
 browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw
 browse serial year pernum hh_earnings incwage mom_earn_pct bw co_bw no_bw if bw==0 & co_bw==0 & no_bw==0
 
+// denote if mom earns more than partner
+gen mom_earn_more=.
+replace mom_earn_more=1 if incwage>=incwage_sp & single_mom==0
+replace mom_earn_more=0 if incwage<incwage_sp & single_mom==0
+
+gen bw_25_dedup=bw_25
+replace bw_25_dedup=0 if (mom_earn_more==1 | single_mom==1)
+
+gen bw_25_married=bw_25
+replace bw_25_married = 0 if single_mom==1
+
+// how different are hh_earnings v. just couple
+egen couple_earnings= rowtotal(incwage incwage_sp)
+	// browse year serial incwage incwage_sp couple_earnings hh_earnings
+
+gen mom_earn_couple = incwage / couple_earnings
+replace mom_earn_couple = 0 if mom_earn_couple==.
+gen bw_25_couple=1 if mom_earn_couple>=0.2500000
+replace bw_25_couple=0 if bw_25_couple==.
+gen bw_25_couple_dedup=bw_25_couple
+replace bw_25_couple_dedup=0 if (mom_earn_more==1 | single_mom==1)
+
+browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw mom_earn_more single_mom bw_25
+
 *making a column to sum all mothers when I collapse
 gen mothers=1
 
@@ -91,7 +116,7 @@ gen mothers=1
 
 preserve
 
-collapse (sum) mothers bw co_bw no_bw bw_25 single_mom, by(year)
+collapse (sum) mothers bw co_bw no_bw bw_25 bw_25_dedup bw_25_married bw_25_couple bw_25_couple_dedup single_mom single_mom_work mom_earn_more, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
