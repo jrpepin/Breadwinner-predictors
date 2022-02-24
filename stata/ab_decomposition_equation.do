@@ -133,6 +133,32 @@ tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & 
 unique SSUID if firstbirth==1, by(bw60_mom)
 
 ********************************************************************************
+* Counts
+********************************************************************************
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	tab `var' trans_bw60_alt2 if bw60lag==0 [aweight = wpfinwgt], row
+	tab `var' trans_bw60_alt2 if survey==1996 & bw60lag==0 [aweight=wpfinwgt], row
+	tab `var' trans_bw60_alt2 if survey==2014 & bw60lag==0 [aweight=wpfinwgt], row
+}
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	tab `var' trans_bw60_alt2 if bw60lag==0, row
+	tab `var' trans_bw60_alt2 if survey==1996 & bw60lag==0, row
+	tab `var' trans_bw60_alt2 if survey==2014 & bw60lag==0, row
+}
+
+svy: mean trans_bw60_alt2 if bw60lag==0 & mt_mom==1 // .1022069
+svy: mean trans_bw60_alt2 if bw60lag==0 & survey==1996 & mt_mom==1 // 0.0836319
+svy: mean trans_bw60_alt2 if bw60lag==0 & survey==2014 & mt_mom==1 // .1295795 
+
+tab survey trans_bw60_alt2 if bw60lag==0 [aweight = wpfinwgt], row
+tab trans_bw60_alt2 if bw60lag==0 & survey==1996 [aweight = wpfinwgt] // the numbers are different when just restricting to 1996 v. in full sample
+tab trans_bw60_alt2 if bw60lag==0 & survey==2014 [aweight = wpfinwgt]  
+
+tab mt_mom survey if bw60lag==0 [aweight = wpfinwgt], column
+tab mt_mom if bw60lag==0 & survey == 2014 [aweight = wpfinwgt]
+
+********************************************************************************
 * Putting Equation 1 into Excel
 ********************************************************************************
 egen id = concat (SSUID PNUM)
@@ -1235,6 +1261,12 @@ browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom bw6
 unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 unique SSUID PNUM if survey==1996, by(ever_bw60) // 0=8171, 1=4779, total=12950
 unique SSUID PNUM if survey==2014, by(ever_bw60) // 0=6175, 1=3571, total=9746
+tab survey ever_bw60 [aweight= wpfinwgt], row
+// do I want all instances even if mom like 2 years in the panel a BW?
+tab survey bw60_mom [aweight= wpfinwgt], row // okay this is lower, because ever_bw60 populated in all years.
+unique year SSUID PNUM, by(ever_bw60) // 0=47250, 1=29252, total=76502
+unique year SSUID PNUM if survey==1996, by(ever_bw60) // 0=31705, 1=19335, total=51040 - 37.8% -- okay duh this matches tab survey ever_bw60 with NO WEIGHTS
+unique year SSUID PNUM if survey==2014, by(ever_bw60) // 0=15545, 1=9917, total=25462 - 38.9%
 
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
