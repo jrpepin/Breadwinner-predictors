@@ -131,6 +131,8 @@ svy: tab survey firstbirth, row
 svy: tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1
 tab survey firstbirth if bw60_mom==1 & bw60_mom[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) in 2/-1 [aweight = wpfinwgt]
 unique SSUID if firstbirth==1, by(bw60_mom)
+unique SSUID if firstbirth==1 & survey==1996, by(bw60_mom)
+unique SSUID if firstbirth==1 & survey==2014, by(bw60_mom)
 
 ********************************************************************************
 * Counts
@@ -1267,6 +1269,12 @@ tab survey bw60_mom [aweight= wpfinwgt], row // okay this is lower, because ever
 unique year SSUID PNUM, by(ever_bw60) // 0=47250, 1=29252, total=76502
 unique year SSUID PNUM if survey==1996, by(ever_bw60) // 0=31705, 1=19335, total=51040 - 37.8% -- okay duh this matches tab survey ever_bw60 with NO WEIGHTS
 unique year SSUID PNUM if survey==2014, by(ever_bw60) // 0=15545, 1=9917, total=25462 - 38.9%
+
+* who entered panel breadwinning
+browse SSUID PNUM year bw60 trans_bw60_alt2 bw60_mom earnings thearn_alt earnings_sp earnings_ratio mom_panel
+tab bw60_mom if year==firstyr & mom_panel==.
+tab survey bw60_mom if year==firstyr & mom_panel==.
+unique SSUID PNUM if year==firstyr & mom_panel==., by(bw60_mom)
 
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
