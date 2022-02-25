@@ -2254,6 +2254,38 @@ forvalues i=1/2{
 	putexcel `col1'27=(`post14s`i''-`pre14s`i''), nformat(#.#)
 }
 
+putexcel A32 = "Event"
+putexcel B32 = "Year" 
+putexcel A33:A34 = "Mothers only an increase in earnings"
+putexcel A35:A36 = "Mothers increase in earnings and partner lost earnings"
+putexcel A37:A38 = "Partner lost earnings only"
+putexcel A39:A40 = "Partner left"
+putexcel A41:A42 = "Other member lost earnings/left"
+putexcel B33 = ("1996") B35 = ("1996") B37 = ("1996") B39 = ("1996") B41 = ("1996") 
+putexcel B34 = ("2014") B36 = ("2014") B38 = ("2014") B40 = ("2014") B42 = ("2014") 
+putexcel C32= ("<50% Up") D32 = (">50% Up") E32 = ("<50% Down") F32 = (">50% Down") G32 = ("Change from 0: below 1") H32 = ("Change from 0: above 1") 
+
+* Percent change
+//tab inc_pov_move if trans_bw60_alt2==1 & survey_yr==1 & mt_mom==1
+
+local x=1
+local colu1 "C D E F G H"
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	forvalues i=1/6{
+		local col1: word `i' of `colu1'
+		local row1 = `x'*2+31
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==1 & `var'==1, detail // 1996
+		putexcel `col1'`row1'=`r(mean)', nformat(#.##%)
+		
+		local row2 = `x'*2+32
+		sum inc_pov_pct`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1, detail // 2014
+		putexcel `col1'`row2'=`r(mean)', nformat(#.##%)
+	}
+local ++x
+}
+
+
 // Table 6: Mother's Hours Change
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table6) modify
