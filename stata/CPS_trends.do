@@ -86,8 +86,12 @@ browse serial year pernum hh_earnings incwage mom_earn_pct bw co_bw no_bw if bw=
 
 // denote if mom earns more than partner
 gen mom_earn_more=.
-replace mom_earn_more=1 if incwage>=incwage_sp & single_mom==0
-replace mom_earn_more=0 if incwage<incwage_sp & single_mom==0
+replace mom_earn_more=1 if incwage>incwage_sp & single_mom==0
+replace mom_earn_more=0 if incwage<=incwage_sp & single_mom==0
+
+gen mom_earn_same=.
+replace mom_earn_same=1 if incwage>=incwage_sp & single_mom==0
+replace mom_earn_same=0 if incwage<incwage_sp & single_mom==0
 
 gen bw_25_dedup=bw_25
 replace bw_25_dedup=0 if (mom_earn_more==1 | single_mom==1)
@@ -106,6 +110,13 @@ replace bw_25_couple=0 if bw_25_couple==.
 gen bw_25_couple_dedup=bw_25_couple
 replace bw_25_couple_dedup=0 if (mom_earn_more==1 | single_mom==1)
 
+gen bw_couple=1 if mom_earn_couple>=0.6000000
+replace bw_couple=0 if bw_couple==.
+gen co_bw_couple=1 if mom_earn_couple<0.600000 & mom_earn_couple >=0.4000000
+replace co_bw_couple=0 if co_bw_couple==.
+gen no_bw_couple=1 if mom_earn_couple<0.400000
+replace no_bw_couple=0 if no_bw_couple==.
+
 browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw mom_earn_more single_mom bw_25
 
 *making a column to sum all mothers when I collapse
@@ -116,7 +127,7 @@ gen mothers=1
 
 preserve
 
-collapse (sum) mothers bw co_bw no_bw bw_25 bw_25_dedup bw_25_married bw_25_couple bw_25_couple_dedup single_mom single_mom_work mom_earn_more, by(year)
+collapse (sum) mothers single_mom bw co_bw no_bw bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
