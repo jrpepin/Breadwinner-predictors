@@ -81,6 +81,11 @@ replace co_bw=0 if co_bw==.
 replace no_bw=0 if no_bw==.
 replace bw_25=0 if bw_25==.
 
+gen co_bw_alt=1 if mom_earn_pct<0.600000 & mom_earn_pct >=0.39500000
+replace co_bw_alt=0 if co_bw_alt==.
+gen no_bw_alt=1 if mom_earn_pct<0.39500000
+replace no_bw_alt=0 if no_bw_alt==.
+
 browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw
 browse serial year pernum hh_earnings incwage mom_earn_pct bw co_bw no_bw if bw==0 & co_bw==0 & no_bw==0
 
@@ -98,6 +103,10 @@ replace bw_25_dedup=0 if (mom_earn_more==1 | single_mom==1)
 
 gen bw_25_married=bw_25
 replace bw_25_married = 0 if single_mom==1
+
+gen bw_40_married = 1 if mom_earn_pct >=0.40000000
+replace bw_40_married = 0 if single_mom==1
+replace bw_40_married = 0 if bw_40_married==.
 
 // how different are hh_earnings v. just couple
 egen couple_earnings= rowtotal(incwage incwage_sp)
@@ -127,9 +136,62 @@ gen mothers=1
 
 preserve
 
-collapse (sum) mothers single_mom bw co_bw no_bw bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same, by(year)
+collapse (sum) mothers single_mom bw co_bw no_bw co_bw_alt no_bw_alt bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_40_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
+
+* get chart of distro by decile
+gen bw_decile=.
+replace bw_decile=0 if mom_earn_pct==0
+replace bw_decile=1 if mom_earn_pct >0 & mom_earn_pct <.1000000
+replace bw_decile=2 if mom_earn_pct >=0.1000000 & mom_earn_pct <0.2000000
+replace bw_decile=3 if mom_earn_pct >=0.2000000 & mom_earn_pct <0.3000000
+replace bw_decile=4 if mom_earn_pct >=0.2000000 & mom_earn_pct <0.3000000
+replace bw_decile=5 if mom_earn_pct >=0.3000000 & mom_earn_pct <0.4000000
+replace bw_decile=6 if mom_earn_pct >=0.4000000 & mom_earn_pct <0.5000000
+replace bw_decile=7 if mom_earn_pct >=0.5000000 & mom_earn_pct <0.6000000
+replace bw_decile=8 if mom_earn_pct >=0.6000000 & mom_earn_pct <0.7000000
+replace bw_decile=9 if mom_earn_pct >=0.7000000 & mom_earn_pct <0.8000000
+replace bw_decile=10 if mom_earn_pct >=0.8000000 & mom_earn_pct <0.9000000
+replace bw_decile=11 if mom_earn_pct >=0.9000000 & mom_earn_pct <1
+replace bw_decile=12 if mom_earn_pct==1
+
+browse mom_earn_pct bw_decile
+
+tab bw_decile if year==2014
+/*
+
+          0 |      8,791       30.78       30.78
+          1 |      1,384        4.85       35.62
+          2 |      1,644        5.76       41.38
+          4 |      2,202        7.71       49.09
+          5 |      2,582        9.04       58.13
+          6 |      2,633        9.22       67.34
+          7 |      2,137        7.48       74.82
+          8 |      1,060        3.71       78.54
+          9 |        595        2.08       80.62
+         10 |        472        1.65       82.27
+         11 |        478        1.67       83.94
+         12 |      4,586       16.06      100.00
+*/
+
+* get chart of distro by decile - just couple earnings
+gen bw_decile_couple=.
+replace bw_decile_couple=0 if mom_earn_couple==0
+replace bw_decile_couple=1 if mom_earn_couple >0 & mom_earn_couple <.1000000
+replace bw_decile_couple=2 if mom_earn_couple >=0.1000000 & mom_earn_couple <0.2000000
+replace bw_decile_couple=3 if mom_earn_couple >=0.2000000 & mom_earn_couple <0.3000000
+replace bw_decile_couple=4 if mom_earn_couple >=0.2000000 & mom_earn_couple <0.3000000
+replace bw_decile_couple=5 if mom_earn_couple >=0.3000000 & mom_earn_couple <0.4000000
+replace bw_decile_couple=6 if mom_earn_couple >=0.4000000 & mom_earn_couple <0.5000000
+replace bw_decile_couple=7 if mom_earn_couple >=0.5000000 & mom_earn_couple <0.6000000
+replace bw_decile_couple=8 if mom_earn_couple >=0.6000000 & mom_earn_couple <0.7000000
+replace bw_decile_couple=9 if mom_earn_couple >=0.7000000 & mom_earn_couple <0.8000000
+replace bw_decile_couple=10 if mom_earn_couple >=0.8000000 & mom_earn_couple <0.9000000
+replace bw_decile_couple=11 if mom_earn_couple >=0.9000000 & mom_earn_couple <1
+replace bw_decile_couple=12 if mom_earn_couple==1
+
+tab bw_decile_couple if year==2014
 
 // do 1967 separately?
