@@ -194,4 +194,7 @@ replace bw_decile_couple=12 if mom_earn_couple==1
 
 tab bw_decile_couple if year==2014
 
+tab bw_decile_couple if year==2014 & single_mom==0 // just married couples
+
+
 // do 1967 separately?

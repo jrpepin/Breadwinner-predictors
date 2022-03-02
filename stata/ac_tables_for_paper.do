@@ -1158,6 +1158,22 @@ browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov tran
 tab inc_pov_percent, gen(inc_pov_pct)
 tab inc_pov_move, gen(inc_pov_mv)
 
+// 3 buckets we created for FAMDEM
+gen inc_pov_summary=.
+replace inc_pov_summary=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov >=1.5
+replace inc_pov_summary=2 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov <1.5
+replace inc_pov_summary=3 if inc_pov_change_raw < 0 & inc_pov_change_raw!=.
+replace inc_pov_summary=4 if inc_pov_change_raw==0
+
+label define summary 1 "Up, Above Pov" 2 "Up, Not above pov" 3 "Down" 4 "No Change"
+label values inc_pov_summary summary
+
+browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov trans_bw60_alt2 bw60 inc_pov_change inc_pov_change_raw inc_pov_move inc_pov_summary // inc_pov_percent inc_pov_up
+
+tab inc_pov_summary if trans_bw60_alt2==1
+tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==1
+tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==2
+
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4c) modify
 
 putexcel A1:H1 = "Median HH Income-to-Poverty Change - Mother became BW", merge border(bottom) hcenter
