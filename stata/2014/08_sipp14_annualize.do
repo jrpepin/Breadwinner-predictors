@@ -580,9 +580,9 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					full_part full_no part_no part_full no_part no_full educ_change		///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
 					no_full_sp educ_change_sp  											///
-			(mean) 	spouse partner numtype2 wpfinwgt correction birth mom_panel			/// 
-					avg_hhsize = hhsize avg_hrs=tmwkhrs avg_earn=earnings  numearner 	///
-					other_earner thincpovt2 pov_level start_marital_status 				///
+			(mean) 	spouse partner numtype2 wpfinwgt scaled_weight correction birth 	/// 
+					mom_panel avg_hhsize = hhsize avg_hrs=tmwkhrs avg_earn=earnings  	///
+					numearner other_earner thincpovt2 pov_level start_marital_status 	///
 					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1	///
 					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///

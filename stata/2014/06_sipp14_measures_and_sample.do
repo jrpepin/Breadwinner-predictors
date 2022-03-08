@@ -324,6 +324,14 @@ label define pov_level 1 "< 50%" 2 "50-125%" 3 "125-150%" 4 "150-185%" 5 "185-20
 label values pov_level pov_level
 // drop thincpov
 
+* scalings weights to use before I combine with 1996
+summarize wpfinwgt
+local rescalefactor `r(N)'/`r(sum)'
+display `rescalefactor'
+gen scaled_weight = .
+replace scaled_weight = wpfinwgt*`rescalefactor'
+summarize scaled_weight
+
 save "$tempdir/sipp14tpearn_fullsamp", replace
 
 // browse SSUID PNUM year panelmonth durmom if inlist(SSUID, "000418500162", "000418209903", "000418334944")
