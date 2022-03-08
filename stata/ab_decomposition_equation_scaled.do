@@ -123,6 +123,7 @@ svy: tab survey trans_bw60_alt2 if bw60lag==0, row
 tab survey trans_bw60_alt2 if bw60lag==0, row // unweighted
 tab survey trans_bw60_alt2 if bw60lag==0 [aweight = scaled_weight], row  // validating this is same as svy
 tab survey trans_bw60_alt2 if bw60lag==0 [aweight = correction], row  // comparison to unweighted - partner left correction
+tab survey trans_bw60_alt2 if bw60lag==0 [aweight = wpfinwgt], row  // validating this is same as svy
 
 // figuring out how to add in mothers who had their first birth in a panel
 browse SSUID PNUM year firstbirth bw60 trans_bw60
