@@ -183,6 +183,13 @@ egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
 
 drop rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf
 
+* scalings weights to use before I combine with 2014
+summarize wpfinwgt
+local rescalefactor `r(N)'/`r(sum)'
+display `rescalefactor'
+gen scaled_weight = .
+replace scaled_weight = wpfinwgt*`rescalefactor'
+summarize scaled_weight
 
 save "$tempdir/sipp96tpearn_fullsamp", replace
 
