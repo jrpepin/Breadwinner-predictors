@@ -83,7 +83,27 @@ forvalues p=1/26{
 
 browse year serial pernum sploc incwage incwage_sp incwage* 
 
+// if cohab, mother needs to be either relate==hh head OR relate==partner, otherwise she is just iN A HOUSEHOLD with other cohabitors
+tab relate if cohab==1
+gen mom_in_cohab=cohab
+replace mom_in_cohab=0 if cohab==1 & inlist(relate,201,202,301,303,501,701,901,1001,1115,1241,1260)
+
+gen inc_cohab_use=incwage_cohab if relate==101
+replace inc_cohab_use=incwage1 if inlist(relate, 1114,1116)
+replace inc_cohab_use=. if mom_in_cohab==0
+
+
+// browse year serial pernum incwage mom_in_cohab pernum_cohab incwage_cohab inc_cohab_use relate pecohab sploc incwage incwage_sp incwage1
+tab sploc if mom_in_cohab==1 // so do they have a spouse location and did I have this information available all along?? yes they all do....
+tab pecohab if mom_in_cohab==1 & year >=2007, m // becuase not asked until 2007, but seems liek i have that history.
+*-- okay - but starting in what year? 1995?
+tab sprule if year <1995
+tab sprule if year >1995
+tab marst if mom_in_cohab==1
+tab marst if sploc>0
+
 gen single_mom=(sploc==0)
+replace single_mom=0 if mom_in_cohab==1
 gen single_mom_work=(single_mom==1 & incwage >0)
 
 // calculate breadwinners v. co-breadwinner mothers
@@ -106,6 +126,12 @@ gen co_bw_alt=1 if mom_earn_pct<0.600000 & mom_earn_pct >=0.39500000
 replace co_bw_alt=0 if co_bw_alt==.
 gen no_bw_alt=1 if mom_earn_pct<0.39500000
 replace no_bw_alt=0 if no_bw_alt==.
+
+gen bw_60_partnered=0
+replace bw_60_partnered=1 if mom_earn_pct>=0.6000000 & single_mom==0
+
+gen bw_60_nopartner=0
+replace bw_60_nopartner=1 if mom_earn_pct>=0.6000000 & single_mom==1
 
 browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw
 browse serial year pernum hh_earnings incwage mom_earn_pct bw co_bw no_bw if bw==0 & co_bw==0 & no_bw==0
@@ -151,13 +177,15 @@ browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw m
 
 *making a column to sum all mothers when I collapse
 gen mothers=1
+gen married=0
+replace married=1 if inlist(marst,1,2)
 
 // then consolidate  by years
 * need total mothers (summothers, then total bw, total co_bw?
 
 preserve
 
-collapse (sum) mothers single_mom bw co_bw no_bw co_bw_alt no_bw_alt bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_40_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same, by(year)
+collapse (sum) mothers single_mom mom_in_cohab married bw co_bw no_bw co_bw_alt no_bw_alt bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_40_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same bw_60_partnered bw_60_nopartner, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
