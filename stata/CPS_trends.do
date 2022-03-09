@@ -1,3 +1,6 @@
+// how to identify PARTNERS
+browse year serial pernum ncouples relate pecohab
+
 use "$CPS/bw_1967_2021.dta", clear
 replace incwage=0 if incwage==99999999
 replace incwage=0 if incwage==99999998
@@ -13,7 +16,25 @@ reshape wide month-incwage_sp, i(year serial) j(pernum)
 reshape wide `r(varlist)', i(id) j(year)
 */
 
-keep year serial incwage*
+gen cohab=0
+forvalues i=1/26{
+	replace cohab=1 if inlist(relate`i', 1114,1116)
+}
+
+gen pernum_cohab=.
+forvalues i=1/26{
+	replace pernum_cohab=`i' if inlist(relate`i', 1114,1116)
+}
+
+gen incwage_cohab=.
+forvalues i=1/26{
+	replace incwage_cohab=incwage`i' if pernum_cohab==`i'
+}
+
+
+// browse year serial cohab pernum_cohab incwage_cohab relate1 relate2 relate3 incwage1 incwage2 incwage3 pecohab* // 2005	34680, cohab==relate2
+
+keep year serial incwage* cohab pernum_cohab incwage_cohab pecohab*
 drop *_sp*
 save "$tempdir/cps_wage_match.dta", replace
 
