@@ -106,6 +106,9 @@ gen single_mom=(sploc==0)
 replace single_mom=0 if mom_in_cohab==1
 gen single_mom_work=(single_mom==1 & incwage >0)
 
+gen married=0
+replace married=1 if sploc>0 & single_mom==0 & mom_in_cohab==0
+
 // calculate breadwinners v. co-breadwinner mothers
 gen mom_earn_pct = incwage/hh_earnings
 replace mom_earn_pct = 0 if mom_earn_pct==.
@@ -129,6 +132,12 @@ replace no_bw_alt=0 if no_bw_alt==.
 
 gen bw_60_partnered=0
 replace bw_60_partnered=1 if mom_earn_pct>=0.6000000 & single_mom==0
+
+gen bw_60_cohab=0
+replace bw_60_cohab=1 if mom_earn_pct>=0.6000000 & mom_in_cohab==1
+
+gen bw_60_married=0
+replace bw_60_married=1 if mom_earn_pct>=0.6000000 & married==1
 
 gen bw_60_nopartner=0
 replace bw_60_nopartner=1 if mom_earn_pct>=0.6000000 & single_mom==1
@@ -177,15 +186,13 @@ browse serial year pernum hh_earnings incwage incwage_sp mom_earn_pct bw co_bw m
 
 *making a column to sum all mothers when I collapse
 gen mothers=1
-gen married=0
-replace married=1 if inlist(marst,1,2)
 
 // then consolidate  by years
 * need total mothers (summothers, then total bw, total co_bw?
 
 preserve
 
-collapse (sum) mothers single_mom mom_in_cohab married bw co_bw no_bw co_bw_alt no_bw_alt bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_40_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same bw_60_partnered bw_60_nopartner, by(year)
+collapse (sum) mothers single_mom mom_in_cohab married bw co_bw no_bw co_bw_alt no_bw_alt bw_couple co_bw_couple no_bw_couple bw_25 bw_25_couple bw_25_dedup bw_25_married bw_40_married bw_25_couple_dedup single_mom_work mom_earn_more mom_earn_same bw_60_partnered bw_60_cohab bw_60_married bw_60_nopartner, by(year)
 export excel using "$results/cps_bw_over_time.xls", firstrow(variables) replace
 
 restore
