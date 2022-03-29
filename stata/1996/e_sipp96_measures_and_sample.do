@@ -222,9 +222,12 @@ bysort SSUID PNUM (year_birth): replace year_birth=year_birth[1]
 replace child_inpanel=0 if child_inpanel<0
 replace child_inpanel=1 if child_inpanel>0 & child_inpanel!=.
 
-browse SSUID PNUM year panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper mom_panel child_inpanel year_birth durmom durmom_1st
+browse SSUID PNUM year panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper mom_panel child_inpanel yrfirstbirth year_birth durmom durmom_1st
 gen mom_panel2=mom_panel
 replace mom_panel2=1 if child_inpanel==1
+
+gen yrfirstbirth2=yrfirstbirth
+replace yrfirstbirth2=year_birth if yrfirstbirth2==. & year_birth!=.
 
 // Create an indicator of how many years have elapsed since individual's first birth
 replace durmom_1st=year-year_birth if durmom_1st==. & !missing(year_birth)
@@ -444,5 +447,8 @@ dyndoc "$SIPP1996_code/sample_size_1996.md", saving($results/sample_size_1996.ht
 
 drop mom_panel
 rename mom_panel2 mom_panel
+
+drop yrfirstbirth
+rename yrfirstbirth2 yrfirstbirth
 
 save "$SIPP96keep/sipp96tpearn_all", replace
