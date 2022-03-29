@@ -72,7 +72,7 @@ browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
 gen durmom_1st=year-yrfirstbirth if !missing(yrfirstbirth) // to get the duration 1 year prior to respondent becoming a mom
    
 gen mom_panel=.
-replace mom_panel=1 if inrange(yrfirstbirth, 1995, 2000) // flag if became a mom during panel to use later - note, since the topical module was in 1996, anyone with a birth during the panel not captured - unless I am missing something
+replace mom_panel=1 if inrange(yrfirstbirth, 1995, 2000) // flag if became a mom during panel to use later - note, since the topical module was in 1996, anyone with a birth during the panel not captured here - I handle this below with the counts of children
 
 * Note that durmom=0 when child was born in this year, but some of the children born in the previous calendar
 * year are still < 1. So if we want the percentage of mothers breadwinning in the year of the child's birth
@@ -211,6 +211,24 @@ bysort SSUID panelmonth (num_children): replace num_children = num_children[1] i
 qui unique PNUM if person==3 & tage < 18 & epnmom!=., by(ssuid_month) generate(num_minors)
 bysort SSUID panelmonth (num_minors): replace num_minors = num_minors[1] if (PNUM==hhmom1 | PNUM==hhmom2)
 
+sort SSUID PNUM panelmonth
+gen child_inpanel=0
+replace child_inpanel=(num_minors-num_minors[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // & panelmonth==panelmonth[_n-1]+1
+gen month_birth=panelmonth if child_inpanel>=1 & child_inpanel!=.
+bysort SSUID PNUM (month_birth): replace month_birth=month_birth[1]
+gen year_birth=year if child_inpanel>=1 & child_inpanel!=.
+bysort SSUID PNUM (year_birth): replace year_birth=year_birth[1]
+// replace child_inpanel=1 if panelmonth >= month_birth & month_birth!=.
+replace child_inpanel=0 if child_inpanel<0
+replace child_inpanel=1 if child_inpanel>0 & child_inpanel!=.
+
+browse SSUID PNUM year panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper mom_panel child_inpanel year_birth durmom durmom_1st
+gen mom_panel2=mom_panel
+replace mom_panel2=1 if child_inpanel==1
+
+// Create an indicator of how many years have elapsed since individual's first birth
+replace durmom_1st=year-year_birth if durmom_1st==. & !missing(year_birth)
+
 browse SSUID PNUM panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper if inlist(SSUID, "019156667000", "019228369159" , "019359986255", "019344451235") // okay some issues with multigenerational households
 
 // ids to look at PRE drop: 019156667000, 019228369159, 019359986255 - potentially not related?
@@ -275,7 +293,7 @@ browse SSUID PNUM panelmonth person hhmom1 hhmom2 epnmom tage num_children num_m
 	di "$mothers_py96"
 
 * Keep mothers that meet our criteria: 18 years or less since last birth OR became a mother during panel (we want data starting 1 year prior to motherhood)
-	keep if (durmom>=0 & durmom < 19) | (mom_panel==1 & durmom_1st>=-1)
+	keep if (durmom>=0 & durmom < 19) | (mom_panel2==1 & durmom_1st>=-1)
 	
 	// Creates a macro with the total number of mothers left in the dataset.
 	egen	mothers_sample = nvals(idnum)
