@@ -442,4 +442,7 @@ restore
 // create output of sample size with restrictions
 dyndoc "$SIPP1996_code/sample_size_1996.md", saving($results/sample_size_1996.html) replace
 
+drop mom_panel
+rename mom_panel2 mom_panel
+
 save "$SIPP96keep/sipp96tpearn_all", replace
