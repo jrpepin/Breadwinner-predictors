@@ -230,8 +230,8 @@ drop if _merge==2
 // browse SSUID PNUM panelmonth mom_panel mom_panel2 yrfirstbirth yrfirstbirth2 first_child_inpanel if yrfirstbirth!=yrfirstbirth2 & yrfirstbirth!=.
    
 // Create indicator of birth during the year
-	gen birth=1 if (yrfirstbirth2==year | yrlastbirth==year)
-	gen first_birth=1 if (yrfirstbirth2==year)
+	gen birth=1 if (yrfirstbirth==year | yrlastbirth==year)
+	gen first_birth=1 if (yrfirstbirth==year)
 
 	// browse SSUID PNUM panelmonth mom_panel mom_panel2 yrfirstbirth yrfirstbirth2 first_birth first_child_inpanel if first_birth==. & mom_panel2==1
 	
@@ -546,12 +546,12 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 									/
 					resp_non first_birth partner_gain partner_lose											///
 					full_part full_no part_no part_full no_part no_full										///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp					///
-			(mean) 	spouse partner wpfinwgt scaled_weight birth mom_panel mom_panel2 first_child_inpanel 	///
+			(mean) 	spouse partner wpfinwgt scaled_weight birth mom_panel 								 	///
 					avg_hhsize=hhsize start_marital_status last_marital_status avg_mo_hrs avg_mo_hrs_sp 	///
 					avg_earn=earnings numearner other_earner tpyrate1 tpyrate2 avg_wk_rate thpov			/// 		
 			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age				///
-					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrfirstbirth2 year_first_birth 		///
-					yrlastbirth status_b1 minors_fy start_spartner last_spartner start_spouse last_spouse 	///
+					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth  						///
+					 status_b1 minors_fy start_spartner last_spartner start_spouse last_spouse 				///
 					start_partner last_partner																///
 			(min) 	durmom durmom_1st emomlivh youngest_age first_wave										///
 					tpearn_mis earnings_mis to_mis_tpearn* to_mis_earnings*									/// put emomlivh as min, bc min=yes and if at SOME PT in year, want here
@@ -568,8 +568,10 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 									/
 	gen 	firstbirth = (first_birth>0)
 	drop	first_birth
 	
-	// browse SSUID PNUM year mom_panel2 first_child_inpanel firstbirth yrfirstbirth yrfirstbirth2
+/*
+	browse SSUID PNUM year mom_panel2 first_child_inpanel firstbirth yrfirstbirth yrfirstbirth2
 	replace mom_panel2=. if yrfirstbirth2 <=1995 // think some people had a birth pre-panel, then a birth in panel, but it seemed like a new child. will rely on the actual recorded first birth measure (from TM 2)
+*/
 
 // Create indicators for partner changes -- note to KM: revisit this, needs more categories (like differentiate spouse v. partner)
 	gen 	gain_partner=0 				if !missing(start_spartner) & !missing(last_spartner)
@@ -622,10 +624,12 @@ replace to_earnings`r'=. if to_mis_earnings`r'==.
 	replace bw60_alt= 0 					if hh_noearnings==1
 	*/
 	
+/*
 drop mom_panel
 rename mom_panel2 mom_panel
 
 drop yrfirstbirth
 rename yrfirstbirth2 yrfirstbirth
+*/
 	
 save "$SIPP96keep/sipp96_annual_bw_status.dta", replace

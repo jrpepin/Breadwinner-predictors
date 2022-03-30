@@ -215,6 +215,8 @@ bysort SSUID panelmonth (num_babies): replace num_babies = num_babies[1] if (PNU
 
 // Merge in number of children saved in step d
 drop _merge
+
+/* using household roster to identify births
 merge 1:1 SSUID shhadid panelmonth PNUM using "$tempdir/mom_children_lookup96.dta", keepusing(mom_children mom_bio_children)
 drop if _merge==2 // not in my sample
 drop _merge
@@ -242,19 +244,6 @@ replace first_child_inpanel=1 if first_child_inpanel>0 & first_child_inpanel!=.
 
 browse SSUID PNUM panelmonth num_babies mom_bio_children any_child_inpanel first_child_inpanel mom_panel year_birth year_first_birth yrfirstbirth
 
-/* alt count of children
-sort SSUID PNUM panelmonth
-gen child_inpanel=0
-replace child_inpanel=(num_minors-num_minors[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // & panelmonth==panelmonth[_n-1]+1
-gen month_birth=panelmonth if child_inpanel>=1 & child_inpanel!=.
-bysort SSUID PNUM (month_birth): replace month_birth=month_birth[1]
-gen year_birth=year if child_inpanel>=1 & child_inpanel!=.
-bysort SSUID PNUM (year_birth): replace year_birth=year_birth[1]
-// replace child_inpanel=1 if panelmonth >= month_birth & month_birth!=.
-replace child_inpanel=0 if child_inpanel<0
-replace child_inpanel=1 if child_inpanel>0 & child_inpanel!=.
-browse SSUID PNUM year panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper mom_panel child_inpanel yrfirstbirth year_birth durmom durmom_1st
-*/
 
 gen mom_panel2=mom_panel
 replace mom_panel2=1 if first_child_inpanel==1
@@ -268,6 +257,7 @@ browse SSUID PNUM year panelmonth num_babies mom_bio_children any_child_inpanel 
 
 // Create an indicator of how many years have elapsed since individual's first birth
 replace durmom_1st=year-year_first_birth if durmom_1st==. & !missing(year_first_birth)
+*/
 
 browse SSUID PNUM panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper if inlist(SSUID, "019156667000", "019228369159" , "019359986255", "019344451235") // okay some issues with multigenerational households
 
@@ -333,7 +323,7 @@ browse SSUID PNUM panelmonth person hhmom1 hhmom2 epnmom tage num_children num_m
 	di "$mothers_py96"
 
 * Keep mothers that meet our criteria: 18 years or less since last birth OR became a mother during panel (we want data starting 1 year prior to motherhood)
-	keep if (durmom>=0 & durmom < 19) | (mom_panel2==1 & durmom_1st>=-1)
+	keep if (durmom>=0 & durmom < 19) | (mom_panel==1 & durmom_1st>=-1)
 	
 	// Creates a macro with the total number of mothers left in the dataset.
 	egen	mothers_sample = nvals(idnum)
