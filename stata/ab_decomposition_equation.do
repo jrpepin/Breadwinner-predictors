@@ -1238,7 +1238,7 @@ log using "$logdir/bw_updates_021522.log", replace
 * how many moms who had a birth in the panel were breadwinners at the time of birth
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_marital_status if mom_panel==1
 
-unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
+unique SSUID PNUM if mom_panel==1 // 2773 moms became mom in the panel
 // or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth
 tab bw60_mom if year==yrfirstbirth-1 & mom_panel==1 // year prior - 104, but we only have 468 records here - don't have year prior for all, so probably less useful

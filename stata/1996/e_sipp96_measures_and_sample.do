@@ -210,7 +210,39 @@ qui unique PNUM if person==3 & epnmom!=., by(ssuid_month) generate(num_children)
 bysort SSUID panelmonth (num_children): replace num_children = num_children[1] if (PNUM==hhmom1 | PNUM==hhmom2) // this is more accurate ffor children, but NOT biological children
 qui unique PNUM if person==3 & tage < 18 & epnmom!=., by(ssuid_month) generate(num_minors)
 bysort SSUID panelmonth (num_minors): replace num_minors = num_minors[1] if (PNUM==hhmom1 | PNUM==hhmom2)
+qui unique PNUM if person==3 & tage <=1 & epnmom!=., by(ssuid_month) generate(num_babies)
+bysort SSUID panelmonth (num_babies): replace num_babies = num_babies[1] if (PNUM==hhmom1 | PNUM==hhmom2)
 
+// Merge in number of children saved in step d
+drop _merge
+merge 1:1 SSUID shhadid panelmonth PNUM using "$tempdir/mom_children_lookup96.dta", keepusing(mom_children mom_bio_children)
+drop if _merge==2 // not in my sample
+drop _merge
+
+replace mom_children=0 if mom_children==.
+replace mom_bio_children=0 if mom_bio_children==.
+
+browse SSUID PNUM panelmonth num_babies mom_children mom_bio_children rfownkid rfoklt18 num_children
+
+sort SSUID PNUM panelmonth
+gen any_child_inpanel=0
+replace any_child_inpanel=(mom_bio_children-mom_bio_children[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // & panelmonth==panelmonth[_n-1]+1
+gen year_birth=year if any_child_inpanel>=1 & any_child_inpanel!=.
+bysort SSUID PNUM (year_birth): replace year_birth=year_birth[1]
+replace any_child_inpanel=0 if any_child_inpanel<0
+replace any_child_inpanel=1 if any_child_inpanel>0 & any_child_inpanel!=.
+
+sort SSUID PNUM panelmonth
+gen first_child_inpanel=0
+replace first_child_inpanel=1 if (mom_bio_children>0 & mom_bio_children[_n-1]==0) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // & panelmonth==panelmonth[_n-1]+1
+gen year_first_birth=year if first_child_inpanel>=1 & first_child_inpanel!=.
+bysort SSUID PNUM (year_first_birth): replace year_first_birth=year_first_birth[1]
+replace first_child_inpanel=0 if first_child_inpanel<0
+replace first_child_inpanel=1 if first_child_inpanel>0 & first_child_inpanel!=.
+
+browse SSUID PNUM panelmonth num_babies mom_bio_children any_child_inpanel first_child_inpanel mom_panel year_birth year_first_birth yrfirstbirth
+
+/* alt count of children
 sort SSUID PNUM panelmonth
 gen child_inpanel=0
 replace child_inpanel=(num_minors-num_minors[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // & panelmonth==panelmonth[_n-1]+1
@@ -221,16 +253,21 @@ bysort SSUID PNUM (year_birth): replace year_birth=year_birth[1]
 // replace child_inpanel=1 if panelmonth >= month_birth & month_birth!=.
 replace child_inpanel=0 if child_inpanel<0
 replace child_inpanel=1 if child_inpanel>0 & child_inpanel!=.
-
 browse SSUID PNUM year panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper mom_panel child_inpanel yrfirstbirth year_birth durmom durmom_1st
+*/
+
 gen mom_panel2=mom_panel
-replace mom_panel2=1 if child_inpanel==1
+replace mom_panel2=1 if first_child_inpanel==1
+bysort SSUID PNUM (mom_panel2): replace mom_panel2=mom_panel2[1]
 
 gen yrfirstbirth2=yrfirstbirth
-replace yrfirstbirth2=year_birth if yrfirstbirth2==. & year_birth!=.
+replace yrfirstbirth2=year_first_birth if yrfirstbirth2==. & year_first_birth!=.
+
+browse SSUID PNUM year panelmonth num_babies mom_bio_children any_child_inpanel first_child_inpanel mom_panel year_birth year_first_birth yrfirstbirth mom_panel2 yrfirstbirth2 durmom_1st
+
 
 // Create an indicator of how many years have elapsed since individual's first birth
-replace durmom_1st=year-year_birth if durmom_1st==. & !missing(year_birth)
+replace durmom_1st=year-year_first_birth if durmom_1st==. & !missing(year_first_birth)
 
 browse SSUID PNUM panelmonth person hhmom1 hhmom2 epnmom tage num_children num_minors errp ehrefper if inlist(SSUID, "019156667000", "019228369159" , "019359986255", "019344451235") // okay some issues with multigenerational households
 
@@ -325,7 +362,6 @@ tab person, m
 // Merge this data with household composition data - created in step c. hhcomp.dta has one record for
 	* every SSUID PNUM panelmonth combination except for PNUMs living alone (_merge==1). 
 	* those not in the target sample are _merge==2
-	drop _merge
 	
 	merge 1:1 SSUID PNUM panelmonth using "$tempdir/s96_hhcomp.dta"
 
@@ -445,10 +481,10 @@ restore
 // create output of sample size with restrictions
 dyndoc "$SIPP1996_code/sample_size_1996.md", saving($results/sample_size_1996.html) replace
 
-drop mom_panel
-rename mom_panel2 mom_panel
+// drop mom_panel
+// rename mom_panel2 mom_panel
 
-drop yrfirstbirth
-rename yrfirstbirth2 yrfirstbirth
+// drop yrfirstbirth
+// rename yrfirstbirth2 yrfirstbirth
 
 save "$SIPP96keep/sipp96tpearn_all", replace

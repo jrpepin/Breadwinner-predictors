@@ -26,6 +26,7 @@ clear
 			eppintvw rhchange epnmom etypmom epndad etypdad epnspous ehhnumpp						///
 			tpearn  tpmsum* apmsum* tftotinc thtotinc thpov 										/// /* FINANCIAL   */
 			erace eorigin esex tage  eeducate   ems uentmain ulftmain								/// /* DEMOGRAPHIC */
+			rfnkids rfownkid rfoklt18																/// /* KIDS IN FAMILY */
 			tjbocc* ejbind* rmhrswk ejbhrs* eawop rmesr epdjbthn ejobcntr eptwrk eptresn			/// /* EMPLOYMENT & EARNINGS */
 			ersend* ersnowrk rpyper* epayhr* tpyrate* rwksperm										///
 			rcutyp27 rcutyp21 rcutyp25 rcutyp20 rcutyp24 rhnbrf rhcbrf rhmtrf efsyn epatyn ewicyn	/// /* PROGRAM USAGE */
@@ -142,3 +143,23 @@ browse ssuid epppnum epnmom hhmom1 hhmom2 person esex tage errp ehrefper epnspou
 * browse ssuid epppnum ehhnumpp errp esex tage if ssuid == "019052123067" // unmarried partners considered "not relatives", so 2 people in HH, 1 could be ref w/ no relatives, other then unmarried parner
 
 save "$SIPP96keep/sipp96_data.dta", replace
+
+// trying to identify births
+
+// bysort SSUID panelmonth epnmom: distinct PNUM
+bysort ssuid panelmonth epnmom: egen mom_children=nvals(PNUM) if epnmom!=.
+bysort ssuid panelmonth epnmom: egen mom_bio_children=nvals(PNUM) if etypmom==1
+
+browse ssuid PNUM panelmonth mom_children mom_bio_children rfnkids rfownkid rfoklt18 epnmom epndad etypmom etypdad
+
+preserve
+collapse 	(max) mom_children mom_bio_children ///
+			(mean) rfnkids rfownkid rfoklt18, by(ssuid shhadid panelmonth epnmom)
+			
+drop if epnmom==.
+gen PNUM = epnmom
+rename ssuid SSUID
+
+save "$tempdir/mom_children_lookup96.dta", replace
+
+restore
