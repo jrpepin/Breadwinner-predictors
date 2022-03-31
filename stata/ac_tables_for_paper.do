@@ -2590,6 +2590,84 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 }
 */
 
+********************************************************************************
+* Table 7: HH economic well-being change when mom becomes BW
+********************************************************************************
+
+/* 3 buckets we created for FAMDEM
+label define summary 1 "Up, Above Pov" 2 "Up, Not above pov" 3 "Down" 4 "No Change"
+label values inc_pov_summary summary
+
+tab inc_pov_summary if trans_bw60_alt2==1
+tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==1
+tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==2
+*/
+tab inc_pov_summary, gen(inc_pov_bucket)
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table7) modify
+putexcel A1:E1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel A3 = ("Total") B3 = ("Total")
+putexcel A4:A6 = "Education"
+putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
+putexcel A7:A10 = "Race"
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+putexcel A11:A14 = "Age at First Birth"
+putexcel B11 = ("Younger than 20") B12 = ("20-24") B13 = ("25-29") B14 = ("Older than 30") 
+putexcel A15:A16 = "Marital Status at First Birth"
+putexcel B15 = ("Married") B16 = ("Never Married")
+putexcel C2 = ("Income Up: Above Threshold") D2 = ("Income Up: Below Threshold") E2 = ("Income Down") 
+
+local colu "C D E"
+
+forvalues i=1/3{
+	local col: word `i' of `colu'
+	sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2, detail // 2014
+	putexcel `col'3=`r(mean)', nformat(#.##%)
+}
+
+local row1 "4 5 6"
+forvalues e=1/3{
+	local row: word `e' of `row1'
+		forvalues i=1/3{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & educ_gp==`e', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+local row1 "7 8 9 10"
+forvalues r=1/4{
+	local row: word `r' of `row1'
+		forvalues i=1/3{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & race==`r', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+local row1 "11 12 13 14"
+forvalues a=1/4{
+	local row: word `a' of `row1'
+		forvalues i=1/3{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & ageb1_cat==`a', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+
+local row1 "15 16"
+forvalues s=1/2{
+	local row: word `s' of `row1'
+		forvalues i=1/3{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & status_b1==`s', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
 
 ********************************************************************************
 * Misc things
@@ -2621,6 +2699,50 @@ tabstat earnings_ratio_mis if trans_bw60_alt2==1, by(survey) stats(mean p50)
 
 tabstat mom_part if survey==1996, by(educ_gp) stats(mean p50)
 tabstat mom_part if survey==2014, by(educ_gp) stats(mean p50)
+
+// Distributions
+browse SSUID PNUM year bw60 bw60lag trans_bw60_alt2
+
+* All mothers eligible to transition to BW: HH earnings distribution in year she isn't BW (aka can then become)
+histogram thearn_adj if bw60==0 & thearn_adj<=100000, width(5000) percent addlabel addlabopts(mlabsize(vsmall)) xlabel(0(5000)100000,  angle(45)) title("Household earnings when mother eligible to transition") xtitle("HH earnings") // with 0 earnings included
+graph export "$results/income_all_eligible_moms_0.png", as(png) name("Graph") replace
+
+histogram thearn_adj if bw60==0 & thearn_adj>0 & thearn_adj<=100000, width(5000) percent addlabel addlabopts(mlabsize(vsmall)) xlabel(0(5000)100000,  angle(45)) title("Household earnings when mother eligible to transition") xtitle("HH earnings") // with 0 earnings excluded
+graph export "$results/income_all_eligible_moms_no0.png", as(png) name("Graph") replace
+
+* Mothers who do transition: HH earnings distribution year prior to transition
+histogram thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & thearn_adj<=100000, width(5000) percent addlabel addlabopts(mlabsize(vsmall)) xlabel(0(5000)100000,  angle(45)) title("Household earnings year prior to transition") xtitle("HH earnings") // with 0 earnings included
+graph export "$results/income_year_prior_0.png", as(png) name("Graph") replace
+
+histogram thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & thearn_adj>0 & thearn_adj<=100000, width(5000) percent addlabel addlabopts(mlabsize(vsmall)) xlabel(0(5000)100000,  angle(45)) title("Household earnings year prior to transition") xtitle("HH earnings") // with 0 earnings excluded
+graph export "$results/income_year_prior_no0.png", as(png) name("Graph") replace
+
+* All eligible mothers: mom's % earnings distribution
+histogram earnings_ratio if bw60==0, width(.10) percent addlabel xlabel(0(.1)1) title("Earnings ratio when mother eligible to transition") xtitle("Mom Earnings Ratio") 
+graph export "$results/ratio_all_eligible_moms.png", as(png) name("Graph") replace
+
+histogram earnings_ratio if bw60==0 & survey==1996, width(.10) percent addlabel xlabel(0(.1)1) title("Earnings ratio when mother eligible to transition") xtitle("Mom Earnings Ratio") 
+histogram earnings_ratio if bw60==0 & survey==2014, width(.10) percent addlabel xlabel(0(.1)1) title("Earnings ratio when mother eligible to transition") xtitle("Mom Earnings Ratio") 
+
+* Mothers who transition: mom's % earnings distribution year prior to transition
+histogram earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, width(.10) percent addlabel xlabel(0(.1)1) title("Earnings ratio year prior to transition") xtitle("Mom Earnings Ratio")
+graph export "$results/ratio_year_prior.png", as(png) name("Graph") replace
+
+histogram earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey==1996, width(.10) percent addlabel xlabel(0(.1)1) title("1996 Earnings ratio year prior to transition") xtitle("Mom Earnings Ratio")
+graph export "$results/ratio_year_prior_1996.png", as(png) name("Graph") replace
+
+histogram earnings_ratio if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey==2014, width(.10) percent addlabel xlabel(0(.1)1) title("2014 Earnings ratio year prior to transition") xtitle("Mom Earnings Ratio")
+graph export "$results/ratio_year_prior_2014.png", as(png) name("Graph") replace
+
+* Mothers who transition: mom's % earnings distribution the year she transitions
+histogram earnings_ratio if trans_bw60_alt2==1 & bw60lag==0, width(.10) percent addlabel xlabel(0(.1)1) title("Earnings ratio year mom transitions") xtitle("Mom Earnings Ratio")
+graph export "$results/ratio_post_transition.png", as(png) name("Graph") replace
+
+histogram earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & survey==1996, width(.10) percent addlabel xlabel(0(.1)1) title("1996 Earnings ratio year mom transitions") xtitle("Mom Earnings Ratio")
+graph export "$results/ratio_post_transition_1996.png", as(png) name("Graph") replace
+
+histogram earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & survey==2014, width(.10) percent addlabel xlabel(0(.1)1) title("2014 Earnings ratio year mom transitions") xtitle("Mom Earnings Ratio")
+graph export "$results/ratio_post_transition_2014.png", as(png) name("Graph") replace
 
 
 ********************************************************************************
