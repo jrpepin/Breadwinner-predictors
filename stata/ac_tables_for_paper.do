@@ -2717,6 +2717,10 @@ graph export "$results/income_year_prior_0.png", as(png) name("Graph") replace
 histogram thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & thearn_adj>0 & thearn_adj<=100000, width(5000) percent addlabel addlabopts(mlabsize(vsmall)) xlabel(0(5000)100000,  angle(45)) title("Household earnings year prior to transition") xtitle("HH earnings") // with 0 earnings excluded
 graph export "$results/income_year_prior_no0.png", as(png) name("Graph") replace
 
+* Mothers who do transition: HH earnings distribution year of transition
+histogram thearn_adj if trans_bw60_alt2==1 & bw60lag==0 & thearn_adj<=100000, width(5000) percent addlabel addlabopts(mlabsize(vsmall)) xlabel(0(5000)100000,  angle(45)) title("Household earnings when mother becomes primary earner") xtitle("HH earnings")
+graph export "$results/income_post_transition.png", as(png) name("Graph") replace
+
 * All eligible mothers: mom's % earnings distribution
 histogram earnings_ratio if bw60==0, width(.10) percent addlabel xlabel(0(.1)1) title("Earnings ratio when mother eligible to transition") xtitle("Mom Earnings Ratio") 
 graph export "$results/ratio_all_eligible_moms.png", as(png) name("Graph") replace
@@ -2744,6 +2748,11 @@ graph export "$results/ratio_post_transition_1996.png", as(png) name("Graph") re
 histogram earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & survey==2014, width(.10) percent addlabel xlabel(0(.1)1) title("2014 Earnings ratio year mom transitions") xtitle("Mom Earnings Ratio")
 graph export "$results/ratio_post_transition_2014.png", as(png) name("Graph") replace
 
+* Income poverty ratio for women who became moms in SIPP
+tab inc_pov_flag if firstbirth==1 & mom_panel==1 // this is just moms who had first birth during SIPP, didn't have to be BW
+tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 // moms had first birth during SIPP and were BW at time
+tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 & survey==1996
+tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 & survey==2014
 
 ********************************************************************************
 * Figures

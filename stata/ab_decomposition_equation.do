@@ -1238,8 +1238,8 @@ log using "$logdir/bw_updates_021522.log", replace
 * how many moms who had a birth in the panel were breadwinners at the time of birth
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_marital_status if mom_panel==1
 
-unique SSUID PNUM if mom_panel==1 // 2773 moms became mom in the panel
-// or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298
+unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
+// or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298 -- is this because we only keep her if we have an observation the year prior? I think so
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth
 tab bw60_mom if year==yrfirstbirth-1 & mom_panel==1 // year prior - 104, but we only have 468 records here - don't have year prior for all, so probably less useful
 
@@ -1309,5 +1309,32 @@ tab end_tjb1_occ if survey==2014, sort
 // chi-square for bw v. not
 tab end_occ_code1 ever_bw60 if survey==2014, col
 tab end_occ_code1 ever_bw60 if survey==2014, chi2
+
+* Moms who enter motherhood as BWs:
+* Counts:
+unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
+tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth...so 231 moms total entered motherhood as breadwinners (70 in 1996; 161 in 2014)
+unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
+
+	* 1996: % of all moms
+	// total moms= 12950, so 70/12950
+	
+	* 1996: % of all ever-BW mom
+	unique SSUID PNUM if survey==1996, by(ever_bw60) // 0=8171, 1=4779, total=12950
+	// so in 1996, 4,779 mothers were ever breadwinners. 70 of those were mothers who entered motherhood as BW - aka (70/4779)
+
+	* 1996: % of those who become mom in SIPP
+	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 // 70 mothers entered motherhood as BW in 1996, out of a total of 467 moms who became a mom during panel (14.99%)
+
+	* 2014: % of all moms
+	//total moms = 9746, so 161 / 9746
+	
+	* 2014: % of all ever-BW mom
+	unique SSUID PNUM if survey==2014, by(ever_bw60) // 0=6175, 1=3571, total=9746
+	// so in 2014, 3,571 mothers were ever breadwinners. 161 of those were mothers who entered motherhood as BW - aka (161/3571)
+	
+	* 2014: % of those who become mom in SIPP
+	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 161 mothers entered motherhood as BW in 2014, out of a total of 831 moms who became a mom during panel (19.37%)
+
 
 log close
