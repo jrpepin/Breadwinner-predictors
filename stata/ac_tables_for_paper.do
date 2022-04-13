@@ -147,6 +147,7 @@ foreach var in race1 race2 race3 race4{
 
 * Education
 tab educ [aweight=wpfinwgt], gen(educ)
+tab educ_gp  [aweight=wpfinwgt], gen(educ_gp)
 // test: svy: mean educ1
 
 local colu "C D"
@@ -2667,6 +2668,43 @@ forvalues s=1/2{
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
 	}	
 }
+
+********************************************************************************
+* Table 8a: description of mothers in each pathway
+* All mothers, NOT just those who transition
+********************************************************************************
+
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table8a) modify
+putexcel C1:G1 = "1996", merge border(bottom) hcenter
+putexcel H1:L1 = "2014", merge border(bottom) hcenter
+putexcel C2 = ("Partner Left") D2 = ("Mom Earnings Up") E2 = ("Partner Lost Earnings")  F2 = ("Mom Up Partner Down")  G2 = ("Other Member Changes") 
+putexcel H2 = ("Partner Left") I2 = ("Mom Earnings Up") J2 = ("Partner Lost Earnings")  K2 = ("Mom Up Partner Down")  L2 = ("Other Member Changes") 
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel A3 = ("Total") B3 = ("Mothers (N)")
+putexcel A4:A6 = "Education"
+putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
+putexcel A7:A10 = "Race"
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+putexcel A11:A12 = "Current Partner Status"
+putexcel B11 = ("Partnered") B12 = ("Single")
+putexcel A13:A14 = "Marital Status at First Birth"
+putexcel B13 = ("Married") B14 = ("Never Married")
+putexcel A15:A18 = "Age at First Birth"
+putexcel B15 = ("Younger than 20") B16 = ("20-24") B17 = ("25-29") B18 = ("Older than 30") 
+putexcel A19:A21 = "Work characteristics"
+putexcel B19 = ("Average work hours") B20 = ("Average hourly wage") B21 = ("Median annual earnings") 
+putexcel A22:A24 = "Partner Education"
+putexcel B22 = ("HS or Less") B23 = ("Some College") B24 = ("College Plus") 
+putexcel A25:A28 = "Partner Race"
+putexcel B25 = ("NH White") B26 = ("Black") B27 = ("NH Asian") B28 = ("Hispanic") 
+putexcel A29:A31 = "Partner Work characteristics"
+putexcel B29 = ("Average work hours") B30 = ("Average hourly wage") B31 = ("Median annual earnings") 
+
+********************************************************************************
+* Table 8b: description of mothers in each pathway
+* JUST mothers who transition
+********************************************************************************
 
 
 ********************************************************************************

@@ -31,7 +31,7 @@ clear
 			tpearn  tpmsum* apmsum* tftotinc thtotinc thpov 										/// /* FINANCIAL   */
 			erace eorigin esex tage  eeducate tfipsst  ems uentmain ulftmain						/// /* DEMOGRAPHIC */
 			tjbocc* ejbind* rmhrswk ejbhrs* eawop rmesr epdjbthn ejobcntr eptwrk eptresn			/// /* EMPLOYMENT & EARNINGS */
-			ersend* ersnowrk rpyper* epayhr* tpyrate* rwksperm										///
+			ersend* ersnowrk rpyper* epayhr* tpyrate* rwksperm rmwkwjb								///
 			rcutyp27 rcutyp21 rcutyp25 rcutyp20 rcutyp24 rhnbrf rhcbrf rhmtrf efsyn epatyn ewicyn	/// /* PROGRAM USAGE */
 			renroll eenlevel  epatyp5 	edisabl edisprev											/// /* MISC (enrollment, child care, disability)*/
 			
@@ -196,7 +196,8 @@ egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
 
 
 //misc variables
-* Disability status
+* some of these variables are missing - commenting out for now
+/* Disability status 
 // EFINDJOB (seems more restrictive than EDISABL, which is about limits, find job is about difficult finding ANY job) EDISABL RDIS_ALT (alt includes job rrlated disability measures whereas RDIS doesn't, but theeir differences are very neglible so relying on the more comprehensive one)
 // relabeling so the Nos are 0 not 2
 foreach var in efindjob edisabl rdis_alt{
@@ -219,7 +220,6 @@ label values moves moves
 recode eehc_why (1=1) (2=2) (3/14=3) (15=4) (16=3), gen(hh_move)
 label define hh_move 1 "Relationship Change" 2 "Independence" 3 "Other" 4 "Did not Move"
 label values hh_move hh_move
-
 
 * Reasons for leaving employer
 label define leave_job 1 "Fired" 2 "Other Involuntary Reason" 3 "Quit Voluntarily" 4 "Retired" 5 "Childcare-related" 6 "Other personal reason" 7 "Illness" 8 "In School"

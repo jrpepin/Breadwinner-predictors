@@ -65,16 +65,21 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 
 	gen ft_pt_sp=.
 	gen educ_sp=.
-
+	gen race_sp=.
+	gen weeks_employed_sp=.
+	
 	forvalues n=1/22{
 	replace ft_pt_sp=to_ft_pt`n' if spart_num==`n'
 	replace educ_sp=to_educ`n' if spart_num==`n'
+	replace race_sp=to_race`n' if spart_num==`n'
+	replace weeks_employed_sp=to_RMWKWJB`n' if spart_num==`n'
+	
 	}
 
 	
 // getting ready to create indicators of various status changes THROUGHOUT the year
 drop _merge
-local reshape_vars marital_status hhsize other_earner earnings spartner ft_pt educ renroll ft_pt_sp educ_sp
+local reshape_vars marital_status hhsize other_earner earnings spartner ft_pt educ renroll ft_pt_sp educ_sp race_sp weeks_employed_sp
 
 keep `reshape_vars' SSUID PNUM panelmonth
  
@@ -579,15 +584,15 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					resp_non partner_gain partner_lose first_birth						///
 					full_part full_no part_no part_full no_part no_full educ_change		///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
-					no_full_sp educ_change_sp  											///
+					no_full_sp educ_change_sp rmwkwjb weeks_employed_sp					///
 			(mean) 	spouse partner numtype2 wpfinwgt scaled_weight correction birth 	/// 
 					mom_panel avg_hhsize = hhsize avg_hrs=tmwkhrs avg_earn=earnings  	///
 					numearner other_earner thincpovt2 pov_level start_marital_status 	///
-					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1	///
+					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1 ///
 					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
-					prebiochildren race educ tceb oldest_age ejb*_payhr1 				///
-					start_spartner last_spartner start_spouse last_spouse				///
+					prebiochildren race educ race_sp educ_sp tceb oldest_age 			///
+					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
 					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
 			(min) 	tage_fb durmom youngest_age first_wave								///
 					tpearn_mis tmwkhrs_mis earnings_mis									///

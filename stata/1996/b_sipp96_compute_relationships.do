@@ -291,9 +291,9 @@ save "$tempdir/s96_rel_pairs_full.dta", replace
 
 // now merging demographic info / rest of variables back in
 
-drop _merge
+// drop _merge
 
-local keepvars "thtotinc thpov efkind tftotinc esex wpfinwgt tage ems epnspous epnmom epndad etypmom etypdad ulftmain uentmain tpearn programs benefits renroll eenlevel epdjbthn ejobcntr edisabl edisprev ersnowrk eawop eptwrk eptresn rmesr rwksperm ersend1 ejbhrs1 tpmsum1 epayhr1 tpyrate1 rpyper1 ejbind1 tjbocc1 ersend2 ejbhrs2 tpmsum2 epayhr2 tpyrate2 rpyper2 ejbind2 tjbocc2 epatyp5 emarpth exmar tfmyear tlmyear tfrchl tfrinhh tmomchl emomlivh efbrthmo tfbrthyr ragfbrth elbirtmo tlbirtyr efblivnw elblivnw earnings race educ employ jobchange_1 jobchange_2 better_job hourly_est1 hourly_est2 avg_wk_rate avg_mo_hrs"
+local keepvars "thtotinc thpov efkind tftotinc esex wpfinwgt tage ems epnspous epnmom epndad etypmom etypdad ulftmain uentmain tpearn programs benefits renroll eenlevel epdjbthn ejobcntr edisabl edisprev ersnowrk eawop eptwrk eptresn rmesr rwksperm ersend1 ejbhrs1 tpmsum1 epayhr1 tpyrate1 rpyper1 ejbind1 tjbocc1 ersend2 ejbhrs2 tpmsum2 epayhr2 tpyrate2 rpyper2 ejbind2 tjbocc2 epatyp5 emarpth exmar tfmyear tlmyear tfrchl tfrinhh tmomchl emomlivh efbrthmo tfbrthyr ragfbrth elbirtmo tlbirtyr efblivnw elblivnw earnings race educ employ jobchange_1 jobchange_2 better_job hourly_est1 hourly_est2 avg_wk_rate avg_mo_hrs rmwkwjb"
 
 merge m:1 SSUID ERESIDENCEID from_num panelmonth using "$SIPP96keep/sipp96_hhdata.dta", keepusing(`keepvars')
 

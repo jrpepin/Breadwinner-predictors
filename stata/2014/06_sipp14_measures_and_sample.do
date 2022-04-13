@@ -26,7 +26,7 @@ clear
 			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc								/// /* DEMOGRAPHIC */
 			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why									///
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
-			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend ejb*_jborse 						///
+			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend ejb*_jborse rmwkwjb				///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
 			tjb*_gamt* tjb*_msum tpearn																			///
 			efindjob edisabl ejobcant rdis rdis_alt edisany														/// /* DISABILITY */

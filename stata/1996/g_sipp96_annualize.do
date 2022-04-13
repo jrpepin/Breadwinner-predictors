@@ -62,16 +62,20 @@ use "$SIPP96keep/sipp96tpearn_rel.dta", clear
 
 	gen eptwrk_sp=.
 	gen educ_sp=.
+	gen race_sp=.
+	gen weeks_employed_sp=.
 
 	forvalues n=1/17{
 	replace eptwrk_sp=to_eptwrk`n' if spart_num==`n'
 	replace educ_sp=to_educ`n' if spart_num==`n'
+	replace race_sp=to_race`n' if spart_num==`n'
+	replace weeks_employed_sp=to_rmwkwjb`n' if spart_num==`n'
 	}
 
 	
 // getting ready to create indicators of various status changes THROUGHOUT the year
 drop _merge
-local reshape_vars marital_status hhsize other_earner earnings spartner eptwrk educ renroll eptwrk_sp educ_sp
+local reshape_vars marital_status hhsize other_earner earnings spartner eptwrk educ renroll eptwrk_sp educ_sp race_sp weeks_employed_sp
 
 keep `reshape_vars' SSUID PNUM panelmonth
  
@@ -543,14 +547,14 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 									/
 			(sum) 	tpearn thearn thearn_alt total_hrs=avg_mo_hrs total_hrs_sp = avg_mo_hrs_sp earnings 	///
 					eawop sing_coh sing_mar coh_mar coh_diss marr_diss marr_wid marr_coh					///
 					hh_lose earn_lose earn_non hh_gain earn_gain non_earn resp_earn 						///
-					resp_non first_birth partner_gain partner_lose											///
+					resp_non first_birth partner_gain partner_lose rmwkwjb weeks_employed_sp				///
 					full_part full_no part_no part_full no_part no_full										///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp					///
 			(mean) 	spouse partner wpfinwgt scaled_weight birth mom_panel 								 	///
 					avg_hhsize=hhsize start_marital_status last_marital_status avg_mo_hrs avg_mo_hrs_sp 	///
 					avg_earn=earnings numearner other_earner tpyrate1 tpyrate2 avg_wk_rate thpov			/// 		
 			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age				///
-					race educ tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth  						///
+					race educ race_sp educ_sp tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth  		///
 					 status_b1 minors_fy start_spartner last_spartner start_spouse last_spouse 				///
 					start_partner last_partner																///
 			(min) 	durmom durmom_1st emomlivh youngest_age first_wave										///
