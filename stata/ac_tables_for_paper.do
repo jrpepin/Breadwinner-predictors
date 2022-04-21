@@ -55,6 +55,18 @@ putexcel A28 = "Marital Status at first birth (time-invariant)"
 putexcel A29 = "Married", txtindent(4)
 putexcel A30 = "Never Married", txtindent(4)
 
+putexcel F2 = "2014: Ever BW"
+putexcel G2 = "2014: Never BW"
+
+// First create a variable for ever breadwinning status
+gen bw60_all = bw60_mom
+replace bw60_all = 0 if mom_panel==1 & year < yrfirstbirth
+bysort SSUID PNUM (bw60_all): egen ever_bw60 = max(bw60_all)
+browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom bw60_all ever_bw60
+
+tab ever_bw60 if survey_yr==2
+unique SSUID PNUM if survey_yr==2, by(ever_bw60)
+
 local colu "C D"
 
 // there is probably a more efficient way to do this but I am currently struggling
@@ -74,12 +86,36 @@ forvalues y=1/2{
 	putexcel `col'4= `total_PY_`y'', nformat(###,###)
 }
 
+// total
 egen total_N = nvals(id) 
 global total_N = total_N
 putexcel B3 = $total_N, nformat(###,###)
 egen total_PY = count(id)
 global total_PY = total_PY
 putexcel B4 = $total_PY, nformat(###,###)
+
+// 2014 - ever BW status
+egen total_N_ever14 = nvals(id) if survey_yr==2 & ever_bw60==1
+sum total_N_ever14
+replace total_N_ever14 = r(mean)
+global total_N_ever14 = total_N_ever14
+putexcel F3 = $total_N_ever14, nformat(###,###)
+egen total_PY_ever14 = count(id) if survey_yr==2 & ever_bw60==1
+sum total_PY_ever14
+replace total_PY_ever14 = r(mean)
+global total_PY_ever14 = total_PY_ever14
+putexcel F4 = $total_PY_ever14, nformat(###,###)
+
+egen total_N_never14 = nvals(id) if survey_yr==2 & ever_bw60==0
+sum total_N_never14
+replace total_N_never14 = r(mean)
+global total_N_never14 = total_N_never14
+putexcel G3 = $total_N_never14, nformat(###,###)
+egen total_PY_never14 = count(id) if survey_yr==2 & ever_bw60==0
+sum total_PY_never14
+replace total_PY_never14 = r(mean)
+global total_PY_never14 = total_PY_never14
+putexcel G4 = $total_PY_never14, nformat(###,###)
 
 *Transitions
 gen eligible=(bw60lag==0)
@@ -113,6 +149,10 @@ sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [awei
 putexcel C7=`r(p50)', nformat(###,###)
 sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail
 putexcel D7=`r(p50)', nformat(###,###)
+sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ever_bw60==1 [aweight=wpfinwgt], detail
+putexcel F7=`r(p50)', nformat(###,###)
+sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ever_bw60==0 [aweight=wpfinwgt], detail
+putexcel G7=`r(p50)', nformat(###,###)
 
 *Mother
 sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID [aweight=wpfinwgt], detail // is this t-1?
@@ -121,6 +161,10 @@ sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 [aw
 putexcel C8=`r(p50)', nformat(###,###)
 sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 [aweight=wpfinwgt], detail 
 putexcel D8=`r(p50)', nformat(###,###)
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ever_bw60==1 [aweight=wpfinwgt], detail 
+putexcel F8=`r(p50)', nformat(###,###)
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ever_bw60==0 [aweight=wpfinwgt], detail 
+putexcel G8=`r(p50)', nformat(###,###)
 
 * Race
 tab race [aweight=wpfinwgt], gen(race)
@@ -142,6 +186,12 @@ foreach var in race1 race2 race3 race4{
 		svy: mean `var'
 		matrix `var' = e(b)
 		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==1
+		matrix `var'_ever = e(b)
+		putexcel F`row' = matrix(`var'_ever), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==0
+		matrix `var'_never = e(b)
+		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
 
@@ -166,6 +216,12 @@ foreach var in educ1 educ2 educ3 educ4{
 		svy: mean `var'
 		matrix `var' = e(b)
 		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==1
+		matrix `var'_ever = e(b)
+		putexcel F`row' = matrix(`var'_ever), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==0
+		matrix `var'_never = e(b)
+		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
 	
@@ -193,6 +249,12 @@ foreach var in marst1 marst2 marst3{
 		svy: mean `var'
 		matrix `var' = e(b)
 		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==1
+		matrix `var'_ever = e(b)
+		putexcel F`row' = matrix(`var'_ever), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==0
+		matrix `var'_never = e(b)
+		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
 
@@ -216,10 +278,16 @@ foreach var in ageb11 ageb12 ageb13 ageb14{
 		svy: mean `var'
 		matrix `var' = e(b)
 		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==1
+		matrix `var'_ever = e(b)
+		putexcel F`row' = matrix(`var'_ever), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==0
+		matrix `var'_never = e(b)
+		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
 	
-* Age at first birth
+* Marital Status at first birth
 tab status_b1 [aweight=wpfinwgt], gen(status_b1)
 // test: svy: mean status_b11
 
@@ -239,6 +307,12 @@ foreach var in status_b11 status_b12{
 		svy: mean `var'
 		matrix `var' = e(b)
 		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==1
+		matrix `var'_ever = e(b)
+		putexcel F`row' = matrix(`var'_ever), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==0
+		matrix `var'_never = e(b)
+		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
 
