@@ -3174,6 +3174,100 @@ replace N_mom_panel2bw = r(mean)
 local N_mom_panel2bw = N_mom_panel2bw
 putexcel N3= `N_mom_panel2bw', nformat(###,###)
 
+********************************************************************************
+* Table 9: Description of mothers in each income change bucket
+********************************************************************************
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table9) modify
+putexcel C1:H1 = "2014", merge border(bottom) hcenter
+putexcel C2 = ("Income Up: Above") D2 = ("Income Up: Below") E2 = ("Income Down: Above")  F2 = ("Income Down: Below")
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel A3 = ("Total") B3 = ("Mothers (N)")
+putexcel A4:A6 = "Education"
+putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
+putexcel A7:A10 = "Race"
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+putexcel A11:A12 = "Current Partner Status"
+putexcel B11 = ("Partnered") B12 = ("Single")
+putexcel A13:A14 = "Marital Status at First Birth"
+putexcel B13 = ("Married") B14 = ("Never Married")
+putexcel A15:A18 = "Age at First Birth"
+putexcel B15 = ("Younger than 20") B16 = ("20-24") B17 = ("25-29") B18 = ("Older than 30") 
+putexcel A19:A21 = "Work characteristics"
+putexcel B19 = ("Average work hours") B20 = ("Average hourly wage") B21 = ("Median annual earnings") 
+putexcel A22:A24 = "Partner Education"
+putexcel B22 = ("HS or Less") B23 = ("Some College") B24 = ("College Plus") 
+putexcel A25:A28 = "Partner Race"
+putexcel B25 = ("NH White") B26 = ("Black") B27 = ("NH Asian") B28 = ("Hispanic") 
+putexcel A29:A31 = "Partner Work characteristics"
+putexcel B29 = ("Average work hours") B30 = ("Average hourly wage") B31 = ("Median annual earnings") 
+
+// 2014 estimates
+local colu "C D E F"
+local z=1
+
+foreach var in inc_pov_bucket1 inc_pov_bucket2 inc_pov_bucket3 inc_pov_bucket4{
+local col: word `z' of `colu'
+local i=1
+	foreach gp in educ_gp1 educ_gp2 educ_gp3{		
+		local row =`i' + 3
+		svy: mean `gp' if `var'==1 & bw60lag==0 & survey_yr==2 & trans_bw60_alt2==1
+		matrix `var' = e(b)
+		putexcel `col'`row' = matrix(`var'), nformat(#.##%)
+		local ++i
+	}
+	foreach gp in race1 race2 race3 race4{		
+		local row =`i' + 3
+		svy: mean `gp' if `var'==1 & bw60lag==0 & survey_yr==2 & trans_bw60_alt2==1
+		matrix `var' = e(b)
+		putexcel `col'`row' = matrix(`var'), nformat(#.##%)
+		local ++i
+	}
+	foreach gp in partnered single status_b11 status_b12 ageb11 ageb12 ageb13 ageb14{
+		local row =`i' + 3
+		svy: mean `gp' if `var'==1 & bw60lag==0 & survey_yr==2 & trans_bw60_alt2==1
+		matrix `var' = e(b)
+		putexcel `col'`row' = matrix(`var'), nformat(#.##%)
+		local ++i
+	}
+	foreach gp in avg_mo_hrs hourly_wage earnings_adj{
+		local row =`i' + 3
+		sum `gp' if `var'==1 & bw60lag==0 & survey_yr==2 & trans_bw60_alt2==1 [aweight=wpfinwgt], detail
+		matrix `var' = `r(p50)'
+		putexcel `col'`row' = matrix(`var'), nformat(#.##%)
+		local ++i
+	}
+		foreach gp in educ_gp_sp1 educ_gp_sp2 educ_gp_sp3 race_sp1 race_sp2 race_sp3 race_sp4{
+		local row =`i' + 3
+		svy: mean `gp' if `var'==1 & bw60lag==0 & survey_yr==2 & trans_bw60_alt2==1
+		matrix `var' = e(b)
+		putexcel `col'`row' = matrix(`var'), nformat(#.##%)
+		local ++i
+	}
+	foreach gp in avg_mo_hrs_sp hourly_wage_sp earnings_sp_adj{
+		local row =`i' + 3
+		sum `gp' if `var'==1 & bw60lag==0 & survey_yr==2 & trans_bw60_alt2==1 [aweight=wpfinwgt], detail
+		matrix `var' = `r(p50)'
+		putexcel `col'`row' = matrix(`var'), nformat(#.##%)
+		local ++i
+	}
+local ++z
+}
+
+* count of N
+// 2014
+local colu "C D E F"
+local z=1
+
+foreach var in inc_pov_bucket1 inc_pov_bucket2 inc_pov_bucket3 inc_pov_bucket4{
+	local col: word `z' of `colu'
+	egen N_`var' = count(id) if `var'==1 & bw60lag==0 & survey_yr==2  & trans_bw60_alt2==1
+	sum N_`var'
+	replace N_`var' = r(mean)
+	local N_`var' = N_`var'
+	putexcel `col'3= `N_`var'', nformat(###,###)
+	local ++z
+}
 
 ********************************************************************************
 * Misc things
