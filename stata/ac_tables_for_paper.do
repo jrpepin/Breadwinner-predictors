@@ -1243,6 +1243,17 @@ replace inc_pov_summary=4 if inc_pov_change_raw==0
 label define summary 1 "Up, Above Pov" 2 "Up, Not above pov" 3 "Down" 4 "No Change"
 label values inc_pov_summary summary
 
+// Breaking out income down to above v. below poverty
+gen inc_pov_summary2=.
+replace inc_pov_summary2=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov >=1.5
+replace inc_pov_summary2=2 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov <1.5
+replace inc_pov_summary2=3 if inc_pov_change_raw < 0 & inc_pov_change_raw!=. & inc_pov >=1.5
+replace inc_pov_summary2=4 if inc_pov_change_raw < 0 & inc_pov_change_raw!=. & inc_pov <1.5
+replace inc_pov_summary2=5 if inc_pov_change_raw==0
+
+label define summary2 1 "Up, Above Pov" 2 "Up, Below Pov" 3 "Down, Above Pov" 4 "Down, Below Pov" 5 "No Change"
+label values inc_pov_summary2 summary2
+
 browse SSUID year end_hhsize end_minorchildren threshold thearn_adj inc_pov trans_bw60_alt2 bw60 inc_pov_change inc_pov_change_raw inc_pov_move inc_pov_summary // inc_pov_percent inc_pov_up
 
 tab inc_pov_summary if trans_bw60_alt2==1
@@ -2677,10 +2688,12 @@ tab inc_pov_summary if trans_bw60_alt2==1
 tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==1
 tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==2
 */
-tab inc_pov_summary, gen(inc_pov_bucket)
+
+// tab inc_pov_summary, gen(inc_pov_bucket) // 3 categories (Up Above; Up Below; Down)
+tab inc_pov_summary2, gen(inc_pov_bucket) // 4 categores (Up Above; Up Below; Down Above; Down Below)
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table7) modify
-putexcel A1:E1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
+putexcel A1:F1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
 putexcel A2 = "Category"
 putexcel B2 = "Label"
 putexcel A3 = ("Total") B3 = ("Total")
@@ -2692,11 +2705,13 @@ putexcel A11:A14 = "Age at First Birth"
 putexcel B11 = ("Younger than 20") B12 = ("20-24") B13 = ("25-29") B14 = ("Older than 30") 
 putexcel A15:A16 = "Marital Status at First Birth"
 putexcel B15 = ("Married") B16 = ("Never Married")
-putexcel C2 = ("Income Up: Above Threshold") D2 = ("Income Up: Below Threshold") E2 = ("Income Down") 
+putexcel A17:A21 = "Pathway"
+putexcel B17 = ("Partner Left") B18 = ("Mom Up") B19 = ("Partner Down") B20 = ("Mom Up Partner Down") B21 = ("Other HH Member") 
+putexcel C2 = ("Income Up: Above Threshold") D2 = ("Income Up: Below Threshold") E2 = ("Income Down: Above") F2 = ("Income Down: Below") 
 
-local colu "C D E"
+local colu "C D E F"
 
-forvalues i=1/3{
+forvalues i=1/4{
 	local col: word `i' of `colu'
 	sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2, detail // 2014
 	putexcel `col'3=`r(mean)', nformat(#.##%)
@@ -2705,7 +2720,7 @@ forvalues i=1/3{
 local row1 "4 5 6"
 forvalues e=1/3{
 	local row: word `e' of `row1'
-		forvalues i=1/3{
+		forvalues i=1/4{
 		local col: word `i' of `colu'
 		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & educ_gp==`e', detail // 2014
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
@@ -2715,7 +2730,7 @@ forvalues e=1/3{
 local row1 "7 8 9 10"
 forvalues r=1/4{
 	local row: word `r' of `row1'
-		forvalues i=1/3{
+		forvalues i=1/4{
 		local col: word `i' of `colu'
 		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & race==`r', detail // 2014
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
@@ -2725,7 +2740,7 @@ forvalues r=1/4{
 local row1 "11 12 13 14"
 forvalues a=1/4{
 	local row: word `a' of `row1'
-		forvalues i=1/3{
+		forvalues i=1/4{
 		local col: word `i' of `colu'
 		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & ageb1_cat==`a', detail // 2014
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
@@ -2736,12 +2751,25 @@ forvalues a=1/4{
 local row1 "15 16"
 forvalues s=1/2{
 	local row: word `s' of `row1'
-		forvalues i=1/3{
+		forvalues i=1/4{
 		local col: word `i' of `colu'
 		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & status_b1==`s', detail // 2014
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
 	}	
 }
+
+local row1 "17 18 19 20 21"
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	local row: word `x' of `row1'
+		forvalues i=1/4{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1, detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}
+local ++x
+}
+
 
 ********************************************************************************
 * Table 8a: description of mothers in each pathway
