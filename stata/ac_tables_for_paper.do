@@ -3175,9 +3175,88 @@ local N_mom_panel2bw = N_mom_panel2bw
 putexcel N3= `N_mom_panel2bw', nformat(###,###)
 
 ********************************************************************************
-* Table 9: Description of mothers in each income change bucket
+* Table 9: Distribution of Pathways by Demographic Characteristics
 ********************************************************************************
+
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table9) modify
+putexcel A1:G1 = "Distribution of Pathways by Demographic Characteristics: 2014", merge border(bottom) hcenter
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel A3 = ("Total") B3 = ("Total")
+putexcel A4:A6 = "Education"
+putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
+putexcel A7:A10 = "Race"
+putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
+putexcel A11:A14 = "Age at First Birth"
+putexcel B11 = ("Younger than 20") B12 = ("20-24") B13 = ("25-29") B14 = ("Older than 30") 
+putexcel A15:A16 = "Marital Status at First Birth"
+putexcel B15 = ("Married") B16 = ("Never Married")
+putexcel C2 = ("Partner Left") D2 = ("Mom Up") E2 = ("Partner Down") F2 = ("Mom Up Partner Down") G2 = ("Other HH Member") 
+
+local colu "C D E F G"
+
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	local col: word `x' of `colu'
+	sum `var' if trans_bw60_alt2==1 & survey_yr==2, detail // 2014
+	putexcel `col'3=`r(mean)', nformat(#.##%)
+	local ++x
+}
+
+local row1 "4 5 6"
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	forvalues e=1/3{
+		local row: word `e' of `row1'
+		local col: word `x' of `colu'
+		sum `var' if trans_bw60_alt2==1 & survey_yr==2 & educ_gp==`e', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+local ++x
+}
+
+local row1 "7 8 9 10"
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	forvalues r=1/4{
+		local row: word `r' of `row1'
+		local col: word `x' of `colu'
+		sum `var' if trans_bw60_alt2==1 & survey_yr==2 & race==`r', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+local ++x
+}
+
+local row1 "11 12 13 14"
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	forvalues a=1/4{
+		local row: word `a' of `row1'
+		local col: word `x' of `colu'
+		sum `var' if trans_bw60_alt2==1 & survey_yr==2 & ageb1_cat==`a', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+local ++x
+}
+
+
+local row1 "15 16"
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	forvalues s=1/2{
+		local row: word `s' of `row1'
+		local col: word `x' of `colu'
+		sum `var' if trans_bw60_alt2==1 & survey_yr==2 & status_b1==`s', detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+local ++x
+}
+
+
+********************************************************************************
+* Table 10: Description of mothers in each income change bucket
+********************************************************************************
+putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table10) modify
 putexcel C1:F1 = "2014", merge border(bottom) hcenter
 putexcel C2 = ("Income Up: Above") D2 = ("Income Up: Below") E2 = ("Income Down: Above")  F2 = ("Income Down: Below")
 putexcel A2 = "Category"
