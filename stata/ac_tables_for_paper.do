@@ -3178,7 +3178,7 @@ putexcel N3= `N_mom_panel2bw', nformat(###,###)
 * Table 9: Description of mothers in each income change bucket
 ********************************************************************************
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table9) modify
-putexcel C1:H1 = "2014", merge border(bottom) hcenter
+putexcel C1:F1 = "2014", merge border(bottom) hcenter
 putexcel C2 = ("Income Up: Above") D2 = ("Income Up: Below") E2 = ("Income Down: Above")  F2 = ("Income Down: Below")
 putexcel A2 = "Category"
 putexcel B2 = "Label"
