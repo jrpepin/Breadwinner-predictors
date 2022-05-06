@@ -821,7 +821,7 @@ forvalues r=1/4{
 	sum hh_income_raw if hh_chg_value==0, detail
 	sum hh_income_raw if hh_chg_value==1, detail
 	
-	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
+	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
 	graph export "$results/HH_Income_Change.png", as(png) name("Graph") replace
 	
 	*Mother
