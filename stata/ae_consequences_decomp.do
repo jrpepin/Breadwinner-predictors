@@ -40,14 +40,19 @@ mean empower if mt_mom==1 & educ_gp==2
 
 putexcel set "$results/Consequences_decomposition", sheet(Sheet1) replace
 putexcel A2:A7 = "Empower", merge vcenter
-putexcel A9:A14 = "Default", merge vcenter
-putexcel A16:A21 = "Empower", merge vcenter
-putexcel A23:A28 = "Default", merge vcenter
+putexcel A8:A13 = "Default", merge vcenter
+putexcel A18:A23 = "Reserve", merge vcenter
+putexcel A25:A30 = "Empower", merge vcenter
+putexcel A31:A36 = "Default", merge vcenter
+putexcel A41:A46 = "Reserve", merge vcenter
 
 putexcel B2 = ("LTHS") B3 = ("College") B4 = ("Some College") B5 = ("College") B6 = ("LTHS") B7 = ("Some College")
-putexcel B9 = ("LTHS") B10 = ("College") B11 = ("Some College") B12 = ("College") B13 = ("LTHS") B14 = ("Some College")
-putexcel B16 = ("White") B17 = ("Black") B18 = ("White") B19 = ("Hispanic") B20 = ("Black") B21 = ("Hispanic")
-putexcel B23 = ("White") B24 = ("Black") B25 = ("White") B26 = ("Hispanic") B27 = ("Black") B28 = ("Hispanic")
+putexcel B8 = ("LTHS") B9 = ("College") B10 = ("Some College") B11 = ("College") B12 = ("LTHS") B13 = ("Some College")
+putexcel B18 = ("LTHS") B19 = ("College") B20 = ("Some College") B21 = ("College") B22 = ("LTHS") B23 = ("Some College")
+
+putexcel B25 = ("White") B26 = ("Black") B27 = ("White") B28 = ("Hispanic") B29 = ("Black") B30 = ("Hispanic")
+putexcel B31 = ("White") B32 = ("Black") B33 = ("White") B34 = ("Hispanic") B35 = ("Black") B36 = ("Hispanic")
+putexcel B41 = ("White") B42 = ("Black") B43 = ("White") B44 = ("Hispanic") B45 = ("Black") B46 = ("Hispanic")
 
 putexcel C1 = "Mom Up", border(bottom)
 putexcel D1 = "Mom Up and Outcome", border(bottom)
@@ -71,22 +76,21 @@ putexcel U1 = "Partner Down Only Component", border(bottom)
 putexcel V1 = "Partner Left Component", border(bottom)
 putexcel W1 = "Other Component", border(bottom)
 
-local colu1 "C E G I K C E G I K"
-local colu2 "D F H J L D F H J L"
-local outcome "empower default"
+local colu1 "C E G I K C E G I K C E G I K"
+local colu2 "D F H J L D F H J L D F H J L"
 local i=1
 local x=1
 
 // education
 
-foreach outcome in empower default{
+foreach outcome in empower default reserve{
 	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
 		local col1: word `i' of `colu1'
 		local col2: word `i' of `colu2'
 		
 		
-		local row1=`x'*`x'*`x'+1
-		local row2=`x'*`x'*`x'+2
+		local row1=(`x'*`x')+(`x'*`x')
+		local row2=(`x'*`x')+(`x'*`x')+1
 		sum `var' if educ_gp==1
 		putexcel `col1'`row1' = `r(mean)', nformat(#.##%)
 		sum `var' if educ_gp==3
@@ -96,8 +100,8 @@ foreach outcome in empower default{
 		sum `outcome' if `var'==1 & educ_gp==3
 		putexcel `col2'`row2' = `r(mean)', nformat(#.##%)
 	
-		local row3=`x'*`x'*`x'+3
-		local row4=`x'*`x'*`x'+4
+		local row3=(`x'*`x')+(`x'*`x')+2
+		local row4=(`x'*`x')+(`x'*`x')+3
 		sum `var' if educ_gp==2
 		putexcel `col1'`row3' = `r(mean)', nformat(#.##%)
 		sum `var' if educ_gp==3
@@ -107,8 +111,8 @@ foreach outcome in empower default{
 		sum `outcome' if `var'==1 & educ_gp==3
 		putexcel `col2'`row4' = `r(mean)', nformat(#.##%)
 		
-		local row5=`x'*`x'*`x'+5
-		local row6=`x'*`x'*`x'+6
+		local row5=(`x'*`x')+(`x'*`x')+4
+		local row6=(`x'*`x')+(`x'*`x')+5
 		sum `var' if educ_gp==1
 		putexcel `col1'`row5' = `r(mean)', nformat(#.##%)
 		sum `var' if educ_gp==2
@@ -125,20 +129,19 @@ foreach outcome in empower default{
 
 
 // race
-local colu1 "C E G I K C E G I K"
-local colu2 "D F H J L D F H J L"
-local outcome "empower default"
+local colu1 "C E G I K C E G I K C E G I K"
+local colu2 "D F H J L D F H J L D F H J L"
 local i=1
 local x=1
 
-foreach outcome in empower default{
+foreach outcome in empower default reserve{
 	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
 		local col1: word `i' of `colu1'
 		local col2: word `i' of `colu2'
 		
 		
-		local row1=`x'*`x'*`x'+15
-		local row2=`x'*`x'*`x'+16
+		local row1=(`x'*`x')+(`x'*`x')+23
+		local row2=(`x'*`x')+(`x'*`x')+24
 		sum `var' if race==1
 		putexcel `col1'`row1' = `r(mean)', nformat(#.##%)
 		sum `var' if race==2
@@ -148,8 +151,8 @@ foreach outcome in empower default{
 		sum `outcome' if `var'==1 & race==2
 		putexcel `col2'`row2' = `r(mean)', nformat(#.##%)
 	
-		local row3=`x'*`x'*`x'+17
-		local row4=`x'*`x'*`x'+18
+		local row3=(`x'*`x')+(`x'*`x')+25
+		local row4=(`x'*`x')+(`x'*`x')+26
 		sum `var' if race==1
 		putexcel `col1'`row3' = `r(mean)', nformat(#.##%)
 		sum `var' if race==4
@@ -159,8 +162,8 @@ foreach outcome in empower default{
 		sum `outcome' if `var'==1 & race==4
 		putexcel `col2'`row4' = `r(mean)', nformat(#.##%)
 		
-		local row5=`x'*`x'*`x'+19
-		local row6=`x'*`x'*`x'+20
+		local row5=(`x'*`x')+(`x'*`x')+27
+		local row6=(`x'*`x')+(`x'*`x')+28
 		sum `var' if race==2
 		putexcel `col1'`row5' = `r(mean)', nformat(#.##%)
 		sum `var' if race==4
@@ -177,14 +180,14 @@ foreach outcome in empower default{
 
 
 // Calculating rates needed
-forvalues r=2/28{
+forvalues r=2/46{
 	putexcel M`r'=formula((C`r'*D`r')+(E`r'*F`r')+(G`r'*H`r')+(I`r'*J`r')+(K`r'*L`r')), nformat(#.##%)
 }
 
-local row "2 4 6 9 11 13 16 18 20 23 25 27"
+local row "2 4 6 8 10 12 18 20 22 25 27 29 31 33 35 41 43 45"
 local i=1
 
-forvalues r=1/12{
+forvalues r=1/18{
 	local row1: word `i' of `row'
 	local row2 = `row1'+1
 	putexcel O`row1'=formula((C`row1'*D`row2')+(E`row1'*F`row2')+(G`row1'*H`row2')+(I`row1'*J`row2')+(K`row1'*L`row2')), nformat(#.##%) // setting rate to other group
