@@ -59,15 +59,17 @@ putexcel I1 = "Partner left", border(bottom)
 putexcel J1 = "Partner left and Outcome", border(bottom)
 putexcel K1 = "Other member change", border(bottom)
 putexcel L1 = "Other member change and Outcome", border(bottom)
-putexcel M1 = "Rate of transition to BW", border(bottom)
+putexcel M1 = "Rate of Outcome", border(bottom)
 putexcel N1 = "Total Difference", border(bottom)
-putexcel O1 = "Rate Difference", border(bottom)
-putexcel P1 = "Composition Difference", border(bottom)
-putexcel Q1 = "Mom Component", border(bottom)
-putexcel R1 = "Partner Down Mom Up Component", border(bottom)
-putexcel S1 = "Partner Down Only Component", border(bottom)
-putexcel T1 = "Partner Left Component", border(bottom)
-putexcel U1 = "Other Component", border(bottom)
+putexcel O1 = "Alt Rate", border(bottom)
+putexcel P1 = "Rate Difference", border(bottom)
+putexcel Q1 = "Alt Comp", border(bottom)
+putexcel R1 = "Composition Difference", border(bottom)
+putexcel S1 = "Mom Component", border(bottom)
+putexcel T1 = "Partner Down Mom Up Component", border(bottom)
+putexcel U1 = "Partner Down Only Component", border(bottom)
+putexcel V1 = "Partner Left Component", border(bottom)
+putexcel W1 = "Other Component", border(bottom)
 
 local colu1 "C E G I K C E G I K"
 local colu2 "D F H J L D F H J L"
@@ -174,62 +176,25 @@ foreach outcome in empower default{
 }
 
 
+// Calculating rates needed
+forvalues r=2/28{
+	putexcel M`r'=formula((C`r'*D`r')+(E`r'*F`r')+(G`r'*H`r')+(I`r'*J`r')+(K`r'*L`r')), nformat(#.##%)
+}
 
-***************************************
-gen bw_rate_96 = (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen bw_rate_14 = (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_only_2 * ft_partner_down_only_2_bw) + (ft_partner_down_mom_2 * ft_partner_down_mom_2_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+local row "2 4 6 9 11 13 16 18 20 23 25 27"
+local i=1
 
-gen comp96_rate14 = (mt_mom_1 * mt_mom_2_bw) + (ft_partner_down_only_1 * ft_partner_down_only_2_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_2_bw) + (ft_partner_leave_1 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_2_bw)
-gen comp14_rate96 = (mt_mom_2 * mt_mom_1_bw) + (ft_partner_down_only_2 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_2 * ft_partner_down_mom_1_bw) + (ft_partner_leave_2 * ft_partner_leave_1_bw) + (lt_other_changes_2 * lt_other_changes_1_bw)
+forvalues r=1/12{
+	local row1: word `i' of `row'
+	local row2 = `row1'+1
+	putexcel O`row1'=formula((C`row1'*D`row2')+(E`row1'*F`row2')+(G`row1'*H`row2')+(I`row1'*J`row2')+(K`row1'*L`row2')), nformat(#.##%) // setting rate to other group
+	putexcel Q`row1'=formula((C`row2'*D`row1')+(E`row2'*F`row1')+(G`row2'*H`row1')+(I`row2'*J`row1')+(K`row2'*L`row1')), nformat(#.##%) // setting composition to other group
+	putexcel N`row1'=formula(M`row2'-M`row1'), nformat(#.##%) // total diff
+	putexcel P`row1'=formula(O`row1'-M`row1'), nformat(#.##%) // rate diff
+	putexcel R`row1'=formula(Q`row1'-M`row1'), nformat(#.##%) // comp diff
+	local ++i
+}
 
-gen total_gap = (bw_rate_14 - bw_rate_96)
 
-// 1996 as reference
-gen mom_change_x =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen partner_down_only_chg_x = (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_2 * ft_partner_down_only_2_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen partner_down_mom_up_chg_x  =   (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_2 * ft_partner_down_mom_2_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen partner_leave_change_x =  (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen other_hh_change_x =  (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_2 * lt_other_changes_2_bw)
+// need to figure out how to do the specific elements. might need to go back to the matrices. just difficult because it's not systematic like by race and class; i keep swapping reference groups
 
-// just rate element of each component - everything held at 1996 except the rate part of the component I am interested in
-gen mom_change_r =  (mt_mom_1 * mt_mom_2_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen partner_down_only_chg_r = (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_2_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen partner_down_mom_up_chg_r  =   (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_2_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen partner_leave_change_r =  (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-gen other_hh_change_r =  (mt_mom_1 * mt_mom_1_bw) + (ft_partner_down_only_1 * ft_partner_down_only_1_bw) + (ft_partner_down_mom_1 * ft_partner_down_mom_1_bw) + (ft_partner_leave_1 * ft_partner_leave_1_bw) + (lt_other_changes_1 * lt_other_changes_2_bw)
-ther_hh_change_y =  (mt_mom_2 * mt_mom_2_bw) + (ft_partner_down_2 * ft_partner_down_2_bw) + (ft_partner_leave_2 * ft_partner_leave_2_bw) + (lt_other_changes_1 * lt_other_changes_1_bw)
-
-global bw_rate_96 = bw_rate_96
-putexcel N2 = $bw_rate_96, nformat(#.##%)
-global bw_rate_14 = bw_rate_14
-putexcel N3 = $bw_rate_14, nformat(#.##%)
-global total_gap = (bw_rate_14 - bw_rate_96)
-putexcel O2 = $total_gap, nformat(#.##%)
-global rate_diff = (comp96_rate14 - bw_rate_96)
-putexcel P2 = $rate_diff, nformat(#.##%)
-global comp_diff = (comp14_rate96 - bw_rate_96)
-putexcel Q2 = $comp_diff, nformat(#.##%)
-
-// 1996 as reference
-global mom_compt_x = ((mom_change_x - bw_rate_96) / total_gap)
-putexcel R2 = $mom_compt_x, nformat(#.##%)
-global partner_down_mom_compt_x = ((partner_down_mom_up_chg_x - bw_rate_96) / total_gap)
-putexcel S2 = $partner_down_mom_compt_x, nformat(#.##%)
-global partner_down_only_compt_x = ((partner_down_only_chg_x - bw_rate_96) / total_gap)
-putexcel T2 = $partner_down_only_compt_x, nformat(#.##%)
-global partner_leave_compt_x = ((partner_leave_change_x - bw_rate_96) / total_gap)
-putexcel U2 = $partner_leave_compt_x, nformat(#.##%)
-global other_hh_compt_x = ((other_hh_change_x - bw_rate_96) / total_gap)
-putexcel V2 = $other_hh_compt_x, nformat(#.##%)
-
-// 1996 as reference - just rate
-global mom_compt_r = ((mom_change_r - bw_rate_96) / total_gap)
-putexcel R3 = $mom_compt_r, nformat(#.##%)
-global partner_down_mom_compt_r = ((partner_down_mom_up_chg_r - bw_rate_96) / total_gap)
-putexcel S3 = $partner_down_mom_compt_r, nformat(#.##%)
-global partner_down_only_compt_r = ((partner_down_only_chg_r - bw_rate_96) / total_gap)
-putexcel T3 = $partner_down_only_compt_r, nformat(#.##%)
-global partner_leave_compt_r = ((partner_leave_change_r - bw_rate_96) / total_gap)
-putexcel U3 = $partner_leave_compt_r, nformat(#.##%)
-global other_hh_compt_r = ((other_hh_change_r - bw_rate_96) / total_gap)
-putexcel V3 = $other_hh_compt_r, nformat(#.##%)
