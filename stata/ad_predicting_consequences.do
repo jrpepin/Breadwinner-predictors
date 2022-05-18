@@ -135,3 +135,5 @@ mlogit mechanism i.educ_gp if pathway==2, baseoutcome(1) rrr // okay this doesn'
 margins educ_gp // okay this also matches above interaction
 
 tab pathway mechanism if educ_gp==1
+
+save "$tempdir/bw_consequences.dta", replace
