@@ -17,12 +17,9 @@ use "$tempdir/combined_bw_equation.dta", clear
 * CREATE SAMPLE AND VARIABLES
 ********************************************************************************
 
-** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
-keep if trans_bw60_alt2==1 & bw60lag==0
-keep if survey == 2014
-
 * Create dependent variable: income change
 gen inc_pov = thearn_adj / threshold
+sort SSUID PNUM year
 by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 by SSUID PNUM (year), sort: gen inc_pov_change_raw = (inc_pov-inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 
@@ -59,6 +56,9 @@ replace pathway=5 if lt_other_changes==1
 label define pathway 0 "None" 1 "Mom Up" 2 "Mom Up Partner Down" 3 "Partner Down" 4 "Partner Left" 5 "Other HH Change"
 label values pathway pathway
 
+** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
+keep if trans_bw60_alt2==1 & bw60lag==0
+keep if survey == 2014
 
 ********************************************************************************
 * ANALYSIS
