@@ -137,3 +137,18 @@ margins educ_gp // okay this also matches above interaction
 tab pathway mechanism if educ_gp==1
 
 save "$tempdir/bw_consequences.dta", replace
+
+browse SSUID PNUM educ_gp pathway mechanism inc_pov
+
+preserve
+
+collapse (p50) inc_pov, by(educ_gp pathway)
+export excel using "$results\class_pathway_poverty.xls", firstrow(variables) replace
+
+restore
+preserve
+
+collapse (p50) inc_pov, by(race pathway)
+export excel using "$results\race_pathway_poverty.xls", firstrow(variables) replace
+
+restore
