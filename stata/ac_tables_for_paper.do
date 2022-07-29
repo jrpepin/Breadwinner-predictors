@@ -1985,6 +1985,25 @@ local ++x
 }
 
 *Total Change
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail  // post 2014
+
+//educ
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & educ_gp==1, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & educ_gp==1, detail  // post 2014
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & educ_gp==2, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & educ_gp==2, detail  // post 2014
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & educ_gp==3, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & educ_gp==3, detail  // post 2014
+
+//race
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & race==1, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & race==1, detail  // post 2014
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & race==2, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & race==2, detail  // post 2014
+sum inc_pov_flag if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & race==4, detail // pre 2014 - gets me above, subtract from 1 to get below
+sum inc_pov_flag if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & race==4, detail  // post 2014
+
 local i=1
 
 foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
