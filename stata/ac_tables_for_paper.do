@@ -14,7 +14,7 @@ di "$S_DATE"
 * File used was created in ab_decomposition_equation.do
 * Note: this relies on macros created in step ab, so cannot run this in isolation
 
-use "$tempdir/combined_bw_equation.dta", clear
+use "$tempdir/combined_bw_equation.dta", clear // created in step ab
 
 ********************************************************************************
 * Creating tables for paper
@@ -607,6 +607,11 @@ putexcel A13 = "Mothers increase in earnings - rate"
 putexcel A14 = "Partner lost earnings - rate"
 putexcel A15 = "Mothers increase in earnings & partner lost earnings - rate"
 putexcel A16 = "Other member lost earnings / left - rate"
+putexcel A18 = "Partner left - comp"
+putexcel A19 = "Mothers increase in earnings - comp"
+putexcel A20 = "Partner lost earnings - comp"
+putexcel A21 = "Mothers increase in earnings & partner lost earnings - comp"
+putexcel A22 = "Other member lost earnings / left - comp"
 
 
 putexcel B3 = $total_gap, nformat(#.##%)
@@ -622,6 +627,11 @@ putexcel B13 = $mom_compt_r, nformat(#.##%)
 putexcel B14 = $partner_down_only_compt_r, nformat(#.##%)
 putexcel B15 = $partner_down_mom_compt_r, nformat(#.##%)
 putexcel B16 = $other_hh_compt_r, nformat(#.##%)
+putexcel B18 = $partner_leave_compt_c, nformat(#.##%)
+putexcel B19 = $mom_compt_c, nformat(#.##%)
+putexcel B20 = $partner_down_only_compt_c, nformat(#.##%)
+putexcel B21 = $partner_down_mom_compt_c, nformat(#.##%)
+putexcel B22 = $other_hh_compt_c, nformat(#.##%)
 
 
 * Education and Race
@@ -643,6 +653,11 @@ forvalues e=1/3{
 	putexcel `col'14 = ${partner_down_only_comp_e`e'_rt}, nformat(#.##%)
 	putexcel `col'15 = ${partner_down_mom_component_e`e'_rt}, nformat(#.##%)
 	putexcel `col'16 = ${other_hh_component_e`e'_rt}, nformat(#.##%)
+	putexcel `col'18 = ${partner_leave_component_e`e'_cp}, nformat(#.##%)
+	putexcel `col'19 = ${mom_component_e`e'_cp}, nformat(#.##%)
+	putexcel `col'20 = ${partner_down_only_comp_e`e'_cp}, nformat(#.##%)
+	putexcel `col'21 = ${partner_down_mom_component_e`e'_cp}, nformat(#.##%)
+	putexcel `col'22 = ${other_hh_component_e`e'_cp}, nformat(#.##%)
 }
 
 local col1 "F G H I"
@@ -662,6 +677,11 @@ forvalues r=1/4{
 	putexcel `col'14 = ${partner_down_only_comp_r`r'_rt}, nformat(#.##%)
 	putexcel `col'15 = ${partner_down_mom_component_r`r'_rt}, nformat(#.##%)
 	putexcel `col'16 = ${other_hh_component_r`r'_rt}, nformat(#.##%)
+	putexcel `col'18 = ${partner_leave_component_r`r'_cp}, nformat(#.##%)
+	putexcel `col'19 = ${mom_component_r`r'_cp}, nformat(#.##%)
+	putexcel `col'20 = ${partner_down_only_comp_r`r'_cp}, nformat(#.##%)
+	putexcel `col'21 = ${partner_down_mom_component_r`r'_cp}, nformat(#.##%)
+	putexcel `col'22 = ${other_hh_component_r`r'_cp}, nformat(#.##%)
 }
 
 local col1 "J K L M"
@@ -681,6 +701,11 @@ forvalues a=1/4{
 	putexcel `col'14 = ${partner_down_only_comp_a`a'_rt}, nformat(#.##%)
 	putexcel `col'15 = ${partner_down_mom_component_a`a'_rt}, nformat(#.##%)
 	putexcel `col'16 = ${other_hh_component_a`a'_rt}, nformat(#.##%)
+	putexcel `col'18 = ${partner_leave_component_a`a'_cp}, nformat(#.##%)
+	putexcel `col'19 = ${mom_component_a`a'_cp}, nformat(#.##%)
+	putexcel `col'20 = ${partner_down_only_comp_a`a'_cp}, nformat(#.##%)
+	putexcel `col'21 = ${partner_down_mom_component_a`a'_cp}, nformat(#.##%)
+	putexcel `col'22 = ${other_hh_component_a`a'_cp}, nformat(#.##%)
 }
 
 local col1 "N O"
@@ -700,6 +725,11 @@ forvalues s=1/2{
 	putexcel `col'14 = ${partner_down_only_comp_s`s'_rt}, nformat(#.##%)
 	putexcel `col'15 = ${partner_down_mom_component_s`s'_rt}, nformat(#.##%)
 	putexcel `col'16 = ${other_hh_component_s`s'_rt}, nformat(#.##%)
+	putexcel `col'18 = ${partner_leave_component_s`s'_cp}, nformat(#.##%)
+	putexcel `col'19 = ${mom_component_s`s'_cp}, nformat(#.##%)
+	putexcel `col'20 = ${partner_down_only_comp_s`s'_cp}, nformat(#.##%)
+	putexcel `col'21 = ${partner_down_mom_component_s`s'_cp}, nformat(#.##%)
+	putexcel `col'22 = ${other_hh_component_s`s'_cp}, nformat(#.##%)
 }
 
 // Table 4: Median Income Change
