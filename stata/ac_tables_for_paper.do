@@ -747,6 +747,13 @@ sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[
 sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & lt_other_changes[_n+1]==1, detail  // pre 2014
 sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & lt_other_changes==1, detail // post 2014
 
+sum thearn_adj if bw60==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014 all HHs
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014 -- HHs that don't become BW
+
+sum thearn_adj if bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - all
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - not BW
 
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
 putexcel A1 = "category"
@@ -851,10 +858,12 @@ forvalues r=1/4{
 }
 
 	**Exploratory: who's income goes up, down, stays the same
-	// browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2
+	// browse SSUID PNUM year thearn_adj bw60 bw60lag trans_bw60_alt2
 	by SSUID PNUM (year), sort: gen hh_income_chg = ((thearn_adj-thearn_adj[_n-1])/thearn_adj[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
 	by SSUID PNUM (year), sort: gen hh_income_raw = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
 	browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
+	
+	by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & bw60lag==0
 	
 	inspect hh_income_raw // almost split 50/50 negative v. positive
 	sum hh_income_raw, detail // i am now wondering - is this the better way to do it?
@@ -867,6 +876,15 @@ forvalues r=1/4{
 	
 	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
 	graph export "$results/HH_Income_Change.png", as(png) name("Graph") replace
+	
+	// all
+	histogram hh_income_raw_all if hh_income_raw_all > -50000 & hh_income_raw_all <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Annual Household Income Change") xtitle("HH income change")
+	
+	// all - no transition
+	histogram hh_income_raw_all if hh_income_raw_all > -50000 & hh_income_raw_all <50000 & bw60==0, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Annual Household Income Change - no transition") xtitle("HH income change")
+	
+	// all -transitioned
+	histogram hh_income_raw_all if hh_income_raw_all > -50000 & hh_income_raw_all <50000 & bw60==1, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Annual Household Income Change - transition") xtitle("HH income change")
 	
 	*Mother
 	by SSUID PNUM (year), sort: gen mom_income_raw = ((earnings_adj-earnings_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
@@ -3441,6 +3459,9 @@ tabstat earnings_ratio_mis if trans_bw60_alt2==1, by(survey) stats(mean p50)
 
 tabstat mom_part if survey==1996, by(educ_gp) stats(mean p50)
 tabstat mom_part if survey==2014, by(educ_gp) stats(mean p50)
+
+// eligible mothers
+tab survey_yr bw60
 
 // Distributions
 browse SSUID PNUM year bw60 bw60lag trans_bw60_alt2
