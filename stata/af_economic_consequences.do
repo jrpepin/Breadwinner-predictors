@@ -150,7 +150,43 @@ tab inc_pov_summary2 if trans_bw60_alt2==1, m // this matches our output table
 tab pathway inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
 tab pathway_gp inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
 
-// math for comparing to non-BW households
+
+// attempting models (see file ad for reference)
+** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
+keep if trans_bw60_alt2==1 & bw60lag==0
+keep if survey == 2014
+
+recode inc_pov_summary2 (1=4) (2=3) (3=2) (4=1), gen(outcome)
+label define outcome 1 "Down, Below Pov" 2 "Down, Above" 3 "Up, Below" 4 "Up, Above"
+label values outcome outcome
+tab inc_pov_summary2 outcome
+
+ologit outcome i.pathway_gp
+margins pathway_gp
+predict down_b down_a up_b up_a
+
+ologit outcome ib3.pathway_gp
+
+ologit outcome i.pathway_gp i.educ_gp i.race, or // with controls?
+margins pathway_gp
+
+ologit outcome i.pathway_gp##i.educ_gp, or // interactions
+margins pathway_gp#educ_gp
+
+ologit outcome i.pathway_gp##i.race, or // interactions
+margins pathway_gp#race
+
+// which to use? 
+mlogit outcome i.pathway_gp
+margins pathway_gp
+
+
+
+********************************************************************************
+* Revisit the below
+********************************************************************************
+
+/* math for comparing to non-BW households
 // Table 4: Median Income Change
 sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre 2014
 sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post 2014
@@ -185,7 +221,8 @@ sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[
 	browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
 	
 	by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & bw60lag==0
-	
+*/
+
 /* old
 * mom change: earn_change mom_gain_earn == specifically BECAME an earner
 * other change: earn_change_hh earn_lose earn_change_sp partner_lose
