@@ -169,12 +169,19 @@ ologit outcome ib3.pathway_gp
 
 ologit outcome i.pathway_gp i.educ_gp i.race, or // with controls?
 margins pathway_gp
+margins // will give me total
 
 ologit outcome i.pathway_gp##i.educ_gp, or // interactions
 margins pathway_gp#educ_gp
 
 ologit outcome i.pathway_gp##i.race, or // interactions
 margins pathway_gp#race
+
+ologit outcome i.pathway i.educ_gp, or
+margins i.educ_gp
+
+ologit outcome i.pathway i.race, or
+margins i.race
 
 // which to use? 
 mlogit outcome i.pathway_gp
