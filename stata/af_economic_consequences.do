@@ -100,6 +100,28 @@ label values pathway pathway
 tab pathway, m
 tab pathway if trans_bw60_alt2==1, m
 
+// partner status (for mom up only)
+recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
+label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
+label values marital_status_t1 marr
+
+// okay final (for now) pathways
+gen pathway_gp=.
+replace pathway_gp=1 if mt_mom==1 & inlist(marital_status_t1,1,2) // mom up and partnered
+replace pathway_gp=2 if mt_mom==1 & marital_status_t1==3 // mom up and single
+replace pathway_gp=3 if inlist(pathway,2,5) // partner change - up
+replace pathway_gp=4 if inlist(pathway,3,4,6,7) // partner change - no or down
+replace pathway_gp=5 if pathway==8 // other change - up
+replace pathway_gp=6 if inlist(pathway,9,10) // other change - no or down
+
+label define pathway_gp 1 "Mom up - partnered" 2 "mom up - single" 3 "Partner Change - Up" 4 "Partner Change Only" 5 "Other Change - Up" 6 "Other Change - Only"
+label values pathway_gp pathway_gp
+
+tab pathway_gp, m
+tab pathway pathway_gp
+tab pathway_gp if trans_bw60_alt2==1, m
+
+
 // need outcome variable
 browse SSUID year end_hhsize end_minorchildren threshold thearn_adj
 gen inc_pov = thearn_adj / threshold
@@ -120,11 +142,13 @@ label values inc_pov_summary2 summary2
 
 tab inc_pov_summary2 if trans_bw60_alt2==1, m // this matches our output table
 
+
 ********************************************************************************
 * Outcomes
 ********************************************************************************
 
 tab pathway inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
+tab pathway_gp inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
 
 // math for comparing to non-BW households
 // Table 4: Median Income Change
