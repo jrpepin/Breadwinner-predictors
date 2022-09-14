@@ -9,7 +9,6 @@ di "$S_DATE"
 * DESCRIPTION
 ********************************************************************************
 * File used was created in ab_decomposition_equation.do
-* Note: this relies on macros created in step ab, so cannot run this in isolation
 
 use "$tempdir/combined_bw_equation.dta", clear // created in step ab
 
@@ -22,36 +21,112 @@ by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1
 gen thearn_adj_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 	
 browse SSUID PNUM year bw60 bw60lag trans_bw60_alt2 thearn_adj thearn_adj_lag hh_income_raw_all
-keep if bw60lag==0
+// keep if bw60lag==0
 
 // tab bw60 - that makes sense with our final transition rate
  
+********************************************************************************
+* Some variable things
+********************************************************************************
+ 
 // reclassify pathways
-* mom change: earn_change mom_gain_earn == specifically BECAME an earner
+
+gen mom_earn_change=.
+replace mom_earn_change=-1 if mom_lose_earn==1 | earn_change <0
+replace mom_earn_change=0 if mom_gain_earn==0 & earnup8_all==0 & mom_lose_earn==0 & earn_change==0
+replace mom_earn_change=1 if earnup8_all==1
+replace mom_earn_change=0 if mom_earn_change==. // the very small mom ups - want to be considered no change
+replace mom_earn_change=1 if mom_earn_change==0 & mt_mom==1 // BUT want the very small moms if ONLY mom's earnings went up, because there is nowhere else to put
+browse SSUID PNUM year earn_change mom_gain_earn mom_lose_earn earnings_adj mom_earn_change earnup8_all
+
+tab partner_lose mom_earn_change, row
+tab educ_gp mom_earn_change if partner_lose==1, row
+tab lt_other_changes mom_earn_change, row
+tab ft_partner_down mom_earn_change, row
+
+tab partner_lose mom_earn_change if trans_bw60_alt2==1, row
+tab lt_other_changes mom_earn_change if trans_bw60_alt2==1, row
+tab ft_partner_down mom_earn_change if trans_bw60_alt2==1, row
+tab ft_partner_down_only mom_earn_change if trans_bw60_alt2==1, row
+
+/* mom change: earn_change mom_gain_earn == specifically BECAME an earner
 * other change: earn_change_hh earn_lose earn_change_sp partner_lose
 browse SSUID PNUM year mom_gain_earn earn_change_hh earn_lose earn_change_sp partner_lose mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes
 browse SSUID PNUM year mom_gain_earn  earn_change partner_lose ft_partner_leave
+*/
 
 * mt_mom // can stay
+gen left_up=0
+replace left_up=1 if ft_partner_leave==1 & mom_earn_change==1
+gen left_no=0
+replace left_no=1 if ft_partner_leave==1 & mom_earn_change==0
+gen left_down=0
+replace left_down=1 if ft_partner_leave==1 & mom_earn_change==-1
 
-gen partner_loss_only = ft_partner_down_only
-replace partner_loss_only = 1 if partner_lose==1 & mom_gain_earn==0 & earn_change <=0
-// then also replace if JUST partner left
+gen partner_up=0
+replace partner_up=1 if ft_partner_down==1 & mom_earn_change==1
+gen partner_no=0
+replace partner_no=1 if ft_partner_down==1 & mom_earn_change==0
+gen partner_down=0
+replace partner_down=1 if ft_partner_down==1 & mom_earn_change==-1
 
-gen partner_mom_change = ft_partner_down_mom
-replace partner_mom_change = 1 if ft_partner_leave & (mom_gain_earn==1 | earn_change > 0)
-// then also replace if partner left and mom changed
+gen other_up=0
+replace other_up=1 if lt_other_changes==1 & mom_earn_change==1
+gen other_no=0
+replace other_no=1 if lt_other_changes==1 & mom_earn_change==0
+gen other_down=0
+replace other_down=1 if lt_other_changes==1 & mom_earn_change==-1
 
-browse SSUID PNUM year mom_gain_earn  earn_change partner_lose ft_partner_leave partner_loss_only partner_mom_change
+egen check_total = rowtotal(mt_mom left_up left_no left_down partner_up partner_no partner_down other_up other_no other_down)
+tab check_total // no one should have more than 1 - great
+tab check_total if trans_bw60_alt2==1 // should have 1 - great
 
-gen other_change_only = 0
-replace other_change_only=1 if lt_other_changes & mom_gain_earn==0 & earn_change <=0
+* create 1 variable for ease
+gen pathway=.
+replace pathway=1 if mt_mom==1
+replace pathway=2 if left_up==1
+replace pathway=3 if left_no==1
+replace pathway=4 if left_down==1
+replace pathway=5 if partner_up==1
+replace pathway=6 if partner_no==1
+replace pathway=7 if partner_down==1
+replace pathway=8 if other_up==1
+replace pathway=9 if other_no==1
+replace pathway=10 if other_down==1
 
-gen other_mom_change = 0
-replace other_mom_change=1 if lt_other_changes & (mom_gain_earn==1 | earn_change > 0)
+label define pathway 1 "mt_mom" 2 "left_up" 3 "left_no" 4 "left_down" 5 "partner_up" 6 "partner_no" 7 "partner_down" 8 "other_up" 9 "other_no" 10 "other_down"
+label values pathway pathway
 
+tab pathway, m
+tab pathway if trans_bw60_alt2==1, m
 
-// math
+// need outcome variable
+browse SSUID year end_hhsize end_minorchildren threshold thearn_adj
+gen inc_pov = thearn_adj / threshold
+
+by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
+by SSUID PNUM (year), sort: gen inc_pov_change_raw = (inc_pov-inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
+
+// 4 category outcome
+gen inc_pov_summary2=.
+replace inc_pov_summary2=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov >=1.5
+replace inc_pov_summary2=2 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov <1.5
+replace inc_pov_summary2=3 if inc_pov_change_raw < 0 & inc_pov_change_raw!=. & inc_pov >=1.5
+replace inc_pov_summary2=4 if inc_pov_change_raw < 0 & inc_pov_change_raw!=. & inc_pov <1.5
+replace inc_pov_summary2=5 if inc_pov_change_raw==0
+
+label define summary2 1 "Up, Above Pov" 2 "Up, Below Pov" 3 "Down, Above Pov" 4 "Down, Below Pov" 5 "No Change"
+label values inc_pov_summary2 summary2
+
+tab inc_pov_summary2 if trans_bw60_alt2==1, m // this matches our output table
+
+********************************************************************************
+* Outcomes
+********************************************************************************
+
+tab pathway inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
+
+// math for comparing to non-BW households
 // Table 4: Median Income Change
 sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre 2014
 sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post 2014
@@ -86,3 +161,28 @@ sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[
 	browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
 	
 	by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & bw60lag==0
+	
+/* old
+* mom change: earn_change mom_gain_earn == specifically BECAME an earner
+* other change: earn_change_hh earn_lose earn_change_sp partner_lose
+browse SSUID PNUM year mom_gain_earn earn_change_hh earn_lose earn_change_sp partner_lose mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes
+browse SSUID PNUM year mom_gain_earn  earn_change partner_lose ft_partner_leave
+
+* mt_mom // can stay
+
+gen partner_loss_only = ft_partner_down_only
+replace partner_loss_only = 1 if partner_lose==1 & mom_gain_earn==0 & earn_change <=0
+// then also replace if JUST partner left
+
+gen partner_mom_change = ft_partner_down_mom
+replace partner_mom_change = 1 if ft_partner_leave & (mom_gain_earn==1 | earn_change > 0)
+// then also replace if partner left and mom changed
+
+browse SSUID PNUM year mom_gain_earn  earn_change partner_lose ft_partner_leave partner_loss_only partner_mom_change
+
+gen other_change_only = 0
+replace other_change_only=1 if lt_other_changes & mom_gain_earn==0 & earn_change <=0
+
+gen other_mom_change = 0
+replace other_mom_change=1 if lt_other_changes & (mom_gain_earn==1 | earn_change > 0)
+*/

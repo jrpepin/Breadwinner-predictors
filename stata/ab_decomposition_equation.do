@@ -55,7 +55,7 @@ svy: tab survey bw60lag, row // to ensure consecutive years, aka she is availabl
 
 gen mt_mom = 0
 replace mt_mom = 1 if earnup8_all==1 & earn_lose==0 & earndown8_hh_all==0
-replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom==0 // to capture those outside the 8% threshold (v. small amount)
+replace mt_mom = 1 if earn_change > 0 & earn_lose==0 & earn_change_hh==0 & mt_mom==0 // to capture those outside the 8% threshold (v. small amount) - and ONLY if no other household changes happened
 
 svy: tab survey mt_mom if bw60lag==0, row
 tab survey mt_mom if bw60lag==0 [aweight = wpfinwgt], row // validating this is the same as svy
@@ -75,7 +75,7 @@ svy: tab survey ft_partner_down if bw60lag==0, row
 	* splitting partner down into just partner down, or also mom up - we are going to use these more detailed categories
 	gen ft_partner_down_only=0
 	replace ft_partner_down_only = 1 if earndown8_sp_all==1 & earnup8_all==0 & mt_mom==0 & partner_lose==0 & ft_partner_down==1
-	replace ft_partner_down_only = 1 if earn_change_sp <0 & earn_change_sp >-.08 & earnup8_all==0 & mt_mom==0 & ft_partner_down==1 & partner_lose==0
+	replace ft_partner_down_only = 1 if earn_change_sp <0 & earn_change_sp >-.08 & earnup8_all==0 & mt_mom==0 & ft_partner_down==1 & partner_lose==0 // so if only changed 8% (mom), still considered partner down only
 	
 	gen ft_partner_down_mom=0
 	replace ft_partner_down_mom = 1 if earndown8_sp_all==1 & earnup8_all==1 & mt_mom==0 & partner_lose==0 & ft_partner_down==1
