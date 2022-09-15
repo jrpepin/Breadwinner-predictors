@@ -146,6 +146,18 @@ tab inc_pov_summary2 if trans_bw60_alt2==1, m // this matches our output table
 ********************************************************************************
 * Outcomes
 ********************************************************************************
+// mix of pathways by race / class
+// tab race pathway_gp, row // total
+tab race pathway_gp if bw60lag==0, row // wait which of these is right total? alll? or all eligible? probably all eligible right? since that is who we care about
+tab race pathway_gp if trans_bw60_alt2==1, row // just BW
+
+// tab educ_gp pathway_gp, row // total
+tab educ_gp pathway_gp if bw60lag==0, row // total
+tab educ_gp pathway_gp if trans_bw60_alt2==1, row // just BW
+
+//tab pathway_gp
+tab pathway_gp if bw60lag==0
+tab pathway_gp if trans_bw60_alt2==1
 
 tab pathway inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
 tab pathway_gp inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
