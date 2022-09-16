@@ -156,7 +156,7 @@ tab educ_gp pathway_gp if bw60lag==0, row // total
 tab educ_gp pathway_gp if trans_bw60_alt2==1, row // just BW
 
 //tab pathway_gp
-tab pathway_gp if bw60lag==0
+tab pathway_gp if bw60lag==0, m // need missing because not all people experience an event DUH
 tab pathway_gp if trans_bw60_alt2==1
 
 tab pathway inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
@@ -202,45 +202,106 @@ margins pathway_gp
 
 
 ********************************************************************************
-* Revisit the below
+* Revisit the below - to compare to non-BW HHs (from rows 735 in file ac - Table 4)
 ********************************************************************************
+* Total - BUT had to experience an event
+sum thearn_adj if bw60==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]!=., detail  // pre 2014 all HHs
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]!=., detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]!=., detail  // pre 2014 -- HHs that don't become BW
 
-/* math for comparing to non-BW households
-// Table 4: Median Income Change
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre 2014
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post 2014
+sum thearn_adj if bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp!=., detail // post 2014 - all
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp!=., detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp!=., detail // post 2014 - not BW
 
-sum thearn_adj if bw60==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // pre 2014 - all
-sum thearn_adj if bw60==0, detail // & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2, detail  // or is this all? but want to know we can track them into next year, which is what above does?
-sum thearn_adj if bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post 2014 - all
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post 2014 - bw
-sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2, detail // post 2014 - not bw
+// for each pathway
+* Mom up partnered (1)
+sum thearn_adj if bw60==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==1, detail  // pre 2014 all HHs
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==1, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==1, detail  // pre 2014 -- HHs that don't become BW
 
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & mt_mom[_n+1]==1, detail  // pre 2014
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & mt_mom==1, detail // post 2014
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_mom[_n+1]==1, detail  // pre 2014
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_mom==1, detail // post 2014
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_down_only[_n+1]==1, detail  // pre 2014
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_down_only==1, detail // post 2014
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & lt_other_changes[_n+1]==1, detail  // pre 2014
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & lt_other_changes==1, detail // post 2014
+sum thearn_adj if bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==1, detail // post 2014 - all
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==1, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==1, detail // post 2014 - not BW
 
-sum thearn_adj if bw60==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014 all HHs
-sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014 -- HHs that become BW
-sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & ft_partner_leave[_n+1]==1, detail  // pre 2014 -- HHs that don't become BW
 
-sum thearn_adj if bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - all // is this post or pre?
-sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - BW
-sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - not BW
+* Mom up single (2)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==2, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==2, detail  // pre 2014 -- HHs that don't become BW
 
-	by SSUID PNUM (year), sort: gen hh_income_chg = ((thearn_adj-thearn_adj[_n-1])/thearn_adj[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
-	by SSUID PNUM (year), sort: gen hh_income_raw = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
-	browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==2, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==2, detail // post 2014 - not BW
+
+* Partner + Up (3)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==3, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==3, detail  // pre 2014 -- HHs that don't become BW
+
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==3, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==3, detail // post 2014 - not BW
+
+* Other + Up (5)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==5, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==5, detail  // pre 2014 -- HHs that don't become BW
+
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==5, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==5, detail // post 2014 - not BW
+
+* Partner Only (4)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==4, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==4, detail  // pre 2014 -- HHs that don't become BW
+
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==4, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==4, detail // post 2014 - not BW
+
+* Other Only (6)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==6, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==0 & bw60[_n+1]==0 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==6, detail  // pre 2014 -- HHs that don't become BW
+
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==6, detail // post 2014 - BW
+sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==6, detail // post 2014 - not BW
+
+** four category measure
+tab inc_pov_summary2 if trans_bw60_alt2==1 & bw60lag==0, m // this matches our output table
+tab inc_pov_summary2 if bw60==1 & bw60lag==0, m // this matches our output table -- became
+tab inc_pov_summary2 if bw60==0 & bw60lag==0 & pathway_gp!=., m // this matches our output table -- did not become, but had to experience an event
+
+tab pathway_gp if bw60==1 & bw60lag==0, m
+tab pathway_gp inc_pov_summary2 if bw60==1 & bw60lag==0, row nofreq
+
+tab pathway_gp if bw60==0 & bw60lag==0 //, m
+tab pathway_gp inc_pov_summary2 if bw60==0 & bw60lag==0, row nofreq
+
+* Change metrics (I think for histogram?)
+by SSUID PNUM (year), sort: gen hh_income_chg = ((thearn_adj-thearn_adj[_n-1])/thearn_adj[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+by SSUID PNUM (year), sort: gen hh_income_raw = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
 	
-	by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & bw60lag==0
-*/
+by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & bw60lag==0
+
+** comparing mom's gain to other's loss by pathway
+* Mom up partnered (1)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==1, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==1, detail // post 2014 - BW
+
+* Mom up single (2)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==2, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==2, detail // post 2014 - BW
+
+* Partner + Up (3)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==3, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==3, detail // post 2014 - BW
+
+* Other + Up (5)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==5, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==5, detail // post 2014 - BW
+
+* Partner Only (4)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==4, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==4, detail // post 2014 - BW
+
+* Other Only (6)
+sum thearn_adj if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & pathway_gp[_n+1]==6, detail  // pre 2014 -- HHs that become BW
+sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & pathway_gp==6, detail // post 2014 - BW
+
 
 /* old
 * mom change: earn_change mom_gain_earn == specifically BECAME an earner
