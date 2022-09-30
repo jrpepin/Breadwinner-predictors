@@ -1336,7 +1336,7 @@ drop base_1 base_2
 save "$tempdir/combined_bw_equation.dta", replace
 
 *****************************
-log using "$logdir/bw_updates_021522.log", replace
+// log using "$logdir/bw_updates_021522.log", replace
 
 // investigations
 * how many moms who had a birth in the panel were breadwinners at the time of birth
@@ -1441,4 +1441,4 @@ unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 161 mothers entered motherhood as BW in 2014, out of a total of 831 moms who became a mom during panel (19.37%)
 
 
-log close
+// log close

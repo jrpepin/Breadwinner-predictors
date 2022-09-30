@@ -761,7 +761,7 @@ sum thearn_adj if bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & su
 sum thearn_adj if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - BW
 sum thearn_adj if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & ft_partner_leave==1, detail // post 2014 - not BW
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table1) replace
 putexcel A1 = "category"
 putexcel B1 = "label"
 putexcel C1 = "time"
@@ -921,7 +921,7 @@ forvalues r=1/4{
 	
 	// Table 4a: Partner's income change
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4a) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table1a) modify
 putexcel A1:J1 = "Median Income Loss for Partners - Total", merge border(bottom) hcenter
 putexcel A2 = "Category"
 putexcel B2 = "Label"
@@ -1125,7 +1125,7 @@ forvalues r=1/4{
 
 // Table 4b: Mother's Income Change
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4b) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table1b) modify
 putexcel A1:J1 = "Median Income Gain for Mothers - Total", merge border(bottom) hcenter
 putexcel A2 = "Category"
 putexcel B2 = "Label"
@@ -1328,7 +1328,8 @@ tab inc_pov_summary if trans_bw60_alt2==1
 tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==1
 tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==2
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table4c) modify
+
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table2) modify
 
 putexcel A1:H1 = "Median HH Income-to-Poverty Change - Mother became BW", merge border(bottom) hcenter
 putexcel A2 = "Category"
@@ -1482,7 +1483,7 @@ forvalues y=1/2{
 */
 
 // Table 5:  HH raw income change with each breadwinner component
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5-raw) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table3-raw) modify
 putexcel A3 = "Event"
 putexcel B3 = "Year"
 putexcel C3 = ("All_events") E3 = ("All_events") G3 = ("All_events") I3 = ("All_events") K3 = ("All_events") M3 = ("All_events") O3 = ("All_events") Q3 = ("All_events") S3 = ("All_events") U3 = ("All_events") W3 = ("All_events") Y3 = ("All_events") AA3 = ("All_events") AC3 = ("All_events")
@@ -1977,7 +1978,7 @@ local i = 1
 }
 
 // Table 5a:  HH income-to-poverty change with each breadwinner component
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table5a) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table3) modify
 putexcel C1:J1 = "Overview", merge border(bottom) hcenter
 putexcel C2:D2 = "Total", merge border(bottom) hcenter
 putexcel E2:F2 = "Ratio Up", merge border(bottom) hcenter
@@ -2475,294 +2476,6 @@ local ++x
 }
 
 
-// Table 6: Mother's Hours Change
-
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table6) modify
-putexcel A1:J1 = "Median Hours Change for Mothers - Total", merge border(bottom) hcenter
-putexcel A2 = "Category"
-putexcel B2 = "Label"
-putexcel C2 = ("Pre_1996") D2 = ("Post_1996") E2 = ("% Change_1996") F2 = ("Abs Change_1996")
-putexcel G2 = ("Pre_2014") H2 = ("Post_2014") I2 = ("% Change_2014") J2 = ("Abs Change_2014")
-putexcel A3 = ("Total") B3 = ("Total")
-putexcel A4:A6 = "Education"
-putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
-putexcel A7:A10 = "Race"
-putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
-
-putexcel A12:J12 = "Median Hours Change for Mothers - Mother became BW", merge border(bottom) hcenter
-putexcel A13 = "Category"
-putexcel B13 = "Label"
-putexcel C13 = ("Pre_1996") D13 = ("Post_1996") E13 = ("% Change_1996") F13 = ("Abs Change_1996")
-putexcel G13 = ("Pre_2014") H13 = ("Post_2014") I13 = ("% Change_2014") J13 = ("Abs Change_2014")
-putexcel A14 = ("Total") B14 = ("Total")
-putexcel A15:A17 = "Education"
-putexcel B15 = ("HS or Less") B16 = ("Some College") B17 = ("College Plus") 
-putexcel A18:A21 = "Race"
-putexcel B18 = ("NH White") B19 = ("Black") B20 = ("NH Asian") B21 = ("Hispanic") 
-
-* All mothers who gained earnings
-
-sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre
-putexcel C3=`r(p50)', nformat(###,###)
-sum avg_mo_hrs if survey_yr==1 & earn_change_raw>0, detail // post change
-putexcel D3=`r(p50)', nformat(###,###)
-putexcel E3=formula(=(D3-C3)/C3), nformat(#.##%)
-putexcel F3=formula(=D3-C3), nformat(###,###)
-
-sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre
-putexcel G3=`r(p50)', nformat(###,###)
-sum avg_mo_hrs if survey_yr==2 & earn_change_raw>0, detail // post change
-putexcel H3=`r(p50)', nformat(###,###)
-putexcel I3=formula(=(H3-G3)/G3), nformat(#.##%)
-putexcel J3=formula(=H3-G3), nformat(###,###)
-
-local row1 "4 5 6"
-forvalues e=1/3{
-    local row: word `e' of `row1'	
-	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0 & educ_gp==`e', detail // pre
-	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==1 & earn_change_raw>0  & educ_gp==`e', detail // post change
-	putexcel D`row'=`r(p50)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0 & educ_gp==`e', detail // pre
-	putexcel G`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==2 & earn_change_raw>0  & educ_gp==`e', detail // post change
-	putexcel H`row'=`r(p50)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-local row2 "7 8 9 10"
-forvalues r=1/4{
-    local row: word `r' of `row2'	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0 & race==`r', detail // pre
-	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==1 & earn_change_raw>0  & race==`r', detail // post change
-	putexcel D`row'=`r(p50)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0 & race==`r', detail // pre
-	putexcel G`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==2 & earn_change_raw>0  & race==`r', detail // post change
-	putexcel H`row'=`r(p50)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-
-* Just those where mother became BW (and she gained earnings)
-sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre
-putexcel C14=`r(p50)', nformat(###,###)
-sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & earn_change_raw>0, detail // post
-putexcel D14=`r(p50)', nformat(###,###)
-putexcel E14=formula(=(D14-C14)/C14), nformat(#.##%)
-putexcel F14=formula(=D14-C14), nformat(###,###)
-
-sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0, detail  // pre
-putexcel G14=`r(p50)', nformat(###,###)
-sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & earn_change_raw>0, detail // post
-putexcel H14=`r(p50)', nformat(###,###)
-putexcel I14=formula(=(H14-G14)/G14), nformat(#.##%)
-putexcel J14=formula(=H14-G14), nformat(###,###)
-
-local row1 "15 16 17"
-forvalues e=1/3{
-    local row: word `e' of `row1'	
-	
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre-1996
-	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1 & earn_change_raw>0, detail // post-1996
-	putexcel D`row'=`r(p50)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-		
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre-2014
-	putexcel G`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2 & earn_change_raw>0, detail // post-2014
-	putexcel H`row'=`r(p50)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-local row2 "18 19 20 21"
-forvalues r=1/4{
-    local row: word `r' of `row2'	
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre-1996
-	putexcel C`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1 & earn_change_raw>0, detail // post-1996
-	putexcel D`row'=`r(p50)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-		
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre-2014
-	putexcel G`row'=`r(p50)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2 & earn_change_raw>0, detail // post-2014
-	putexcel H`row'=`r(p50)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-
-// Table 6a: Mother's Hours Change - Mean
-
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table6a) modify
-putexcel A1:J1 = "Mean Hours Change for Mothers - Total", merge border(bottom) hcenter
-putexcel A2 = "Category"
-putexcel B2 = "Label"
-putexcel C2 = ("Pre_1996") D2 = ("Post_1996") E2 = ("% Change_1996") F2 = ("Abs Change_1996")
-putexcel G2 = ("Pre_2014") H2 = ("Post_2014") I2 = ("% Change_2014") J2 = ("Abs Change_2014")
-putexcel A3 = ("Total") B3 = ("Total")
-putexcel A4:A6 = "Education"
-putexcel B4 = ("HS or Less") B5 = ("Some College") B6 = ("College Plus") 
-putexcel A7:A10 = "Race"
-putexcel B7 = ("NH White") B8 = ("Black") B9 = ("NH Asian") B10 = ("Hispanic") 
-
-putexcel A12:J12 = "Mean Hours Change for Mothers - Mother became BW", merge border(bottom) hcenter
-putexcel A13 = "Category"
-putexcel B13 = "Label"
-putexcel C13 = ("Pre_1996") D13 = ("Post_1996") E13 = ("% Change_1996") F13 = ("Abs Change_1996")
-putexcel G13 = ("Pre_2014") H13 = ("Post_2014") I13 = ("% Change_2014") J13 = ("Abs Change_2014")
-putexcel A14 = ("Total") B14 = ("Total")
-putexcel A15:A17 = "Education"
-putexcel B15 = ("HS or Less") B16 = ("Some College") B17 = ("College Plus") 
-putexcel A18:A21 = "Race"
-putexcel B18 = ("NH White") B19 = ("Black") B20 = ("NH Asian") B21 = ("Hispanic") 
-
-* All mothers who gained earnings
-
-sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre
-putexcel C3=`r(mean)', nformat(###,###)
-sum avg_mo_hrs if survey_yr==1 & earn_change_raw>0, detail // post change
-putexcel D3=`r(mean)', nformat(###,###)
-putexcel E3=formula(=(D3-C3)/C3), nformat(#.##%)
-putexcel F3=formula(=D3-C3), nformat(###,###)
-
-sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre
-putexcel G3=`r(mean)', nformat(###,###)
-sum avg_mo_hrs if survey_yr==2 & earn_change_raw>0, detail // post change
-putexcel H3=`r(mean)', nformat(###,###)
-putexcel I3=formula(=(H3-G3)/G3), nformat(#.##%)
-putexcel J3=formula(=H3-G3), nformat(###,###)
-
-local row1 "4 5 6"
-forvalues e=1/3{
-    local row: word `e' of `row1'	
-	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0 & educ_gp==`e', detail // pre
-	putexcel C`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==1 & earn_change_raw>0  & educ_gp==`e', detail // post change
-	putexcel D`row'=`r(mean)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0 & educ_gp==`e', detail // pre
-	putexcel G`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==2 & earn_change_raw>0  & educ_gp==`e', detail // post change
-	putexcel H`row'=`r(mean)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-local row2 "7 8 9 10"
-forvalues r=1/4{
-    local row: word `r' of `row2'	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0 & race==`r', detail // pre
-	putexcel C`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==1 & earn_change_raw>0  & race==`r', detail // post change
-	putexcel D`row'=`r(mean)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-	
-	sum avg_mo_hrs if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0 & race==`r', detail // pre
-	putexcel G`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if survey_yr==2 & earn_change_raw>0  & race==`r', detail // post change
-	putexcel H`row'=`r(mean)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-
-* Just those where mother became BW (and she gained earnings)
-sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre
-putexcel C14=`r(mean)', nformat(###,###)
-sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & earn_change_raw>0, detail // post
-putexcel D14=`r(mean)', nformat(###,###)
-putexcel E14=formula(=(D14-C14)/C14), nformat(#.##%)
-putexcel F14=formula(=D14-C14), nformat(###,###)
-
-sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & earn_change_raw[_n+1]>0, detail  // pre
-putexcel G14=`r(mean)', nformat(###,###)
-sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & earn_change_raw>0, detail // post
-putexcel H14=`r(mean)', nformat(###,###)
-putexcel I14=formula(=(H14-G14)/G14), nformat(#.##%)
-putexcel J14=formula(=H14-G14), nformat(###,###)
-
-local row1 "15 16 17"
-forvalues e=1/3{
-    local row: word `e' of `row1'	
-	
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre-1996
-	putexcel C`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==1 & earn_change_raw>0, detail // post-1996
-	putexcel D`row'=`r(mean)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-		
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & educ_gp==`e' & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre-2014
-	putexcel G`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & educ_gp==`e' & survey_yr==2 & earn_change_raw>0, detail // post-2014
-	putexcel H`row'=`r(mean)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-local row2 "18 19 20 21"
-forvalues r=1/4{
-    local row: word `r' of `row2'	
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==1 & earn_change_raw[_n+1]>0, detail // pre-1996
-	putexcel C`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==1 & earn_change_raw>0, detail // post-1996
-	putexcel D`row'=`r(mean)', nformat(###,###)
-	putexcel E`row'=formula((D`row'-C`row')/C`row'), nformat(#.##%)
-	putexcel F`row'=formula((D`row'-C`row')), nformat(###,###)
-		
-	sum avg_mo_hrs if bw60==0 & bw60[_n+1]==1 & year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & race==`r' & survey_yr==2 & earn_change_raw[_n+1]>0, detail // pre-2014
-	putexcel G`row'=`r(mean)', nformat(###,###)
-	sum avg_mo_hrs if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & race==`r' & survey_yr==2 & earn_change_raw>0, detail // post-2014
-	putexcel H`row'=`r(mean)', nformat(###,###)
-	putexcel I`row'=formula((H`row'-G`row')/G`row'), nformat(#.##%)
-	putexcel J`row'=formula((H`row'-G`row')), nformat(###,###)
-}
-
-
-/*for raw change
-* All mothers who experienced a change
-local i=1
-
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	local row1 = `i'*2+2
-		
-	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & `var'[_n+1]==1, detail // pre
-	local p50_pre =`r(p50)'
-	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==1 & `var'==1, detail // post - is this the same as bw60lag==0? okay yes
-	local p50_post =`r(p50)'
-	putexcel C`row1'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(###,###)
-
-	local row2 = `i'*2+3
-	sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & `var'[_n+1]==1, detail  // pre
-	local p50_pre =`r(p50)'
-	sum thearn_adj if year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & survey_yr==2 & `var'==1, detail // post
-	local p50_post =`r(p50)'
-	putexcel C`row2'=formula(=(`p50_post' - `p50_pre') / `p50_pre'), nformat(###,###)
-
-	local ++i
-}
-*/
-
 ********************************************************************************
 * Table 7: HH economic well-being change when mom becomes BW
 ********************************************************************************
@@ -2779,7 +2492,7 @@ tab inc_pov_summary if trans_bw60_alt2==1 & survey_yr==2
 // tab inc_pov_summary, gen(inc_pov_bucket) // 3 categories (Up Above; Up Below; Down)
 tab inc_pov_summary2, gen(inc_pov_bucket) // 4 categores (Up Above; Up Below; Down Above; Down Below)
 
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table7) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table4) modify
 putexcel A1:F1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
 putexcel A2 = "Category"
 putexcel B2 = "Label"
@@ -3343,7 +3056,7 @@ local ++x
 ********************************************************************************
 * Table 10: Description of mothers in each income change bucket
 ********************************************************************************
-putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table10) modify
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table5) modify
 putexcel C1:F1 = "2014", merge border(bottom) hcenter
 putexcel C2 = ("Income Up: Above") D2 = ("Income Up: Below") E2 = ("Income Down: Above")  F2 = ("Income Down: Below")
 putexcel A2 = "Category"
@@ -3523,6 +3236,7 @@ tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 // moms had first
 tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 & survey==1996
 tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 & survey==2014
 
+/*
 ********************************************************************************
 * Figures
 ********************************************************************************
@@ -3591,7 +3305,7 @@ graph export "$results/Income_Race.png", as(png) name("Graph") replace
 graph bar change_1996 change_2014 if category=="Total", blabel(bar, format(%9.2f)) title ("Change in Median Household Income upon BW Transition") subtitle("overall") ytitle("Percentage Change post-Transition")  legend(label(1 "1996") label(2 "2014") size(small)) plotregion(fcolor(white)) graphregion(fcolor(white)) ylabel(-.6(.2).2, labsize(small)) bargap(10)  outergap(*5) 
 graph export "$results/Income_Total.png", as(png) name("Graph") replace
 */
-
+*/
 
 /*
 ********************************************************************************
