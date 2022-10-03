@@ -2494,6 +2494,7 @@ tab inc_pov_summary2, gen(inc_pov_bucket) // 4 categores (Up Above; Up Below; Do
 
 putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table4) modify
 putexcel A1:F1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
+putexcel J1:M1 = "1996 Comparison", merge border(bottom) hcenter
 putexcel A2 = "Category"
 putexcel B2 = "Label"
 putexcel A3 = ("Total") B3 = ("Total")
@@ -2508,6 +2509,7 @@ putexcel B15 = ("Married") B16 = ("Never Married")
 putexcel A17:A21 = "Pathway"
 putexcel B17 = ("Partner Left") B18 = ("Mom Up") B19 = ("Partner Down") B20 = ("Mom Up Partner Down") B21 = ("Other HH Member") 
 putexcel C2 = ("Income Up: Above Threshold") D2 = ("Income Up: Below Threshold") E2 = ("Income Down: Above") F2 = ("Income Down: Below") 
+putexcel J2 = ("Income Up: Above Threshold") K2 = ("Income Up: Below Threshold") L2 = ("Income Down: Above") M2 = ("Income Down: Below") 
 
 local colu "C D E F"
 
@@ -2565,6 +2567,69 @@ foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom 
 		forvalues i=1/4{
 		local col: word `i' of `colu'
 		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1, detail // 2014
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}
+local ++x
+}
+
+
+//1996
+local colu "J K L M"
+
+forvalues i=1/4{
+	local col: word `i' of `colu'
+	sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==1, detail // 1996
+	putexcel `col'3=`r(mean)', nformat(#.##%)
+}
+
+local row1 "4 5 6"
+forvalues e=1/3{
+	local row: word `e' of `row1'
+		forvalues i=1/4{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==1 & educ_gp==`e', detail // 1996
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+local row1 "7 8 9 10"
+forvalues r=1/4{
+	local row: word `r' of `row1'
+		forvalues i=1/4{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==1 & race==`r', detail // 1996
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+local row1 "11 12 13 14"
+forvalues a=1/4{
+	local row: word `a' of `row1'
+		forvalues i=1/4{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==1 & ageb1_cat==`a', detail // 1996
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+
+local row1 "15 16"
+forvalues s=1/2{
+	local row: word `s' of `row1'
+		forvalues i=1/4{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==1 & status_b1==`s', detail // 1996
+		putexcel `col'`row'=`r(mean)', nformat(#.##%)
+	}	
+}
+
+local row1 "17 18 19 20 21"
+local x=1
+foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	local row: word `x' of `row1'
+		forvalues i=1/4{
+		local col: word `i' of `colu'
+		sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==1 & `var'==1, detail // 1996
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
 	}
 local ++x
