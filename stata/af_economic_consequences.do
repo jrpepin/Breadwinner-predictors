@@ -141,7 +141,8 @@ label define summary2 1 "Up, Above Pov" 2 "Up, Below Pov" 3 "Down, Above Pov" 4 
 label values inc_pov_summary2 summary2
 
 tab inc_pov_summary2 if trans_bw60_alt2==1, m // this matches our output table
-
+tabstat thearn_adj if trans_bw60_alt2, by(inc_pov_summary2) stats(mean p50)
+tabstat inc_pov if trans_bw60_alt2, by(inc_pov_summary2) stats(mean p50)
 
 ********************************************************************************
 * Outcomes
