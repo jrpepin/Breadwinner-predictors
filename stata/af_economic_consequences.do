@@ -125,6 +125,10 @@ tab pathway_gp if trans_bw60_alt2==1, m
 // need outcome variable
 browse SSUID year end_hhsize end_minorchildren threshold thearn_adj
 gen inc_pov = thearn_adj / threshold
+gen inc_pov_lag = inc_pov[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen pov_lag=.
+replace pov_lag=0 if inc_pov_lag <1.5
+replace pov_lag=1 if inc_pov_lag>=1.5 & inc_pov_lag!=. // okay 1 is NOT in poverty
 
 by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 by SSUID PNUM (year), sort: gen inc_pov_change_raw = (inc_pov-inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
@@ -162,6 +166,8 @@ tab pathway_gp if trans_bw60_alt2==1
 
 tab pathway inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
 tab pathway_gp inc_pov_summary2 if trans_bw60_alt2==1, row nofreq
+
+tab pov_lag inc_pov_summary2 if trans_bw60_alt2==1, row
 
 
 // attempting models (see file ad for reference)

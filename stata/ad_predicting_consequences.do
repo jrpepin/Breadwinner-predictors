@@ -23,6 +23,11 @@ sort SSUID PNUM year
 by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 by SSUID PNUM (year), sort: gen inc_pov_change_raw = (inc_pov-inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 
+gen inc_pov_lag = inc_pov[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen pov_lag=.
+replace pov_lag=0 if inc_pov_lag <1.5
+replace pov_lag=1 if inc_pov_lag>=1.5 & inc_pov_lag!=. // okay 1 is NOT in poverty
+
 gen inc_pov_summary2=.
 replace inc_pov_summary2=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov >=1.5
 replace inc_pov_summary2=2 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov <1.5
@@ -60,8 +65,43 @@ label values pathway pathway
 keep if trans_bw60_alt2==1 & bw60lag==0
 keep if survey == 2014
 
+
 ********************************************************************************
 * ANALYSIS
+********************************************************************************
+tab pov_lag inc_pov_summary2, row
+
+tab pathway inc_pov_summary2 if pov_lag==0, row nofreq
+tab pathway inc_pov_summary2 if pov_lag==1, row nofreq
+
+tab race inc_pov_summary2 if pov_lag==0, row nofreq
+tab race inc_pov_summary2 if pov_lag==1, row nofreq
+
+tab educ_gp inc_pov_summary2 if pov_lag==0, row nofreq
+tab educ_gp inc_pov_summary2 if pov_lag==1, row nofreq
+
+tabstat inc_pov, by(pov_lag)
+tabstat inc_pov_lag, by(pov_lag)
+tab educ_gp pov_lag, row
+
+// trying NEW classification
+gen outcome=.
+replace outcome=1 if pov_lag==0 & inc_pov_summary2==1 // improve
+replace outcome=2 if (pov_lag==0 & inlist(inc_pov_summary2,2,4)) | (pov_lag==1 & inlist(inc_pov_summary2,1,3)) // maintain
+replace outcome=3 if pov_lag==1 & inc_pov_summary2==4 // decline
+
+label define outcome 1 "Improve" 2 "Maintain" 3 "Decline"
+label values outcome outcome
+
+tab inc_pov_summary2 outcome
+
+tab race outcome, row nofreq
+tab educ_gp outcome, row nofreq
+
+tab pathway outcome, row nofreq // okay I honestly do not hate this.
+
+********************************************************************************
+* MODELS
 ********************************************************************************
 
 /// To use for now
