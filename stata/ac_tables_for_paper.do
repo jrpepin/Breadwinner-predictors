@@ -2511,6 +2511,20 @@ putexcel B17 = ("Partner Left") B18 = ("Mom Up") B19 = ("Partner Down") B20 = ("
 putexcel C2 = ("Income Up: Above Threshold") D2 = ("Income Up: Below Threshold") E2 = ("Income Down: Above") F2 = ("Income Down: Below") 
 putexcel J2 = ("Income Up: Above Threshold") K2 = ("Income Up: Below Threshold") L2 = ("Income Down: Above") M2 = ("Income Down: Below") 
 
+/// split pathways by race / educ
+putexcel A23:A27 = "HS or Less", merge hcenter
+putexcel A28:A32 = "Some College", merge hcenter
+putexcel A33:A37 = "College", merge hcenter
+putexcel A38:A42 = "White", merge hcenter
+putexcel A43:A47 = "Black", merge hcenter
+putexcel A48:A52 = "Hispanic", merge hcenter
+putexcel B23 = ("Partner Left") B24 = ("Mom Up") B25 = ("Partner Down") B26 = ("Mom Up Partner Down") B27 = ("Other HH Member")
+putexcel B28 = ("Partner Left") B29 = ("Mom Up") B30 = ("Partner Down") B31 = ("Mom Up Partner Down") B32 = ("Other HH Member")
+putexcel B33 = ("Partner Left") B34 = ("Mom Up") B35 = ("Partner Down") B36 = ("Mom Up Partner Down") B37 = ("Other HH Member")
+putexcel B38 = ("Partner Left") B39 = ("Mom Up") B40 = ("Partner Down") B41 = ("Mom Up Partner Down") B42 = ("Other HH Member")
+putexcel B43 = ("Partner Left") B44 = ("Mom Up") B45 = ("Partner Down") B46 = ("Mom Up Partner Down") B47 = ("Other HH Member")
+putexcel B48 = ("Partner Left") B49 = ("Mom Up") B50 = ("Partner Down") B51 = ("Mom Up Partner Down") B52 = ("Other HH Member")
+
 local colu "C D E F"
 
 forvalues i=1/4{
@@ -2570,6 +2584,41 @@ foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom 
 		putexcel `col'`row'=`r(mean)', nformat(#.##%)
 	}
 local ++x
+}
+
+local colu "C D E F"
+
+forvalues e=1/3{
+	local x=1
+		foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+		local row = (`e' * 5) +17 + `x'
+			forvalues i=1/4{
+			local col: word `i' of `colu'
+			sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1 &	educ_gp==`e', detail // 2014
+			putexcel `col'`row'=`r(mean)', nformat(#.##%)
+			}
+		local ++x
+	}
+}
+
+
+recode race (1=1) (2=2)(4=3)(3=4)(5=4), gen(race_gp)
+label define race_gp 1 "White" 2 "Black" 3 "Hispanic"
+label values race_gp race_gp
+
+local colu "C D E F"
+
+forvalues r=1/3{
+	local x=1
+		foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+		local row = (`r' * 5) +32 + `x'
+			forvalues i=1/4{
+			local col: word `i' of `colu'
+			sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1 &	race_gp==`r', detail // 2014
+			putexcel `col'`row'=`r(mean)', nformat(#.##%)
+			}
+		local ++x
+	}
 }
 
 
