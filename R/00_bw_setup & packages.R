@@ -97,6 +97,17 @@ if(!require(conflicted)){
   library(conflicted)
 }
 
+devtools::install_github("hrbrmstr/waffle")
+library(waffle)
+
+if(!require(colorspace)){
+  install.packages("colorspace")
+  library(colorspace)
+}
+
+library(ggtext) ## color text in titles in figures
+library(ggwaffle)
+
 # Address any conflicts in the packages
 conflict_scout() # Identify the conflicts
 conflict_prefer("here", "here")
@@ -121,6 +132,22 @@ figDir  <- file.path(projcode, "output/results/figures")
 # Import the data
 #####################################################################################
 
-data <- read_excel(file.path(dataDir, "Breadwinner_Predictor_Tables.xlsx"), sheet = "Table4")
+# Figure 1 data ---------------------------------------------------------------------
+data_f1 <- data.frame(year = c(rep("1996",5), rep("2014",5)),
+                      path = as_factor(c(rep(c("Partner separation",
+                                               "Mothers increased earnings",
+                                               "Partner lost earnings",
+                                               "Mothers increased earnings & partner lost earnings",
+                                               "Other member exit or lost earnings"),2))),
+                      vals = c(5.89, 32.67, 17.83, 19.67, 23.93,
+                               9.68, 31.10, 15.27, 26.35, 17.56),
+                      prop = c(rep(6,5), rep(9,5)))  %>%
+  group_by(year) %>%
+  mutate(total = round(sum(vals * prop))) %>%
+  ungroup()
+
+# Figure 2 data ---------------------------------------------------------------------
+data_f2  <- read_excel(file.path(dataDir, "bw_decomp.xlsx"), sheet = "tab3")
+
 
 message("End of 00_bw_setup & packages") # Marks end of R Script
