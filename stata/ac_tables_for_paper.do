@@ -62,6 +62,7 @@ putexcel G2 = "2014: Never BW"
 gen bw60_all = bw60_mom
 replace bw60_all = 0 if mom_panel==1 & year < yrfirstbirth
 bysort SSUID PNUM (bw60_all): egen ever_bw60 = max(bw60_all)
+bysort SSUID PNUM (bw50): egen ever_bw50 = max(bw50)
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom bw60_all ever_bw60
 
 tab ever_bw60 if survey_yr==2
@@ -230,6 +231,14 @@ foreach var in educ1 educ2 educ3 educ4{
 recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
 label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
 label values marital_status_t1 marr
+
+// for JG ask 10/10/22
+browse SSUID PNUM year earnings_adj thearn_adj bw60 bw50 earnings_ratio
+tab marital_status_t1 bw60 if survey_yr==2, row // 15.41%
+unique SSUID PNUM if survey_yr==2 & marital_status_t1==1, by(ever_bw60) // 1633 / 6288 = 25.9%
+
+tab marital_status_t1 bw50 if survey_yr==2, row // 23.34%
+unique SSUID PNUM if survey_yr==2 & marital_status_t1==1, by(ever_bw50) // 2251 / 6288 = 35.8%
 
 tab marital_status_t1 [aweight=wpfinwgt], gen(marst)
 
