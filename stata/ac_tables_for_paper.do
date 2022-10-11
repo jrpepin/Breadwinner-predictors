@@ -260,6 +260,11 @@ tab marital_status_t1 wife_bw60 if survey_yr==2, row // 18.91%
 tab marital_status_t1 wife_bw50 if survey_yr==2, row // 28.30%
 tab marital_status_t1 wife_bw50_alt if survey_yr==2, row // 27.49%
 
+tab marital_status_t1 wife_bw60 if year==2016, row // 18.7%
+tab year wife_bw60 if marital_status_t1 ==1 & survey_yr==2, row
+tab marital_status_t1 wife_bw50 if year==2016, row // 28.1%
+tab marital_status_t1 wife_bw50_alt if year==2016, row // 27.6%
+
 tab marital_status_t1 [aweight=wpfinwgt], gen(marst)
 
 local colu "C D"
