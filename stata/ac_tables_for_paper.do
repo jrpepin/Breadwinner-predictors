@@ -252,8 +252,13 @@ gen wife_bw50=.
 replace wife_bw50 =0 if wife_ratio <.50 & wife_ratio!=.
 replace wife_bw50 =1 if wife_ratio >=.50 & wife_ratio!=.
 
+gen wife_bw50_alt=.
+replace wife_bw50_alt =0 if wife_ratio <=.50 & wife_ratio!=.
+replace wife_bw50_alt =1 if wife_ratio >.50 & wife_ratio!=.
+
 tab marital_status_t1 wife_bw60 if survey_yr==2, row // 18.91%
 tab marital_status_t1 wife_bw50 if survey_yr==2, row // 28.30%
+tab marital_status_t1 wife_bw50_alt if survey_yr==2, row // 27.49%
 
 tab marital_status_t1 [aweight=wpfinwgt], gen(marst)
 
