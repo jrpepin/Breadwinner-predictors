@@ -240,6 +240,21 @@ unique SSUID PNUM if survey_yr==2 & marital_status_t1==1, by(ever_bw60) // 1633 
 tab marital_status_t1 bw50 if survey_yr==2, row // 23.34%
 unique SSUID PNUM if survey_yr==2 & marital_status_t1==1, by(ever_bw50) // 2251 / 6288 = 35.8%
 
+// need just her percentage of partner earnings
+gen wife_ratio = earnings_adj / (earnings_adj + earnings_sp_adj)
+browse SSUID PNUM  earnings_adj earnings_sp_adj wife_ratio
+
+gen wife_bw60=.
+replace wife_bw60 =0 if wife_ratio <.60 & wife_ratio!=.
+replace wife_bw60 =1 if wife_ratio >=.60 & wife_ratio!=.
+
+gen wife_bw50=.
+replace wife_bw50 =0 if wife_ratio <.50 & wife_ratio!=.
+replace wife_bw50 =1 if wife_ratio >=.50 & wife_ratio!=.
+
+tab marital_status_t1 wife_bw60 if survey_yr==2, row // 18.91%
+tab marital_status_t1 wife_bw50 if survey_yr==2, row // 28.30%
+
 tab marital_status_t1 [aweight=wpfinwgt], gen(marst)
 
 local colu "C D"
