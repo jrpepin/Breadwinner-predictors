@@ -1,5 +1,5 @@
 // how to identify PARTNERS
-browse year serial pernum ncouples relate pecohab
+//browse year serial pernum ncouples relate pecohab
 
 use "$CPS/bw_1967_2021.dta", clear
 replace incwage=0 if incwage==99999999
@@ -164,6 +164,17 @@ gen bw_40_married = 1 if mom_earn_pct >=0.40000000
 replace bw_40_married = 0 if single_mom==1
 replace bw_40_married = 0 if bw_40_married==.
 
+gen bw_50_married = 1 if mom_earn_pct >0.50000000
+replace bw_50_married = 0 if single_mom==1
+replace bw_50_married = 0 if bw_50_married==.
+tab bw_50_married if married==1 & year==2021
+tab mom_earn_more if married==1 & year==2021
+
+gen bw_50_married_alt = 1 if mom_earn_pct >=0.50000000
+replace bw_50_married_alt = 0 if single_mom==1
+replace bw_50_married_alt = 0 if bw_50_married_alt==.
+tab bw_50_married_alt if married==1 & year==2021
+
 // how different are hh_earnings v. just couple
 egen couple_earnings= rowtotal(incwage incwage_sp)
 	// browse year serial incwage incwage_sp couple_earnings hh_earnings
@@ -174,6 +185,13 @@ gen bw_25_couple=1 if mom_earn_couple>=0.2500000
 replace bw_25_couple=0 if bw_25_couple==.
 gen bw_25_couple_dedup=bw_25_couple
 replace bw_25_couple_dedup=0 if (mom_earn_more==1 | single_mom==1)
+
+gen bw_50_couple=1 if mom_earn_couple>0.500000
+replace bw_50_couple=0 if bw_50_couple==.
+gen bw_50_couple_alt=1 if mom_earn_couple>=0.500000 // this matches earnings distribution below (the Philip Cohen one) - just mom's percent of couple earnings NOT total household, using 50%+. If it's just greater than 50%, it's 23.8% (above)
+replace bw_50_couple_alt=0 if bw_50_couple_alt==.
+gen bw_50_couple_dedup=bw_50_couple
+replace bw_50_couple_dedup=0 if (mom_earn_more==1 | single_mom==1)
 
 gen bw_couple=1 if mom_earn_couple>=0.6000000
 replace bw_couple=0 if bw_couple==.
@@ -251,6 +269,8 @@ replace bw_decile_couple=12 if mom_earn_couple==1
 tab bw_decile_couple if year==2014
 
 tab bw_decile_couple if year==2014 & single_mom==0 // just married couples
+tab bw_decile_couple if year==2021 & single_mom==0 // just married couples
+tab bw_decile_couple if year==2021 & single_mom==0 & married==1 // just married couples
 
 
 // do 1967 separately?
