@@ -594,6 +594,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					prebiochildren race educ race_sp educ_sp tceb oldest_age 			///
 					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
 					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
+					yrfirstbirth														///
 			(min) 	tage_fb durmom youngest_age first_wave								///
 					tpearn_mis tmwkhrs_mis earnings_mis									///
 					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///

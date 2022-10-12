@@ -20,6 +20,7 @@ browse SSUID PNUM year bw60 trans_bw60 earnup8_all momup_only earn_lose earndown
 
 // ensure those who became mothers IN panel removed from sample in years they hadn't yet had a baby
 browse SSUID PNUM year bw60 trans_bw60 firstbirth yrfirstbirth if mom_panel==1
+browse SSUID PNUM year bw60 trans_bw60 firstbirth yrfirstbirth mom_panel
 gen bw60_mom=bw60  // need to retain this for future calculations for women who became mom in panel
 replace bw60=. if year < yrfirstbirth & mom_panel==1
 replace trans_bw60=. if year < yrfirstbirth & mom_panel==1
@@ -1341,6 +1342,7 @@ save "$tempdir/combined_bw_equation.dta", replace
 // investigations
 * how many moms who had a birth in the panel were breadwinners at the time of birth
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_marital_status if mom_panel==1
+browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom mom_panel
 
 unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
 // or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298 -- is this because we only keep her if we have an observation the year prior? I think so
@@ -1416,7 +1418,8 @@ tab end_occ_code1 ever_bw60 if survey==2014, chi2
 
 * Moms who enter motherhood as BWs:
 * Counts:
-unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
+unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel - but this might not be first birth?
+unique SSUID PNUM if mom_panel==1 & firstbirth==1, by(survey_yr) // these are the numbers I used in the ppt
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth...so 231 moms total entered motherhood as breadwinners (70 in 1996; 161 in 2014)
 unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 

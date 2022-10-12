@@ -38,9 +38,9 @@ rename avg_hrs 		avg_mo_hrs
 rename hours_sp		avg_mo_hrs_sp
 rename tage_fb 		ageb1_mon
 
-gen yrfirstbirth=year if firstbirth==1
-bysort SSUID PNUM (yrfirstbirth): replace yrfirstbirth=yrfirstbirth[1]
-// browse SSUID PNUM year mom_panel firstbirth yrfirstbirth
+gen yrfirstbirth_ch=year if firstbirth==1
+bysort SSUID PNUM (yrfirstbirth_ch): replace yrfirstbirth_ch=yrfirstbirth_ch[1]
+// browse SSUID PNUM year mom_panel firstbirth yrfirstbirth yrfirstbirth_ch
 
 keep `keep_vars' st_occ_* end_occ_* st_tjb*_occ end_tjb*_occ
 

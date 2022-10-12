@@ -216,7 +216,8 @@ bysort SSUID panelmonth (num_babies): replace num_babies = num_babies[1] if (PNU
 // Merge in number of children saved in step d
 drop _merge
 
-/* using household roster to identify births
+/*
+** using household roster to identify births
 merge 1:1 SSUID shhadid panelmonth PNUM using "$tempdir/mom_children_lookup96.dta", keepusing(mom_children mom_bio_children)
 drop if _merge==2 // not in my sample
 drop _merge
@@ -244,18 +245,20 @@ replace first_child_inpanel=1 if first_child_inpanel>0 & first_child_inpanel!=.
 
 browse SSUID PNUM panelmonth num_babies mom_bio_children any_child_inpanel first_child_inpanel mom_panel year_birth year_first_birth yrfirstbirth
 
-
-gen mom_panel2=mom_panel
-replace mom_panel2=1 if first_child_inpanel==1
-bysort SSUID PNUM (mom_panel2): replace mom_panel2=mom_panel2[1]
-
 gen yrfirstbirth2=yrfirstbirth
 replace yrfirstbirth2=year_first_birth if yrfirstbirth2==. & year_first_birth!=.
 
+gen mom_panel2=mom_panel
+replace mom_panel2=1 if first_child_inpanel==1 & yrfirstbirth==. & yrfirstbirth2!=. 
+bysort SSUID PNUM (mom_panel2): replace mom_panel2=mom_panel2[1]
+
 browse SSUID PNUM year panelmonth num_babies mom_bio_children any_child_inpanel first_child_inpanel mom_panel year_birth year_first_birth yrfirstbirth mom_panel2 yrfirstbirth2 durmom_1st
+browse SSUID PNUM year panelmonth num_babies mom_bio_children any_child_inpanel first_child_inpanel mom_panel year_birth year_first_birth yrfirstbirth mom_panel2 yrfirstbirth2 durmom_1st if yrfirstbirth==. & yrfirstbirth2!=. // I think I want THESE moms right?
+unique SSUID PNUM if mom_panel==1
+unique SSUID PNUM if mom_panel2==1 & yrfirstbirth==. & yrfirstbirth2!=.  /// so these are just the EXTRA moms, for full picutre, I need all.
+*/
 
-
-// Create an indicator of how many years have elapsed since individual's first birth
+/* Create an indicator of how many years have elapsed since individual's first birth
 replace durmom_1st=year-year_first_birth if durmom_1st==. & !missing(year_first_birth)
 */
 
