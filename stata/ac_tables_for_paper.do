@@ -914,8 +914,11 @@ forvalues r=1/4{
 	sum hh_income_raw if hh_chg_value==0, detail
 	sum hh_income_raw if hh_chg_value==1, detail
 	
-	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
+	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change") // wait is this all years?! but needs to be just 2014???
+	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & survey_yr==2, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("2014 Household income change upon transition to BW") xtitle("HH income change") // wait is this all years?! but needs to be just 2014???
 	graph export "$results/HH_Income_Change.png", as(png) name("Graph") replace
+	
+	recode hh_income_raw (-99999999/-50001=0)(-50000/-45000=-5
 	
 	// all
 	histogram hh_income_raw_all if hh_income_raw_all > -50000 & hh_income_raw_all <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Annual Household Income Change") xtitle("HH income change")
