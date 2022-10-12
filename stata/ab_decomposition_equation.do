@@ -1354,10 +1354,16 @@ label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-
 label values st_marital_status end_marital_status marital_status
 
 gen end_partner_status=.
-replace end_partner_status=1 if inlist(end_marital_status,1,2)
-replace end_partner_status=0 if inrange(end_marital_status,3,5)
+replace end_partner_status=1 if inlist(end_marital_status,1,2) // partnered
+replace end_partner_status=0 if inrange(end_marital_status,3,5) // unpartnered
+
+label define end_partner 0 "Single" 1 "Partnered"
+label values end_partner_status end_partner
 
 tab end_partner_status if bw60_mom==1 & firstbirth==1 & mom_panel==1 // base should be 231, what % partnered v. not - 0=47%; 1=53%, but total sample is 72% partnered, so single overrepresented
+tab survey_yr end_partner_status if bw60_mom==1 & firstbirth==1 & mom_panel==1 // base should be 231, what % partnered v. not - 0=47%; 1=53%, but total sample is 72% partnered, so single overrepresented
+unique SSUID PNUM if survey_yr==2, by(end_partner_status) // counts by partner status
+unique SSUID PNUM if survey_yr==1, by(end_partner_status) // counts by partner status
 
 * ever breadwinning status
 gen bw60_all = bw60_mom
@@ -1375,6 +1381,11 @@ tab survey bw60_mom [aweight= wpfinwgt], row // okay this is lower, because ever
 unique year SSUID PNUM, by(ever_bw60) // 0=47250, 1=29252, total=76502
 unique year SSUID PNUM if survey==1996, by(ever_bw60) // 0=31705, 1=19335, total=51040 - 37.8% -- okay duh this matches tab survey ever_bw60 with NO WEIGHTS
 unique year SSUID PNUM if survey==2014, by(ever_bw60) // 0=15545, 1=9917, total=25462 - 38.9%
+
+* by partner status
+unique SSUID PNUM if survey==1996 & ever_bw60==1, by(end_partner_status)
+unique SSUID PNUM if survey==2014 & ever_bw60==1, by(end_partner_status)
+
 
 * who entered panel breadwinning
 browse SSUID PNUM year bw60 trans_bw60_alt2 bw60_mom earnings thearn_alt earnings_sp earnings_ratio mom_panel
@@ -1420,6 +1431,8 @@ tab end_occ_code1 ever_bw60 if survey==2014, chi2
 * Counts:
 unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel - but this might not be first birth?
 unique SSUID PNUM if mom_panel==1 & firstbirth==1, by(survey_yr) // these are the numbers I used in the ppt
+unique SSUID PNUM if mom_panel==1 & firstbirth==1 & survey_yr==1, by(end_partner_status) // by partner status
+unique SSUID PNUM if mom_panel==1 & firstbirth==1 & survey_yr==2, by(end_partner_status) // by partner status
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth...so 231 moms total entered motherhood as breadwinners (70 in 1996; 161 in 2014)
 unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 
@@ -1444,4 +1457,15 @@ unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 161 mothers entered motherhood as BW in 2014, out of a total of 831 moms who became a mom during panel (19.37%)
 
 
+* % of single moms that are breadwinners
+unique SSUID PNUM if survey_yr==1, by(end_partner_status)
+unique SSUID PNUM if survey_yr==2, by(end_partner_status)
+
+unique SSUID PNUM if survey_yr==1 & ever_bw60==1, by(end_partner_status)
+unique SSUID PNUM if survey_yr==2 & ever_bw60==1, by(end_partner_status)
+
+tab end_partner_status if survey_yr==1 & trans_bw60_alt2==1 & bw60lag==0 // bc want all transitions not uniques
+tab end_partner_status if survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0 // bc want all transitions not uniques
+tab survey_yr trans_bw60_alt2 if bw60lag==0, row
+	
 // log close

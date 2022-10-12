@@ -86,3 +86,8 @@ tabout total_max_earner2 using "$results/Breadwinner_Distro_96.xls", c(freq col)
 forvalues e=1/4{
 	tabout total_max_earner2 using "$results/Breadwinner_Distro_96.xls" if educ==`e', c(freq col) clab(Educ=`e' Percent) f(0c 1p) append 
 }
+
+label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-Unpartnered" 5 "Never Married- Not partnered"
+label values st_marital_status end_marital_status marital_status
+
+tab total_max_earner2 if inlist(end_marital_status,3,4,5)
