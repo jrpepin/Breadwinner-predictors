@@ -61,6 +61,22 @@ replace pathway=5 if lt_other_changes==1
 label define pathway 0 "None" 1 "Mom Up" 2 "Mom Up Partner Down" 3 "Partner Down" 4 "Partner Left" 5 "Other HH Change"
 label values pathway pathway
 
+// program variables
+gen tanf=0
+replace tanf=1 if tanf_amount > 0
+
+// need to get tanf in year prior and then eitc in year after - but this is not really going to work for 2016, so need to think about that
+sort SSUID PNUM year
+browse SSUID PNUM year rtanfcov tanf tanf_amount program_income eeitc
+gen tanf_lag = tanf[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen eitc_after = eeitc[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(year[_n+1]-1)
+
+//
+recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
+label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
+label values marital_status_t1 marr
+recode marital_status_t1 (1/2=1)(3=0), gen(partnered)
+
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
 keep if trans_bw60_alt2==1 & bw60lag==0
 keep if survey == 2014
@@ -99,6 +115,27 @@ tab race outcome, row nofreq
 tab educ_gp outcome, row nofreq
 
 tab pathway outcome, row nofreq // okay I honestly do not hate this.
+
+********************************************************************************
+* Demographics by outcome and pathway
+********************************************************************************
+
+tab inc_pov_summary2 tanf, row
+tab inc_pov_summary2 tanf_lag, row
+tab inc_pov_summary2 eeitc, row
+tab inc_pov_summary2 eitc_after, row
+
+tab pathway tanf, row
+tab pathway tanf_lag, row
+tab pathway eeitc, row
+tab pathway eitc_after, row
+
+tab inc_pov_summary2 educ_gp, row nofreq
+tab inc_pov_summary2 race, row nofreq
+tab inc_pov_summary2 partnered, row nofreq
+tab inc_pov_summary2 tanf_lag, row nofreq
+tab inc_pov_summary2 eeitc, row nofreq
+tab inc_pov_summary2 eitc_after, row nofreq
 
 ********************************************************************************
 * MODELS
