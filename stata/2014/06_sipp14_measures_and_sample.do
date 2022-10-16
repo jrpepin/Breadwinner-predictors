@@ -22,7 +22,7 @@ clear
    forvalues w=1/4{
       use "$SIPP2014/pu2014w`w'_compressed.dta"
    	keep	swave monthcode wpfinwgt ssuid pnum eresidenceid shhadid einttype thhldstatus						/// /* TECHNICAL */
-			tpearn apearn tjb?_msum ajb?_msum tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2				/// /* FINANCIAL   */
+			tpearn apearn tjb?_msum ajb?_msum tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2 tptrninc		/// /* FINANCIAL   */
 			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc								/// /* DEMOGRAPHIC */
 			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why									///
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
@@ -30,7 +30,7 @@ clear
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
 			tjb*_gamt* tjb*_msum tpearn																			///
 			efindjob edisabl ejobcant rdis rdis_alt edisany														/// /* DISABILITY */
-			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn 											/// /* PROGRAM USAGE */
+			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn rtanfcov ttanf_amt							/// /* PROGRAM USAGE */
 			ewelac_mnyn renroll eedgrade eedcred																/// /* ENROLLMENT */
 			echld_mnyn epayhelp elist eworkmore																	/// /* CHILD CARE */
 			
@@ -78,9 +78,13 @@ drop tmover rmover
 	rename eresidenceid ERESIDENCEID
 	rename pnum PNUM
 
-// Create a measure of total household earnings per month (with allocated data)
+// Create a measure of total household earnings per month (with allocated data) and program income 
 	* Note that this approach omits the earnings of type 2 people.
     egen thearn = total(tpearn), 	by(SSUID ERESIDENCEID swave monthcode)
+	recode tptrninc (.=0)
+	egen program_income = total(tptrninc), by(SSUID ERESIDENCEID swave monthcode)
+	recode ttanf_amt (.=0)
+	egen tanf_amount = total(ttanf_amt), by(SSUID ERESIDENCEID swave monthcode)
 	
 // Creating a measure of earnings solely based on wages and not profits and losses
 	egen earnings=rowtotal(tjb1_msum tjb2_msum tjb3_msum tjb4_msum tjb5_msum tjb6_msum tjb7_msum), missing
@@ -257,8 +261,8 @@ replace `var' =0 if `var'==2
 }
 
 * Welfare use
-foreach var in eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn{
-replace `var' =0 if `var'==2
+foreach var in eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn rtanfcov{
+replace `var' =0 if `var'==2 | `var'==3
 }
 
 egen programs = rowtotal ( rfsyn tgayn rtanfyn rwicyn)
