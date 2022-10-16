@@ -3475,6 +3475,25 @@ tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 // moms had first
 tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 & survey==1996
 tab inc_pov_flag if firstbirth==1 & mom_panel==1 & bw60_mom==1 & survey==2014
 
+********************************************************************************
+* Pathway comparison
+********************************************************************************
+gen pathway=0
+replace pathway=1 if mt_mom==1
+replace pathway=2 if ft_partner_down_mom==1
+replace pathway=3 if ft_partner_down_only==1
+replace pathway=4 if ft_partner_leave==1
+replace pathway=5 if lt_other_changes==1
+
+label define pathway 0 "None" 1 "Mom Up" 2 "Mom Up Partner Down" 3 "Partner Down" 4 "Partner Left" 5 "Other HH Change"
+label values pathway pathway
+
+tab survey_yr pathway if trans_bw60_alt2==1 & bw60lag==0, row
+tab survey_yr pathway if trans_bw60_alt2==1 & bw60lag==0 & durmom_1st <=18 & durmom_1st >=0, row // compare to if oldest child is under 18
+
+tab survey_yr trans_bw60_alt2 if bw60lag==0 [aweight=wpfinwgt], row
+tab survey_yr trans_bw60_alt2 if bw60lag==0 & durmom_1st <=18 & durmom_1st >=0 [aweight=wpfinwgt], row
+
 /*
 ********************************************************************************
 * Figures
