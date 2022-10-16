@@ -569,6 +569,10 @@ foreach var of varlist hhsize minorchildren{
 	gen end_`var' = `var'
 }
 
+recode eeitc (.=0)
+recode rtanfyn (.=0)
+recode rtanfcov (.=0)
+
 // need to retain missings for earnings when annualizing (sum treats missing as 0)
 
 bysort SSUID PNUM year (tpearn): egen tpearn_mis = min(tpearn)
@@ -585,17 +589,19 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					full_part full_no part_no part_full no_part no_full educ_change		///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
 					no_full_sp educ_change_sp rmwkwjb weeks_employed_sp					///
+					program_income tanf_amount rtanfyn									///
 			(mean) 	spouse partner numtype2 wpfinwgt scaled_weight correction birth 	/// 
 					mom_panel avg_hhsize = hhsize avg_hrs=tmwkhrs avg_earn=earnings  	///
 					numearner other_earner thincpovt2 pov_level start_marital_status 	///
-					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1 tjb*_bwkly1 ///
-					tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1						///
+					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1  			///
+					tjb*_bwkly1 tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1			///
+					eeitc rtanfcov														///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
 					prebiochildren race educ race_sp educ_sp tceb oldest_age 			///
 					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
 					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
 					yrfirstbirth														///
-			(min) 	tage_fb durmom youngest_age first_wave								///
+			(min) 	tage_fb durmom durmom_1st youngest_age first_wave					///
 					tpearn_mis tmwkhrs_mis earnings_mis									///
 					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///
 			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*				/// other hh members char.
