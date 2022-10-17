@@ -69,6 +69,8 @@ replace tanf=1 if tanf_amount > 0
 sort SSUID PNUM year
 browse SSUID PNUM year rtanfcov tanf tanf_amount program_income eeitc
 gen tanf_lag = tanf[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen tanf_amount_lag = tanf_amount[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen program_income_lag = program_income[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen eitc_after = eeitc[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(year[_n+1]-1)
 
 //
@@ -116,6 +118,8 @@ tab educ_gp outcome, row nofreq
 
 tab pathway outcome, row nofreq // okay I honestly do not hate this.
 
+browse SSUID PNUM year earnings_adj thearn_adj tanf_amount_lag  tanf_amount program_income program_income_lag
+
 ********************************************************************************
 * Demographics by outcome and pathway
 ********************************************************************************
@@ -129,6 +133,9 @@ tab pathway tanf, row
 tab pathway tanf_lag, row
 tab pathway eeitc, row
 tab pathway eitc_after, row
+tab pathway inc_pov_summary2, row
+tab pathway inc_pov_summary2 if partnered==0, row
+tab pathway inc_pov_summary2 if partnered==1, row
 
 tab inc_pov_summary2 educ_gp, row nofreq
 tab inc_pov_summary2 race, row nofreq
@@ -136,6 +143,8 @@ tab inc_pov_summary2 partnered, row nofreq
 tab inc_pov_summary2 tanf_lag, row nofreq
 tab inc_pov_summary2 eeitc, row nofreq
 tab inc_pov_summary2 eitc_after, row nofreq
+
+tab inc_pov_summary2 tanf_lag if partnered==0, row
 
 ********************************************************************************
 * MODELS
