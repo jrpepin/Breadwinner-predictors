@@ -72,6 +72,10 @@ gen tanf_lag = tanf[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year
 gen tanf_amount_lag = tanf_amount[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen program_income_lag = program_income[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen eitc_after = eeitc[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(year[_n+1]-1)
+gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+
+gen zero_earnings=0
+replace zero_earnings=1 if earnings_lag==0
 
 //
 recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
@@ -143,6 +147,7 @@ tab inc_pov_summary2 partnered, row nofreq
 tab inc_pov_summary2 tanf_lag, row nofreq
 tab inc_pov_summary2 eeitc, row nofreq
 tab inc_pov_summary2 eitc_after, row nofreq
+tab inc_pov_summary2 zero_earnings, row nofreq
 
 tab inc_pov_summary2 tanf_lag if partnered==0, row
 
