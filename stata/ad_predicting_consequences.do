@@ -11,7 +11,7 @@ di "$S_DATE"
 * This file....
 
 use "$tempdir/combined_bw_equation.dta", clear
-
+keep if survey == 2014
 
 ********************************************************************************
 * CREATE SAMPLE AND VARIABLES
@@ -73,6 +73,7 @@ gen tanf_amount_lag = tanf_amount[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1]
 gen program_income_lag = program_income[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen eitc_after = eeitc[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(year[_n+1]-1)
 gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen thearn_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 
 gen zero_earnings=0
 replace zero_earnings=1 if earnings_lag==0
@@ -83,9 +84,24 @@ label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
 label values marital_status_t1 marr
 recode marital_status_t1 (1/2=1)(3=0), gen(partnered)
 
+// household income change
+by SSUID PNUM (year), sort: gen hh_income_chg = ((thearn_adj-thearn_adj[_n-1])/thearn_adj[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+by SSUID PNUM (year), sort: gen hh_income_raw = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1
+browse SSUID PNUM year thearn_adj bw60 trans_bw60_alt2 hh_income_chg hh_income_raw
+	
+by SSUID PNUM (year), sort: gen hh_income_raw_all = ((thearn_adj-thearn_adj[_n-1])) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & bw60lag==0
+	
+inspect hh_income_raw // almost split 50/50 negative v. positive
+sum hh_income_raw, detail // i am now wondering - is this the better way to do it?
+gen hh_chg_value=.
+replace hh_chg_value = 0 if hh_income_raw <0
+replace hh_chg_value = 1 if hh_income_raw >0 & hh_income_raw!=.
+tab hh_chg_value
+sum hh_income_raw if hh_chg_value==0, detail
+sum hh_income_raw if hh_chg_value==1, detail
+
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
 keep if trans_bw60_alt2==1 & bw60lag==0
-keep if survey == 2014
 
 
 ********************************************************************************
@@ -150,6 +166,12 @@ tab inc_pov_summary2 eitc_after, row nofreq
 tab inc_pov_summary2 zero_earnings, row nofreq
 
 tab inc_pov_summary2 tanf_lag if partnered==0, row
+
+	
+histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
+histogram inc_pov_change_raw if inc_pov_change_raw < 5 & inc_pov_change_raw >-5, width(.5) xlabel(-5(0.5)5) addlabel addlabopts(yvarformat(%4.1f)) percent
+
+browse SSUID PNUM year earnings_adj earnings_lag thearn_adj thearn_lag hh_income_raw inc_pov inc_pov_lag inc_pov_change_raw
 
 ********************************************************************************
 * MODELS
