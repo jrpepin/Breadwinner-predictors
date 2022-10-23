@@ -2555,12 +2555,16 @@ putexcel A33:A37 = "College", merge hcenter
 putexcel A38:A42 = "White", merge hcenter
 putexcel A43:A47 = "Black", merge hcenter
 putexcel A48:A52 = "Hispanic", merge hcenter
+putexcel A53:A57 = "Partnered", merge hcenter
+putexcel A58:A62 = "Single", merge hcenter
 putexcel B23 = ("Partner Left") B24 = ("Mom Up") B25 = ("Partner Down") B26 = ("Mom Up Partner Down") B27 = ("Other HH Member")
 putexcel B28 = ("Partner Left") B29 = ("Mom Up") B30 = ("Partner Down") B31 = ("Mom Up Partner Down") B32 = ("Other HH Member")
 putexcel B33 = ("Partner Left") B34 = ("Mom Up") B35 = ("Partner Down") B36 = ("Mom Up Partner Down") B37 = ("Other HH Member")
 putexcel B38 = ("Partner Left") B39 = ("Mom Up") B40 = ("Partner Down") B41 = ("Mom Up Partner Down") B42 = ("Other HH Member")
 putexcel B43 = ("Partner Left") B44 = ("Mom Up") B45 = ("Partner Down") B46 = ("Mom Up Partner Down") B47 = ("Other HH Member")
 putexcel B48 = ("Partner Left") B49 = ("Mom Up") B50 = ("Partner Down") B51 = ("Mom Up Partner Down") B52 = ("Other HH Member")
+putexcel B53 = ("Partner Left") B54 = ("Mom Up") B55 = ("Partner Down") B56 = ("Mom Up Partner Down") B57 = ("Other HH Member")
+putexcel B58 = ("Partner Left") B59 = ("Mom Up") B60 = ("Partner Down") B61 = ("Mom Up Partner Down") B62 = ("Other HH Member")
 
 local colu "C D E F"
 
@@ -2658,6 +2662,22 @@ forvalues r=1/3{
 	}
 }
 
+recode partnered(0=2) // make single two
+
+local colu "C D E F"
+
+forvalues p=1/2{
+	local x=1
+		foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+		local row = (`p' * 5) +47 + `x'
+			forvalues i=1/4{
+			local col: word `i' of `colu'
+			sum inc_pov_bucket`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1 &	partnered==`p', detail // 2014
+			putexcel `col'`row'=`r(mean)', nformat(#.##%)
+			}
+		local ++x
+	}
+}
 
 //1996
 local colu "J K L M"

@@ -167,6 +167,9 @@ tab inc_pov_summary2 zero_earnings, row nofreq
 
 tab inc_pov_summary2 tanf_lag if partnered==0, row
 
+tab pathway inc_pov_summary2 if educ_gp==1, row
+tab pathway inc_pov_summary2 if partnered==1, row
+
 	
 histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
 histogram inc_pov_change_raw if inc_pov_change_raw < 5 & inc_pov_change_raw >-5, width(.5) xlabel(-5(0.5)5) addlabel addlabopts(yvarformat(%4.1f)) percent
