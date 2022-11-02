@@ -126,6 +126,11 @@ replace relationship=1 if start_marital_status==1 & partnered_all==1 // married
 replace relationship=2 if start_marital_status==2 & partnered_all==1 // cohab
 label values relationship marr
 
+* gah
+gen rel_status=.
+replace rel_status=1 if single_all==1
+replace rel_status=2 if partnered_all==1
+
 ********************************************************************************
 * Descriptive things
 ********************************************************************************
@@ -137,6 +142,205 @@ tab single_all end_as_sole, row
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & single_all==1, stats(mean p50)
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & partnered_all==1, stats(mean p50)
+
+// Sample descriptives for impact paper
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(sample) modify
+putexcel A1 = "Descriptive Statistics", border(bottom) hcenter bold
+putexcel B1 = "Total Sample"
+putexcel C1 = "Single Mothers"
+putexcel D1 = "Partnered Mothers"
+putexcel A2 = "Median HH income at time t-1 (inflation-adjusted)"
+putexcel A3 = "Mothers' median income at time t-1 (inflation-adjusted)"
+putexcel A4 = "Race/ethnicity (time-invariant)"
+putexcel A5 = "Non-Hispanic White", txtindent(4)
+putexcel A6 = "Black", txtindent(4)
+putexcel A7 = "Non-Hispanic Asian", txtindent(4)
+putexcel A8 = "Hispanic", txtindent(4)
+putexcel A9 = "Education (time-varying)"
+putexcel A10 = "HS Degree or Less", txtindent(4)
+putexcel A11 = "Some College", txtindent(4)
+putexcel A12 = "College Plus", txtindent(4)
+putexcel A13 = "Relationship Status (time-varying)"
+putexcel A14 = "Married", txtindent(4)
+putexcel A15 = "Cohabitating", txtindent(4)
+putexcel A16 = "Single", txtindent(4)
+putexcel A17 = "Pathway into primary earning (time-varying)"
+putexcel A18 = "Partner separation", txtindent(4)
+putexcel A19 = "Mothers increase in earnings", txtindent(4)
+putexcel A20 = "Partner lost earnings", txtindent(4)
+putexcel A21 = "Mothers increase in earnings & partner lost earnings", txtindent(4)
+putexcel A22 = "Other member exit | lost earnings", txtindent(4)
+putexcel A23 = "Poverty and welfare"
+putexcel A24 = "Mom had Zero Earnings in Year Prior", txtindent(4)
+putexcel A25 = "TANF in Year Prior", txtindent(4)
+putexcel A26 = "EITC in Year Prior", txtindent(4)
+putexcel A27 = "EITC in Year Became Primary Earner (reduced sample)", txtindent(4)
+
+*Income 
+* HH
+sum thearn_lag, detail
+putexcel B2=`r(p50)', nformat(###,###)
+sum thearn_lag if rel_status==1, detail
+putexcel C2=`r(p50)', nformat(###,###)
+sum thearn_lag if rel_status==2, detail
+putexcel D2=`r(p50)', nformat(###,###)
+
+*Mother
+/*
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & trans_bw60_alt2[_n+1]==1 & bw60lag[_n+1]==0, detail  // okay yes this is right, but before I had the below - which is wrong, because need the earnings to lag the bw
+sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0, detail
+*/
+sum earnings_lag, detail 
+putexcel B3=`r(p50)', nformat(###,###)
+sum earnings_lag if rel_status==1, detail 
+putexcel C3=`r(p50)', nformat(###,###)
+sum earnings_lag if rel_status==2, detail 
+putexcel D3=`r(p50)', nformat(###,###)
+
+* Race
+tab race, gen(race)
+
+local i=1
+
+foreach var in race1 race2 race3 race4{
+	local row = `i'+4
+	mean `var' if survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0
+	matrix `var'_bw14 = e(b)
+	putexcel B`row' = matrix(`var'_bw14), nformat(#.##%)
+	local ++i
+}
+		
+
+* Education
+tab educ_gp, gen(educ_gp)
+
+local i=1
+
+foreach var in educ_gp1 educ_gp2 educ_gp3{
+	local row = `i'+9
+	mean `var' if survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0
+	matrix `var'_bw14 = e(b)
+	putexcel B`row' = matrix(`var'_bw14), nformat(#.##%)
+	local ++i
+}
+		
+	
+* Marital Status - December of prior year
+tab marital_status_t1, gen(marst)
+
+local i=1
+
+foreach var in marst1 marst2 marst3{
+	local row = `i'+13
+	mean `var' if survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0
+	matrix `var'_bw14 = e(b)
+	putexcel B`row' = matrix(`var'_bw14), nformat(#.##%)
+	local ++i
+}
+
+* Pathway into breadwinning
+
+local i=1
+
+foreach var in ft_partner_leave mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	local row = `i'+17
+	mean `var' if survey_yr==2 & trans_bw60_alt2==1 // & bw60lag==0 // remove svy to see if matches paper 1
+	matrix `var'_bw14 = e(b)
+	putexcel B`row' = matrix(`var'_bw14), nformat(#.##%)
+	local ++i
+}
+
+local i=1
+
+* Poverty and welfare
+foreach var in start_from_0 tanf_lag eeitc eitc_after{
+	local row = `i'+23
+	mean `var' if survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0
+	matrix `var'_bw14 = e(b)
+	putexcel B`row' = matrix(`var'_bw14), nformat(#.##%)
+	local ++i
+}
+
+
+//// by partnership status
+
+* Race
+local i=1
+local colu "C D"
+
+foreach var in race1 race2 race3 race4{
+	forvalues p=1/2{
+		local row = `i'+4
+		local col: word `p' of `colu'
+		mean `var' if rel_status==`p'
+		matrix `var'_`p' = e(b)
+		putexcel `col'`row' = matrix(`var'_`p'), nformat(#.##%)
+	}
+	local ++i
+}
+
+
+* Education
+local i=1
+local colu "C D"
+
+foreach var in educ_gp1 educ_gp2 educ_gp3{
+	forvalues p=1/2{
+		local row = `i'+9
+		local col: word `p' of `colu'
+		mean `var' if rel_status==`p'
+		matrix `var'_`p' = e(b)
+		putexcel `col'`row' = matrix(`var'_`p'), nformat(#.##%)
+	}
+	local ++i
+}
+		
+	
+* Marital Status - December of prior year
+local i=1
+local colu "C D"
+
+foreach var in marst1 marst2 marst3{
+	forvalues p=1/2{
+		local row = `i'+13
+		local col: word `p' of `colu'
+		mean `var' if rel_status==`p'
+		matrix `var'_`p' = e(b)
+		putexcel `col'`row' = matrix(`var'_`p'), nformat(#.##%)
+	}
+	local ++i
+}
+
+* Pathway into breadwinning
+local i=1
+local colu "C D"
+
+foreach var in ft_partner_leave mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+	forvalues p=1/2{
+		local row = `i'+17
+		local col: word `p' of `colu'
+		mean `var' if rel_status==`p'
+		matrix `var'_`p' = e(b)
+		putexcel `col'`row' = matrix(`var'_`p'), nformat(#.##%)
+	}
+	local ++i
+}
+
+* Poverty and welfare
+local i=1
+local colu "C D"
+
+foreach var in start_from_0 tanf_lag eeitc eitc_after{
+	forvalues p=1/2{
+		local row = `i'+23
+		local col: word `p' of `colu'
+		mean `var' if rel_status==`p'
+		matrix `var'_`p' = e(b)
+		putexcel `col'`row' = matrix(`var'_`p'), nformat(#.##%)
+	}
+	local ++i
+}
+
 
 ********************************************************************************
 * ANALYSIS
