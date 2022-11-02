@@ -23,10 +23,14 @@ sort SSUID PNUM year
 by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 by SSUID PNUM (year), sort: gen inc_pov_change_raw = (inc_pov-inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
 
+gen in_pov=.
+replace in_pov=0 if inc_pov>=1.5 & inc_pov!=.
+replace in_pov=1 if inc_pov <1.5
+
 gen inc_pov_lag = inc_pov[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen pov_lag=.
-replace pov_lag=0 if inc_pov_lag <1.5
-replace pov_lag=1 if inc_pov_lag>=1.5 & inc_pov_lag!=. // okay 1 is NOT in poverty
+replace pov_lag=0 if inc_pov_lag>=1.5 & inc_pov_lag!=.
+replace pov_lag=1 if inc_pov_lag <1.5
 
 gen inc_pov_summary2=.
 replace inc_pov_summary2=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov >=1.5
@@ -142,6 +146,15 @@ tab single_all end_as_sole, row
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & single_all==1, stats(mean p50)
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & partnered_all==1, stats(mean p50)
+
+tab pov_lag // pre
+tab in_pov // post
+
+tab partnered_all pov_lag, row // pre
+tab partnered_all in_pov, row // post
+
+tab relationship pov_lag, row // pre
+tab relationship in_pov, row // post
 
 // Sample descriptives for impact paper
 putexcel set "$results/Breadwinner_Impact_Tables", sheet(sample) modify
