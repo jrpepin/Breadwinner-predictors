@@ -78,11 +78,16 @@ gen thearn_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & yea
 gen zero_earnings=0
 replace zero_earnings=1 if earnings_lag==0
 
-//
+// last_status
 recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
 label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
 label values marital_status_t1 marr
-recode marital_status_t1 (1/2=1)(3=0), gen(partnered)
+recode marital_status_t1 (1/2=1)(3=0), gen(partnered_t1)
+
+// first_status
+recode start_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t)
+label values marital_status_t marr
+recode marital_status_t (1/2=1)(3=0), gen(partnered_t)
 
 // household income change
 by SSUID PNUM (year), sort: gen hh_income_chg = ((thearn_adj-thearn_adj[_n-1])/thearn_adj[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1) & trans_bw60_alt2==1

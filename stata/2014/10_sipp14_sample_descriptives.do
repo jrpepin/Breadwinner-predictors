@@ -31,13 +31,15 @@ replace who_max_earn=relationship`n' if to_earnings`n'==hh_earn_max
 // browse SSUID PNUM year who_max_earn hh_earn_max earnings to_earnings* relationship*
 
 gen total_max_earner=.
-replace total_max_earner=who_max_earn if (earnings==. & hh_earn_max>0 & hh_earn_max!=.) | (hh_earn_max > earnings & earnings!=. & hh_earn_max!=.)
+replace total_max_earner=who_max_earn if (earnings==. & hh_earn_max>0 & hh_earn_max!=.) | (hh_earn_max >= earnings & earnings!=. & hh_earn_max!=. & (earnings+hh_earn_max>0))
 replace total_max_earner=99 if (earnings>0 & earnings!=. & hh_earn_max==.) | (hh_earn_max < earnings & earnings!=. & hh_earn_max!=.)
 
 gen total_max_earner2=total_max_earner
 replace total_max_earner2=100 if total_max_earner==99 & (hh_earn_max==0 | hh_earn_max==.) // splitting out the "self" view to delineate between hh where mother is primary earner because she is the only earner
 
-browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner total_max_earner2 to_earnings*
+sort SSUID PNUM year
+browse SSUID PNUM year who_max_earn hh_earn_max earnings total_max_earner total_max_earner2 to_earnings* 
+replace total_max_earner2=0 if total_max_earner2==.
 
 
 #delimit ;
@@ -61,6 +63,7 @@ label define rel2 1 "Spouse"
                  18 "Other relationship"   
                  19 "Foster parent/Child"
                  20 "Other non-relative"
+				 0 "no earners"
                  99 "self" 
 				 100 "self - no other earners" ;
 
@@ -81,6 +84,52 @@ label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-
 label values st_marital_status end_marital_status marital_status
 
 tab total_max_earner2 if inlist(end_marital_status,3,4,5)
+
+// for impact paper to get earner prior to transition (steps I did in ab)
+* Missing value check
+tab race, m
+tab educ, m // .02%
+drop if educ==.
+tab last_marital_status, m // .02%
+drop if last_marital_status==.
+
+* ensure those who became mothers IN panel removed from sample in years they hadn't yet had a baby
+gen bw60_mom=bw60  // need to retain this for future calculations for women who became mom in panel
+replace bw60=. if year < yrfirstbirth & mom_panel==1
+replace trans_bw60=. if year < yrfirstbirth & mom_panel==1
+replace trans_bw60_alt=. if year < yrfirstbirth & mom_panel==1
+replace trans_bw60_alt2=. if year < yrfirstbirth & mom_panel==1
+
+sort SSUID PNUM year
+gen bw60lag = 0 if bw60[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+replace bw60lag =1 if  bw60[_n-1]==1 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+
+tab trans_bw60_alt2 if bw60lag==0
+
+tab total_max_earner2 if trans_bw60_alt2==1 & bw60lag==0 // should be all mom? - OKAY IT IS weeeee. so need to get LAGGED max earner?
+
+gen max_earner_lag = total_max_earner2[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+label values max_earner_lag rel2
+browse SSUID PNUM year trans_bw60_alt2  total_max_earner total_max_earner2 max_earner_lag to_earnings* 
+
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 // so she could be MAX earner, but at like 51% not 60%
+
+gen partnered=0
+replace partnered=1 if inlist(last_marital_status,1,2)
+
+gen partnered_st=0
+replace partnered_st=1 if inlist(start_marital_status,1,2)
+
+gen single_all=0
+replace single_all=1 if partnered==0 & no_status_chg==1
+
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 // single
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered_st==0
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 & no_status_chg==1 // single ALL YEAR, probably cleanest?
+
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==1 // partnered -- need to make this partnered at SOME POINT? maybe get single all year and subtract?
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & (partnered==1 | single_all==0) // partnered -- need to make this partnered at SOME POINT? maybe get single all year and subtract?
+
 
 /* Need to revisit all below as it's mostly redundant to file 9 now
 
