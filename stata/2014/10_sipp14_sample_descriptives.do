@@ -112,7 +112,7 @@ gen max_earner_lag = total_max_earner2[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[
 label values max_earner_lag rel2
 browse SSUID PNUM year trans_bw60_alt2  total_max_earner total_max_earner2 max_earner_lag to_earnings* 
 
-tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 // so she could be MAX earner, but at like 51% not 60%
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 // so she could be MAX earner, but at like 51% not 60%. or she could be  30, someone else 20, someone else 20, etc. etc.
 
 gen partnered=0
 replace partnered=1 if inlist(last_marital_status,1,2)
@@ -130,6 +130,22 @@ tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 & no_status
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==1 // partnered -- need to make this partnered at SOME POINT? maybe get single all year and subtract?
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & (partnered==1 | single_all==0) // partnered -- need to make this partnered at SOME POINT? maybe get single all year and subtract?
 
+* get percentage of mom's earnings in year prior?  browse SSUID PNUM year thearn_alt earnings earnings_ratio to_earnings* should I do average HH, average mothers OR get the percentage by household, then average? I already have - earnings_ratio
+tabstat thearn_alt, stats(mean p50)
+tabstat earnings, stats(mean p50)
+replace earnings_ratio=0 if earnings_ratio==. & earnings==0 & thearn_alt > 0 // wasn't counting moms with 0 earnings -- is this an issue elsewhere?? BUT still leaving as missing if NO earnings. is that right?
+gen earnings_ratio_alt=earnings_ratio
+replace earnings_ratio_alt=0 if earnings_ratio_alt==. // count as 0 if no earnings (instead of missing)
+
+gen earnings_ratio_lag = earnings_ratio[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+tabstat earnings_ratio_lag if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
+tabstat earnings_ratio_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 & no_status_chg==1, stats(mean p50)
+tabstat earnings_ratio_lag if trans_bw60_alt2==1 & bw60lag==0 & (partnered==1 | single_all==0), stats(mean p50)
+
+gen earnings_ratio_alt_lag = earnings_ratio_alt[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 & no_status_chg==1, stats(mean p50)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0 & (partnered==1 | single_all==0), stats(mean p50)
 
 /* Need to revisit all below as it's mostly redundant to file 9 now
 
