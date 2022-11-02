@@ -79,6 +79,13 @@ gen eitc_after = eeitc[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(y
 gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen thearn_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 
+replace earnings_ratio=0 if earnings_ratio==. & earnings==0 & thearn_alt > 0 // wasn't counting moms with 0 earnings -- is this an issue elsewhere?? BUT still leaving as missing if NO earnings. is that right?
+gen earnings_ratio_alt=earnings_ratio
+replace earnings_ratio_alt=0 if earnings_ratio_alt==. // count as 0 if no earnings (instead of missing)
+
+gen earnings_ratio_lag = earnings_ratio[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen earnings_ratio_alt_lag = earnings_ratio_alt[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+
 gen zero_earnings=0
 replace zero_earnings=1 if earnings_lag==0
 
@@ -146,6 +153,18 @@ tab single_all end_as_sole, row
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & single_all==1, stats(mean p50)
 tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & partnered_all==1, stats(mean p50)
+tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & relationship==1, stats(mean p50)
+tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & relationship==2, stats(mean p50)
+
+tabstat earnings_ratio_lag if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
+tabstat earnings_ratio_lag if trans_bw60_alt2==1 & bw60lag==0 & single_all==1, stats(mean p50)
+tabstat earnings_ratio_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered_all==1, stats(mean p50)
+
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0 & single_all==1, stats(mean p50)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered_all==1, stats(mean p50)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0 & relationship==1, stats(mean p50)
+tabstat earnings_ratio_alt_lag if trans_bw60_alt2==1 & bw60lag==0 & relationship==2, stats(mean p50)
 
 tab pov_lag // pre
 tab in_pov // post
