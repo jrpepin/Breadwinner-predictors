@@ -108,6 +108,35 @@ sum hh_income_raw if hh_chg_value==1, detail
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
 keep if trans_bw60_alt2==1 & bw60lag==0
 
+gen start_from_0 = 0
+replace start_from_0=1 if earnings_lag==0
+
+gen end_as_sole=0
+replace end_as_sole=1 if earnings_ratio==1
+
+** use the single / partnered I created before: single needs to be ALL YEAR
+gen single_all=0
+replace single_all=1 if partnered_t==0 & no_status_chg==1
+
+gen partnered_all=0
+replace partnered_all=1 if partnered_t==1 | single_all==0
+
+gen relationship=.
+replace relationship=1 if start_marital_status==1 & partnered_all==1 // married
+replace relationship=2 if start_marital_status==2 & partnered_all==1 // cohab
+label values relationship marr
+
+********************************************************************************
+* Descriptive things
+********************************************************************************
+tab single_all start_from_0, row
+tab single_all end_as_sole, row
+
+// both more likely to start from 0 AND end up as 100% contributor
+
+tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0, stats(mean p50)
+tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & single_all==1, stats(mean p50)
+tabstat earnings_ratio if trans_bw60_alt2==1 & bw60lag==0 & partnered_all==1, stats(mean p50)
 
 ********************************************************************************
 * ANALYSIS
@@ -126,6 +155,27 @@ tab educ_gp inc_pov_summary2 if pov_lag==1, row nofreq
 tabstat inc_pov, by(pov_lag)
 tabstat inc_pov_lag, by(pov_lag)
 tab educ_gp pov_lag, row
+
+tab single_all inc_pov_summary2, row nofreq
+tab single_all inc_pov_summary2 if start_from_0==1, row nofreq
+tab single_all inc_pov_summary2 if start_from_0==0, row nofreq
+
+tab relationship inc_pov_summary2, row nofreq
+
+sum thearn_lag, detail  // pre 2014 -- matches paper
+sum thearn_adj, detail // post 2014 -- matches paper
+
+sum thearn_lag if single_all==1, detail
+sum thearn_adj if single_all==1, detail
+
+sum thearn_lag if partnered_all==1, detail
+sum thearn_adj if partnered_all==1, detail
+
+sum thearn_lag if relationship==1, detail
+sum thearn_adj if relationship==1, detail
+
+sum thearn_lag if relationship==2, detail
+sum thearn_adj if relationship==2, detail
 
 // trying NEW classification
 gen outcome=.
@@ -180,6 +230,10 @@ histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, kdensi
 histogram inc_pov_change_raw if inc_pov_change_raw < 5 & inc_pov_change_raw >-5, width(.5) xlabel(-5(0.5)5) addlabel addlabopts(yvarformat(%4.1f)) percent
 
 browse SSUID PNUM year earnings_adj earnings_lag thearn_adj thearn_lag hh_income_raw inc_pov inc_pov_lag inc_pov_change_raw
+
+histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & single_all==1, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change") // single moms
+
+histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & partnered_all==1, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change") // partnered
 
 ********************************************************************************
 * MODELS
