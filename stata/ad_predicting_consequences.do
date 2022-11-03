@@ -116,9 +116,6 @@ tab hh_chg_value
 sum hh_income_raw if hh_chg_value==0, detail
 sum hh_income_raw if hh_chg_value==1, detail
 
-** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
-keep if trans_bw60_alt2==1 & bw60lag==0
-
 gen start_from_0 = 0
 replace start_from_0=1 if earnings_lag==0
 
@@ -142,11 +139,22 @@ gen rel_status=.
 replace rel_status=1 if single_all==1
 replace rel_status=2 if partnered_all==1
 
+** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
+keep if trans_bw60_alt2==1 & bw60lag==0
+
 ********************************************************************************
 * Descriptive things
 ********************************************************************************
 tab single_all start_from_0, row
 tab single_all end_as_sole, row
+
+sum avg_hhsize
+sum avg_hhsize if single_all==1
+sum avg_hhsize if partnered_all==1
+
+sum st_minorchildren
+sum st_minorchildren if single_all==1
+sum st_minorchildren if partnered_all==1
 
 // both more likely to start from 0 AND end up as 100% contributor
 
