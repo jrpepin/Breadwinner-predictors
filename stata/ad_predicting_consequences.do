@@ -138,8 +138,28 @@ label values relationship marr
 gen rel_status=.
 replace rel_status=1 if single_all==1
 replace rel_status=2 if partnered_all==1
+label define rel 1 "Single" 2 "Partnered"
+label values rel_status rel
+
+// drop if inlist(status_b1, 3,4) 
 
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
+keep if bw60lag==0 // first want to see the effect of transitioning on income AMONG eligible mothers
+browse SSUID PNUM year hh_income_chg hh_income_raw hh_income_raw_all // k so the first two are just those who transition, the last one is all mothers - so would need that for comparison. for those who transition, they match
+
+gen hh_income_pos = hh_income_raw_all 
+replace hh_income_pos = hh_income_raw_all *-1 if hh_income_raw_all<0
+gen log_income = ln(hh_income_pos) // ah does not work with negative numbers
+gen log_income_change = log_income
+replace log_income_change = log_income*-1 if hh_income_raw<0
+browse hh_income_raw_all hh_income_pos log_income log_income_change
+
+regress hh_income_raw_all i.trans_bw60_alt2 // so when you become BW, lose income?
+regress hh_income_raw_all i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 i.status_b1 // controls for those most likely to become BW
+
+regress log_income_change i.trans_bw60_alt2 // so when you become BW, lose income?
+regress log_income_change i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 i.status_b1 // controls for those most likely to become BW
+
 keep if trans_bw60_alt2==1 & bw60lag==0
 
 ********************************************************************************
@@ -478,6 +498,102 @@ browse SSUID PNUM year earnings_adj earnings_lag thearn_adj thearn_lag hh_income
 histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & single_all==1, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change") // single moms
 
 histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & partnered_all==1, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change") // partnered
+
+********************************************************************************
+* MODELS with continuous outcome
+********************************************************************************
+**DO WE HAVE ENOUGH POWER TO DO THIS??
+
+regress hh_income_raw_all 
+regress hh_income_raw_all i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 i.status_b1 // controls for those most likely to become BW
+regress hh_income_raw_all i.pathway
+regress hh_income_raw_all ib2.pathway
+regress hh_income_raw_all i.race // okay so none of these significant.
+regress hh_income_raw_all i.race if rel_status==2
+regress hh_income_raw_all i.educ_gp // also these
+regress hh_income_raw_all i.educ_gp if rel_status==2
+regress hh_income_raw_all i.rel_status // or these
+regress hh_income_raw_all i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
+
+regress log_income_change
+regress log_income_change ib2.pathway
+regress log_income_change ib2.pathway if rel_status==2
+regress log_income_change i.race // nope still not
+regress log_income_change i.race if rel_status==2
+regress log_income_change ib2.pathway##i.race if inlist(race,1,2,4)
+regress log_income_change i.educ_gp // also these
+regress log_income_change i.educ_gp if rel_status==2
+regress log_income_change ib2.pathway##i.educ_gp // okay also not
+regress log_income_change i.rel_status // okay these are significant
+regress log_income_change i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
+
+regress inc_pov_change_raw ib2.pathway
+regress inc_pov_change_raw i.race // nope
+regress inc_pov_change_raw i.educ_gp // nope
+
+mlogit inc_pov_summary2, rrr
+
+mlogit inc_pov_summary2 i.pathway, rrr
+margins i.pathway
+
+mlogit inc_pov_summary2 i.educ_gp, rrr // this is kind of interesting
+margins i.educ_gp
+marginsplot
+
+mlogit inc_pov_summary2 i.race, rrr // this is kind of interesting
+margins i.race
+marginsplot
+
+// okay so poverty is kind of interesting
+logit in_pov, or
+logit in_pov ib2.pathway, or
+logit in_pov i.race, or
+logit in_pov i.race##ib2.pathway if inlist(race,1,2,4), or // this is actually interesting, but is this really about who is already likely?
+logit in_pov i.educ_gp, or
+logit in_pov i.educ_gp##ib2.pathway, or
+
+/// OKAY, effect of transitioning - interaction
+regress log_income_change i.trans_bw60_alt2
+regress log_income_change i.trans_bw60_alt2##i.race if inlist(race,1,2,4) // okay interaction only signifcant for hispanics
+regress hh_income_raw_all i.trans_bw60_alt2##i.race if inlist(race,1,2,4) // okay interaction only signifcant for hispanics - not with raw
+
+regress log_income_change i.trans_bw60_alt2##i.educ_gp // not sig
+regress hh_income_raw_all i.trans_bw60_alt2##i.educ_gp // not sig
+
+logit in_pov i.trans_bw60_alt2 i.pov_lag, or
+logit in_pov i.trans_bw60_alt2##i.race i.pov_lag, or // not sig when I control for prior poverty
+logit in_pov i.trans_bw60_alt2##i.educ_gp i.pov_lag, or // okay education BECOMES sig when i control for prior poverty (for college)
+margins trans_bw60_alt2#educ_gp
+
+tab pov_lag in_pov, row // is it really that maternal BW reinforces not actually alters path? that is why I think movement in and out of poverty is more intersting. maybe do like three - income, 4 category, then movements across the two?
+tab pov_lag in_pov if trans_bw60_alt2==1, row
+
+gen pov_change=.
+replace pov_change=0 if in_pov==pov_lag
+replace pov_change=1 if in_pov==1 & pov_lag==0
+replace pov_change=2 if in_pov==0 & pov_lag==1
+
+label define pov_change 0 "No" 1 "Moved into" 2 "Moved out of"
+label values pov_change pov_change
+
+gen pov_change_detail=.
+replace pov_change_detail=0 if in_pov==pov_lag & pov_lag==0 // stayed out of poverty
+replace pov_change_detail=1 if in_pov==0 & pov_lag==1 // moved out of poverty
+replace pov_change_detail=2 if in_pov==pov_lag & pov_lag==1 // stay IN poverty
+replace pov_change_detail=3 if in_pov==1 & pov_lag==0 // moved into
+
+label define pov_change_detail 0 "Stayed out" 1 "Moved Out" 2 "Stayed in" 3 "Moved in"
+label values pov_change_detail pov_change_detail
+
+tab race pov_change_detail, row
+tab educ_gp pov_change_detail, row
+
+mlogit pov_change i.race, rrr
+mlogit pov_change i.educ_gp, rrr
+
+histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
+histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==1, percent addlabel width(5000) // in pov
+histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==0, percent addlabel width(5000) // not in pov
 
 ********************************************************************************
 * MODELS
