@@ -151,7 +151,7 @@ gen hh_income_pos = hh_income_raw_all
 replace hh_income_pos = hh_income_raw_all *-1 if hh_income_raw_all<0
 gen log_income = ln(hh_income_pos) // ah does not work with negative numbers
 gen log_income_change = log_income
-replace log_income_change = log_income*-1 if hh_income_raw<0
+replace log_income_change = log_income*-1 if hh_income_raw_all<0
 browse hh_income_raw_all hh_income_pos log_income log_income_change
 
 regress hh_income_raw_all i.trans_bw60_alt2 // so when you become BW, lose income?
@@ -508,7 +508,7 @@ regress hh_income_raw_all
 regress hh_income_raw_all i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 i.status_b1 // controls for those most likely to become BW
 regress hh_income_raw_all i.pathway
 regress hh_income_raw_all ib2.pathway
-regress hh_income_raw_all i.race // okay so none of these significant.
+regress hh_income_raw_all i.race if inlist(race,1,2,4) // okay so none of these significant.
 regress hh_income_raw_all i.race if rel_status==2
 regress hh_income_raw_all i.educ_gp // also these
 regress hh_income_raw_all i.educ_gp if rel_status==2
@@ -536,29 +536,50 @@ mlogit inc_pov_summary2, rrr
 mlogit inc_pov_summary2 i.pathway, rrr
 margins i.pathway
 
+mlogit inc_pov_summary2 i.pathway i.pov_lag, rrr
+margins i.pathway
+
 mlogit inc_pov_summary2 i.educ_gp, rrr // this is kind of interesting
 margins i.educ_gp
 marginsplot
+mlogit inc_pov_summary2 i.educ_gp i.pov_lag, rrr // this is kind of interesting
+margins i.educ_gp
 
-mlogit inc_pov_summary2 i.race, rrr // this is kind of interesting
+mlogit inc_pov_summary2 i.race if inlist(race,1,2,4), rrr // this is kind of interesting
 margins i.race
 marginsplot
+
+mlogit inc_pov_summary2 i.race i.pov_lag if inlist(race,1,2,4), rrr // this is kind of interesting
+margins i.race
 
 // okay so poverty is kind of interesting
 logit in_pov, or
 logit in_pov ib2.pathway, or
-logit in_pov i.race, or
+logit in_pov i.race if inlist(race,1,2,4), or
 logit in_pov i.race##ib2.pathway if inlist(race,1,2,4), or // this is actually interesting, but is this really about who is already likely?
 logit in_pov i.educ_gp, or
 logit in_pov i.educ_gp##ib2.pathway, or
 
-/// OKAY, effect of transitioning - interaction
-regress log_income_change i.trans_bw60_alt2
-regress log_income_change i.trans_bw60_alt2##i.race if inlist(race,1,2,4) // okay interaction only signifcant for hispanics
-regress hh_income_raw_all i.trans_bw60_alt2##i.race if inlist(race,1,2,4) // okay interaction only signifcant for hispanics - not with raw
+logit in_pov ib2.pathway i.pov_lag, or
+logit in_pov i.race i.pov_lag if inlist(race,1,2,4), or
+logit in_pov i.educ_gp i.pov_lag, or
 
-regress log_income_change i.trans_bw60_alt2##i.educ_gp // not sig
-regress hh_income_raw_all i.trans_bw60_alt2##i.educ_gp // not sig
+
+/// OKAY, effect of transitioning - interaction
+regress log_income_change i.trans_bw60_alt2 if pathway!=0
+regress hh_income_raw_all i.trans_bw60_alt2 if pathway!=0 // okay once I restrict to those who DID not experience an event, it goes away. DUH
+regress hh_income_raw_all i.trans_bw60_alt2 i.educ_gp i.race i.status_b1 i.rel_status if pathway!=0
+
+regress log_income_change i.trans_bw60_alt2##i.race if inlist(race,1,2,4) & pathway!=0
+regress hh_income_raw_all i.trans_bw60_alt2##i.race if inlist(race,1,2,4) & pathway!=0 // still not sig
+margins trans_bw60_alt2#race
+
+regress log_income_change i.trans_bw60_alt2##i.educ_gp 
+regress hh_income_raw_all i.trans_bw60_alt2##i.educ_gp if pathway!=0
+margins trans_bw60_alt2#educ_gp // college is significant
+
+regress hh_income_raw_all i.trans_bw60_alt2##ib2.pathway if pathway!=0
+margins trans_bw60_alt2#pathway
 
 logit in_pov i.trans_bw60_alt2 i.pov_lag, or
 logit in_pov i.trans_bw60_alt2##i.race i.pov_lag, or // not sig when I control for prior poverty
@@ -591,9 +612,31 @@ tab educ_gp pov_change_detail, row
 mlogit pov_change i.race, rrr
 mlogit pov_change i.educ_gp, rrr
 
+mlogit pov_change_detail i.pathway, rrr
+margins i.pathway
+
+mlogit pov_change_detail i.pathway i.race i.educ_gp, rrr
+margins i.pathway
+
+mlogit pov_change_detail i.educ_gp, rrr
+margins i.educ_gp
+
+mlogit pov_change_detail i.race if inlist(race,1,2,4), rrr
+margins i.race
+
+// end pov
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
+graph export "$results\all_income_changes.png", as(png) name("Graph")
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==1, percent addlabel width(5000) // in pov
+graph export "$results\all_income_changes_inpov.png", as(png) name("Graph")
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==0, percent addlabel width(5000) // not in pov
+graph export "$results\all_income_changes_notinpov.png", as(png) name("Graph")
+
+// started in pov
+histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
+histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_lag==1, percent addlabel width(5000) // in pov
+histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_lag==0, percent addlabel width(5000) // not in pov
+
 
 ********************************************************************************
 * MODELS
