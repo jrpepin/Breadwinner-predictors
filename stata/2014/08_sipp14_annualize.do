@@ -278,6 +278,27 @@ browse SSUID PNUM year monthcode partner_lose year_left ratio correction
 
 sum correction
 
+gen spousenum=.
+	forvalues n=1/22{
+	replace spousenum=`n' if relationship`n'==1
+}
+
+gen partnernum=.
+	forvalues n=1/22{
+	replace partnernum=`n' if relationship`n'==2
+}
+
+gen spart_num=spousenum
+replace spart_num=partnernum if spart_num==.
+
+gen earnings_sp=.
+// gen earnings_a_sp=.
+
+forvalues n=1/22{
+	// replace earnings_sp=to_TPEARN`n' if spart_num==`n'
+	replace earnings_sp=to_earnings`n' if spart_num==`n' // use this one
+}
+
 /* exploration
 browse SSUID PNUM year monthcode panelmonth partner_lose
 tab monthcode partner_lose, column
@@ -528,7 +549,7 @@ restore
 *	gen 	spartner=1 	if spouse==1 | partner==1
 *	replace spartner=0 	if spouse==0 & partner==0
 	
-	// Create indicators of partner presence at the first and last month of observation by year
+	// Create indicators of partner presence and earnings at the first and last month of observation by year
 	gen 	start_spartner=spartner if monthcode==startmonth
 	gen 	last_spartner=spartner 	if monthcode==lastmonth
 	gen 	start_spouse=spouse if monthcode==startmonth
@@ -537,6 +558,8 @@ restore
 	gen 	last_partner=partner 	if monthcode==lastmonth
 	gen 	start_marital_status=marital_status if monthcode==startmonth
 	gen 	last_marital_status=marital_status 	if monthcode==lastmonth
+	gen 	st_partner_earn=earnings_sp if monthcode==startmonth
+	gen 	end_partner_earn=earnings_sp 	if monthcode==lastmonth
 	
 // Create basic indictor to identify months observed when data is collapsed
 	gen one=1
@@ -595,7 +618,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					numearner other_earner thincpovt2 pov_level start_marital_status 	///
 					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1  			///
 					tjb*_bwkly1 tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1			///
-					eeitc rtanfcov														///
+					eeitc rtanfcov 														///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
 					prebiochildren race educ race_sp educ_sp tceb oldest_age 			///
 					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///

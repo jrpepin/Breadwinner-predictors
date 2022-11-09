@@ -122,6 +122,10 @@ replace start_from_0=1 if earnings_lag==0
 gen end_as_sole=0
 replace end_as_sole=1 if earnings_ratio==1
 
+gen partner_zero=0
+replace partner_zero=1 if end_partner_earn==0
+tab pathway partner_zero, row
+
 ** use the single / partnered I created before: single needs to be ALL YEAR
 gen single_all=0
 replace single_all=1 if partnered_t==0 & no_status_chg==1
