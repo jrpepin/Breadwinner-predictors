@@ -129,6 +129,9 @@ replace single_all=1 if partnered_t==0 & no_status_chg==1
 gen partnered_all=0
 replace partnered_all=1 if partnered_t==1 | single_all==0
 
+gen partnered_no_chg=0
+replace partnered_no_chg=1 if partnered_t==1 & no_status_chg==1
+
 gen relationship=.
 replace relationship=1 if start_marital_status==1 & partnered_all==1 // married
 replace relationship=2 if start_marital_status==2 & partnered_all==1 // cohab
@@ -608,6 +611,9 @@ label values pov_change_detail pov_change_detail
 
 tab race pov_change_detail, row
 tab educ_gp pov_change_detail, row
+tab rel_status pov_change_detail, row
+tab partnered_no_chg pov_change_detail, row // to get those partnered all year
+tab pathway end_as_sole, row nofreq // proxy for partner going down to 0? (or whoever lost earnings)
 
 mlogit pov_change i.race, rrr
 mlogit pov_change i.educ_gp, rrr
