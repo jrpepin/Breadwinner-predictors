@@ -157,6 +157,12 @@ replace rel_status_detail=2 if partnered_all==1 & rel_status_detail==.
 label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
 label values rel_status_detail rel_detail
 
+gen income_change=.
+replace income_change=1 if inlist(inc_pov_summary2,1,2) // up
+replace income_change=2 if inlist(inc_pov_summary2,3,4) // down
+label define income 1 "Up" 2 "Down"
+label values income_change income
+
 // drop if inlist(status_b1, 3,4) 
 
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
@@ -422,6 +428,32 @@ foreach var in start_from_0 tanf_lag eeitc eitc_after{
 * ANALYSIS
 ********************************************************************************
 tab pov_lag inc_pov_summary2, row
+tab inc_pov_summary2 pov_lag, row
+
+forvalues p=1/5{
+	display `p'
+	tab inc_pov_summary2 pov_lag if pathway==`p', row
+}
+
+forvalues e=1/3{
+	display `e'
+	tab inc_pov_summary2 pov_lag if educ_gp==`e', row
+}
+
+forvalues r=1/5{
+	display `r'
+	tab inc_pov_summary2 pov_lag if race==`r', row
+}
+
+forvalues rs=1/3{
+	display `rs'
+	tab inc_pov_summary2 pov_lag if rel_status_detail==`rs', row
+}
+
+forvalues rs=1/2{
+	display `rs'
+	tab inc_pov_summary2 pov_lag if rel_status==`rs', row
+}
 
 tab pathway inc_pov_summary2 if pov_lag==0, row nofreq
 tab pathway inc_pov_summary2 if pov_lag==1, row nofreq
@@ -674,6 +706,41 @@ margins i.rel_status
 
 mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race, rrr
 margins i.rel_status_detail
+
+
+// descriptive
+tab pathway pov_change_detail, row
+tab educ_gp pov_change_detail, row
+tab race pov_change_detail, row
+tab rel_status_detail pov_change_detail, row
+tab rel_status pov_change_detail, row
+
+tab pov_change_detail income_change, row
+
+forvalues p=1/5{
+	display `p'
+	tab pov_change_detail income_change if pathway==`p', row
+}
+
+forvalues e=1/3{
+	display `e'
+	tab pov_change_detail income_change if educ_gp==`e', row
+}
+
+forvalues r=1/5{
+	display `r'
+	tab pov_change_detail income_change if race==`r', row
+}
+
+forvalues rs=1/3{
+	display `rs'
+	tab pov_change_detail income_change if rel_status_detail==`rs', row
+}
+
+forvalues rs=1/2{
+	display `rs'
+	tab pov_change_detail income_change if rel_status==`rs', row
+}
 
 // end pov
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
