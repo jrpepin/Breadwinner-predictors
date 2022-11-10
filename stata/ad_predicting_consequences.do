@@ -148,6 +148,15 @@ replace rel_status=2 if partnered_all==1
 label define rel 1 "Single" 2 "Partnered"
 label values rel_status rel
 
+gen rel_status_detail=.
+replace rel_status_detail=1 if single_all==1
+replace rel_status_detail=2 if partnered_no_chg==1
+replace rel_status_detail=3 if pathway==4
+replace rel_status_detail=2 if partnered_all==1 & rel_status_detail==.
+
+label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
+label values rel_status_detail rel_detail
+
 // drop if inlist(status_b1, 3,4) 
 
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
@@ -509,6 +518,15 @@ histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & partn
 ********************************************************************************
 * MODELS with continuous outcome
 ********************************************************************************
+*Descriptive for comparison
+
+tabstat hh_income_raw_all, stats(mean p50)
+tabstat hh_income_raw_all, by(pathway) stats(mean p50)
+tabstat hh_income_raw_all, by(race) stats(mean p50)
+tabstat hh_income_raw_all, by(educ_gp) stats(mean p50)
+tabstat hh_income_raw_all, by(rel_status_detail) stats(mean p50)
+tabstat hh_income_raw_all, by(rel_status) stats(mean p50)
+
 **DO WE HAVE ENOUGH POWER TO DO THIS??
 
 regress hh_income_raw_all 
@@ -519,7 +537,10 @@ regress hh_income_raw_all i.race if inlist(race,1,2,4) // okay so none of these 
 regress hh_income_raw_all i.race if rel_status==2
 regress hh_income_raw_all i.educ_gp // also these
 regress hh_income_raw_all i.educ_gp if rel_status==2
-regress hh_income_raw_all i.rel_status // or these
+regress hh_income_raw_all ib2.rel_status // or these
+regress hh_income_raw_all ib2.rel_status_detail
+regress hh_income_raw_all ib2.rel_status i.educ_gp i.race // or these
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
 regress hh_income_raw_all i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
 
 regress log_income_change
@@ -540,7 +561,7 @@ regress inc_pov_change_raw i.educ_gp // nope
 
 mlogit inc_pov_summary2, rrr
 
-mlogit inc_pov_summary2 i.pathway, rrr
+mlogit inc_pov_summary2 i.pathway, rrr // wait why is this not working now??
 margins i.pathway
 
 mlogit inc_pov_summary2 i.pathway i.pov_lag, rrr
@@ -555,21 +576,35 @@ margins i.educ_gp
 mlogit inc_pov_summary2 i.race if inlist(race,1,2,4), rrr // this is kind of interesting
 margins i.race
 marginsplot
-
 mlogit inc_pov_summary2 i.race i.pov_lag if inlist(race,1,2,4), rrr // this is kind of interesting
 margins i.race
 
+mlogit inc_pov_summary2 i.rel_status i.educ_gp i.race, rrr // this is kind of interesting
+margins i.rel_status
+mlogit inc_pov_summary2 i.rel_status i.educ_gp i.race i.pov_lag, rrr // this is kind of interesting
+margins i.rel_status
+
+mlogit inc_pov_summary2 i.rel_status_detail i.educ_gp i.race, rrr // this is kind of interesting
+margins i.rel_status_detail
+mlogit inc_pov_summary2 i.rel_status_detail i.educ_gp i.race i.pov_lag, rrr // this is kind of interesting
+margins i.rel_status_detail
+
 // okay so poverty is kind of interesting
 logit in_pov, or
+logit in_pov ib2.pathway i.educ_gp i.race, or
 logit in_pov ib2.pathway, or
 logit in_pov i.race if inlist(race,1,2,4), or
 logit in_pov i.race##ib2.pathway if inlist(race,1,2,4), or // this is actually interesting, but is this really about who is already likely?
 logit in_pov i.educ_gp, or
 logit in_pov i.educ_gp##ib2.pathway, or
+logit in_pov ib2.rel_status i.educ_gp i.race
+logit in_pov ib2.rel_status_detail i.educ_gp i.race
 
 logit in_pov ib2.pathway i.pov_lag, or
 logit in_pov i.race i.pov_lag if inlist(race,1,2,4), or
 logit in_pov i.educ_gp i.pov_lag, or
+logit in_pov ib2.rel_status i.educ_gp i.race i.pov_lag
+logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag
 
 
 /// OKAY, effect of transitioning - interaction
@@ -633,6 +668,12 @@ margins i.educ_gp
 
 mlogit pov_change_detail i.race if inlist(race,1,2,4), rrr
 margins i.race
+
+mlogit pov_change_detail i.rel_status i.educ_gp i.race, rrr
+margins i.rel_status
+
+mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race, rrr
+margins i.rel_status_detail
 
 // end pov
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
