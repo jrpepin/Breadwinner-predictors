@@ -123,12 +123,39 @@ replace partnered_st=1 if inlist(start_marital_status,1,2)
 gen single_all=0
 replace single_all=1 if partnered==0 & no_status_chg==1
 
+gen partnered_all=0
+replace partnered_all=1 if partnered_st==1 | single_all==0
+
+gen partnered_no_chg=0
+replace partnered_no_chg=1 if partnered_st==1 & no_status_chg==1
+
+* gah
+gen rel_status=.
+replace rel_status=1 if single_all==1
+replace rel_status=2 if partnered_all==1
+label define rel 1 "Single" 2 "Partnered"
+label values rel_status rel
+
+gen rel_status_detail=.
+replace rel_status_detail=1 if single_all==1
+replace rel_status_detail=2 if partnered_no_chg==1
+replace rel_status_detail=3 if partner_lose==1
+replace rel_status_detail=2 if partnered_all==1 & rel_status_detail==.
+
+label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
+label values rel_status_detail rel_detail
+
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 // single
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered_st==0
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==0 & no_status_chg==1 // single ALL YEAR, probably cleanest?
 
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & partnered==1 // partnered -- need to make this partnered at SOME POINT? maybe get single all year and subtract?
 tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & (partnered==1 | single_all==0) // partnered -- need to make this partnered at SOME POINT? maybe get single all year and subtract?
+
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & rel_status_detail==1 // single
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & rel_status_detail==2 // partnered 
+tab max_earner_lag if trans_bw60_alt2==1 & bw60lag==0 & rel_status_detail==3 // relationship dissolved
 
 * get percentage of mom's earnings in year prior?  browse SSUID PNUM year thearn_alt earnings earnings_ratio to_earnings* should I do average HH, average mothers OR get the percentage by household, then average? I already have - earnings_ratio
 tabstat thearn_alt, stats(mean p50)
