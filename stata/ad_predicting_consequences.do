@@ -578,6 +578,11 @@ regress hh_income_raw_all ib2.rel_status // or these
 regress hh_income_raw_all ib2.rel_status_detail
 regress hh_income_raw_all ib2.rel_status i.educ_gp i.race // or these
 regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
+margins rel_status_detail
+margins educ_gp
+margins race
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // wait do I need to control for poverty lag here? when I do this, education becomes significant
+
 regress hh_income_raw_all i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
 
 regress log_income_change
@@ -635,14 +640,19 @@ logit in_pov i.race##ib2.pathway if inlist(race,1,2,4), or // this is actually i
 logit in_pov i.educ_gp, or
 logit in_pov i.educ_gp##ib2.pathway, or
 logit in_pov ib2.rel_status i.educ_gp i.race
-logit in_pov ib2.rel_status_detail i.educ_gp i.race
+logit in_pov ib2.rel_status_detail i.educ_gp i.race, or
+margins rel_status_detail
+margins educ_gp
+margins race
 
 logit in_pov ib2.pathway i.pov_lag, or
 logit in_pov i.race i.pov_lag if inlist(race,1,2,4), or
 logit in_pov i.educ_gp i.pov_lag, or
 logit in_pov ib2.rel_status i.educ_gp i.race i.pov_lag
-logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag
-
+logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
+margins rel_status_detail
+margins educ_gp
+margins race
 
 /// OKAY, effect of transitioning - interaction
 regress log_income_change i.trans_bw60_alt2 if pathway!=0
