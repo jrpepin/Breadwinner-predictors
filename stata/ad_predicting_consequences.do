@@ -191,10 +191,16 @@ tab single_all start_from_0, row
 tab single_all end_as_sole, row
 
 sum avg_hhsize
+sum avg_hhsize if rel_status_detail==1 // single
+sum avg_hhsize if rel_status_detail==2
+sum avg_hhsize if rel_status_detail==3
 sum avg_hhsize if single_all==1
 sum avg_hhsize if partnered_all==1
 
 sum st_minorchildren
+sum avg_hhsize if rel_status_detail==1 // single
+sum avg_hhsize if rel_status_detail==2
+sum avg_hhsize if rel_status_detail==3
 sum st_minorchildren if single_all==1
 sum st_minorchildren if partnered_all==1
 
