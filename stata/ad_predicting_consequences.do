@@ -755,6 +755,14 @@ graph export "$results\all_income_changes_inpov.png", as(png) name("Graph")
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==0, percent addlabel width(5000) // not in pov
 graph export "$results\all_income_changes_notinpov.png", as(png) name("Graph")
 
+// mlabformat(%fmt)
+
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==1, percent width(5000) color(red%30)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==0, percent width(5000) color(dkgreen%30)), ///
+legend(order(1 "In financial hardship" 2 "Not in financial hardship" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+graph export "$results\income_change_by_pov.png", as(png) name("Graph")
+
+
 // started in pov
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_lag==1, percent addlabel width(5000) // in pov
