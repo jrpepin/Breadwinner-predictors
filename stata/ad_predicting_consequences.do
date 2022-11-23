@@ -165,6 +165,12 @@ label values income_change income
 
 // drop if inlist(status_b1, 3,4) 
 
+// topcode income change to stabilize outliers - use 1% / 99% or 5% / 95%?
+sum hh_income_raw_all, detail
+gen hh_income_topcode=hh_income_raw_all
+replace hh_income_topcode = `r(p5)' if hh_income_raw_all<`r(p5)'
+replace hh_income_topcode = `r(p95)' if hh_income_raw_all>`r(p95)'
+
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
 keep if bw60lag==0 // first want to see the effect of transitioning on income AMONG eligible mothers
 browse SSUID PNUM year hh_income_chg hh_income_raw hh_income_raw_all // k so the first two are just those who transition, the last one is all mothers - so would need that for comparison. for those who transition, they match
@@ -185,7 +191,7 @@ regress log_income_change i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 
 keep if trans_bw60_alt2==1 & bw60lag==0
 
 ********************************************************************************
-* Descriptive things
+* Relationship status descriptives
 ********************************************************************************
 tab single_all start_from_0, row
 tab single_all end_as_sole, row
@@ -198,11 +204,18 @@ sum avg_hhsize if single_all==1
 sum avg_hhsize if partnered_all==1
 
 sum st_minorchildren
-sum avg_hhsize if rel_status_detail==1 // single
-sum avg_hhsize if rel_status_detail==2
-sum avg_hhsize if rel_status_detail==3
+sum st_minorchildren if rel_status_detail==1 // single
+sum st_minorchildren if rel_status_detail==2
+sum st_minorchildren if rel_status_detail==3
 sum st_minorchildren if single_all==1
 sum st_minorchildren if partnered_all==1
+
+sum hh_income_raw
+sum hh_income_raw if in_pov==0, detail
+sum hh_income_raw if in_pov==1, detail
+sum hh_income_raw if hh_income_raw >=-50000 & hh_income_raw <=50000, detail
+sum hh_income_raw if in_pov==0 & hh_income_raw >=-50000 & hh_income_raw <=50000, detail
+sum hh_income_raw if in_pov==1 & hh_income_raw >=-50000 & hh_income_raw <=50000, detail
 
 // both more likely to start from 0 AND end up as 100% contributor
 
@@ -559,6 +572,60 @@ histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & singl
 histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & partnered_all==1, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change") // partnered
 
 ********************************************************************************
+* Pathway descriptives
+********************************************************************************
+gen mom_earn_change=.
+replace mom_earn_change=-1 if mom_lose_earn==1 | earn_change <0
+replace mom_earn_change=0 if mom_gain_earn==0 & earnup8_all==0 & mom_lose_earn==0 & earn_change==0
+replace mom_earn_change=1 if earnup8_all==1
+replace mom_earn_change=0 if mom_earn_change==. // the very small mom ups - want to be considered no change
+replace mom_earn_change=1 if mom_earn_change==0 & mt_mom==1 // BUT want the very small moms if ONLY mom's earnings went up, because there is nowhere else to put
+
+gen pathway_detail=.
+replace pathway_detail=1 if pathway==1 & start_from_0==1 // no earnings prior
+replace pathway_detail=2 if pathway==1 & start_from_0==0 // she had earnings
+replace pathway_detail=3 if pathway==3 & earnings_sp_adj==0 // partner down to 0
+replace pathway_detail=4 if pathway==3 & earnings_sp_adj!=0 // partner not down to 0
+replace pathway_detail=5 if pathway==2
+replace pathway_detail=6 if pathway==5 & inlist(mom_earn_change,-1,0) & end_as_sole==1 // just other, down to 0
+replace pathway_detail=7 if pathway==5 & inlist(mom_earn_change,-1,0) & end_as_sole==0 // just other, not down to 0
+replace pathway_detail=8 if pathway==5 & mom_earn_change==1 // both
+replace pathway_detail=9 if pathway==4 & inlist(mom_earn_change,-1,0) // just partner left
+replace pathway_detail=10 if pathway==4 & mom_earn_change==1 // partner left and her earnings up
+
+label define pathway_detail 1 "Mom Up from 0" 2 "Mom Up" 3 "Partner Down to 0" 4 "Partner Down" 5 "Mom Up Partner Down" 6 "Other Down to 0" 7 "Other Down" 8 "Mom Up Other Down" 9 "Dissolution" 10 "Dissolution Mom Up"
+label values pathway_detail pathway_detail
+
+browse SSUID PNUM earnings_adj earnings_lag earnings_sp_adj thearn_adj thearn_lag pathway_detail earnings_ratio end_as_sole mom_earn_change
+sum earn_change_sp
+sum earn_change_raw_sp
+sum earn_change_raw_sp if pathway_detail==3
+sum earn_change_raw_sp if pathway_detail==4
+sum earnings_sp_adj if pathway_detail==3
+sum earnings_sp_adj if pathway_detail==4
+
+tabstat hh_income_raw, by(pathway) stats(mean p50)
+tabstat thearn_adj, by(pathway) stats(mean p50)
+tabstat hh_income_raw, by(pathway_detail) stats(mean p50)
+tabstat thearn_adj, by(pathway_detail) stats(mean p50)
+tabstat hh_income_topcode, by(pathway) stats(mean p50)
+tabstat hh_income_topcode, by(pathway_detail) stats(mean p50)
+
+gen pathway_final=.
+replace pathway_final=1 if pathway_detail==1 // mom up from 0
+replace pathway_final=2 if pathway_detail==2 // mom up
+replace pathway_final=3 if inlist(pathway_detail,3,4,9) // partner down or left, mom no change
+replace pathway_final=4 if inlist(pathway_detail,6,7) // other down, mom no change
+replace pathway_final=5 if inlist(pathway_detail,5,10) // partner down or left, mom up
+replace pathway_final=6 if pathway_detail==8 // other down, mom up
+
+label define pathway_final 1 "Mom Up from 0" 2 "Mom up" 3 "Partner Down" 4 "Other Down" 5 "Partner Down Mom Up" 6 "Other Down Mom Up"
+label values pathway_final pathway_final
+
+tabstat hh_income_raw, by(pathway_final) stats(mean p50)
+tabstat thearn_adj, by(pathway_final) stats(mean p50)
+
+********************************************************************************
 * MODELS with continuous outcome
 ********************************************************************************
 *Descriptive for comparison
@@ -584,12 +651,16 @@ regress hh_income_raw_all ib2.rel_status // or these
 regress hh_income_raw_all ib2.rel_status_detail
 regress hh_income_raw_all ib2.rel_status i.educ_gp i.race // or these
 regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag
 margins rel_status_detail
 margins educ_gp
 margins race
 regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // wait do I need to control for poverty lag here? when I do this, education becomes significant
 
 regress hh_income_raw_all i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
+
+regress hh_income_topcode ib2.rel_status_detail
+regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race
 
 regress log_income_change
 regress log_income_change ib2.pathway
@@ -600,7 +671,7 @@ regress log_income_change ib2.pathway##i.race if inlist(race,1,2,4)
 regress log_income_change i.educ_gp // also these
 regress log_income_change i.educ_gp if rel_status==2
 regress log_income_change ib2.pathway##i.educ_gp // okay also not
-regress log_income_change i.rel_status // okay these are significant
+regress log_income_change i.rel_status_detail // okay these are significant
 regress log_income_change i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
 
 regress inc_pov_change_raw ib2.pathway
