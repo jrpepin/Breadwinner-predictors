@@ -676,7 +676,7 @@ regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // single is ma
 gen hh_income_1000s = hh_income_topcode / 1000
 
 regress hh_income_topcode ib6.pathway_final
-regress hh_income_topcode ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race
+regress hh_income_topcode ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race // use these coefficients for pathway, education, and race
 regress hh_income_1000s ib6.pathway_final
 
 // interactions
@@ -760,7 +760,7 @@ margins rel_status_detail
 margins educ_gp
 margins race
 
-logit in_pov ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race, or
+logit in_pov ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race, or // use these for pathway, race, educ
 logit in_pov ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
 
 /// OKAY, effect of transitioning - interaction
