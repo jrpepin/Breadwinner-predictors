@@ -625,6 +625,15 @@ label values pathway_final pathway_final
 tabstat hh_income_raw, by(pathway_final) stats(mean p50)
 tabstat thearn_adj, by(pathway_final) stats(mean p50)
 
+tabstat hh_income_raw, by(educ_gp) stats(mean p50)
+tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
+tabstat thearn_adj, by(educ_gp) stats(mean p50)
+
+tabstat hh_income_raw, by(race) stats(mean p50)
+tabstat hh_income_topcode, by(race) stats(mean p50)
+tabstat thearn_adj, by(race) stats(mean p50)
+
+
 ********************************************************************************
 * MODELS with continuous outcome
 ********************************************************************************
@@ -659,8 +668,28 @@ regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // wa
 
 regress hh_income_raw_all i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
 
-regress hh_income_topcode ib2.rel_status_detail
-regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race
+regress hh_income_topcode ib2.rel_status_detail // not sig with controls
+regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // single is marginally signifcant here (p=.06)
+
+**** Pathway analysis
+// what if I put in 1000s?
+gen hh_income_1000s = hh_income_topcode / 1000
+
+regress hh_income_topcode ib6.pathway_final
+regress hh_income_topcode ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race
+regress hh_income_1000s ib6.pathway_final
+
+// interactions
+regress hh_income_topcode ib6.pathway_final
+regress hh_income_topcode i.educ_gp // nothing sig
+regress hh_income_topcode ib6.pathway_final##i.educ_gp // college plus main effect becomes sig. few interactions sig except college plus partner down and other down (more negative)
+margins pathway_final#educ_gp
+marginsplot
+
+regress hh_income_topcode i.race // nothing sig
+regress hh_income_topcode ib6.pathway_final##i.race if inlist(race,1,2,4) // black main effect becomes marginally sig.  some interactions with Black and other down, partner down (more positive?)
+margins pathway_final#race
+marginsplot
 
 regress log_income_change
 regress log_income_change ib2.pathway
@@ -731,6 +760,9 @@ margins rel_status_detail
 margins educ_gp
 margins race
 
+logit in_pov ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race, or
+logit in_pov ib6.pathway_final ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
+
 /// OKAY, effect of transitioning - interaction
 regress log_income_change i.trans_bw60_alt2 if pathway!=0
 regress hh_income_raw_all i.trans_bw60_alt2 if pathway!=0 // okay once I restrict to those who DID not experience an event, it goes away. DUH
@@ -777,6 +809,9 @@ tab educ_gp pov_change_detail, row
 tab rel_status pov_change_detail, row
 tab partnered_no_chg pov_change_detail, row // to get those partnered all year
 tab pathway end_as_sole, row nofreq // proxy for partner going down to 0? (or whoever lost earnings)
+tab pathway pov_change_detail, row nofreq
+tab pathway_detail pov_change_detail, row nofreq
+tab pathway_final pov_change_detail, row nofreq
 
 mlogit pov_change i.race, rrr
 mlogit pov_change i.educ_gp, rrr
@@ -833,6 +868,17 @@ forvalues rs=1/2{
 	display `rs'
 	tab pov_change_detail income_change if rel_status==`rs', row
 }
+
+forvalues e=1/3{
+	display `e'
+	tab pathway_final pov_change_detail if educ_gp==`e', row nofreq
+}
+
+forvalues r=1/5{
+	display `r'
+	tab pathway_final pov_change_detail if race==`r', row nofreq
+}
+
 
 // end pov
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent addlabel width(5000) // all
