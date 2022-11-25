@@ -660,6 +660,7 @@ regress hh_income_raw_all ib2.rel_status // or these
 regress hh_income_raw_all ib2.rel_status_detail
 regress hh_income_raw_all ib2.rel_status i.educ_gp i.race // or these
 regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
+regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // USE
 regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag
 margins rel_status_detail
 margins educ_gp
