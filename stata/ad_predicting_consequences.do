@@ -32,6 +32,25 @@ gen pov_lag=.
 replace pov_lag=0 if inc_pov_lag>=1.5 & inc_pov_lag!=.
 replace pov_lag=1 if inc_pov_lag <1.5
 
+* poverty change outcome to use
+gen pov_change=.
+replace pov_change=0 if in_pov==pov_lag
+replace pov_change=1 if in_pov==1 & pov_lag==0
+replace pov_change=2 if in_pov==0 & pov_lag==1
+
+label define pov_change 0 "No" 1 "Moved into" 2 "Moved out of"
+label values pov_change pov_change
+
+gen pov_change_detail=.
+replace pov_change_detail=0 if in_pov==pov_lag & pov_lag==0 // stayed out of poverty
+replace pov_change_detail=1 if in_pov==0 & pov_lag==1 // moved out of poverty
+replace pov_change_detail=2 if in_pov==pov_lag & pov_lag==1 // stay IN poverty
+replace pov_change_detail=3 if in_pov==1 & pov_lag==0 // moved into
+
+label define pov_change_detail 0 "Stayed out" 1 "Moved Out" 2 "Stayed in" 3 "Moved in"
+label values pov_change_detail pov_change_detail
+
+/* old dependent variables
 gen inc_pov_summary2=.
 replace inc_pov_summary2=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov >=1.5
 replace inc_pov_summary2=2 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. & inc_pov <1.5
@@ -49,6 +68,7 @@ replace mechanism=3 if inc_pov_summary2==1
 
 label define mechanism 1 "Default" 2 "Reserve" 3 "Empowerment"
 label values mechanism mechanism
+*/
 
 * Creating necessary independent variables
  // one variable for all pathways
@@ -451,52 +471,52 @@ foreach var in start_from_0 tanf_lag eeitc eitc_after{
 ********************************************************************************
 * ANALYSIS
 ********************************************************************************
-tab pov_lag inc_pov_summary2, row
-tab inc_pov_summary2 pov_lag, row
+tab pov_lag pov_change_detail, row
+tab pov_change_detail pov_lag, row
 
 forvalues p=1/5{
 	display `p'
-	tab inc_pov_summary2 pov_lag if pathway==`p', row
+	tab pov_change_detail pov_lag if pathway==`p', row
 }
 
 forvalues e=1/3{
 	display `e'
-	tab inc_pov_summary2 pov_lag if educ_gp==`e', row
+	tab pov_change_detail pov_lag if educ_gp==`e', row
 }
 
 forvalues r=1/5{
 	display `r'
-	tab inc_pov_summary2 pov_lag if race==`r', row
+	tab pov_change_detail pov_lag if race==`r', row
 }
 
 forvalues rs=1/3{
 	display `rs'
-	tab inc_pov_summary2 pov_lag if rel_status_detail==`rs', row
+	tab pov_change_detail pov_lag if rel_status_detail==`rs', row
 }
 
 forvalues rs=1/2{
 	display `rs'
-	tab inc_pov_summary2 pov_lag if rel_status==`rs', row
+	tab pov_change_detail pov_lag if rel_status==`rs', row
 }
 
-tab pathway inc_pov_summary2 if pov_lag==0, row nofreq
-tab pathway inc_pov_summary2 if pov_lag==1, row nofreq
+tab pathway pov_change_detail if pov_lag==0, row nofreq
+tab pathway pov_change_detail if pov_lag==1, row nofreq
 
-tab race inc_pov_summary2 if pov_lag==0, row nofreq
-tab race inc_pov_summary2 if pov_lag==1, row nofreq
+tab race pov_change_detail if pov_lag==0, row nofreq
+tab race pov_change_detail if pov_lag==1, row nofreq
 
-tab educ_gp inc_pov_summary2 if pov_lag==0, row nofreq
-tab educ_gp inc_pov_summary2 if pov_lag==1, row nofreq
+tab educ_gp pov_change_detail if pov_lag==0, row nofreq
+tab educ_gp pov_change_detail if pov_lag==1, row nofreq
 
 tabstat inc_pov, by(pov_lag)
 tabstat inc_pov_lag, by(pov_lag)
 tab educ_gp pov_lag, row
 
-tab single_all inc_pov_summary2, row nofreq
-tab single_all inc_pov_summary2 if start_from_0==1, row nofreq
-tab single_all inc_pov_summary2 if start_from_0==0, row nofreq
+tab single_all pov_change_detail, row nofreq
+tab single_all pov_change_detail if start_from_0==1, row nofreq
+tab single_all pov_change_detail if start_from_0==0, row nofreq
 
-tab relationship inc_pov_summary2, row nofreq
+tab relationship pov_change_detail, row nofreq
 
 sum thearn_lag, detail  // pre 2014 -- matches paper
 sum thearn_adj, detail // post 2014 -- matches paper
@@ -513,53 +533,35 @@ sum thearn_adj if relationship==1, detail
 sum thearn_lag if relationship==2, detail
 sum thearn_adj if relationship==2, detail
 
-// trying NEW classification
-gen outcome=.
-replace outcome=1 if pov_lag==0 & inc_pov_summary2==1 // improve
-replace outcome=2 if (pov_lag==0 & inlist(inc_pov_summary2,2,4)) | (pov_lag==1 & inlist(inc_pov_summary2,1,3)) // maintain
-replace outcome=3 if pov_lag==1 & inc_pov_summary2==4 // decline
-
-label define outcome 1 "Improve" 2 "Maintain" 3 "Decline"
-label values outcome outcome
-
-tab inc_pov_summary2 outcome
-
-tab race outcome, row nofreq
-tab educ_gp outcome, row nofreq
-
-tab pathway outcome, row nofreq // okay I honestly do not hate this.
-
-browse SSUID PNUM year earnings_adj thearn_adj tanf_amount_lag  tanf_amount program_income program_income_lag
-
 ********************************************************************************
 * Demographics by outcome and pathway
 ********************************************************************************
 
-tab inc_pov_summary2 tanf, row
-tab inc_pov_summary2 tanf_lag, row
-tab inc_pov_summary2 eeitc, row
-tab inc_pov_summary2 eitc_after, row
+tab pov_change_detail tanf, row
+tab pov_change_detail tanf_lag, row
+tab pov_change_detail eeitc, row
+tab pov_change_detail eitc_after, row
 
 tab pathway tanf, row
 tab pathway tanf_lag, row
 tab pathway eeitc, row
 tab pathway eitc_after, row
-tab pathway inc_pov_summary2, row
-tab pathway inc_pov_summary2 if partnered==0, row
-tab pathway inc_pov_summary2 if partnered==1, row
+tab pathway pov_change_detail, row
+tab pathway pov_change_detail if partnered==0, row
+tab pathway pov_change_detail if partnered==1, row
 
-tab inc_pov_summary2 educ_gp, row nofreq
-tab inc_pov_summary2 race, row nofreq
-tab inc_pov_summary2 partnered, row nofreq
-tab inc_pov_summary2 tanf_lag, row nofreq
-tab inc_pov_summary2 eeitc, row nofreq
-tab inc_pov_summary2 eitc_after, row nofreq
-tab inc_pov_summary2 zero_earnings, row nofreq
+tab pov_change_detail educ_gp, row nofreq
+tab pov_change_detail race, row nofreq
+tab pov_change_detail partnered, row nofreq
+tab pov_change_detail tanf_lag, row nofreq
+tab pov_change_detail eeitc, row nofreq
+tab pov_change_detail eitc_after, row nofreq
+tab pov_change_detail zero_earnings, row nofreq
 
-tab inc_pov_summary2 tanf_lag if partnered==0, row
+tab pov_change_detail tanf_lag if partnered==0, row
 
-tab pathway inc_pov_summary2 if educ_gp==1, row
-tab pathway inc_pov_summary2 if partnered==1, row
+tab pathway pov_change_detail if educ_gp==1, row
+tab pathway pov_change_detail if partnered==1, row
 
 	
 histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")
@@ -708,34 +710,34 @@ regress inc_pov_change_raw ib2.pathway
 regress inc_pov_change_raw i.race // nope
 regress inc_pov_change_raw i.educ_gp // nope
 
-mlogit inc_pov_summary2, rrr
+mlogit pov_change_detail, rrr
 
-mlogit inc_pov_summary2 i.pathway, rrr // wait why is this not working now??
+mlogit pov_change_detail i.pathway, rrr 
 margins i.pathway
 
-mlogit inc_pov_summary2 i.pathway i.pov_lag, rrr
+mlogit pov_change_detail i.pathway i.pov_lag, rrr
 margins i.pathway
 
-mlogit inc_pov_summary2 i.educ_gp, rrr // this is kind of interesting
+mlogit pov_change_detail i.educ_gp, rrr
 margins i.educ_gp
 marginsplot
-mlogit inc_pov_summary2 i.educ_gp i.pov_lag, rrr // this is kind of interesting
+mlogit pov_change_detail i.educ_gp i.pov_lag, rrr
 margins i.educ_gp
 
-mlogit inc_pov_summary2 i.race if inlist(race,1,2,4), rrr // this is kind of interesting
+mlogit pov_change_detail i.race if inlist(race,1,2,4), rrr
 margins i.race
 marginsplot
-mlogit inc_pov_summary2 i.race i.pov_lag if inlist(race,1,2,4), rrr // this is kind of interesting
+mlogit pov_change_detail i.race i.pov_lag if inlist(race,1,2,4), rrr
 margins i.race
 
-mlogit inc_pov_summary2 i.rel_status i.educ_gp i.race, rrr // this is kind of interesting
+mlogit pov_change_detail i.rel_status i.educ_gp i.race, rrr
 margins i.rel_status
-mlogit inc_pov_summary2 i.rel_status i.educ_gp i.race i.pov_lag, rrr // this is kind of interesting
+mlogit pov_change_detail i.rel_status i.educ_gp i.race i.pov_lag, rrr
 margins i.rel_status
 
-mlogit inc_pov_summary2 i.rel_status_detail i.educ_gp i.race, rrr // this is kind of interesting
+mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race, rrr
 margins i.rel_status_detail
-mlogit inc_pov_summary2 i.rel_status_detail i.educ_gp i.race i.pov_lag, rrr // this is kind of interesting
+mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race i.pov_lag, rrr
 margins i.rel_status_detail
 
 // okay so poverty is kind of interesting
@@ -787,23 +789,6 @@ margins trans_bw60_alt2#educ_gp
 
 tab pov_lag in_pov, row // is it really that maternal BW reinforces not actually alters path? that is why I think movement in and out of poverty is more intersting. maybe do like three - income, 4 category, then movements across the two?
 tab pov_lag in_pov if trans_bw60_alt2==1, row
-
-gen pov_change=.
-replace pov_change=0 if in_pov==pov_lag
-replace pov_change=1 if in_pov==1 & pov_lag==0
-replace pov_change=2 if in_pov==0 & pov_lag==1
-
-label define pov_change 0 "No" 1 "Moved into" 2 "Moved out of"
-label values pov_change pov_change
-
-gen pov_change_detail=.
-replace pov_change_detail=0 if in_pov==pov_lag & pov_lag==0 // stayed out of poverty
-replace pov_change_detail=1 if in_pov==0 & pov_lag==1 // moved out of poverty
-replace pov_change_detail=2 if in_pov==pov_lag & pov_lag==1 // stay IN poverty
-replace pov_change_detail=3 if in_pov==1 & pov_lag==0 // moved into
-
-label define pov_change_detail 0 "Stayed out" 1 "Moved Out" 2 "Stayed in" 3 "Moved in"
-label values pov_change_detail pov_change_detail
 
 tab race pov_change_detail, row
 tab educ_gp pov_change_detail, row
@@ -902,82 +887,6 @@ histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, percent
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_lag==1, percent addlabel width(5000) // in pov
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_lag==0, percent addlabel width(5000) // not in pov
 
-
-********************************************************************************
-* MODELS
-********************************************************************************
-
-/// To use for now
-log using "$logdir/regression_consequences.log", replace
-
-mlogit mechanism, baseoutcome(1) rrr // here prove that reserve is most likely outcome for full sample
-mlogit mechanism i.educ_gp, baseoutcome(1) rrr nocons
-margins i.educ_gp
-tabulate mechanism educ_gp, chi2 col // this matches margins - because FULLY SATURATED (according to help article)
-listcoef i.educ_gp // gives me what i need for educ 2
-
-mlogit mechanism ib3.educ_gp, baseoutcome(1) rrr nocons
-listcoef i.educ_gp // gives me educ 1
-
-mlogit mechanism i.educ_gp i.educ_gp#i.pathway, baseoutcome(2) rrr nocons // okay using reserve as the category makes things make more sense. think there are more differences between reserve and empower than there are default and anything else
-margins educ_gp#pathway  // why won't mom up estimate?
-listcoef i.educ_gp // oh wait maybe this is helpful?!
-
-mlogit mechanism i.race, baseoutcome(1) rrr
-margins race
-
-mlogit mechanism i.race i.race#i.pathway, baseoutcome(2) rrr nocons 
-margins race#pathway
-listcoef i.race
-
-log close
-
-/// testing things
-
-mlogit mechanism, baseoutcome(1) rrr // here prove that reserve is most likely outcome for full sample
-mlogit mechanism i.educ_gp, baseoutcome(1) rrr nocons
-// do I interpret some college reserve coefficient as some college likelihood of being in reserve relative to default OR some college likelihood of being in reserve relative to HS or less being in reserve? OR some college reserve relative to default high school or less?!
-// from UCLA: This is the multinomial logit estimate for a one unit increase in video score (so going from no HS to some college) for chocolate relative to vanilla (for reserve to default), given the other variables in the model are held constant. so going up in education increases likelihood of going to next outcome?
-// think WITHOUT no cons, it's relative to default HS. does that mean constant is HS or less relative to HS or less default?? I *think* so gah
-// WITH no cons, it's relative to that education in default?? so like college empower to college default, same with reserve
-// how do I get it to be relative to less than HS in same category?? probably need to change reference groups?! and reference outcomes? listcoef
-// from ND: Hence, you can easily see whether, say, yr89 significantly affects the likelihood of your being in the SD versus the SA category; but you can't easily tell whether yr89 significantly affects the likelihood of your being in, say, SD versus D, when neither is the base.
-// from German: Thus, the relative probability of working rather than being in school is 37% higher for blacks than for non-blacks with the same education and work experience. (Relative probabilities are also called relative odds.) A common mistake is to interpret this coefficient as meaning that the probability of working is higher for blacks. It is only the relative probability of work over school that is higher. Says use MARGINS to interpret
-
-margins i.educ_gp
-tabulate mechanism educ_gp, chi2 col // this matches margins - because FULLY SATURATED (according to help article)
-
-listcoef i.educ_gp // gives me what i need for educ 2
-
-mlogit mechanism ib3.educ_gp, baseoutcome(1) rrr nocons
-listcoef i.educ_gp // gives me educ 1
-
-mlogit mechanism ib2.educ_gp, baseoutcome(1) rrr nocons
-listcoef i.educ_gp // why can't I get educ 3??
-
-mlogit mechanism i.race, baseoutcome(1) rrr
-margins race
-
-mlogit mechanism i.pathway, baseoutcome(1) rrr
-margins pathway
-
-mlogit mechanism i.educ_gp i.educ_gp#i.pathway, baseoutcome(1) rrr nocons // very few things are significant, think because reference groups are weird?
-margins educ_gp#pathway  // why won't mom up estimate?
-
-mlogit mechanism i.educ_gp i.educ_gp#i.pathway, baseoutcome(2) rrr nocons // okay using reserve as the category makes things make more sense. think there are more differences between reserve and empower than there are default and anything else
-margins educ_gp#pathway  // why won't mom up estimate?
-listcoef i.educ_gp // oh wait maybe this is helpful?!
-
-// instead of interacting, do a model either for each educ and use pathway as IV?
-// OR do pathway as stratifyer and education as iV?
-
-mlogit mechanism i.pathway if educ_gp==1, baseoutcome(1) rrr // think the problem is like one outcome is most common - and there isn't noticeable variation by pathway on what leads to that outcome? so it's like ALL pathways leads to that outcome?
-margins pathway // okay this literally matches above, just does estimate mom up - very low. okay because basically ONLY leads to default
-
-mlogit mechanism i.educ_gp if pathway==2, baseoutcome(1) rrr // okay this doesn't work bc mom up can't lead to default?
-margins educ_gp // okay this also matches above interaction
-
-tab pathway mechanism if educ_gp==1
 
 save "$tempdir/bw_consequences.dta", replace
 
