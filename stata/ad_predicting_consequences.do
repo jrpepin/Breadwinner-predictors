@@ -944,6 +944,73 @@ histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_la
 
 save "$tempdir/bw_consequences.dta", replace
 
+********************************************************************************
+* Descriptive: pathway by race / educ + categorical outcome
+********************************************************************************
+recode pov_change_detail (1=1)(0=2)(2=3)(3=4), gen(outcome) // putting in better order, will help with below
+label define outcome 1 "Moved Out" 2 "Stayed Out" 3 "Stayed in" 4 "Moved in"
+label values outcome outcome
+
+tab outcome, gen(outcome)
+
+putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table5) modify
+putexcel A1:F1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
+putexcel A2 = "Category"
+putexcel B2 = "Label"
+putexcel C2 = ("Moved out") D2 = ("Stayed out") E2 = ("Stayed in") F2 = ("Moved in")
+
+/// split pathways by race / educ
+putexcel A3:A7 = "HS or Less", merge hcenter
+putexcel A8:A12 = "Some College", merge hcenter
+putexcel A13:A17 = "College", merge hcenter
+putexcel A18:A22 = "White", merge hcenter
+putexcel A23:A27 = "Black", merge hcenter
+putexcel A28:A32 = "Hispanic", merge hcenter
+putexcel B3 = ("Partner Left") B4 = ("Mom Up") B5 = ("Partner Down") B6 = ("Mom Up Partner Down") B7 = ("Other HH Member")
+putexcel B8 = ("Partner Left") B9 = ("Mom Up") B10 = ("Partner Down") B11 = ("Mom Up Partner Down") B12 = ("Other HH Member")
+putexcel B13 = ("Partner Left") B14 = ("Mom Up") B15 = ("Partner Down") B16 = ("Mom Up Partner Down") B17 = ("Other HH Member")
+putexcel B18 = ("Partner Left") B19 = ("Mom Up") B20 = ("Partner Down") B21 = ("Mom Up Partner Down") B22 = ("Other HH Member")
+putexcel B23 = ("Partner Left") B24 = ("Mom Up") B25 = ("Partner Down") B26 = ("Mom Up Partner Down") B27 = ("Other HH Member")
+putexcel B28 = ("Partner Left") B29 = ("Mom Up") B30 = ("Partner Down") B31 = ("Mom Up Partner Down") B32 = ("Other HH Member")
+
+local colu "C D E F"
+
+forvalues e=1/3{
+	local x=1
+		foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+		local row = (`e' * 5) -3 + `x'
+			forvalues i=1/4{
+			local col: word `i' of `colu'
+			sum outcome`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1 &	educ_gp==`e', detail // 2014
+			putexcel `col'`row'=`r(mean)', nformat(#.##%)
+			}
+		local ++x
+	}
+}
+
+recode race (1=1) (2=2)(4=3)(3=4)(5=4), gen(race_gp)
+label define race_gp 1 "White" 2 "Black" 3 "Hispanic"
+label values race_gp race_gp
+
+local colu "C D E F"
+
+forvalues r=1/3{
+	local x=1
+		foreach var in ft_partner_leave	mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes{
+		local row = (`r' * 5) +12 + `x'
+			forvalues i=1/4{
+			local col: word `i' of `colu'
+			sum outcome`i' if trans_bw60_alt2==1 & survey_yr==2 & `var'==1 &	race_gp==`r', detail // 2014
+			putexcel `col'`row'=`r(mean)', nformat(#.##%)
+			}
+		local ++x
+	}
+}
+
+// validate
+tab pathway outcome if educ_gp==1, row nofreq
+
+/*
 browse SSUID PNUM educ_gp pathway mechanism inc_pov
 
 preserve
@@ -958,3 +1025,4 @@ collapse (p50) inc_pov, by(race pathway)
 export excel using "$results\race_pathway_poverty.xls", firstrow(variables) replace
 
 restore
+*/
