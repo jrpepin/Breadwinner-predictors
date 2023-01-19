@@ -720,15 +720,15 @@ regress hh_income_topcode i.pathway
 regress hh_income_topcode i.pathway i.race i.educ_gp
 regress hh_income_topcode i.pathway i.race i.educ_gp i.pov_lag
 
-logit in_pov i.educ_gp
-logit in_pov i.race
-logit in_pov i.pathway
-logit in_pov i.pathway i.race i.educ_gp
+logit in_pov i.educ_gp, or
+logit in_pov i.race, or
+logit in_pov i.pathway, or
+logit in_pov i.pathway i.race i.educ_gp, or
 
-logit in_pov i.educ_gp i.pov_lag
-logit in_pov i.race i.pov_lag
-logit in_pov i.pathway i.pov_lag
-logit in_pov i.pathway i.race i.educ_gp i.pov_lag
+logit in_pov i.educ_gp i.pov_lag, or
+logit in_pov i.race i.pov_lag, or
+logit in_pov i.pathway i.pov_lag, or
+logit in_pov i.pathway i.race i.educ_gp i.pov_lag, or
 
 // log close
 
