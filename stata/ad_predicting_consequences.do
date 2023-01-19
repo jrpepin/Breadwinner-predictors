@@ -636,6 +636,63 @@ tabstat hh_income_raw, by(race) stats(mean p50)
 tabstat hh_income_topcode, by(race) stats(mean p50)
 tabstat thearn_adj, by(race) stats(mean p50)
 
+********************************************************************************
+* Descriptives to use
+******************************************************************************** 
+// log using "$logdir\impact_stats.log", replace
+
+tabstat hh_income_raw, by(educ_gp) stats(mean p50)
+tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
+
+tabstat hh_income_raw, by(race) stats(mean p50)
+tabstat hh_income_topcode, by(race) stats(mean p50)
+
+tabstat hh_income_raw, by(pathway) stats(mean p50)
+tabstat hh_income_topcode, by(pathway) stats(mean p50)
+
+tab pathway pov_change_detail, row
+tab educ_gp pov_change_detail, row
+tab race pov_change_detail, row
+tab rel_status_detail pov_change_detail, row
+tab rel_status pov_change_detail, row
+
+tab pov_change_detail income_change, row
+
+forvalues p=1/5{
+	display `p'
+	tab pov_change_detail income_change if pathway==`p', row
+}
+
+forvalues e=1/3{
+	display `e'
+	tab pov_change_detail income_change if educ_gp==`e', row
+}
+
+forvalues r=1/5{
+	display `r'
+	tab pov_change_detail income_change if race==`r', row
+}
+
+forvalues rs=1/3{
+	display `rs'
+	tab pov_change_detail income_change if rel_status_detail==`rs', row
+}
+
+forvalues rs=1/2{
+	display `rs'
+	tab pov_change_detail income_change if rel_status==`rs', row
+}
+
+forvalues e=1/3{
+	display `e'
+	tab pathway_final pov_change_detail if educ_gp==`e', row nofreq
+}
+
+forvalues r=1/5{
+	display `r'
+	tab pathway_final pov_change_detail if race==`r', row nofreq
+}
+
 
 ********************************************************************************
 * Models to use
@@ -649,6 +706,31 @@ logit in_pov ib2.rel_status_detail i.educ_gp i.race, or
 
 logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
 
+
+** For other paper
+regress hh_income_raw_all i.educ_gp
+regress hh_income_raw_all i.race
+regress hh_income_raw_all i.pathway
+regress hh_income_raw_all i.pathway i.race i.educ_gp
+regress hh_income_raw_all i.pathway i.race i.educ_gp i.pov_lag
+
+regress hh_income_topcode i.educ_gp
+regress hh_income_topcode i.race
+regress hh_income_topcode i.pathway
+regress hh_income_topcode i.pathway i.race i.educ_gp
+regress hh_income_topcode i.pathway i.race i.educ_gp i.pov_lag
+
+logit in_pov i.educ_gp
+logit in_pov i.race
+logit in_pov i.pathway
+logit in_pov i.pathway i.race i.educ_gp
+
+logit in_pov i.educ_gp i.pov_lag
+logit in_pov i.race i.pov_lag
+logit in_pov i.pathway i.pov_lag
+logit in_pov i.pathway i.race i.educ_gp i.pov_lag
+
+// log close
 
 ********************************************************************************
 * Other
@@ -836,51 +918,6 @@ margins i.rel_status
 
 mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race, rrr
 margins i.rel_status_detail
-
-
-// descriptive
-tab pathway pov_change_detail, row
-tab educ_gp pov_change_detail, row
-tab race pov_change_detail, row
-tab rel_status_detail pov_change_detail, row
-tab rel_status pov_change_detail, row
-
-tab pov_change_detail income_change, row
-
-forvalues p=1/5{
-	display `p'
-	tab pov_change_detail income_change if pathway==`p', row
-}
-
-forvalues e=1/3{
-	display `e'
-	tab pov_change_detail income_change if educ_gp==`e', row
-}
-
-forvalues r=1/5{
-	display `r'
-	tab pov_change_detail income_change if race==`r', row
-}
-
-forvalues rs=1/3{
-	display `rs'
-	tab pov_change_detail income_change if rel_status_detail==`rs', row
-}
-
-forvalues rs=1/2{
-	display `rs'
-	tab pov_change_detail income_change if rel_status==`rs', row
-}
-
-forvalues e=1/3{
-	display `e'
-	tab pathway_final pov_change_detail if educ_gp==`e', row nofreq
-}
-
-forvalues r=1/5{
-	display `r'
-	tab pathway_final pov_change_detail if race==`r', row nofreq
-}
 
 
 // end pov
