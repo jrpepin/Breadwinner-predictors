@@ -161,7 +161,6 @@ replace relationship=1 if start_marital_status==1 & partnered_all==1 // married
 replace relationship=2 if start_marital_status==2 & partnered_all==1 // cohab
 label values relationship marr
 
-* gah
 gen rel_status=.
 replace rel_status=1 if single_all==1
 replace rel_status=2 if partnered_all==1
@@ -178,8 +177,8 @@ label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
 label values rel_status_detail rel_detail
 
 gen income_change=.
-replace income_change=1 if inlist(inc_pov_summary2,1,2) // up
-replace income_change=2 if inlist(inc_pov_summary2,3,4) // down
+replace income_change=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. // up
+replace income_change=2 if inc_pov_change_raw < 0 & inc_pov_change_raw!=. // down
 label define income 1 "Up" 2 "Down"
 label values income_change income
 
@@ -471,6 +470,7 @@ foreach var in start_from_0 tanf_lag eeitc eitc_after{
 ********************************************************************************
 * ANALYSIS
 ********************************************************************************
+/* this doesn't make sense because this variable now takes into account prior pov status
 tab pov_lag pov_change_detail, row
 tab pov_change_detail pov_lag, row
 
@@ -507,6 +507,7 @@ tab race pov_change_detail if pov_lag==1, row nofreq
 
 tab educ_gp pov_change_detail if pov_lag==0, row nofreq
 tab educ_gp pov_change_detail if pov_lag==1, row nofreq
+*/
 
 tabstat inc_pov, by(pov_lag)
 tabstat inc_pov_lag, by(pov_lag)
@@ -637,7 +638,20 @@ tabstat thearn_adj, by(race) stats(mean p50)
 
 
 ********************************************************************************
-* MODELS with continuous outcome
+* Models to use
+********************************************************************************
+** In JFEI paper
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
+
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // didn't include but should I?
+
+logit in_pov ib2.rel_status_detail i.educ_gp i.race, or
+
+logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
+
+
+********************************************************************************
+* Other
 ********************************************************************************
 *Descriptive for comparison
 
@@ -647,8 +661,6 @@ tabstat hh_income_raw_all, by(race) stats(mean p50)
 tabstat hh_income_raw_all, by(educ_gp) stats(mean p50)
 tabstat hh_income_raw_all, by(rel_status_detail) stats(mean p50)
 tabstat hh_income_raw_all, by(rel_status) stats(mean p50)
-
-**DO WE HAVE ENOUGH POWER TO DO THIS??
 
 regress hh_income_raw_all 
 regress hh_income_raw_all i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 i.status_b1 // controls for those most likely to become BW
@@ -661,9 +673,11 @@ regress hh_income_raw_all i.educ_gp if rel_status==2
 regress hh_income_raw_all ib2.rel_status // or these
 regress hh_income_raw_all ib2.rel_status_detail
 regress hh_income_raw_all ib2.rel_status i.educ_gp i.race // or these
-regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
+
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race // but I think this is what is in the paper?
 regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // USE
-regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // do I need to do this?
+
 margins rel_status_detail
 margins educ_gp
 margins race
@@ -694,6 +708,7 @@ regress hh_income_topcode ib6.pathway_final##i.race if inlist(race,1,2,4) // bla
 margins pathway_final#race
 marginsplot
 
+/*
 regress log_income_change
 regress log_income_change ib2.pathway
 regress log_income_change ib2.pathway if rel_status==2
@@ -705,6 +720,7 @@ regress log_income_change i.educ_gp if rel_status==2
 regress log_income_change ib2.pathway##i.educ_gp // okay also not
 regress log_income_change i.rel_status_detail // okay these are significant
 regress log_income_change i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do I need to put all in same model? or is this wild. how to control? do need to control for each other?
+
 
 regress inc_pov_change_raw ib2.pathway
 regress inc_pov_change_raw i.race // nope
@@ -739,6 +755,7 @@ mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race, rrr
 margins i.rel_status_detail
 mlogit pov_change_detail i.rel_status_detail i.educ_gp i.race i.pov_lag, rrr
 margins i.rel_status_detail
+*/
 
 // okay so poverty is kind of interesting
 logit in_pov, or
