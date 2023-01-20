@@ -204,11 +204,17 @@ label values income_change income
 
 // drop if inlist(status_b1, 3,4) 
 
-// topcode income change to stabilize outliers - use 1% / 99% or 5% / 95%?
+// topcode income change to stabilize outliers - use 1% / 99% or 5% / 95%? should I topcode here or once I restrict sample?
 sum hh_income_raw_all, detail
 gen hh_income_topcode=hh_income_raw_all
 replace hh_income_topcode = `r(p5)' if hh_income_raw_all<`r(p5)'
 replace hh_income_topcode = `r(p95)' if hh_income_raw_all>`r(p95)'
+
+gen income_chg_top = hh_income_topcode / thearn_lag
+
+// browse SSUID thearn_adj thearn_lag hh_income_raw_all hh_income_topcode hh_income_chg income_chg_top
+sum hh_income_chg, detail
+sum income_chg_top, detail
 
 ** Should I restrict sample to just mothers who transitioned into breadwinning for this step? Probably. or just subpop?
 keep if bw60lag==0 // first want to see the effect of transitioning on income AMONG eligible mothers
