@@ -17,7 +17,7 @@ keep if survey == 2014
 * CREATE SAMPLE AND VARIABLES
 ********************************************************************************
 
-* Create dependent variable: income change
+* Create dependent variable: income / pov change change
 gen inc_pov = thearn_adj / threshold
 sort SSUID PNUM year
 by SSUID PNUM (year), sort: gen inc_pov_change = ((inc_pov-inc_pov[_n-1])/inc_pov[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
@@ -42,12 +42,12 @@ label define pov_change 0 "No" 1 "Moved into" 2 "Moved out of"
 label values pov_change pov_change
 
 gen pov_change_detail=.
-replace pov_change_detail=0 if in_pov==pov_lag & pov_lag==0 // stayed out of poverty
 replace pov_change_detail=1 if in_pov==0 & pov_lag==1 // moved out of poverty
-replace pov_change_detail=2 if in_pov==pov_lag & pov_lag==1 // stay IN poverty
-replace pov_change_detail=3 if in_pov==1 & pov_lag==0 // moved into
+replace pov_change_detail=2 if in_pov==pov_lag & pov_lag==0 // stayed out of poverty
+replace pov_change_detail=3 if in_pov==pov_lag & pov_lag==1 // stay IN poverty
+replace pov_change_detail=4 if in_pov==1 & pov_lag==0 // moved into
 
-label define pov_change_detail 0 "Stayed out" 1 "Moved Out" 2 "Stayed in" 3 "Moved in"
+label define pov_change_detail 1 "Moved Out" 2 "Stayed out" 3 "Stayed in" 4 "Moved in"
 label values pov_change_detail pov_change_detail
 
 /* old dependent variables
@@ -70,19 +70,39 @@ label define mechanism 1 "Default" 2 "Reserve" 3 "Empowerment"
 label values mechanism mechanism
 */
 
+// some lagged measures I need
+sort SSUID PNUM year
+gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen thearn_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+
 * Creating necessary independent variables
  // one variable for all pathways
 egen validate = rowtotal(mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes) // make sure moms only have 1 event
 browse SSUID PNUM validate mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes trans_bw60_alt2 bw60_mom
 
-gen pathway=0
-replace pathway=1 if mt_mom==1
-replace pathway=2 if ft_partner_down_mom==1
-replace pathway=3 if ft_partner_down_only==1
-replace pathway=4 if ft_partner_leave==1
-replace pathway=5 if lt_other_changes==1
+gen pathway_v1=0
+replace pathway_v1=1 if mt_mom==1
+replace pathway_v1=2 if ft_partner_down_mom==1
+replace pathway_v1=3 if ft_partner_down_only==1
+replace pathway_v1=4 if ft_partner_leave==1
+replace pathway_v1=5 if lt_other_changes==1
 
-label define pathway 0 "None" 1 "Mom Up" 2 "Mom Up Partner Down" 3 "Partner Down" 4 "Partner Left" 5 "Other HH Change"
+label define pathway_v1 0 "None" 1 "Mom Up" 2 "Mom Up Partner Down" 3 "Partner Down" 4 "Partner Left" 5 "Other HH Change"
+label values pathway_v1 pathway_v1
+
+// more detailed pathway
+gen start_from_0 = 0
+replace start_from_0=1 if earnings_lag==0
+
+gen pathway=0
+replace pathway=1 if mt_mom==1 & start_from_0==1
+replace pathway=2 if mt_mom==1 & start_from_0==0
+replace pathway=3 if ft_partner_down_mom==1
+replace pathway=4 if ft_partner_down_only==1
+replace pathway=5 if ft_partner_leave==1
+replace pathway=6 if lt_other_changes==1
+
+label define pathway 0 "None" 1 "Mom Up, Not employed" 2 "Mom Up, employed" 3 "Mom Up Partner Down" 4 "Partner Down" 5 "Partner Left" 6 "Other HH Change"
 label values pathway pathway
 
 // program variables
@@ -96,8 +116,6 @@ gen tanf_lag = tanf[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year
 gen tanf_amount_lag = tanf_amount[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen program_income_lag = program_income[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 gen eitc_after = eeitc[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(year[_n+1]-1)
-gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
-gen thearn_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
 
 replace earnings_ratio=0 if earnings_ratio==. & earnings==0 & thearn_alt > 0 // wasn't counting moms with 0 earnings -- is this an issue elsewhere?? BUT still leaving as missing if NO earnings. is that right?
 gen earnings_ratio_alt=earnings_ratio
@@ -135,9 +153,6 @@ replace hh_chg_value = 1 if hh_income_raw >0 & hh_income_raw!=.
 tab hh_chg_value
 sum hh_income_raw if hh_chg_value==0, detail
 sum hh_income_raw if hh_chg_value==1, detail
-
-gen start_from_0 = 0
-replace start_from_0=1 if earnings_lag==0
 
 gen end_as_sole=0
 replace end_as_sole=1 if earnings_ratio==1
@@ -208,6 +223,23 @@ regress log_income_change i.trans_bw60_alt2 // so when you become BW, lose incom
 regress log_income_change i.trans_bw60_alt2 i.educ_gp i.race i.rel_status ageb1 i.status_b1 // controls for those most likely to become BW
 
 keep if trans_bw60_alt2==1 & bw60lag==0
+
+** exploratory things
+// browse SSUID PNUM year thearn_adj thearn_lag hh_income_chg hh_income_raw
+inspect hh_income_chg // so about 200 are missing, which means hh income was 0 in the year prior to her becoming BW, make those 100%?
+gen hh_income_chg_x = hh_income_chg
+replace hh_income_chg_x = 1 if hh_income_chg==.
+
+sum hh_income_chg, detail
+sum hh_income_chg_x, detail
+// the means are very similar, which makes sense, it is the medians that are different
+
+tabstat hh_income_chg, by(pathway) stats(mean p50)
+tabstat hh_income_chg_x, by(pathway) stats(mean p50)
+* right this mainly affects the mom up, unemployed pathway, since that is primarily where hh income is starting from 0. I think if I use recoded and mean it should be fine?
+
+tab rel_status pathway if mt_mom==1, row // 90% of single are in mom up not employed; 60% of partnered are in mom up employed
+tab rel_status pathway if mt_mom==1, col // 70% of unemployed = single; 88% of employed = partnered
 
 ********************************************************************************
 * Relationship status descriptives
@@ -547,6 +579,7 @@ tab pathway tanf, row
 tab pathway tanf_lag, row
 tab pathway eeitc, row
 tab pathway eitc_after, row
+tab pathway_v1 pov_change_detail, row
 tab pathway pov_change_detail, row
 tab pathway pov_change_detail if partnered==0, row
 tab pathway pov_change_detail if partnered==1, row
@@ -583,7 +616,7 @@ replace mom_earn_change=0 if mom_gain_earn==0 & earnup8_all==0 & mom_lose_earn==
 replace mom_earn_change=1 if earnup8_all==1
 replace mom_earn_change=0 if mom_earn_change==. // the very small mom ups - want to be considered no change
 replace mom_earn_change=1 if mom_earn_change==0 & mt_mom==1 // BUT want the very small moms if ONLY mom's earnings went up, because there is nowhere else to put
-
+/*
 gen pathway_detail=.
 replace pathway_detail=1 if pathway==1 & start_from_0==1 // no earnings prior
 replace pathway_detail=2 if pathway==1 & start_from_0==0 // she had earnings
@@ -627,7 +660,7 @@ label values pathway_final pathway_final
 
 tabstat hh_income_raw, by(pathway_final) stats(mean p50)
 tabstat thearn_adj, by(pathway_final) stats(mean p50)
-
+*/
 tabstat hh_income_raw, by(educ_gp) stats(mean p50)
 tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
 tabstat thearn_adj, by(educ_gp) stats(mean p50)
@@ -643,13 +676,17 @@ tabstat thearn_adj, by(race) stats(mean p50)
 
 tabstat hh_income_raw, by(educ_gp) stats(mean p50)
 tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
+tabstat hh_income_chg_x, by(educ_gp) stats(mean p50)
 
 tabstat hh_income_raw, by(race) stats(mean p50)
 tabstat hh_income_topcode, by(race) stats(mean p50)
+tabstat hh_income_chg_x, by(race) stats(mean p50)
 
 tabstat hh_income_raw, by(pathway) stats(mean p50)
 tabstat hh_income_topcode, by(pathway) stats(mean p50)
+tabstat hh_income_chg_x, by(pathway) stats(mean p50)
 
+tab pathway_v1  pov_change_detail, row
 tab pathway pov_change_detail, row
 tab educ_gp pov_change_detail, row
 tab race pov_change_detail, row
@@ -658,7 +695,10 @@ tab rel_status pov_change_detail, row
 
 tab pov_change_detail income_change, row
 
-forvalues p=1/5{
+tab educ_gp pathway, row nofreq
+tab race pathway, row nofreq
+
+forvalues p=1/6{
 	display `p'
 	tab pov_change_detail income_change if pathway==`p', row
 }
@@ -707,10 +747,11 @@ logit in_pov ib2.rel_status_detail i.educ_gp i.race, or
 logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
 
 
-** For other paper
+** For other paper - raw income change
 regress hh_income_raw_all i.educ_gp
 regress hh_income_raw_all i.race
 regress hh_income_raw_all i.pathway
+regress hh_income_raw_all i.pathway_v1 i.race i.educ_gp
 regress hh_income_raw_all i.pathway i.race i.educ_gp
 regress hh_income_raw_all i.pathway i.race i.educ_gp i.pov_lag
 
@@ -720,15 +761,74 @@ regress hh_income_topcode i.pathway
 regress hh_income_topcode i.pathway i.race i.educ_gp
 regress hh_income_topcode i.pathway i.race i.educ_gp i.pov_lag
 
+regress hh_income_chg i.educ_gp
+regress hh_income_chg i.race
+regress hh_income_chg i.pathway_v1
+regress hh_income_chg i.pathway
+regress hh_income_chg ib3.pathway
+regress hh_income_chg ib3.pathway i.race i.educ_gp
+regress hh_income_chg ib3.pathway i.race i.educ_gp i.pov_lag
+
+// use
+regress hh_income_chg_x i.educ_gp
+regress hh_income_chg_x i.race
+regress hh_income_chg_x i.pathway_v1
+regress hh_income_chg_x i.pathway
+regress hh_income_chg_x ib3.pathway
+regress hh_income_chg_x ib3.pathway i.race i.educ_gp
+regress hh_income_chg_x ib3.pathway i.race i.educ_gp i.pov_lag
+
+// test
+regress hh_income_chg_x i.educ_gp
+estimates store m1 
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M1) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+regress hh_income_chg_x i.race
+estimates store m2
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M2) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway
+estimates store m3
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M3) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.race
+estimates store m4
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M4) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.educ_gp
+estimates store m5
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M5) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.race i.educ_gp 
+estimates store m6
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M6) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.race i.educ_gp i.pov_lag
+estimates store m7 
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M7) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway##i.race i.educ_gp i.pov_lag
+estimates store m8
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M8) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway##i.educ_gp i.race i.pov_lag
+estimates store m9
+outreg2 using "$results/percent_change.xls", sideway stats(coef) label ctitle(M9) dec(2) eform alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+//estimates table m1 m2 m3 m4 m5 m6 m7 m8 m9, star b(%9.3f)
+//estout m1 m2 m3 m4 m5 m6 m7 m8 m9, stats(r2_a)
+
+
+* In poverty as outcome
 logit in_pov i.educ_gp, or
 logit in_pov i.race, or
 logit in_pov i.pathway, or
-logit in_pov i.pathway i.race i.educ_gp, or
+logit in_pov ib3.pathway i.race i.educ_gp, or
 
 logit in_pov i.educ_gp i.pov_lag, or
 logit in_pov i.race i.pov_lag, or
 logit in_pov i.pathway i.pov_lag, or
-logit in_pov i.pathway i.race i.educ_gp i.pov_lag, or
+logit in_pov ib3.pathway i.race i.educ_gp i.pov_lag, or
 
 // log close
 
@@ -947,11 +1047,7 @@ save "$tempdir/bw_consequences.dta", replace
 ********************************************************************************
 * Descriptive: pathway by race / educ + categorical outcome
 ********************************************************************************
-recode pov_change_detail (1=1)(0=2)(2=3)(3=4), gen(outcome) // putting in better order, will help with below
-label define outcome 1 "Moved Out" 2 "Stayed Out" 3 "Stayed in" 4 "Moved in"
-label values outcome outcome
-
-tab outcome, gen(outcome)
+tab pov_change_detail, gen(outcome)
 
 putexcel set "$results/Breadwinner_Impact_Tables", sheet(Table5) modify
 putexcel A1:F1 = "Household Economic Well-Being Changes when Mom Becomes Primary Earner: 2014", merge border(bottom) hcenter
