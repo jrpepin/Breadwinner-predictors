@@ -789,6 +789,9 @@ regress hh_income_chg_x ib3.pathway
 regress hh_income_chg_x ib3.pathway i.race i.educ_gp
 regress hh_income_chg_x ib3.pathway i.race i.educ_gp i.pov_lag
 
+regress income_chg_top_x ib3.pathway i.race_gp i.educ_gp
+regress income_chg_top_x ib3.pathway i.race_gp i.educ_gp i.pov_lag
+
 // topcoding change
 sum hh_income_chg_x, detail
 gen income_chg_top_x=hh_income_chg_x
