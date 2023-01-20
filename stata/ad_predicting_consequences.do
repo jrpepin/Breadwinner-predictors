@@ -789,48 +789,57 @@ regress hh_income_chg_x ib3.pathway
 regress hh_income_chg_x ib3.pathway i.race i.educ_gp
 regress hh_income_chg_x ib3.pathway i.race i.educ_gp i.pov_lag
 
+// topcoding change
+sum hh_income_chg_x, detail
+gen income_chg_top_x=hh_income_chg_x
+replace income_chg_top_x = `r(p1)' if hh_income_chg_x<`r(p1)'
+replace income_chg_top_x = `r(p99)' if hh_income_chg_x>`r(p99)'
+
+browse income_chg_top_x hh_income_chg_x
+
+regress income_chg_top_x ib3.pathway i.race_gp i.educ_gp 
+
 // test
-regress hh_income_chg_x i.educ_gp
+regress income_chg_top_x i.educ_gp
 estimates store m1 
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
 
-regress hh_income_chg_x i.race_gp
+regress income_chg_top_x i.race_gp
 estimates store m2
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway
+regress income_chg_top_x ib3.pathway
 estimates store m3
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway i.race_gp
+regress income_chg_top_x ib3.pathway i.race_gp
 estimates store m4
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway i.educ_gp
+regress income_chg_top_x ib3.pathway i.educ_gp
 estimates store m5
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway i.race_gp i.educ_gp 
+regress income_chg_top_x ib3.pathway i.race_gp i.educ_gp 
 estimates store m6
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M6) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway i.race_gp i.educ_gp i.pov_lag
+regress income_chg_top_x ib3.pathway i.race_gp i.educ_gp i.pov_lag
 estimates store m7 
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M7) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway##i.race i.educ_gp i.pov_lag
-regress hh_income_chg_x ib3.pathway##i.race i.educ_gp i.pov_lag if inlist(race,1,2,4) // r-squared is sig reduced if I don't include asian or other...
-regress hh_income_chg_x ib3.pathway##i.race_gp i.educ_gp i.pov_lag // r-squared is sig reduced if I don't split asian or other...
+regress income_chg_top_x ib3.pathway##i.race i.educ_gp i.pov_lag
+regress income_chg_top_x ib3.pathway##i.race i.educ_gp i.pov_lag if inlist(race,1,2,4) // r-squared is sig reduced if I don't include asian or other...
+regress income_chg_top_x ib3.pathway##i.race_gp i.educ_gp i.pov_lag // r-squared is sig reduced if I don't split asian or other...
 estimates store m8
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M8) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-regress hh_income_chg_x ib3.pathway##i.educ_gp i.race_gp i.pov_lag
+regress income_chg_top_x ib3.pathway##i.educ_gp i.race_gp i.pov_lag
 estimates store m9
 outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M9) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 //estimates table m1 m2 m3 m4 m5 m6 m7 m8 m9, star b(%9.3f)
 //estout m1 m2 m3 m4 m5 m6 m7 m8 m9, stats(r2_a)
-
 
 * In poverty as outcome
 logit in_pov i.educ_gp, or
@@ -1130,4 +1139,43 @@ collapse (p50) inc_pov, by(race pathway)
 export excel using "$results\race_pathway_poverty.xls", firstrow(variables) replace
 
 restore
+
+// not topcoded output
+regress hh_income_chg_x i.educ_gp
+estimates store m1 
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+regress hh_income_chg_x i.race_gp
+estimates store m2
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway
+estimates store m3
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.race_gp
+estimates store m4
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.educ_gp
+estimates store m5
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.race_gp i.educ_gp 
+estimates store m6
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M6) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway i.race_gp i.educ_gp i.pov_lag
+estimates store m7 
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M7) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway##i.race i.educ_gp i.pov_lag
+regress hh_income_chg_x ib3.pathway##i.race i.educ_gp i.pov_lag if inlist(race,1,2,4) // r-squared is sig reduced if I don't include asian or other...
+regress hh_income_chg_x ib3.pathway##i.race_gp i.educ_gp i.pov_lag // r-squared is sig reduced if I don't split asian or other...
+estimates store m8
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M8) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+regress hh_income_chg_x ib3.pathway##i.educ_gp i.race_gp i.pov_lag
+estimates store m9
+outreg2 using "$results/regression_percent_change.xls", sideway stats(coef) label ctitle(M9) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 */
