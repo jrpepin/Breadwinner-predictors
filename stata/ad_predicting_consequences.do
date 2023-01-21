@@ -684,6 +684,13 @@ tabstat thearn_adj, by(race) stats(mean p50)
 * Descriptives to use
 ******************************************************************************** 
 // log using "$logdir\impact_stats.log", replace
+tabstat hh_income_raw, stats(mean p50)
+tabstat hh_income_topcode, stats(mean p50)
+tabstat hh_income_chg_x, stats(mean p50)
+tabstat income_chg_top, stats(mean p50)
+
+tabstat hh_income_raw if hh_income_raw < 0, stats(mean p50) // -$45000
+tabstat income_chg_top if income_chg_top < 0, stats(mean p50) // -42%
 
 tabstat hh_income_raw, by(educ_gp) stats(mean p50)
 tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
@@ -708,6 +715,13 @@ tab pov_change_detail income_change, row
 
 tab educ_gp pathway, row nofreq
 tab race pathway, row nofreq
+
+tab educ_gp pathway, row nofreq chi2 // Pearson chi2(10) =  99.1910   Pr = 0.000
+tab race pathway, row nofreq chi2 // Pearson chi2(20) =  90.6400   Pr = 0.000
+
+tab educ_gp pathway, row nofreq cchi2 // Pearson chi2(10) =  99.1910   Pr = 0.000
+tab race pathway, row nofreq cchi2 // Pearson chi2(20) =  90.6400   Pr = 0.000
+
 
 forvalues p=1/6{
 	display `p'
