@@ -252,6 +252,13 @@ tabstat hh_income_chg_x, by(pathway) stats(mean p50)
 tab rel_status pathway if mt_mom==1, row // 90% of single are in mom up not employed; 60% of partnered are in mom up employed
 tab rel_status pathway if mt_mom==1, col // 70% of unemployed = single; 88% of employed = partnered
 
+// average change for motivation for heterogeneity paper
+tabstat hh_income_raw if hh_chg_value==0, stats(mean p50)
+tabstat hh_income_raw if hh_chg_value==1, stats(mean p50)
+
+tabstat hh_income_topcode if hh_chg_value==0, stats(mean p50)
+tabstat hh_income_topcode if hh_chg_value==1, stats(mean p50)
+
 ********************************************************************************
 * Relationship status descriptives
 ********************************************************************************
