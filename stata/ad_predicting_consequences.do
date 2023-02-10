@@ -1238,8 +1238,10 @@ rename partnered_t1 partnered_1
 keep SSUID PNUM year bw60_2 bw60_1 earnings_2 earnings_1 thearn_2 thearn_1 earnings_ratio_2 earnings_ratio_1 inc_pov_2 inc_pov_1 in_pov_2 in_pov_1 percentile_2 percentile_1 marital_status_2 marital_status_1 partnered_2 partnered_1 ///
 trans_bw60_alt2 wpfinwgt  scaled_weight race educ race_gp educ_gp pathway_v1 pathway tage ageb1 status_b1 yrfirstbirth ageb1_gp rel_status_detail earn_change earn_change_raw inc_pov_change inc_pov_change_raw pov_change_detail hh_income_chg hh_income_raw percentile_chg income_change hh_income_topcode  income_chg_top hh_income_chg_x mom_earn_change income_chg_top_x
 
+gen id = _n
+
 reshape long bw60_ earnings_ thearn_ earnings_ratio_ inc_pov_ in_pov_ percentile_ marital_status_ partnered_, ///
-i(SSUID PNUM year) j(time)
+i(id) j(time)
 
 save "$tempdir/bw_consequences_long.dta", replace
 
