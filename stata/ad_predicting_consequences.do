@@ -196,6 +196,59 @@ replace rel_status_detail=2 if partnered_all==1 & rel_status_detail==.
 label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
 label values rel_status_detail rel_detail
 
+
+* Get percentiles
+//browse SSUID year bw60 bw60lag
+
+sum thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID  [aweight=wpfinwgt], detail // is this t-1? this is in demography paper
+sum thearn_adj, detail // then this would be t?
+sum thearn_adj if bw60lag==0, detail // is this t-1?
+sum thearn_adj if bw60==1, detail // is this t? okay definitely not
+
+xtile percentile = thearn_adj, nq(10)
+
+forvalues p=1/10{
+	sum thearn_adj if percentile==`p'
+}
+
+/*
+1 0 		4942
+2 4950 		18052
+3 18055		28058
+4 28061		38763
+5 38769		51120
+6 51136		65045
+7 65051		82705
+8 82724		107473
+9 107478	151012
+10 151072	2000316
+*/
+
+gen pre_percentile=. // okay duh a lot of missing because thearn_lag not there for everyone
+replace pre_percentile=1 if thearn_lag>=0 & thearn_lag<= 4942
+replace pre_percentile=2 if thearn_lag>= 4950 & thearn_lag<= 18052
+replace pre_percentile=3 if thearn_lag>= 18055 & thearn_lag<= 28058
+replace pre_percentile=4 if thearn_lag>= 28061	& thearn_lag<=38763
+replace pre_percentile=5 if thearn_lag>= 38769 & thearn_lag<= 51120
+replace pre_percentile=6 if thearn_lag>= 51136	& thearn_lag<=	65045
+replace pre_percentile=7 if thearn_lag>= 65051	& thearn_lag<=	82705
+replace pre_percentile=8 if thearn_lag>= 82724	& thearn_lag<=	107473
+replace pre_percentile=9 if thearn_lag>= 107478	& thearn_lag<=151012
+replace pre_percentile=10 if thearn_lag>= 151072 & thearn_lag<= 2000316
+
+gen post_percentile=.
+replace post_percentile=1 if thearn_adj>=0 & thearn_adj<= 4942
+replace post_percentile=2 if thearn_adj>= 4950 & thearn_adj<= 18052
+replace post_percentile=3 if thearn_adj>= 18055 & thearn_adj<= 28058
+replace post_percentile=4 if thearn_adj>= 28061	& thearn_adj<=38763
+replace post_percentile=5 if thearn_adj>= 38769 & thearn_adj<= 51120
+replace post_percentile=6 if thearn_adj>= 51136	& thearn_adj<=	65045
+replace post_percentile=7 if thearn_adj>= 65051	& thearn_adj<=	82705
+replace post_percentile=8 if thearn_adj>= 82724	& thearn_adj<=	107473
+replace post_percentile=9 if thearn_adj>= 107478	& thearn_adj<=151012
+replace post_percentile=10 if thearn_adj>= 151072 & thearn_adj<= 2000316
+
+* other income measures
 gen income_change=.
 replace income_change=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. // up
 replace income_change=2 if inc_pov_change_raw < 0 & inc_pov_change_raw!=. // down
@@ -879,6 +932,18 @@ logit in_pov ib3.pathway i.race i.educ_gp i.pov_lag, or
 // log close
 
 ********************************************************************************
+* Percentiles
+********************************************************************************
+gen percentile_chg = post_percentile-pre_percentile
+
+regress percentile_chg i.educ_gp
+regress percentile_chg i.race_gp
+regress percentile_chg ib3.pathway
+
+regress post_percentile i.educ_gp pre_percentile
+
+
+********************************************************************************
 * Other
 ********************************************************************************
 *Descriptive for comparison
@@ -1088,8 +1153,6 @@ histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_la
 histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_lag==0, percent addlabel width(5000) // not in pov
 
 
-save "$tempdir/bw_consequences.dta", replace
-
 ********************************************************************************
 * Descriptive: pathway by race / educ + categorical outcome
 ********************************************************************************
@@ -1147,6 +1210,39 @@ forvalues r=1/3{
 
 // validate
 tab pathway outcome if educ_gp==1, row nofreq
+
+
+********************************************************************************
+* Create dataset to save
+********************************************************************************
+//1=lag, 2=year
+rename bw60 bw60_2
+rename bw60lag bw60_1
+rename earnings_adj earnings_2
+rename earnings_lag earnings_1
+rename thearn_adj thearn_2
+rename thearn_lag thearn_1
+rename earnings_ratio earnings_ratio_2
+rename earnings_ratio_lag earnings_ratio_1
+rename inc_pov inc_pov_2
+rename inc_pov_lag inc_pov_1
+rename in_pov in_pov_2
+rename pov_lag in_pov_1
+rename post_percentile percentile_2
+rename pre_percentile percentile_1
+rename marital_status_t marital_status_2
+rename marital_status_t1 marital_status_1
+rename partnered_t partnered_2
+rename partnered_t1 partnered_1
+
+keep SSUID PNUM year bw60_2 bw60_1 earnings_2 earnings_1 thearn_2 thearn_1 earnings_ratio_2 earnings_ratio_1 inc_pov_2 inc_pov_1 in_pov_2 in_pov_1 percentile_2 percentile_1 marital_status_2 marital_status_1 partnered_2 partnered_1 ///
+trans_bw60_alt2 wpfinwgt  scaled_weight race educ race_gp educ_gp pathway_v1 pathway tage ageb1 status_b1 yrfirstbirth ageb1_gp rel_status_detail earn_change earn_change_raw inc_pov_change inc_pov_change_raw pov_change_detail hh_income_chg hh_income_raw percentile_chg income_change hh_income_topcode  income_chg_top hh_income_chg_x mom_earn_change income_chg_top_x
+
+reshape long bw60_ earnings_ thearn_ earnings_ratio_ inc_pov_ in_pov_ percentile_ marital_status_ partnered_, ///
+i(SSUID PNUM year) j(time)
+
+save "$tempdir/bw_consequences_long.dta", replace
+
 
 /*
 browse SSUID PNUM educ_gp pathway mechanism inc_pov
