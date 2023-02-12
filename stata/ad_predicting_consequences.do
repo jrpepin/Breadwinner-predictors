@@ -248,6 +248,8 @@ replace post_percentile=8 if thearn_adj>= 82724	& thearn_adj<=	107473
 replace post_percentile=9 if thearn_adj>= 107478	& thearn_adj<=151012
 replace post_percentile=10 if thearn_adj>= 151072 & thearn_adj<= 2000316
 
+gen percentile_chg = post_percentile-pre_percentile
+
 * other income measures
 gen income_change=.
 replace income_change=1 if inc_pov_change_raw > 0 & inc_pov_change_raw!=. // up
@@ -755,14 +757,23 @@ tabstat income_chg_top if income_chg_top < 0, stats(mean p50) // -42%
 tabstat hh_income_raw, by(educ_gp) stats(mean p50)
 tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
 tabstat hh_income_chg_x, by(educ_gp) stats(mean p50)
+tabstat thearn_lag, by(educ_gp) stats(mean p50)
+tabstat pre_percentile, by(educ_gp) stats(mean p50)
+tabstat percentile_chg, by(educ_gp) stats(mean p50)
 
 tabstat hh_income_raw, by(race) stats(mean p50)
 tabstat hh_income_topcode, by(race) stats(mean p50)
 tabstat hh_income_chg_x, by(race) stats(mean p50)
+tabstat thearn_lag, by(race) stats(mean p50)
+tabstat pre_percentile, by(race) stats(mean p50)
+tabstat percentile_chg, by(race) stats(mean p50)
 
 tabstat hh_income_raw, by(pathway) stats(mean p50)
 tabstat hh_income_topcode, by(pathway) stats(mean p50)
 tabstat hh_income_chg_x, by(pathway) stats(mean p50)
+tabstat thearn_lag, by(pathway) stats(mean p50)
+tabstat pre_percentile, by(pathway) stats(mean p50)
+tabstat percentile_chg, by(pathway) stats(mean p50)
 
 tab pathway_v1  pov_change_detail, row
 tab pathway pov_change_detail, row
@@ -934,8 +945,6 @@ logit in_pov ib3.pathway i.race i.educ_gp i.pov_lag, or
 ********************************************************************************
 * Percentiles
 ********************************************************************************
-gen percentile_chg = post_percentile-pre_percentile
-
 regress percentile_chg i.educ_gp
 regress percentile_chg i.race_gp
 regress percentile_chg ib3.pathway

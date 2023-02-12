@@ -30,9 +30,11 @@ sum percentile_chg
 
 // unconditional means model 
 mixed percentile_ || id: , mle var // 4.95 - this is the same as doing sum percentile_
+estimates store m0a
 
 // unconditional growth model
 mixed percentile_ time2 || id: time2, cov(un) mle var // this is the same as below individual
+
 /*
 
 ------------------------------------------------------------------------------
@@ -45,6 +47,7 @@ mixed percentile_ time2 || id: time2, cov(un) mle var // this is the same as bel
 
 
 mixed percentile_ time2 || id: time2, mle var // results same as above, it's the random effects parameters that are different
+estimates store m0
 
 // adding predictors - okay but probably need to INTERACT with time?! (see slide 35 - and I think what I did for growth curves?)
 mixed percentile_ time2 i.educ_gp || id: time2, mle var
@@ -86,6 +89,7 @@ mixed percentile_ time2 i.pathway || id: time2, mle var
 // gen race_time = race_gp*time
 
 mixed percentile_ i.time2##i.educ_gp|| id: time2, mle var
+estimates store m1
 
 /*
 ---------------------------------------------------------------------------------
@@ -148,6 +152,8 @@ College Plus |  6.883495
 
 
 mixed percentile_ i.time2##i.race_gp|| id: time2, mle var
+estimates store m2
+
 /*
 -------------------------------------------------------------------------------
   percentile_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
@@ -169,30 +175,56 @@ time2#race_gp |
 */
 
 
-mixed percentile_ i.time2##i.pathway|| id: time2, mle var
+mixed percentile_ i.time2##ib3.pathway|| id: time2, mle var
+estimates store m3
 
 /*
-----------------------------------------------------------------------------------------
-           percentile_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-               1.time2 |   1.334951   .1341123     9.95   0.000     1.072096    1.597807
-                       |
-               pathway |
-     Mom Up, employed  |   5.760213   .2516066    22.89   0.000     5.267073    6.253353
-  Mom Up Partner Down  |   4.939376   .1928794    25.61   0.000     4.561339    5.317413
-         Partner Down  |   6.438534   .2245345    28.68   0.000     5.998454    6.878613
-         Partner Left  |   4.964486   .2568828    19.33   0.000     4.461005    5.467967
-      Other HH Change  |   3.760386   .2139416    17.58   0.000     3.341068    4.179704
-                       |
-         time2#pathway |
-   1#Mom Up, employed  |   .3581179   .2338175     1.53   0.126     -.100156    .8163917
-1#Mom Up Partner Down  |  -1.758616   .1792424    -9.81   0.000    -2.109924   -1.407307
-       1#Partner Down  |  -3.893572   .2086594   -18.66   0.000    -4.302537   -3.484607
-       1#Partner Left  |  -2.745478   .2387206   -11.50   0.000    -3.213362   -2.277594
-    1#Other HH Change  |  -2.474486   .1988155   -12.45   0.000    -2.864158   -2.084815
-                       |
-                 _cons |   1.140777   .1443157     7.90   0.000     .8579231     1.42363
-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+            percentile_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                1.time2 |  -.4236641   .1189191    -3.56   0.000    -.6567412   -.1905871
+                        |
+                pathway |
+  Mom Up, Not employed  |  -4.939376   .1928794   -25.61   0.000    -5.317413   -4.561339
+      Mom Up, employed  |   .8208374   .2425991     3.38   0.001     .3453519    1.296323
+          Partner Down  |   1.499158   .2143926     6.99   0.000     1.078956    1.919359
+          Partner Left  |   .0251105   .2480669     0.10   0.919    -.4610917    .5113127
+       Other HH Change  |   -1.17899   .2032718    -5.80   0.000    -1.577395   -.7805844
+                        |
+          time2#pathway |
+1#Mom Up, Not employed  |   1.758616   .1792424     9.81   0.000     1.407307    2.109924
+    1#Mom Up, employed  |   2.116733   .2254468     9.39   0.000     1.674866    2.558601
+        1#Partner Down  |  -2.134957   .1992346   -10.72   0.000    -2.525449   -1.744464
+        1#Partner Left  |  -.9868622    .230528    -4.28   0.000    -1.438689   -.5350355
+     1#Other HH Change  |  -.7158708   .1889001    -3.79   0.000    -1.086108   -.3456334
+                        |
+                  _cons |   6.080153   .1279666    47.51   0.000     5.829343    6.330963
+-----------------------------------------------------------------------------------------
+*/
+
+// but am I meant to test these over the unconditional means / growth? actually maybe
+lrtest m1 m2 // not
+lrtest m1 m3 // sig diff
+lrtest m2 m3 // sig diff
+lrtest m0 m1 // sig diff
+lrtest m0 m2 // sig diff
+lrtest m0 m3 // sig diff
+
+estimates stats m0 m1 m2 m3 // unconditional, educ, race, pathway
+/*
+
+
+-----------------------------------------------------------------------------
+       Model |          N   ll(null)  ll(model)      df        AIC        BIC
+-------------+---------------------------------------------------------------
+          m0 |      1,962          .  -4611.181       5   9232.362   9260.271
+          m1 |      1,962          .  -4453.745       9    8925.49   8975.726
+          m2 |      1,962          .  -4573.731      11   9169.463   9230.862
+          m3 |      1,962          .  -4079.851      15   8189.702   8273.428
+-----------------------------------------------------------------------------
+
+To compare models using AIC, you need to calculate the AIC of each model. If a model is more than 2 AIC units lower than another, then it is considered significantly better than that model.
+
 */
 
 mixed thearn_ i.time2##i.educ_gp|| id: time2, mle var
@@ -238,33 +270,66 @@ time2#race_gp |
 
 */
 
-mixed thearn_ i.time2##i.pathway|| id: time2, mle var
+mixed thearn_ i.time2##ib3.pathway|| id: time2, mle var
 
 /*
-
-----------------------------------------------------------------------------------------
-               thearn_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
------------------------+----------------------------------------------------------------
-               1.time2 |   19966.09   5212.847     3.83   0.000     9749.095    30183.08
-                       |
-               pathway |
-     Mom Up, employed  |   86735.76   8096.868    10.71   0.000     70866.19    102605.3
-  Mom Up Partner Down  |   76113.84   6206.987    12.26   0.000     63948.37    88279.31
-         Partner Down  |   118415.9   7225.669    16.39   0.000     104253.9      132578
-         Partner Left  |    76560.4   8266.658     9.26   0.000     60358.05    92762.75
-      Other HH Change  |    46847.1   6884.782     6.80   0.000     33353.17    60341.02
-                       |
-         time2#pathway |
-   1#Mom Up, employed  |    67713.1   9088.317     7.45   0.000     49900.33    85525.87
-1#Mom Up Partner Down  |  -27107.16   6967.023    -3.89   0.000    -40762.28   -13452.05
-       1#Partner Down  |  -84550.69   8110.442   -10.42   0.000    -100446.9   -68654.52
-       1#Partner Left  |  -48893.06   9278.898    -5.27   0.000    -67079.36   -30706.75
-    1#Other HH Change  |  -32674.73   7727.814    -4.23   0.000    -47820.96   -17528.49
-                       |
-                 _cons |   1652.083   4644.175     0.36   0.722    -7450.332     10754.5
-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+                thearn_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
+------------------------+----------------------------------------------------------------
+                1.time2 |  -7141.076   4622.298    -1.54   0.122    -16200.61    1918.461
+                        |
+                pathway |
+  Mom Up, Not employed  |  -76113.84   6206.988   -12.26   0.000    -88279.31   -63948.37
+      Mom Up, employed  |   10621.92   7807.001     1.36   0.174    -4679.523    25923.36
+          Partner Down  |    42302.1   6899.296     6.13   0.000     28779.73    55824.48
+          Partner Left  |   446.5605   7982.959     0.06   0.955    -15199.75    16092.87
+       Other HH Change  |  -29266.74   6541.423    -4.47   0.000     -42087.7   -16445.79
+                        |
+          time2#pathway |
+1#Mom Up, Not employed  |   27107.16   6967.023     3.89   0.000     13452.05    40762.28
+    1#Mom Up, employed  |   94820.26   8762.955    10.82   0.000     77645.19    111995.3
+        1#Partner Down  |  -57443.53   7744.103    -7.42   0.000    -72621.69   -42265.37
+        1#Partner Left  |  -21785.89   8960.459    -2.43   0.015    -39348.07   -4223.716
+     1#Other HH Change  |  -5567.563   7342.409    -0.76   0.448    -19958.42    8823.294
+                        |
+                  _cons |   77765.92    4118.05    18.88   0.000     69694.69    85837.15
+-----------------------------------------------------------------------------------------
 
 */
+
+*Combined model
+mixed percentile_ i.time2 i.educ_gp i.race_gp ib3.pathway i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
+
+*Attempting 3-way interaction (I could also interact time and pathway and do for each education group separately?)
+mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var
+estimates store m4
+outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Educ) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+lrtest m1 m4 // compare interaction to just educ - sig
+lrtest m3 m4 // compare interaction to just path - sig
+
+estimates stats m1 m3 m4 // AIC is lowest with interaction...
+
+mixed percentile_ i.time2 i.race_gp ib3.pathway i.time2##i.race_gp##ib3.pathway || id: time2, mle var
+estimates store m5
+outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Race) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+lrtest m2 m5 // compare interaction to just race - sig
+lrtest m3 m5 // compare interaction to just path - sig
+
+estimates stats m2 m3 m5 // no real differences between m3 and m5 (BIC actually higher for m5, AIC very similar)
+
+estimates stats m1 m2 m3 m4 m5
+
+
+mixed percentile_ i.time2##ib3.pathway if educ_gp==1 || id: time2, mle var
+mixed percentile_ i.time2##ib3.pathway if educ_gp==2 || id: time2, mle var // makes easier to compare across
+mixed percentile_ i.time2##ib3.pathway if educ_gp==3 || id: time2, mle var
+
+mixed percentile_ i.time2##ib3.pathway if race_gp==1 || id: time2, mle var
+mixed percentile_ i.time2##ib3.pathway if race_gp==2 || id: time2, mle var
+mixed percentile_ i.time2##ib3.pathway if race_gp==3 || id: time2, mle var
+
 
 /*
 save "$tempdir/bw_consequences_long.dta", replace
