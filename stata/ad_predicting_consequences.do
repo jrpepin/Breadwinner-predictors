@@ -949,6 +949,12 @@ regress percentile_chg i.educ_gp
 regress percentile_chg i.race_gp
 regress percentile_chg ib3.pathway
 
+regress percentile_chg i.educ_gp##ib3.pathway
+margins educ_gp#pathway
+
+regress percentile_chg i.race_gp##ib3.pathway
+margins race_gp#pathway
+
 regress post_percentile i.educ_gp pre_percentile
 
 
