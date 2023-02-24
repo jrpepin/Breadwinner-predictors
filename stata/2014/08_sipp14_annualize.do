@@ -67,13 +67,14 @@ use "$SIPP14keep/sipp14tpearn_rel", clear
 	gen educ_sp=.
 	gen race_sp=.
 	gen weeks_employed_sp=.
+	gen sex_sp =.
 	
 	forvalues n=1/22{
 	replace ft_pt_sp=to_ft_pt`n' if spart_num==`n'
 	replace educ_sp=to_educ`n' if spart_num==`n'
 	replace race_sp=to_race`n' if spart_num==`n'
 	replace weeks_employed_sp=to_RMWKWJB`n' if spart_num==`n'
-	
+	replace sex_sp=to_sex`n' if spart_num==`n'	
 	}
 
 	
@@ -292,11 +293,13 @@ gen spart_num=spousenum
 replace spart_num=partnernum if spart_num==.
 
 gen earnings_sp=.
+gen sex_sp=.
 // gen earnings_a_sp=.
 
 forvalues n=1/22{
 	// replace earnings_sp=to_TPEARN`n' if spart_num==`n'
 	replace earnings_sp=to_earnings`n' if spart_num==`n' // use this one
+	replace sex_sp=to_sex`n' if spart_num==`n'	
 }
 
 /* exploration
@@ -620,7 +623,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					tjb*_bwkly1 tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1			///
 					eeitc rtanfcov 														///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
-					prebiochildren race educ race_sp educ_sp tceb oldest_age 			///
+					prebiochildren race educ race_sp educ_sp sex_sp tceb oldest_age 	///
 					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
 					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
 					yrfirstbirth														///
