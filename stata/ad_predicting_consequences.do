@@ -190,7 +190,7 @@ label values rel_status rel
 gen rel_status_detail=.
 replace rel_status_detail=1 if single_all==1
 replace rel_status_detail=2 if partnered_no_chg==1
-replace rel_status_detail=3 if pathway==4
+replace rel_status_detail=3 if pathway==5 // why was this 4 at one point (which was partner down) did I change this?
 replace rel_status_detail=2 if partnered_all==1 & rel_status_detail==.
 
 label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
@@ -340,6 +340,16 @@ sum hh_income_raw if in_pov==1, detail
 sum hh_income_raw if hh_income_raw >=-50000 & hh_income_raw <=50000, detail
 sum hh_income_raw if in_pov==0 & hh_income_raw >=-50000 & hh_income_raw <=50000, detail
 sum hh_income_raw if in_pov==1 & hh_income_raw >=-50000 & hh_income_raw <=50000, detail
+
+tabstat hh_income_raw, by(rel_status_detail) stats(mean p50) // mean is in paper
+tabstat hh_income_topcode, by(rel_status_detail) stats(mean p50) // let's replace with p50
+
+tabstat hh_income_topcode if educ_gp==1, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode if educ_gp==2, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode if educ_gp==3, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode if race_gp==1, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode if race_gp==2, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode if race_gp==3, by(rel_status_detail) stats(mean p50) // let's replace with p50
 
 // both more likely to start from 0 AND end up as 100% contributor
 
@@ -834,14 +844,23 @@ forvalues r=1/5{
 * Models to use
 ********************************************************************************
 ** In JFEI paper
-regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race
+*regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race //// okay this matches the 11/8 file but NOT the paper - did the numbers get updated somewhere?
+regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // okay I am dumb - this IS what is in the paper, the topcode, okay.
 
-regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // didn't include but should I?
+*regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // didn't include but should I?
+regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race i.pov_lag // add to table
 
 logit in_pov ib2.rel_status_detail i.educ_gp i.race, or
-
 logit in_pov ib2.rel_status_detail i.educ_gp i.race i.pov_lag, or
 
+*regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race i.pathway // controlling for pathway is weird
+
+*Moderation effects?
+regress hh_income_topcode ib2.rel_status_detail##i.race_gp i.educ_gp // think it's just only sig for whites bc sample - only 6 Blacks dissolved
+margins rel_status_detail#race_gp
+
+regress hh_income_topcode ib2.rel_status_detail##i.educ_gp i.race_gp // literally nothing is significant.
+margins rel_status_detail#educ_gp
 
 ** For other paper - raw income change
 regress hh_income_raw_all i.educ_gp
@@ -982,7 +1001,7 @@ regress hh_income_raw_all ib2.rel_status // or these
 regress hh_income_raw_all ib2.rel_status_detail
 regress hh_income_raw_all ib2.rel_status i.educ_gp i.race // or these
 
-regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race // but I think this is what is in the paper?
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race // but I think this is what is in the paper?regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race // but I think this is what is in the paper?
 regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // USE
 regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race i.pov_lag // do I need to do this?
 
@@ -995,6 +1014,7 @@ regress hh_income_raw_all i.educ_gp i.race i.rel_status ageb1 i.status_b1 // do 
 
 regress hh_income_topcode ib2.rel_status_detail // not sig with controls
 regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race // single is marginally signifcant here (p=.06)
+regress hh_income_raw_all ib2.rel_status_detail i.educ_gp i.race // single is marginally signifcant here (p=.06)
 
 **** Pathway analysis
 // what if I put in 1000s?
