@@ -343,6 +343,8 @@ sum hh_income_raw if in_pov==1 & hh_income_raw >=-50000 & hh_income_raw <=50000,
 
 tabstat hh_income_raw, by(rel_status_detail) stats(mean p50) // mean is in paper
 tabstat hh_income_topcode, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode, by(educ_gp) stats(mean p50) // let's replace with p50
+tabstat hh_income_topcode, by(race_gp) stats(mean p50) // let's replace with p50
 
 tabstat hh_income_topcode if educ_gp==1, by(rel_status_detail) stats(mean p50) // let's replace with p50
 tabstat hh_income_topcode if educ_gp==2, by(rel_status_detail) stats(mean p50) // let's replace with p50
