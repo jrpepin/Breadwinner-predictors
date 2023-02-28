@@ -841,6 +841,24 @@ forvalues r=1/5{
 	tab pathway_final pov_change_detail if race==`r', row nofreq
 }
 
+****************************************************************************
+* Descriptives for potential decomp
+****************************************************************************
+tabstat hh_income_raw if educ_gp==1, by(pathway) stats(mean p50)
+tabstat hh_income_raw if educ_gp==2, by(pathway) stats(mean p50)
+tabstat hh_income_raw if educ_gp==3, by(pathway) stats(mean p50)
+
+tabstat percentile_chg if educ_gp==1, by(pathway) stats(mean p50)
+tabstat percentile_chg if educ_gp==2, by(pathway) stats(mean p50)
+tabstat percentile_chg if educ_gp==3, by(pathway) stats(mean p50)
+
+tabstat hh_income_raw if race_gp==1, by(pathway) stats(mean p50)
+tabstat hh_income_raw if race_gp==2, by(pathway) stats(mean p50)
+tabstat hh_income_raw if race_gp==3, by(pathway) stats(mean p50)
+
+tabstat percentile_chg if race_gp==1, by(pathway) stats(mean p50)
+tabstat percentile_chg if race_gp==2, by(pathway) stats(mean p50)
+tabstat percentile_chg if race_gp==3, by(pathway) stats(mean p50)
 
 ********************************************************************************
 * Models to use

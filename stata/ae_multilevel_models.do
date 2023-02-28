@@ -13,14 +13,14 @@ di "$S_DATE"
 
 use "$tempdir/bw_consequences_long.dta", clear
 
-gen percentile_chg_real = percentile_chg
-repace percentile_chg_real = . if time==1
+// gen percentile_chg_real = percentile_chg
+// replace percentile_chg_real = . if time==1
 
 spagplot percentile_ time, id(id) nofit
 
 spagplot percentile_ time if id>100 & id <200, id(id) nofit
 
-gen time2 = time-1
+// gen time2 = time-1
 sum percentile_chg
 
 ********************************************************************************
@@ -149,7 +149,6 @@ College Plus |  6.883495
 ------------------------
 
 */
-
 
 mixed percentile_ i.time2##i.race_gp|| id: time2, mle var
 estimates store m2
@@ -314,6 +313,7 @@ mixed percentile_ i.time2 i.race_gp ib3.pathway i.time2##i.race_gp##ib3.pathway 
 estimates store m5
 outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Race) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
+
 lrtest m2 m5 // compare interaction to just race - sig
 lrtest m3 m5 // compare interaction to just path - sig
 
@@ -330,6 +330,17 @@ mixed percentile_ i.time2##ib3.pathway if race_gp==1 || id: time2, mle var
 mixed percentile_ i.time2##ib3.pathway if race_gp==2 || id: time2, mle var
 mixed percentile_ i.time2##ib3.pathway if race_gp==3 || id: time2, mle var
 
+** Do need to put pathway and demos in same model
+mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2#i.educ_gp i.time2#ib3.pathway || id: time2, mle var
+estimates store m6
+outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Educ_Path) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+mixed percentile_ i.time2 i.race_gp ib3.pathway i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
+estimates store m7
+outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Race_Path) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+
+estimates stats m1 m2 m6 m7
 
 /*
 save "$tempdir/bw_consequences_long.dta", replace
