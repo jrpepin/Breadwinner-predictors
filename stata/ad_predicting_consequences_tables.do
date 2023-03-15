@@ -263,6 +263,18 @@ browse hh_income_raw_all hh_income_pos log_income log_income_change
 
 // keep if trans_bw60_alt2==1 & bw60lag==0 - want to get comparison to mothers who are NOT the primary earner
 
+sum avg_hhsize if trans_bw60_alt2==1 & bw60lag==0
+sum avg_hhsize if rel_status_detail==1 & trans_bw60_alt2==1 & bw60lag==0 // single
+sum avg_hhsize if rel_status_detail==2 & trans_bw60_alt2==1 & bw60lag==0
+sum avg_hhsize if rel_status_detail==3 & trans_bw60_alt2==1 & bw60lag==0
+sum avg_hhsize if trans_bw60_alt2==0 & bw60lag==0
+
+sum st_minorchildren if trans_bw60_alt2==1 & bw60lag==0
+sum st_minorchildren if rel_status_detail==1 & trans_bw60_alt2==1 & bw60lag==0 // single
+sum st_minorchildren if rel_status_detail==2 & trans_bw60_alt2==1 & bw60lag==0
+sum st_minorchildren if rel_status_detail==3 & trans_bw60_alt2==1 & bw60lag==0
+sum st_minorchildren if trans_bw60_alt2==0 & bw60lag==0
+
 ********************************************************************************
 * Relationship status descriptives for JFEI paper
 ********************************************************************************
