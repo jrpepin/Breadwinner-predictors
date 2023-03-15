@@ -312,7 +312,25 @@ tabstat hh_income_raw if hh_chg_value==0, stats(mean p50)
 tabstat hh_income_raw if hh_chg_value==1, stats(mean p50)
 
 tabstat hh_income_topcode if hh_chg_value==0, stats(mean p50)
+tabstat hh_income_chg if hh_chg_value==0, stats(mean p50)
 tabstat hh_income_topcode if hh_chg_value==1, stats(mean p50)
+
+sum thearn_adj, detail
+gen thearn_topcode=thearn_adj
+replace thearn_topcode = `r(p99)' if thearn_adj>`r(p99)'
+sum thearn_topcode, detail
+
+sum thearn_lag, detail
+gen thearn_lag_topcode=thearn_lag
+replace thearn_lag_topcode = `r(p99)' if thearn_lag>`r(p99)'
+sum thearn_lag_topcode, detail
+
+browse id earnings earnings_lag earn_change_raw
+gen earn_change_raw_x = earn_change_raw
+replace earn_change_raw = earnings-earnings_lag
+browse id earnings earnings_lag earn_change_raw
+
+browse id earnings earnings_lag earn_change_raw earn_change_raw_x
 
 ********************************************************************************
 * Relationship status descriptives
@@ -341,8 +359,12 @@ sum hh_income_raw if hh_income_raw >=-50000 & hh_income_raw <=50000, detail
 sum hh_income_raw if in_pov==0 & hh_income_raw >=-50000 & hh_income_raw <=50000, detail
 sum hh_income_raw if in_pov==1 & hh_income_raw >=-50000 & hh_income_raw <=50000, detail
 
+tab rel_status_detail hh_chg_value, row
+
 tabstat hh_income_raw, by(rel_status_detail) stats(mean p50) // mean is in paper
-tabstat hh_income_topcode, by(rel_status_detail) stats(mean p50) // let's replace with p50
+tabstat earn_change_raw, by(rel_status_detail) stats(p50 mean)
+
+// tabstat hh_income_topcode, by(rel_status_detail) stats(mean p50) // let's replace with p50
 tabstat hh_income_topcode, by(educ_gp) stats(mean p50) // let's replace with p50
 tabstat hh_income_topcode, by(race_gp) stats(mean p50) // let's replace with p50
 
