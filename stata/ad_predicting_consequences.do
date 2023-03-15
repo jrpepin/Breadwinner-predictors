@@ -666,21 +666,21 @@ tab pathway eeitc, row
 tab pathway eitc_after, row
 tab pathway_v1 pov_change_detail, row
 tab pathway pov_change_detail, row
-tab pathway pov_change_detail if partnered==0, row
-tab pathway pov_change_detail if partnered==1, row
+//tab pathway pov_change_detail if partnered==0, row
+//tab pathway pov_change_detail if partnered==1, row
 
 tab pov_change_detail educ_gp, row nofreq
 tab pov_change_detail race, row nofreq
-tab pov_change_detail partnered, row nofreq
+//tab pov_change_detail partnered, row nofreq
 tab pov_change_detail tanf_lag, row nofreq
 tab pov_change_detail eeitc, row nofreq
 tab pov_change_detail eitc_after, row nofreq
 tab pov_change_detail zero_earnings, row nofreq
 
-tab pov_change_detail tanf_lag if partnered==0, row
+//tab pov_change_detail tanf_lag if partnered==0, row
 
 tab pathway pov_change_detail if educ_gp==1, row
-tab pathway pov_change_detail if partnered==1, row
+//tab pathway pov_change_detail if partnered==1, row
 
 	
 histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000, kdensity width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Household income change upon transition to BW") xtitle("HH income change")

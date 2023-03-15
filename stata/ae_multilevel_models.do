@@ -13,14 +13,14 @@ di "$S_DATE"
 
 use "$tempdir/bw_consequences_long.dta", clear
 
-// gen percentile_chg_real = percentile_chg
-// replace percentile_chg_real = . if time==1
+gen percentile_chg_real = percentile_chg
+replace percentile_chg_real = . if time==1
 
 spagplot percentile_ time, id(id) nofit
 
 spagplot percentile_ time if id>100 & id <200, id(id) nofit
 
-// gen time2 = time-1
+gen time2 = time-1
 sum percentile_chg
 
 ********************************************************************************
@@ -341,6 +341,40 @@ outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label 
 
 
 estimates stats m1 m2 m6 m7
+
+***********************************************************
+* For JFEI
+***********************************************************
+
+mixed thearn_ i.time2##ib2.rel_status_detail || id: time2, mle var
+mixed thearn_ i.time2 i.educ_gp i.race_gp ib2.rel_status_detail i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib2.rel_status_detail || id: time2, mle var // okay one thing is that there is no way to topcode change, so these numbers are a little different
+
+sum thearn_, detail
+gen thearn_topcode=thearn_
+replace thearn_topcode = `r(p99)' if thearn_>`r(p99)'
+sum thearn_topcode, detail
+
+mixed thearn_topcode i.time2##ib2.rel_status_detail || id: time2, mle var
+outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+mixed thearn_topcode i.time2 i.educ_gp i.race_gp ib2.rel_status_detail i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib2.rel_status_detail || id: time2, mle var
+outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+tabstat percentile_ if time==2, by(rel_status_detail)	
+tabstat percentile_ if time==1, by(rel_status_detail)	
+
+mixed percentile_ i.time2##ib2.rel_status_detail || id: time2, mle var
+outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+mixed percentile_ i.time2 i.educ_gp i.race_gp ib2.rel_status_detail i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib2.rel_status_detail || id: time2, mle var
+outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// melogit in_pov_ i.time2##ib2.rel_status_detail || id: time2, or
+//meqrlogit in_pov_ i.time2##ib2.rel_status_detail || id: time2, or
+
+melogit in_pov_ i.time2##ib2.rel_status_detail || id: , or
+outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+melogit in_pov_ i.time2 i.educ_gp i.race_gp ib2.rel_status_detail i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib2.rel_status_detail || id: , or
+outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M6) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
 
 /*
 save "$tempdir/bw_consequences_long.dta", replace
