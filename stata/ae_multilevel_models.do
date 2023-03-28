@@ -368,6 +368,9 @@ tabstat thearn_topcode if time==2, by(rel_status_detail)
 tabstat earnings_ if time==1, by(rel_status_detail)	
 tabstat earnings_ if time==2, by(rel_status_detail)	
 
+tab rel_status_detail in_pov_ if time==1, row
+tab rel_status_detail in_pov_ if time==2, row
+
 mixed percentile_ i.time2##ib2.rel_status_detail || id: time2, mle var
 outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 mixed percentile_ i.time2 i.educ_gp i.race_gp ib2.rel_status_detail i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib2.rel_status_detail || id: time2, mle var
