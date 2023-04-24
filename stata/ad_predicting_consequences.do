@@ -687,6 +687,23 @@ tabstat percentile_chg if race_gp==1, by(pathway) stats(mean p50)
 tabstat percentile_chg if race_gp==2, by(pathway) stats(mean p50)
 tabstat percentile_chg if race_gp==3, by(pathway) stats(mean p50)
 
+// * these are appendix table in JFEI paper - using p50
+tabstat hh_income_raw if educ_gp==1, by(rel_status_detail) stats(mean p50)
+tabstat hh_income_raw if educ_gp==2, by(rel_status_detail) stats(mean p50)
+tabstat hh_income_raw if educ_gp==3, by(rel_status_detail) stats(mean p50)
+
+tabstat hh_income_raw if race_gp==1, by(rel_status_detail) stats(mean p50)
+tabstat hh_income_raw if race_gp==2, by(rel_status_detail) stats(mean p50)
+tabstat hh_income_raw if race_gp==3, by(rel_status_detail) stats(mean p50)
+
+tab rel_status_detail in_pov if educ_gp==1, row
+tab rel_status_detail in_pov if educ_gp==2, row
+tab rel_status_detail in_pov if educ_gp==3, row
+
+tab rel_status_detail in_pov if race_gp==1, row
+tab rel_status_detail in_pov if race_gp==2, row
+tab rel_status_detail in_pov if race_gp==3, row
+
 ********************************************************************************
 * Models to use
 ********************************************************************************

@@ -343,6 +343,7 @@ outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label 
 estimates stats m1 m2 m6 m7
 
 ***********************************************************
+**# Bookmark #1
 * For JFEI
 ***********************************************************
 
@@ -379,12 +380,32 @@ outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M
 // melogit in_pov_ i.time2##ib2.rel_status_detail || id: time2, or
 //meqrlogit in_pov_ i.time2##ib2.rel_status_detail || id: time2, or
 
-melogit in_pov_ i.time2##ib2.rel_status_detail || id: , or
+melogit in_pov_ i.time2##ib2.rel_status_detail || id: //, or
 outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 melogit in_pov_ i.time2 i.educ_gp i.race_gp ib2.rel_status_detail i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib2.rel_status_detail || id: , or
 outreg2 using "$results/multilevel_jfei.xls", sideway stats(coef) label ctitle(M6) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
+// three-way interactions
+mixed thearn_topcode i.time2 i.educ_gp ib3.rel_status_detail i.time2##i.educ_gp##ib3.rel_status_detail || id: time2, mle var // college single = sig higher gains, which makes sense
+mixed thearn_topcode i.time2 i.race_gp ib3.rel_status_detail i.time2##i.race_gp##ib3.rel_status_detail || id: time2, mle var // none of this is sig
 
+melogit in_pov_ i.time2 i.educ_gp ib3.rel_status_detail i.time2##i.educ_gp##ib3.rel_status_detail  || id: //, or - same here, sig less likely to move into pov
+melogit in_pov_ i.time2 i.race_gp ib3.rel_status_detail i.time2##i.race_gp##ib3.rel_status_detail  || id: //, or - nothing sig here
+
+// descriptives
+tab rel_status_detail in_pov_ if time==1 & educ_gp==1, row // pre
+tab rel_status_detail in_pov_ if time==1 & educ_gp==2, row // pre
+tab rel_status_detail in_pov_ if time==1 & educ_gp==3, row // pre
+tab rel_status_detail in_pov_ if time==1 & race_gp==1, row // pre
+tab rel_status_detail in_pov_ if time==1 & race_gp==2, row // pre
+tab rel_status_detail in_pov_ if time==1 & race_gp==3, row // pre
+
+tab rel_status_detail in_pov_ if time==2 & educ_gp==1, row // post
+tab rel_status_detail in_pov_ if time==2 & educ_gp==2, row // post
+tab rel_status_detail in_pov_ if time==2 & educ_gp==3, row // post
+tab rel_status_detail in_pov_ if time==2 & race_gp==1, row // post
+tab rel_status_detail in_pov_ if time==2 & race_gp==2, row // post
+tab rel_status_detail in_pov_ if time==2 & race_gp==3, row // post
 /*
 save "$tempdir/bw_consequences_long.dta", replace
 
