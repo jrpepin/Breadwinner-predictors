@@ -332,6 +332,8 @@ browse id earnings earnings_lag earn_change_raw
 
 browse id earnings earnings_lag earn_change_raw earn_change_raw_x
 
+**# Start here
+
 ********************************************************************************
 * Relationship status descriptives
 ********************************************************************************
@@ -705,6 +707,7 @@ tab rel_status_detail in_pov if race_gp==2, row
 tab rel_status_detail in_pov if race_gp==3, row
 
 ********************************************************************************
+**# Bookmark #1
 * Models to use
 ********************************************************************************
 ** In JFEI paper
@@ -1053,6 +1056,7 @@ histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pov_la
 
 
 ********************************************************************************
+**# Bookmark #2
 * Descriptive: pathway by race / educ + categorical outcome
 ********************************************************************************
 tab pov_change_detail, gen(outcome)
@@ -1110,9 +1114,83 @@ forvalues r=1/3{
 // validate
 tab pathway outcome if educ_gp==1, row nofreq
 
+********************************************************************************
+* Exploring mediation (before going into MLM)
+********************************************************************************
+// regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race
+//medeff (regress hh_income_topcode race) (regress hh_income_topcode race rel_status_detail) [if] [in] [weight], mediate(rel_status_detail) treat(varname [# #]) [sims(#) seed(#) vce(vcetype) level(#) interact(varname)]
+// medeff (regress M T x) (regress Y T M x), mediate(M) treat(T) sims(1000) seed(1)
+
+*M = partnered_all
+*T = race
+*are x other controls?
+
+logit partnered_all i.educ_gp // sig diffs
+logit in_pov i.educ_gp
+logit in_pov i.partnered_all
+logit in_pov i.partnered_all i.educ_gp
+
+regress hh_income_topcode i.educ_gp
+regress hh_income_topcode i.partnered_all
+regress hh_income_topcode i.partnered_all i.educ_gp // educ becomes sig here (like it does in my MLMs with pathway)
+
+medeff (logit partnered_all i.educ_gp) (logit in_pov i.partnered_all i.educ_gp), mediate(i.partnered_all) treat(i.educ_gp)
+
+sgmediation hh_income_topcode, mv(partnered_all) iv(educ_gp)
+sgmediation hh_income_topcode, mv(i.partnered_all) iv(i.educ_gp) // okay can't have factor variables, so just treats as continuous is the only way it works
+
+oaxaca hh_income_topcode i.partnered_all, by(educ_gp) noisily // I think I have to do this by hand
+oaxaca hh_income_topcode i.partnered_all, by(partnered_all) omega noisily
+oaxaca hh_income_topcode i.partnered_all, by(partnered_all) pooled noisily
+oaxaca hh_income_topcode i.partnered_all, by(partnered_all) weight(0.5) noisily
+
+* omega takes the coefficient on education from a pooled regression without an indicator for rural, the group var
+* pooled takes the coefficient on education from a pooled regression with an indicator for rural, the group var
+* weight(0.5) makes a coefficient on education as a 50-50 combination of the coefficients from separate rural and urban regression
+
+tab educ_gp pathway, row
+mlogit pathway i.educ_gp, base(3) // this is no different to a chi-squared, though, right? without controls?
+
+regress percentile_chg i.educ_gp // this is the same rate of change from multilevel models - just doesn't provide starting point - Model 1 (MLM)
+regress percentile_chg i.educ_gp ib3.pathway // this is the same rate of change from multilevel models - just doesn't provide starting point - Model 4 (MLM)
+
+tabstat percentile_chg, by(educ_gp) // raw effects
+oneway percentile_chg educ_gp // anova
+anova percentile_chg educ_gp
+margins educ_gp
+anova percentile_chg pathway
+anova percentile_chg educ_gp pathway
+anova percentile_chg educ_gp pathway educ_gp#pathway // honestly not quite sure what's happening here
+margins educ_gp // wait okay this is the same as if I standardized to pathway (Table 3A)
+margins educ_gp, asbalanced // wait confused, is this meant to match Model 4 - just controlling for pathway? because it doesn't. I am so confused
+
+/*These adjusted marginal predictions are not equal to the simple drug means (see the totals from the
+table command); they are based upon predictions from our ANOVA model. The asbalanced option
+of margins corresponds with the interpretation of the F statistic produced by ANOVA—each cell is
+given equal weight regardless of its sample size (see the following three technical notes). You can
+omit the asbalanced option and obtain predictive margins that take into account the unequal sample
+sizes of the cells.
+*/
+
+margins pathway // not sure what this is..
+
+anova percentile_chg race_gp
+margins race_gp // measured
+anova percentile_chg race_gp pathway race_gp#pathway // honestly not quite sure what's happening here
+margins race_gp // wait okay this is the same as if I standardized to pathway (Table 3A)
+margins race_gp, asbalanced // wait confused, is this meant to match Model 4 - just controlling for pathway? because it doesn't
+
+
+table educ_gp pathway, statistic(mean percentile_chg) nformat(%8.2f) // essentially the interaction? so this is more moderation?
+
+regress percentile_chg ib3.pathway##i.educ_gp
+margins pathway#educ_gp
+marginsplot, recast(bar)
+marginsplot
 
 ********************************************************************************
-* Create dataset to save
+**# Bookmark #3
+* Create dataset to save for MLM
 ********************************************************************************
 //1=lag, 2=year
 rename bw60 bw60_2
