@@ -1115,7 +1115,7 @@ forvalues r=1/3{
 tab pathway outcome if educ_gp==1, row nofreq
 
 ********************************************************************************
-* Exploring mediation (before going into MLM)
+* Exploring mediation / moderation (before going into MLM)
 ********************************************************************************
 // regress hh_income_topcode ib2.rel_status_detail i.educ_gp i.race
 //medeff (regress hh_income_topcode race) (regress hh_income_topcode race rel_status_detail) [if] [in] [weight], mediate(rel_status_detail) treat(varname [# #]) [sims(#) seed(#) vce(vcetype) level(#) interact(varname)]
@@ -1187,6 +1187,17 @@ regress percentile_chg ib3.pathway##i.educ_gp
 margins pathway#educ_gp
 marginsplot, recast(bar)
 marginsplot
+
+***R-squared - since can't get in MLM
+regress percentile_chg i.educ_gp // (M1) - .58%
+regress percentile_chg ib3.pathway // (M3) - 34.67%
+regress percentile_chg i.educ_gp ib3.pathway // (M4) - 35.34%
+regress percentile_chg ib3.pathway##i.educ_gp // (M6) - 37.54%
+
+regress percentile_chg i.race_gp // (M2) - .22%
+regress percentile_chg ib3.pathway // (M3) - 34.67%
+regress percentile_chg i.race_gp ib3.pathway // (M5) - 35.00%
+regress percentile_chg ib3.pathway##i.race_gp // (M7) - 36.01%
 
 ********************************************************************************
 **# Bookmark #3

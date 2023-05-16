@@ -23,8 +23,12 @@ spagplot percentile_ time if id>100 & id <200, id(id) nofit
 gen time2 = time-1
 sum percentile_chg
 
+mixed thearn_ i.time2##i.educ_gp|| id: time2, mle var
+mixed thearn_ i.time2##i.race_gp|| id: time2, mle var
+mixed thearn_ i.time2##ib3.pathway|| id: time2, mle var
+
 ********************************************************************************
-* Models
+* Models to use
 ********************************************************************************
 // okay don't get r-squared but can do LR tests?
 
@@ -153,6 +157,10 @@ College Plus |  6.883495
 mixed percentile_ i.time2##i.race_gp|| id: time2, mle var
 estimates store m2
 
+mixed percentile_ i.time2##i.race_gp i.educ_gp|| id: time2, mle var // control for education
+mixed percentile_ i.time2 i.race_gp i.educ_gp i.time2#i.race_gp i.time2#i.educ_gp || id: time2, mle var // control for education
+estimates store m2a
+
 /*
 -------------------------------------------------------------------------------
   percentile_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
@@ -226,75 +234,6 @@ To compare models using AIC, you need to calculate the AIC of each model. If a m
 
 */
 
-mixed thearn_ i.time2##i.educ_gp|| id: time2, mle var
-/*
-
----------------------------------------------------------------------------------
-        thearn_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
-----------------+----------------------------------------------------------------
-        1.time2 |  -7046.012   4565.623    -1.54   0.123    -15994.47    1902.446
-                |
-        educ_gp |
-  Some College  |   14104.38   5438.754     2.59   0.010     3444.616    24764.14
-  College Plus  |   71361.66   5519.481    12.93   0.000     60543.67    82179.64
-                |
-  time2#educ_gp |
-1#Some College  |   3890.715   6545.018     0.59   0.552    -8937.284    16718.71
-1#College Plus  |   7892.581   6642.166     1.19   0.235    -5125.825    20910.99
-                |
-          _cons |   36861.57   3793.924     9.72   0.000     29425.61    44297.52
----------------------------------------------------------------------------------
-*/
-
-mixed thearn_ i.time2##i.race_gp|| id: time2, mle var
-/*
-
--------------------------------------------------------------------------------
-      thearn_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
---------------+----------------------------------------------------------------
-      1.time2 |  -3920.044   3729.776    -1.05   0.293    -11230.27    3390.182
-              |
-      race_gp |
-       Black  |  -38193.98   6545.735    -5.83   0.000    -51023.39   -25364.58
-    Hispanic  |  -34357.47   6210.308    -5.53   0.000    -46529.45   -22185.49
-           4  |  -8342.915   8673.277    -0.96   0.336    -25342.23    8656.395
-              |
-time2#race_gp |
-     1#Black  |  -3023.961   7416.803    -0.41   0.683    -17560.63    11512.71
-  1#Hispanic  |   6385.886    7036.74     0.91   0.364    -7405.871    20177.64
-         1 4  |    -1336.3   9827.467    -0.14   0.892    -20597.78    17925.18
-              |
-        _cons |   78668.78   3291.731    23.90   0.000      72217.1    85120.45
--------------------------------------------------------------------------------
-
-*/
-
-mixed thearn_ i.time2##ib3.pathway|| id: time2, mle var
-
-/*
------------------------------------------------------------------------------------------
-                thearn_ | Coefficient  Std. err.      z    P>|z|     [95% conf. interval]
-------------------------+----------------------------------------------------------------
-                1.time2 |  -7141.076   4622.298    -1.54   0.122    -16200.61    1918.461
-                        |
-                pathway |
-  Mom Up, Not employed  |  -76113.84   6206.988   -12.26   0.000    -88279.31   -63948.37
-      Mom Up, employed  |   10621.92   7807.001     1.36   0.174    -4679.523    25923.36
-          Partner Down  |    42302.1   6899.296     6.13   0.000     28779.73    55824.48
-          Partner Left  |   446.5605   7982.959     0.06   0.955    -15199.75    16092.87
-       Other HH Change  |  -29266.74   6541.423    -4.47   0.000     -42087.7   -16445.79
-                        |
-          time2#pathway |
-1#Mom Up, Not employed  |   27107.16   6967.023     3.89   0.000     13452.05    40762.28
-    1#Mom Up, employed  |   94820.26   8762.955    10.82   0.000     77645.19    111995.3
-        1#Partner Down  |  -57443.53   7744.103    -7.42   0.000    -72621.69   -42265.37
-        1#Partner Left  |  -21785.89   8960.459    -2.43   0.015    -39348.07   -4223.716
-     1#Other HH Change  |  -5567.563   7342.409    -0.76   0.448    -19958.42    8823.294
-                        |
-                  _cons |   77765.92    4118.05    18.88   0.000     69694.69    85837.15
------------------------------------------------------------------------------------------
-
-*/
 
 *Combined model
 mixed percentile_ i.time2 i.educ_gp i.race_gp ib3.pathway i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
@@ -341,6 +280,16 @@ outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label 
 
 
 estimates stats m1 m2 m6 m7
+
+// descriptive things
+tabstat percentile_ if time==1, by(educ_gp) stats(p50 mean)
+tabstat percentile_ if time==2, by(educ_gp) stats(p50 mean)
+
+tabstat percentile_ if time==1, by(race_gp) stats(p50 mean)
+tabstat percentile_ if time==2, by(race_gp) stats(p50 mean)
+
+tabstat percentile_ if time==1, by(pathway) stats(p50 mean)
+tabstat percentile_ if time==2, by(pathway) stats(p50 mean)
 
 ***********************************************************
 **# Bookmark #1
