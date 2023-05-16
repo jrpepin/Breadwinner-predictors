@@ -275,11 +275,20 @@ estimates store m6
 outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Educ_Path) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 mixed percentile_ i.time2 i.race_gp ib3.pathway i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
-estimates store m7
+estimates store m7 // but this is actually model 5
+// can I compare race coefficient between model 2 and 5? (as indicator of change)
 outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Race_Path) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
+mixed percentile_ i.time2 i.race_gp ib3.pathway i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway i.time2#i.educ_gp  || id: time2, mle var // also add education
+estimates store m7a
 
 estimates stats m1 m2 m6 m7
+
+/* test _b[m2]2.race_gp = _b[m7]2.race_gp
+test [m2_mean]2.race_gp = [m7_mean]2.race_gp
+lincom [m2]2.race_gp - [m7]2.race_gp
+suest m2 m7
+*/
 
 // descriptive things
 tabstat percentile_ if time==1, by(educ_gp) stats(p50 mean)

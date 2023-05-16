@@ -1189,15 +1189,33 @@ marginsplot, recast(bar)
 marginsplot
 
 ***R-squared - since can't get in MLM
-regress percentile_chg i.educ_gp // (M1) - .58%
-regress percentile_chg ib3.pathway // (M3) - 34.67%
-regress percentile_chg i.educ_gp ib3.pathway // (M4) - 35.34%
-regress percentile_chg ib3.pathway##i.educ_gp // (M6) - 37.54%
-
 regress percentile_chg i.race_gp // (M2) - .22%
+estimates store m1
+
 regress percentile_chg ib3.pathway // (M3) - 34.67%
 regress percentile_chg i.race_gp ib3.pathway // (M5) - 35.00%
+estimates store m2
+
 regress percentile_chg ib3.pathway##i.race_gp // (M7) - 36.01%
+
+suest m1 m2
+test [m1_mean]2.race_gp=[m2_mean]2.race_gp
+lincom [m1_mean]2.race_gp - [m2_mean]2.race_gp // =0.05
+
+regress percentile_chg i.educ_gp // (M1) - .58%
+estimates store m3
+regress percentile_chg ib3.pathway // (M3) - 34.67%
+regress percentile_chg i.educ_gp ib3.pathway // (M4) - 35.34%
+estimates store m4
+regress percentile_chg ib3.pathway##i.educ_gp // (M6) - 37.54%
+
+suest m3 m4
+test [m3_mean]2.educ_gp=[m4_mean]2.educ_gp
+lincom [m3_mean]2.educ_gp - [m4_mean]2.educ_gp // not sig - some college
+
+test [m3_mean]3.educ_gp=[m4_mean]3.educ_gp
+lincom [m3_mean]3.educ_gp - [m4_mean]3.educ_gp // not sig - college
+
 
 ********************************************************************************
 **# Bookmark #3
