@@ -239,7 +239,7 @@ To compare models using AIC, you need to calculate the AIC of each model. If a m
 mixed percentile_ i.time2 i.educ_gp i.race_gp ib3.pathway i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
 
 *Attempting 3-way interaction (I could also interact time and pathway and do for each education group separately?)
-mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var
+mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var // Model 6
 estimates store m4
 outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Educ) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
 
@@ -248,10 +248,12 @@ lrtest m3 m4 // compare interaction to just path - sig
 
 estimates stats m1 m3 m4 // AIC is lowest with interaction...
 
-mixed percentile_ i.time2 i.race_gp ib3.pathway i.time2##i.race_gp##ib3.pathway || id: time2, mle var
+mixed percentile_ i.time2 i.race_gp ib3.pathway i.time2##i.race_gp##ib3.pathway || id: time2, mle var // Model 7
 estimates store m5
 outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Race) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
+mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.race_gp##ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var // Model 7a - want race and educ in same model
+outreg2 using "$results/multilevel_interactions.xls", sideway stats(coef) label ctitle(Both) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 lrtest m2 m5 // compare interaction to just race - sig
 lrtest m3 m5 // compare interaction to just path - sig
