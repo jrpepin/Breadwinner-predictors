@@ -584,13 +584,15 @@ tabstat hh_income_topcode, by(race) stats(mean p50)
 tabstat thearn_adj, by(race) stats(mean p50)
 
 ********************************************************************************
-* Descriptives to use
+**# Descriptives to use
 ******************************************************************************** 
 // log using "$logdir\impact_stats.log", replace
 tabstat hh_income_raw, stats(mean p50)
 tabstat hh_income_topcode, stats(mean p50)
 tabstat hh_income_chg_x, stats(mean p50)
 tabstat income_chg_top, stats(mean p50)
+tabstat hh_income_raw if hh_chg_value==0, stats(mean p50) // average decrease
+tabstat hh_income_raw if hh_chg_value==1, stats(mean p50) // average increase
 
 tabstat hh_income_raw if hh_income_raw < 0, stats(mean p50) // -$45000
 tabstat income_chg_top if income_chg_top < 0, stats(mean p50) // -42%
@@ -600,7 +602,10 @@ tabstat hh_income_topcode, by(educ_gp) stats(mean p50)
 tabstat hh_income_chg_x, by(educ_gp) stats(mean p50)
 tabstat thearn_lag, by(educ_gp) stats(mean p50)
 tabstat pre_percentile, by(educ_gp) stats(mean p50)
-tabstat percentile_chg, by(educ_gp) stats(mean p50)
+tabstat percentile_chg, by(educ_gp) stats(mean p50)+
+tab educ_gp hh_chg_value, row
+tabstat hh_income_raw if hh_chg_value==0, by(educ_gp) stats(mean p50) // average decrease
+tabstat hh_income_raw if hh_chg_value==1, by(educ_gp) stats(mean p50) // average increase
 
 tabstat hh_income_raw, by(race) stats(mean p50)
 tabstat hh_income_topcode, by(race) stats(mean p50)
@@ -608,6 +613,9 @@ tabstat hh_income_chg_x, by(race) stats(mean p50)
 tabstat thearn_lag, by(race) stats(mean p50)
 tabstat pre_percentile, by(race) stats(mean p50)
 tabstat percentile_chg, by(race) stats(mean p50)
+tab race_gp hh_chg_value, row
+tabstat hh_income_raw if hh_chg_value==0, by(race_gp) stats(mean p50) // average decrease
+tabstat hh_income_raw if hh_chg_value==1, by(race_gp) stats(mean p50) // average increase
 
 tabstat hh_income_raw, by(pathway) stats(mean p50)
 tabstat hh_income_topcode, by(pathway) stats(mean p50)
@@ -615,6 +623,9 @@ tabstat hh_income_chg_x, by(pathway) stats(mean p50)
 tabstat thearn_lag, by(pathway) stats(mean p50)
 tabstat pre_percentile, by(pathway) stats(mean p50)
 tabstat percentile_chg, by(pathway) stats(mean p50)
+tab pathway hh_chg_value, row
+tabstat hh_income_raw if hh_chg_value==0, by(pathway) stats(mean p50) // average decrease
+tabstat hh_income_raw if hh_chg_value==1, by(pathway) stats(mean p50) // average increase
 
 tab pathway_v1  pov_change_detail, row
 tab pathway pov_change_detail, row
@@ -633,6 +644,14 @@ tab race pathway, row nofreq chi2 // Pearson chi2(20) =  90.6400   Pr = 0.000
 
 tab educ_gp pathway, row nofreq cchi2 // Pearson chi2(10) =  99.1910   Pr = 0.000
 tab race pathway, row nofreq cchi2 // Pearson chi2(20) =  90.6400   Pr = 0.000
+
+forvalues x=1/3{
+	display "Educ = `x'"
+	tabstat hh_income_raw if educ_gp==`x', by(pathway) stats(mean p50)
+	display "Race = `x'"
+	tabstat hh_income_raw if race_gp==`x', by(pathway) stats(mean p50)
+}
+
 
 
 forvalues p=1/6{
@@ -1113,6 +1132,59 @@ forvalues r=1/3{
 
 // validate
 tab pathway outcome if educ_gp==1, row nofreq
+
+********************************************************************************
+**# Figures
+********************************************************************************
+*Okay, so this is in JFEI, but I think I used the graph editor to change plottype to rarea. Okay i can recast duh kim
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, width(1000) percent recast(rarea) xline(0) color(gray%30))
+
+* Education
+twoway (histogram hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & educ_gp==1, width(4000) percent recast(rarea) xline(0) color(gray%30))
+twoway (histogram hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & educ_gp==2, width(4000) percent recast(rarea) xline(0) color(gray%30))
+twoway (histogram hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & educ_gp==3, width(4000) percent recast(rarea) xline(0) color(gray%30))
+
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==1, percent width(1000) color(red%30) recast(area) xline(0)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==3, percent width(1000) color(blue%30) recast(area)), ///
+legend(order(1 "LTHS" 2 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==1, percent width(4000) recast(area) color(red%30) xline(0)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==3, percent width(4000) recast(area) color(blue%30)), ///
+legend(order(1 "LTHS" 2 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==1, percent width(4000) color(red%30) recast(area) xline(0)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==2, percent width(4000) color(dkblue%30) recast(area)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==3, percent width(4000) color(blue%30) recast(area)), ///
+legend(order(1 "LTHS" 2 "Some College" 3 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+
+*Race
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==1, width(1000) percent recast(rarea) xline(0) color(gray%30))
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==2, width(1000) percent recast(rarea) xline(0) color(gray%30))
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==3, width(1000) percent recast(rarea) xline(0) color(gray%30))
+
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==1, percent width(4000) color(red%30) recast(area) xline(0)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==3, percent width(4000) recast(area) color(blue%30)), ///
+legend(order(1 "White" 2 "Black" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==1, percent width(4000) color(red%30) recast(area) xline(0)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==2, percent width(4000) color(dkblue%30) recast(area)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==3, percent width(4000) color(blue%30) recast(area)), ///
+legend(order(1 "White" 2 "Black" 3 "Hispanic" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+
+* Pathway
+forvalues p=1/6{
+	local pathway_`p': label (pathway) `p'
+	twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & pathway==`p', width(1000) percent recast(rarea) xline(0) color(gray%30)), xtitle("`pathway_`p''")
+	graph export "$results\pathway_histogram_`p'.png", as(png) name("Graph") replace
+}
+
+local pathway_1: label (pathway) 1
+display "`pathway_1'"
+
+* Want to replicate with groups
+twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==1, percent width(5000) color(red%30)) ///
+(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & in_pov==0, percent width(5000) color(dkgreen%30)), ///
+legend(order(1 "In financial hardship" 2 "Not in financial hardship" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
 
 ********************************************************************************
 * Exploring mediation / moderation (before going into MLM)
