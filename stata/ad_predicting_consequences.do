@@ -196,6 +196,21 @@ replace rel_status_detail=2 if partnered_all==1 & rel_status_detail==.
 label define rel_detail 1 "Single" 2 "Partnered" 3 "Dissolved"
 label values rel_status_detail rel_detail
 
+// making a variable to combine education and race
+gen educ_x_race=.
+replace educ_x_race=1 if educ_gp==1 & race_gp==1
+replace educ_x_race=2 if educ_gp==1 & race_gp==2
+replace educ_x_race=3 if educ_gp==1 & race_gp==3
+replace educ_x_race=4 if educ_gp==2 & race_gp==1
+replace educ_x_race=5 if educ_gp==2 & race_gp==2
+replace educ_x_race=6 if educ_gp==2 & race_gp==3
+replace educ_x_race=7 if educ_gp==3 & race_gp==1
+replace educ_x_race=8 if educ_gp==3 & race_gp==2
+replace educ_x_race=9 if educ_gp==3 & race_gp==3
+replace educ_x_race=10 if race_gp==4
+
+label define educ_x_race 1 "HS x White" 2 "HS x Black" 3 "HS x Hisp" 4 "Some COll x White" 5 "Some COll x Black" 6 "Some COll x Hisp" 7 "College x White" 8 "College x Black" 9 "College x Hisp" 10 "Other"
+label values educ_x_race educ_x_race
 
 * Get percentiles
 //browse SSUID year bw60 bw60lag
@@ -532,16 +547,16 @@ replace mom_earn_change=0 if mom_earn_change==. // the very small mom ups - want
 replace mom_earn_change=1 if mom_earn_change==0 & mt_mom==1 // BUT want the very small moms if ONLY mom's earnings went up, because there is nowhere else to put
 /*
 gen pathway_detail=.
-replace pathway_detail=1 if pathway==1 & start_from_0==1 // no earnings prior
-replace pathway_detail=2 if pathway==1 & start_from_0==0 // she had earnings
-replace pathway_detail=3 if pathway==3 & earnings_sp_adj==0 // partner down to 0
-replace pathway_detail=4 if pathway==3 & earnings_sp_adj!=0 // partner not down to 0
-replace pathway_detail=5 if pathway==2
-replace pathway_detail=6 if pathway==5 & inlist(mom_earn_change,-1,0) & end_as_sole==1 // just other, down to 0
-replace pathway_detail=7 if pathway==5 & inlist(mom_earn_change,-1,0) & end_as_sole==0 // just other, not down to 0
-replace pathway_detail=8 if pathway==5 & mom_earn_change==1 // both
-replace pathway_detail=9 if pathway==4 & inlist(mom_earn_change,-1,0) // just partner left
-replace pathway_detail=10 if pathway==4 & mom_earn_change==1 // partner left and her earnings up
+replace pathway_detail=1 if pathway==1 // no earnings prior
+replace pathway_detail=2 if pathway==2 // she had earnings
+replace pathway_detail=3 if pathway==4 & earnings_sp_adj==0 // partner down to 0
+replace pathway_detail=4 if pathway==4 & earnings_sp_adj!=0 // partner not down to 0
+replace pathway_detail=5 if pathway==3
+replace pathway_detail=6 if pathway==6 & inlist(mom_earn_change,-1,0) & end_as_sole==1 // just other, down to 0
+replace pathway_detail=7 if pathway==6 & inlist(mom_earn_change,-1,0) & end_as_sole==0 // just other, not down to 0
+replace pathway_detail=8 if pathway==6 & mom_earn_change==1 // both
+replace pathway_detail=9 if pathway==5 & inlist(mom_earn_change,-1,0) // just partner left
+replace pathway_detail=10 if pathway==5 & mom_earn_change==1 // partner left and her earnings up
 
 label define pathway_detail 1 "Mom Up from 0" 2 "Mom Up" 3 "Partner Down to 0" 4 "Partner Down" 5 "Mom Up Partner Down" 6 "Other Down to 0" 7 "Other Down" 8 "Mom Up Other Down" 9 "Dissolution" 10 "Dissolution Mom Up"
 label values pathway_detail pathway_detail
@@ -626,6 +641,15 @@ tabstat percentile_chg, by(pathway) stats(mean p50)
 tab pathway hh_chg_value, row
 tabstat hh_income_raw if hh_chg_value==0, by(pathway) stats(mean p50) // average decrease
 tabstat hh_income_raw if hh_chg_value==1, by(pathway) stats(mean p50) // average increase
+
+tabstat hh_income_raw, by(educ_x_race) stats(mean p50)
+tabstat hh_income_chg_x, by(educ_x_race) stats(mean p50) // p50
+tabstat thearn_lag, by(educ_x_race) stats(mean p50)
+tabstat pre_percentile, by(educ_x_race) stats(mean p50)
+tabstat percentile_chg, by(educ_x_race) stats(mean p50)
+tab educ_x_race hh_chg_value, row
+tabstat hh_income_raw if hh_chg_value==0, by(educ_x_race) stats(mean p50) // average decrease
+tabstat hh_income_raw if hh_chg_value==1, by(educ_x_race) stats(mean p50) // average increase
 
 tab pathway_v1  pov_change_detail, row
 tab pathway pov_change_detail, row
