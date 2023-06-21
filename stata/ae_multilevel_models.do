@@ -28,7 +28,37 @@ mixed thearn_ i.time2##i.race_gp|| id: time2, mle var
 mixed thearn_ i.time2##ib3.pathway|| id: time2, mle var
 
 ********************************************************************************
-* Models to use
+* Models for heterogeneity paper
+********************************************************************************
+*Just education
+mixed percentile_ i.time2##i.educ_gp|| id: time2, mle var
+estimates store m1
+outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+*Just race
+mixed percentile_ i.time2##i.race_gp|| id: time2, mle var
+estimates store m2
+outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Race + education
+mixed percentile_ i.time2 i.race_gp i.educ_gp i.time2#i.race_gp i.time2#i.educ_gp || id: time2, mle var
+estimates store m3
+outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* Race + education + pathway (mediation)
+mixed percentile_ i.time2 i.educ_gp i.race_gp ib3.pathway i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
+estimates store m4
+outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* three way interaction for moderation
+mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.race_gp##ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var
+estimates store m5
+outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+estimates stats m1 m2 m3 m4 m5
+
+********************************************************************************
+* Exploration
 ********************************************************************************
 // okay don't get r-squared but can do LR tests?
 
@@ -234,9 +264,6 @@ To compare models using AIC, you need to calculate the AIC of each model. If a m
 
 */
 
-
-*Combined model
-mixed percentile_ i.time2 i.educ_gp i.race_gp ib3.pathway i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
 
 *Attempting 3-way interaction (I could also interact time and pathway and do for each education group separately?)
 mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var // Model 6

@@ -212,6 +212,11 @@ replace educ_x_race=10 if race_gp==4
 label define educ_x_race 1 "HS x White" 2 "HS x Black" 3 "HS x Hisp" 4 "Some COll x White" 5 "Some COll x Black" 6 "Some COll x Hisp" 7 "College x White" 8 "College x Black" 9 "College x Hisp" 10 "Other"
 label values educ_x_race educ_x_race
 
+// adding info on HH composition (created file 10 in 2014 folder) 
+merge 1:1 SSUID PNUM year using "$tempdir/household_lookup.dta"
+drop if _merge==2
+drop _merge
+
 * Get percentiles
 //browse SSUID year bw60 bw60lag
 
@@ -602,6 +607,14 @@ tabstat thearn_adj, by(race) stats(mean p50)
 **# Descriptives to use
 ******************************************************************************** 
 // log using "$logdir\impact_stats.log", replace
+* Table 1
+tabstat earnings_lag if earnings_lag > 0, stats(mean p50 sd semean)
+tabstat thearn_lag if thearn_lag > 0, stats(mean p50 sd semean)
+tab extended_hh
+sum avg_hhsize
+tab partnered_t
+tab relationship, m
+
 tabstat hh_income_raw, stats(mean p50)
 tabstat hh_income_topcode, stats(mean p50)
 tabstat hh_income_chg_x, stats(mean p50)

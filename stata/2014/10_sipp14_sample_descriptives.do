@@ -85,6 +85,18 @@ label values st_marital_status end_marital_status marital_status
 
 tab total_max_earner2 if inlist(end_marital_status,3,4,5)
 
+// creating an indicator of whether or not mom lives in extended household, then making a lookup table to match later
+gen extended_hh=0
+
+forvalues n=1/22{
+replace extended_hh=1 if inlist(relationship`n',3,5,7,9,10,11,12,13,14,15,16,17,18,19,20) // anyone who is not spouse, partner, or child (1,2,4,6,8)
+}
+
+preserve
+keep SSUID PNUM year total_max_earner2 extended_hh
+save "$tempdir/household_lookup.dta", replace
+restore
+
 // for impact paper to get earner prior to transition (steps I did in ab)
 * Missing value check
 tab race, m
