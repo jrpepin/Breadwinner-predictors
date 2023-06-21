@@ -16,9 +16,9 @@ use "$tempdir/bw_consequences_long.dta", clear
 gen percentile_chg_real = percentile_chg
 replace percentile_chg_real = . if time==1
 
-spagplot percentile_ time, id(id) nofit
+// spagplot percentile_ time, id(id) nofit
 
-spagplot percentile_ time if id>100 & id <200, id(id) nofit
+// spagplot percentile_ time if id>100 & id <200, id(id) nofit
 
 gen time2 = time-1
 sum percentile_chg
@@ -31,7 +31,7 @@ mixed thearn_ i.time2##ib3.pathway|| id: time2, mle var
 * Models for heterogeneity paper
 ********************************************************************************
 *Just education
-mixed percentile_ i.time2##i.educ_gp|| id: time2, mle var
+mixed percentile_ i.time2##ib3.educ_gp|| id: time2, mle var
 estimates store m1
 outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
 
@@ -41,17 +41,17 @@ estimates store m2
 outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Race + education
-mixed percentile_ i.time2 i.race_gp i.educ_gp i.time2#i.race_gp i.time2#i.educ_gp || id: time2, mle var
+mixed percentile_ i.time2 i.race_gp ib3.educ_gp i.time2#i.race_gp i.time2#ib3.educ_gp || id: time2, mle var
 estimates store m3
 outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 * Race + education + pathway (mediation)
-mixed percentile_ i.time2 i.educ_gp i.race_gp ib3.pathway i.time2#i.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
+mixed percentile_ i.time2 ib3.educ_gp i.race_gp ib3.pathway i.time2#ib3.educ_gp i.time2#i.race_gp i.time2#ib3.pathway || id: time2, mle var
 estimates store m4
 outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 * three way interaction for moderation
-mixed percentile_ i.time2 i.educ_gp ib3.pathway i.time2##i.race_gp##ib3.pathway i.time2##i.educ_gp##ib3.pathway || id: time2, mle var
+mixed percentile_ i.time2 ib3.educ_gp ib3.pathway i.time2##i.race_gp##ib3.pathway i.time2##ib3.educ_gp##ib3.pathway || id: time2, mle var
 estimates store m5
 outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 

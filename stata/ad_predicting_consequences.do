@@ -621,6 +621,8 @@ tabstat hh_income_chg_x, stats(mean p50)
 tabstat income_chg_top, stats(mean p50)
 tabstat hh_income_raw if hh_chg_value==0, stats(mean p50) // average decrease
 tabstat hh_income_raw if hh_chg_value==1, stats(mean p50) // average increase
+tabstat hh_income_topcode if hh_chg_value==0, stats(mean p50) // average decrease
+tabstat hh_income_topcode if hh_chg_value==1, stats(mean p50) // average increase
 
 tabstat hh_income_raw if hh_income_raw < 0, stats(mean p50) // -$45000
 tabstat income_chg_top if income_chg_top < 0, stats(mean p50) // -42%
@@ -663,6 +665,9 @@ tabstat percentile_chg, by(educ_x_race) stats(mean p50)
 tab educ_x_race hh_chg_value, row
 tabstat hh_income_raw if hh_chg_value==0, by(educ_x_race) stats(mean p50) // average decrease
 tabstat hh_income_raw if hh_chg_value==1, by(educ_x_race) stats(mean p50) // average increase
+
+// variance pre / post (for these households or for ALL)
+tabstat thearn_lag thearn_adj, stats(mean p50 sd var cv range)
 
 tab pathway_v1  pov_change_detail, row
 tab pathway pov_change_detail, row
