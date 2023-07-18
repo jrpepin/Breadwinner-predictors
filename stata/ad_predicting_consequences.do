@@ -1240,6 +1240,13 @@ graph box hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & race
 // https://www.jstor.org/stable/pdf/271083.pdf: Change score method and the regressor variable method. In the change score method, Y2 - Y, is regressed on X. In the regressor variable method, Y2 is regressed on both Y, and X.   First, the  regression of Y2 - Y, on both Y, and X is equivalent to the regressor variable method. So yes, I prove this out below. But confused if, at this point, I am predicting CHANGE or am I predicting time 2 incole decile controlling for time 1, then I somehow need to work out what change would  be??
 
 gen id_use = _n	
+// alt income
+gen thearn_lag_1000s = thearn_lag / 1000
+gen thearn_lag_ln = ln(thearn_lag + 0.01)
+drop thearn_lag_topcode
+gen thearn_lag_topcode=thearn_lag
+sum thearn_lag, detail
+replace thearn_lag_topcode = `r(p90)' if thearn_lag > `r(p90)'
 
 browse pre_percentile post_percentile percentile_chg thearn_lag thearn_adj  hh_income_raw
 tabstat pre_percentile, by(educ_gp)
@@ -1256,6 +1263,25 @@ margins educ_gp
 
 regress post_percentile ib3.educ_gp pre_percentile // see Allison 1990 - okay so THIS matches regress percentile_chg ib3.educ_gp pre_percentile. These are regressor variable methods
 
+// alt income
+regress percentile_chg ib3.educ_gp
+margins educ_gp
+regress percentile_chg ib3.educ_gp thearn_lag
+margins educ_gp
+regress percentile_chg ib3.educ_gp thearn_lag_ln
+margins educ_gp
+regress percentile_chg ib3.educ_gp thearn_lag_1000s
+margins educ_gp
+regress percentile_chg ib3.educ_gp thearn_lag_topcode
+margins educ_gp
+
+regress percentile_chg ib3.educ_gp##c.thearn_lag_ln
+margins educ_gp // this is exactly the same - just the coefficients much harder to interpret
+
+sum thearn_lag, detail
+sum thearn_lag if educ_gp==1, detail
+sum thearn_lag if educ_gp==3, detail
+
 // regress percentile_chg i.educ_gp i.id_use
 // areg percentile_chg ib3.educ_gp, absorb(id_use) //
 // regress percentile_chg ib3.educ_gp thearn_lag i.id // wait do I need to control for ID to make these fixed effects?!?! im so confused. okay no (prob not bc wide not long)
@@ -1271,6 +1297,14 @@ margins race_gp
 regress percentile_chg i.race_gp thearn_lag // this is wildly different
 margins race_gp
 regress percentile_chg i.race_gp pre_percentile
+margins race_gp
+
+// alt income
+regress percentile_chg i.race_gp
+margins race_gp
+regress percentile_chg i.race_gp thearn_lag
+margins race_gp
+regress percentile_chg i.race_gp thearn_lag_ln
 margins race_gp
 
 ********************************************************************************

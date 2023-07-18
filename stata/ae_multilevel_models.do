@@ -37,6 +37,8 @@ mixed percentile_ i.time2##ib3.educ_gp|| id: time2, mle var
 estimates store m1
 outreg2 using "$results/heterogeneity_models.xls", sideway stats(coef) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
 
+mixed percentile_ i.time2##ib3.educ_gp thearn_|| id: time2, mle var // do I control for income or is that collinear?
+
 *Just race
 mixed percentile_ i.time2##i.race_gp|| id: time2, mle var
 estimates store m2
