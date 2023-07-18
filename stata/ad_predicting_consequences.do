@@ -1179,13 +1179,15 @@ tab pathway outcome if educ_gp==1, row nofreq
 **# Figures
 ********************************************************************************
 *Okay, so this is in JFEI, but I think I used the graph editor to change plottype to rarea. Okay i can recast duh kim
-twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000, width(1000) percent recast(rarea) xline(0) color(gray%30))
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000, width(2000) percent recast(rarea) xline(0,lcolor(black)) color(gray%60)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change")  ylabel(, labsize(small)) ytitle("Percent Distribution of Households") graphregion(fcolor(white))
 
 * Education
-twoway (histogram hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & educ_gp==1, width(4000) percent recast(rarea) xline(0) color(gray%30))
-twoway (histogram hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & educ_gp==2, width(4000) percent recast(rarea) xline(0) color(gray%30))
-twoway (histogram hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & educ_gp==3, width(4000) percent recast(rarea) xline(0) color(gray%30))
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000 & educ_gp==1, width(4000) percent recast(rarea) xline(0,lcolor(black)) color(gray%40)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change")  ylabel(0(5)15, labsize(small)) ytitle("Percent Distribution") graphregion(fcolor(white)) ysize(4.5) xsize(8)
 
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000 & educ_gp==2, width(4000) percent recast(rarea) xline(0,lcolor(black)) color(gray%40)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change")  ylabel(0(5)15, labsize(small)) ytitle("Percent Distribution") graphregion(fcolor(white)) ysize(4.5) xsize(8)
+
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000 & educ_gp==3, width(4000) percent recast(rarea) xline(0,lcolor(black)) color(gray%40)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change") ylabel(0(5)15, labsize(small)) ytitle("Percent Distribution") graphregion(fcolor(white)) ysize(4.5) xsize(8)
+/*
 twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==1, percent width(1000) color(red%30) recast(area) xline(0)) ///
 (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==3, percent width(1000) color(blue%30) recast(area)), ///
 legend(order(1 "LTHS" 2 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
@@ -1193,25 +1195,23 @@ legend(order(1 "LTHS" 2 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) a
 twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==1, percent width(4000) recast(area) color(red%30) xline(0)) ///
 (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==3, percent width(4000) recast(area) color(blue%30)), ///
 legend(order(1 "LTHS" 2 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+*/
 
 twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==1, percent width(4000) color(red%30) recast(area) xline(0)) ///
 (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==2, percent width(4000) color(dkblue%30) recast(area)) ///
 (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & educ_gp==3, percent width(4000) color(blue%30) recast(area)), ///
-legend(order(1 "LTHS" 2 "Some College" 3 "College" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+legend(order(1 "LTHS" 2 "Some College" 3 "College" ) size(small) rows(1)) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) ylabel(, labsize(small)) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+
 
 *Race
-twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==1, width(1000) percent recast(rarea) xline(0) color(gray%30))
-twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==2, width(1000) percent recast(rarea) xline(0) color(gray%30))
-twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==3, width(1000) percent recast(rarea) xline(0) color(gray%30))
-
-twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==1, percent width(4000) color(red%30) recast(area) xline(0)) ///
-(histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==3, percent width(4000) recast(area) color(blue%30)), ///
-legend(order(1 "White" 2 "Black" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000 & race_gp==1, width(4000) percent recast(rarea) xline(0,lcolor(black)) color(gray%40)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change")  ylabel(0(5)15, labsize(small)) ytitle("Percent Distribution") graphregion(fcolor(white)) ysize(4.5) xsize(8)
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000 & race_gp==2, width(4000) percent recast(rarea) xline(0,lcolor(black)) color(gray%40)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change")  ylabel(0(5)15, labsize(small)) ytitle("Percent Distribution") graphregion(fcolor(white)) ysize(4.5) xsize(8)  
+twoway (histogram hh_income_raw if hh_income_raw>=-75000 & hh_income_raw<=75000 & race_gp==3, width(4000) percent recast(rarea) xline(0,lcolor(black)) color(gray%40)), xlabel(-75000(5000)75000, labsize(small) angle(ninety) valuelabel) xtitle("Household Income Change") ylabel(0(5)15, labsize(small)) ytitle("Percent Distribution") graphregion(fcolor(white)) ysize(4.5) xsize(8)
 
 twoway (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==1, percent width(4000) color(red%30) recast(area) xline(0)) ///
 (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==2, percent width(4000) color(dkblue%30) recast(area)) ///
 (histogram hh_income_raw if hh_income_raw>=-50000 & hh_income_raw<=50000 & race_gp==3, percent width(4000) color(blue%30) recast(area)), ///
-legend(order(1 "White" 2 "Black" 3 "Hispanic" )) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
+legend(order(1 "White" 2 "Black" 3 "Hispanic" ) size(small) rows(1)) xlabel(-50000(5000)50000, labsize(vsmall) angle(forty_five) valuelabel) ylabel(, labsize(small)) xtitle("Household Income Change") ytitle("Percent Distribution") graphregion(fcolor(white))
 
 * Pathway
 forvalues p=1/6{
@@ -1232,7 +1232,46 @@ legend(order(1 "In financial hardship" 2 "Not in financial hardship" )) xlabel(-
 graph box hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000, over(educ_gp)
 graph box hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & race_gp<4, over(race_gp)
 
-violinplot hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000
+// violinplot hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000
+
+********************************************************************************
+**# Trying fixed effects models here instead of multilevel models
+********************************************************************************
+// https://www.jstor.org/stable/pdf/271083.pdf: Change score method and the regressor variable method. In the change score method, Y2 - Y, is regressed on X. In the regressor variable method, Y2 is regressed on both Y, and X.   First, the  regression of Y2 - Y, on both Y, and X is equivalent to the regressor variable method. So yes, I prove this out below. But confused if, at this point, I am predicting CHANGE or am I predicting time 2 incole decile controlling for time 1, then I somehow need to work out what change would  be??
+
+gen id_use = _n	
+
+browse pre_percentile post_percentile percentile_chg thearn_lag thearn_adj  hh_income_raw
+tabstat pre_percentile, by(educ_gp)
+tabstat post_percentile, by(educ_gp)
+tabstat percentile_chg, by(educ_gp)
+
+regress percentile_chg i.educ_gp
+regress percentile_chg ib3.educ_gp // this exactly matches multi-level models and the above tabstat. This is change score method per Allison
+margins educ_gp
+regress percentile_chg ib3.educ_gp thearn_lag // this is wildly different
+margins educ_gp
+regress percentile_chg ib3.educ_gp pre_percentile // this is also wildly different
+margins educ_gp
+
+regress post_percentile ib3.educ_gp pre_percentile // see Allison 1990 - okay so THIS matches regress percentile_chg ib3.educ_gp pre_percentile. These are regressor variable methods
+
+// regress percentile_chg i.educ_gp i.id_use
+// areg percentile_chg ib3.educ_gp, absorb(id_use) //
+// regress percentile_chg ib3.educ_gp thearn_lag i.id // wait do I need to control for ID to make these fixed effects?!?! im so confused. okay no (prob not bc wide not long)
+
+regress percentile_chg ib3.educ_gp thearn_lag ib3.pathway // NOW is there mediation?
+
+tabstat pre_percentile, by(race_gp)
+tabstat post_percentile, by(race_gp)
+tabstat percentile_chg, by(race_gp)
+
+regress percentile_chg i.race_gp
+margins race_gp
+regress percentile_chg i.race_gp thearn_lag // this is wildly different
+margins race_gp
+regress percentile_chg i.race_gp pre_percentile
+margins race_gp
 
 ********************************************************************************
 * Exploring mediation / moderation (before going into MLM)
@@ -1371,6 +1410,71 @@ i(id) j(time)
 
 save "$tempdir/bw_consequences_long.dta", replace
 
+
+********************************************************************************
+**# To get descriptives for comparison to all eligible mothers
+********************************************************************************
+use "$tempdir/combined_bw_equation.dta", clear // created in step ab
+drop if survey_yr==1
+
+tab trans_bw60_alt2 if bw60lag==0 // the 1s here are my 981
+// the comparison, then, are bw60lag == 0 BUT trans_bw60_alt2==0
+
+unique id if bw60lag==0, by(trans_bw60_alt2)
+
+tab educ_gp if trans_bw60_alt2==1 & bw60lag==0
+tab educ_gp if trans_bw60_alt2==0 & bw60lag==0
+
+tab race if trans_bw60_alt2==1 & bw60lag==0
+tab race if trans_bw60_alt2==0 & bw60lag==0
+
+recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
+label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
+label values marital_status_t1 marr
+
+tab marital_status_t1 if trans_bw60_alt2==1 & bw60lag==0
+tab marital_status_t1 if trans_bw60_alt2==0 & bw60lag==0
+
+// create pathway
+sort SSUID PNUM year
+gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen thearn_lag = thearn_adj[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+
+gen start_from_0 = 0
+replace start_from_0=1 if earnings_lag==0
+
+gen pathway=0
+replace pathway=1 if mt_mom==1 & start_from_0==1
+replace pathway=2 if mt_mom==1 & start_from_0==0
+replace pathway=3 if ft_partner_down_mom==1
+replace pathway=4 if ft_partner_down_only==1
+replace pathway=5 if ft_partner_leave==1
+replace pathway=6 if lt_other_changes==1
+
+label define pathway 0 "None" 1 "Mom Up, Not employed" 2 "Mom Up, employed" 3 "Mom Up Partner Down" 4 "Partner Down" 5 "Partner Left" 6 "Other HH Change"
+label values pathway pathway
+
+tab pathway if trans_bw60_alt2==1 & bw60lag==0
+tab pathway if trans_bw60_alt2==0 & bw60lag==0
+
+
+// 
+sum earnings_lag if trans_bw60_alt2==1 & bw60lag==0 & earnings_lag!=0, detail
+sum earnings_lag if trans_bw60_alt2==0 & bw60lag==0 & earnings_lag!=0, detail
+
+sum thearn_lag if trans_bw60_alt2==1 & bw60lag==0 & thearn_lag!=0, detail
+sum thearn_lag if trans_bw60_alt2==0 & bw60lag==0 & thearn_lag!=0, detail
+
+// adding info on HH composition (created file 10 in 2014 folder) 
+merge 1:1 SSUID PNUM year using "$tempdir/household_lookup.dta"
+drop if _merge==2
+drop _merge
+
+tab extended_hh if trans_bw60_alt2==1 & bw60lag==0
+tab extended_hh if trans_bw60_alt2==0 & bw60lag==0
+
+sum avg_hhsize if trans_bw60_alt2==1 & bw60lag==0
+sum avg_hhsize if trans_bw60_alt2==0 & bw60lag==0
 
 /*
 browse SSUID PNUM educ_gp pathway mechanism inc_pov

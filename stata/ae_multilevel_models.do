@@ -23,6 +23,8 @@ replace percentile_chg_real = . if time==1
 gen time2 = time-1
 sum percentile_chg
 
+mixed thearn_ i.educ_gp|| id: time2, mle var
+mixed thearn_ i.time2 i.educ_gp|| id: time2, mle var
 mixed thearn_ i.time2##i.educ_gp|| id: time2, mle var
 mixed thearn_ i.time2##i.race_gp|| id: time2, mle var
 mixed thearn_ i.time2##ib3.pathway|| id: time2, mle var
@@ -157,6 +159,8 @@ College Plus |         7
 -------------+----------
        Total |   5.14475
 	   
+regress percentile_chg i.educ_gp // these are the same
+mixed percentile_ i.time2##i.educ_gp|| id: time2, mle var // these are the same
 tabstat percentile_chg, by(educ_gp)
 sc-hs = -0.12
 coll-hs = 0.314
@@ -437,3 +441,13 @@ this correlation is that higher initial levels have faster decline?
 */
 
 */
+
+***********************************************************
+**# Should I be using xtreg??
+***********************************************************
+// xtset pvar tvar1
+xtset id time
+xtreg percentile_ ib3.educ_gp, fe // is this not working bc education is fixed?
+xtreg percentile_ ib3.educ_gp i.time // I think this is truly just estimating the effect of percentile across panels, but i want CHANGE - but not working because my variables are not time varying
+
+areg percentile_ ib3.educ_gp, absorb(id)
