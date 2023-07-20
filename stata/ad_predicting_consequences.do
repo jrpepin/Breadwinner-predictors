@@ -1270,13 +1270,19 @@ regress percentile_chg ib3.educ_gp thearn_lag
 margins educ_gp
 regress percentile_chg ib3.educ_gp thearn_lag_ln
 margins educ_gp
+margins educ_gp, atmeans
+margins educ_gp, at(thearn_lag_ln=(-4(4)12))
 regress percentile_chg ib3.educ_gp thearn_lag_1000s
 margins educ_gp
 regress percentile_chg ib3.educ_gp thearn_lag_topcode
 margins educ_gp
 
-regress percentile_chg ib3.educ_gp##c.thearn_lag_ln
+regress percentile_chg ib3.educ_gp##c.thearn_lag_ln //r-squared does not improve - is this what she is asking for? Is this fixed effects? idk anymore.
 margins educ_gp // this is exactly the same - just the coefficients much harder to interpret
+margins educ_gp, at(thearn_lag_ln=(6(1)12))
+margins educ_gp, at(thearn_lag_ln=(6(2)20))
+tabstat thearn_lag_ln, by(educ_gp)
+regress percentile_chg ib3.educ_gp##c.thearn_lag_ln, nocons
 
 sum thearn_lag, detail
 sum thearn_lag if educ_gp==1, detail
@@ -1428,15 +1434,16 @@ rename inc_pov_lag inc_pov_1
 rename in_pov in_pov_2
 rename pov_lag in_pov_1
 rename post_percentile percentile_2
-rename pre_percentile percentile_1
+gen percentile_1 = pre_percentile
+// rename pre_percentile percentile_1
 rename marital_status_t marital_status_2
 rename marital_status_t1 marital_status_1
 rename partnered_t partnered_2
 rename partnered_t1 partnered_1
 
-keep SSUID PNUM year bw60_2 bw60_1 earnings_2 earnings_1 thearn_2 thearn_1 earnings_ratio_2 earnings_ratio_1 inc_pov_2 inc_pov_1 in_pov_2 in_pov_1 percentile_2 percentile_1 marital_status_2 marital_status_1 partnered_2 partnered_1 ///
-trans_bw60_alt2 wpfinwgt  scaled_weight race educ race_gp educ_gp pathway_v1 pathway tage ageb1 status_b1 yrfirstbirth ageb1_gp rel_status_detail earn_change earn_change_raw inc_pov_change inc_pov_change_raw pov_change_detail hh_income_chg hh_income_raw percentile_chg income_change hh_income_topcode  income_chg_top hh_income_chg_x mom_earn_change income_chg_top_x
-
+keep SSUID PNUM year pre_percentile bw60_2 bw60_1 earnings_2 earnings_1 thearn_2 thearn_1 earnings_ratio_2 earnings_ratio_1 inc_pov_2 inc_pov_1 in_pov_2 in_pov_1 percentile_2 percentile_1 marital_status_2 marital_status_1 partnered_2 partnered_1 ///
+ trans_bw60_alt2 wpfinwgt  scaled_weight race educ race_gp educ_gp pathway_v1 pathway tage ageb1 status_b1 yrfirstbirth ageb1_gp rel_status_detail earn_change earn_change_raw inc_pov_change inc_pov_change_raw pov_change_detail hh_income_chg hh_income_raw percentile_chg income_change hh_income_topcode  income_chg_top hh_income_chg_x    // mom_earn_change income_chg_top_x
+ 
 gen id = _n
 
 reshape long bw60_ earnings_ thearn_ earnings_ratio_ inc_pov_ in_pov_ percentile_ marital_status_ partnered_, ///

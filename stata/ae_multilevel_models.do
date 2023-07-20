@@ -443,13 +443,38 @@ this correlation is that higher initial levels have faster decline?
 */
 
 */
+********************************************************************************
+**# Exploring other models
+********************************************************************************
+*Original model:
+mixed percentile_ i.time2##ib3.educ_gp|| id: time2, mle var
+mixed percentile_ i.time2##ib3.educ_gp thearn_|| id: , mle var // these the same
+mixed percentile_ i.time2 ib3.educ_gp thearn_ i.time2#ib3.educ_gp c.thearn_#ib3.educ_gp  || id: time2, mle var // i have no idea what is happening here to be honest
+
+tab percentile_ if time2==0 // probably have enough to do what she said, I am just confused
+ 
+mixed percentile_ i.time2##ib3.educ_gp|| id: time2, mle var
+
+mixed percentile_ i.time2|| id: , mle var
+mixed percentile_ i.time2|| id: time2 , mle var
+
+mixed percentile_ i.time2##ib3.educ_gp|| pre_percentile:, mle var // is this what she means? or do I also need ot interact?
+mixed percentile_ i.time2##ib3.educ_gp pre_percentile##ib3.educ_gp || pre_percentile:, mle var // is this what she means? or do I also need ot interact?
+
+mixed percentile_chg ib3.educ_gp|| pre_percentile: , mle var // is this what she means? this sort of matches when I ran regression and controlled for t0 income
+mixed percentile_chg ib3.educ_gp##pre_percentile || pre_percentile: , mle var // is this what she means? this sort of matches when I ran regression and controlled for t0 income
 
 ***********************************************************
-**# Should I be using xtreg??
+*XT reg
 ***********************************************************
 // xtset pvar tvar1
 xtset id time
 xtreg percentile_ ib3.educ_gp, fe // is this not working bc education is fixed?
 xtreg percentile_ ib3.educ_gp i.time // I think this is truly just estimating the effect of percentile across panels, but i want CHANGE - but not working because my variables are not time varying
+xtreg percentile_ ib3.educ_gp##i.time  // this is exactly the same as MLM. Is this mixed effects?
+mixed percentile_ i.time2##ib3.educ_gp|| id: time2, mle var 
+
+xtreg percentile_ ib3.educ_gp##i.time ib3.educ_gp##c.thearn_, fe
+xtreg percentile_ ib3.educ_gp##i.time ib3.educ_gp##c.thearn_
 
 areg percentile_ ib3.educ_gp, absorb(id)
