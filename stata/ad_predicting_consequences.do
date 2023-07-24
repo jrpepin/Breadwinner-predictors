@@ -1235,11 +1235,8 @@ graph box hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000 & race
 // violinplot hh_income_raw if hh_income_raw>=-100000 & hh_income_raw<=100000
 
 ********************************************************************************
-**# Trying fixed effects models here instead of multilevel models
+**# Models to use for heterogeneity paper
 ********************************************************************************
-// https://www.jstor.org/stable/pdf/271083.pdf: Change score method and the regressor variable method. In the change score method, Y2 - Y, is regressed on X. In the regressor variable method, Y2 is regressed on both Y, and X.   First, the  regression of Y2 - Y, on both Y, and X is equivalent to the regressor variable method. So yes, I prove this out below. But confused if, at this point, I am predicting CHANGE or am I predicting time 2 incole decile controlling for time 1, then I somehow need to work out what change would  be??
-
-gen id_use = _n	
 // alt income
 gen thearn_lag_1000s = thearn_lag / 1000
 gen thearn_lag_ln = ln(thearn_lag + 0.01)
@@ -1247,6 +1244,79 @@ drop thearn_lag_topcode
 gen thearn_lag_topcode=thearn_lag
 sum thearn_lag, detail
 replace thearn_lag_topcode = `r(p90)' if thearn_lag > `r(p90)'
+
+tab pre_percentile, gen(pre)
+mixed percentile_chg ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+
+regress percentile_chg ib3.educ_gp // option 1
+regress percentile_chg ib3.educ_gp i.pre_percentile // option 2
+regress percentile_chg ib3.educ_gp thearn_lag_ln // option 3
+regress percentile_chg ib3.educ_gp thearn_lag_ln i.start_from_0 // option 4
+
+// Models
+*Education
+regress percentile_chg ib3.educ_gp
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Educ1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+regress percentile_chg ib3.educ_gp i.pre_percentile
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Educ2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg ib3.educ_gp thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Educ3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Race
+regress percentile_chg i.race_gp
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Race1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp i.pre_percentile
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Race2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Race3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Pathway
+regress percentile_chg ib3.pathway
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Path1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg ib3.pathway i.pre_percentile
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Path2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg ib3.pathway thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Path3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Race + Educ
+regress percentile_chg i.race_gp ib3.educ_gp
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(RE1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp ib3.educ_gp i.pre_percentile
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(RE2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp ib3.educ_gp thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(RE3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Race + Educ + Pathway
+regress percentile_chg i.race_gp ib3.educ_gp ib3.pathway
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(REP1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.pre_percentile
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(REP2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp ib3.educ_gp ib3.pathway thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(REP3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Interactions
+regress percentile_chg i.race_gp ib3.educ_gp##ib3.pathway thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Int1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp##ib3.pathway ib3.educ_gp thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Int2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+regress percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.race_gp#ib3.pathway ib3.educ_gp#ib3.pathway thearn_lag_ln
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Int3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// separately for moms employed at t0 v. not
+regress percentile_chg ib3.educ_gp thearn_lag_ln
+regress percentile_chg ib3.educ_gp thearn_lag_ln if start_from_0==1 // mom not employed at t0
+regress percentile_chg ib3.educ_gp thearn_lag_ln if start_from_0==0 // mom employed at t0
+regress percentile_chg ib3.educ_gp##i.start_from_0 thearn_lag_ln
+margins educ_gp#start_from_0
+margins start_from_0#educ_gp
+
+********************************************************************************
+**# Model exploration 
+* Trying fixed effects models here instead of multilevel models
+********************************************************************************
+// https://www.jstor.org/stable/pdf/271083.pdf: Change score method and the regressor variable method. In the change score method, Y2 - Y, is regressed on X. In the regressor variable method, Y2 is regressed on both Y, and X.   First, the  regression of Y2 - Y, on both Y, and X is equivalent to the regressor variable method. So yes, I prove this out below. But confused if, at this point, I am predicting CHANGE or am I predicting time 2 incole decile controlling for time 1, then I somehow need to work out what change would  be??
+
+gen id_use = _n	
 
 browse pre_percentile post_percentile percentile_chg thearn_lag thearn_adj  hh_income_raw
 tabstat pre_percentile, by(educ_gp)
@@ -1312,6 +1382,55 @@ regress percentile_chg i.race_gp thearn_lag
 margins race_gp
 regress percentile_chg i.race_gp thearn_lag_ln
 margins race_gp
+
+********************************************************************************
+* Okay multilevel with percentile
+********************************************************************************
+// https://www3.nd.edu/~rwilliam/stats3/Multilevel.pdf
+regress percentile_chg
+mean percentile_chg
+mixed percentile_chg 
+
+regress percentile_chg ib3.educ_gp 
+mixed percentile_chg ib3.educ_gp
+mixed percentile_chg || educ_gp:
+mixed percentile_chg ib3.educ_gp || educ_gp:
+mixed percentile_chg ib3.educ_gp || pre_percentile: // these are similar but I am still not getting coefficients for each of the deciles
+regress percentile_chg ib3.educ_gp pre_percentile
+regress percentile_chg ib3.educ_gp i.pre_percentile
+est store reg
+
+tab pre_percentile, gen(pre)
+mixed percentile_chg ib3.educ_gp || pre_percentile: pre1 pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10 // is this what i want?
+mixed percentile_chg ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10 // do I need to omit a category, duh kim - yes
+mixed percentile_chg ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+est store mlm
+
+lrtest reg mlm, force
+
+mixed percentile_chg ib3.educ_gp || pre_percentile: pre1 pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10, nocons
+
+mixed percentile_chg ib3.educ_gp || pre_percentile:, mle var 
+mixed percentile_chg ib3.educ_gp || pre_percentile: ib3.educ_gp, mle var 
+// mixed percentile_chg ib3.educ_gp || i.pre_percentile:
+
+mixed percentile_chg ib3.educ_gp || pre_percentile:, nocons // Note: all random-effects equations are empty; model is linear regression
+
+regress percentile_chg i.pre_percentile
+mixed percentile_chg i.pre_percentile || pre_percentile: // these are the same
+
+mixed percentile_chg ib3.educ_gp i.pre_percentile || educ_gp: i.pre_percentile // is this what I want?
+// i have to do the math? https://www.princeton.edu/~otorres/Multilevel101.pdf
+// https://errickson.net/stata2/mixed-models.html
+/*
+Random effects: These are the "grouping" variables, and must be categorical (Stata will force every variable used to produce random effects as if it were prefaced by i.). These are essentially just predictors as well, however, we do not obtain coefficients to test or interpret. We do get a measure of the variability across groups, and a test of whether the random effect is benefiting the model
+*/
+
+tab pre_percentile, gen(pre)
+
+xtset pre_percentile
+xtreg percentile_chg ib3.educ_gp
+xtreg percentile_chg ib3.educ_gp, fe
 
 ********************************************************************************
 * Exploring mediation / moderation (before going into MLM)
