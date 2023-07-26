@@ -1248,30 +1248,48 @@ replace thearn_lag_topcode = `r(p90)' if thearn_lag > `r(p90)'
 
 tab pre_percentile, gen(pre)
 
+mixed percentile_chg 
+mixed percentile_chg || pre_percentile: , stddev
+mixed percentile_chg ib3.educ_gp || pre_percentile: 
+mixed percentile_chg ib3.educ_gp i.pre_percentile || pre_percentile: , stddev
+mixed percentile_chg ib3.pathway || pre_percentile: , stddev
+
 *Education
 mixed percentile_chg ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+margins educ_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
 
 *Race
 mixed percentile_chg i.race_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+margins race_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Pathway
 mixed percentile_chg ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+margins pathway
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+mixed percentile_chg ib2.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 
 *Race + Educ
 mixed percentile_chg i.race_gp ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+margins educ_gp
+margins race_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Race + Educ + Pathway
 mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+margins educ_gp
+margins race_gp
+margins pathway
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Interactions
 mixed percentile_chg i.race_gp ib3.educ_gp##ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp#pathway, nofvlabel
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+contrast pathway@educ_gp, effects
+pwcompare educ_gp#pathway
+pwcompare educ_gp#pathway, nofvlabel
 
 mixed percentile_chg i.race_gp##ib3.pathway ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins race_gp#pathway, nofvlabel
@@ -1279,7 +1297,9 @@ outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label
 
 mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.race_gp#ib3.pathway ib3.educ_gp#ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp#pathway, nofvlabel
+pwcompare educ_gp#pathway, nofvlabel
 margins race_gp#pathway, nofvlabel
+pwcompare race_gp#pathway, nofvlabel
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Does education mediate race?
@@ -1291,6 +1311,8 @@ est store r2
 suest r1 r2 // can't use suest with mixed
 test [r1_mean]2.race_gp=[r2_mean]2.race_gp
 test [r1_mean]3.race_gp=[r2_mean]3.race_gp
+
+/// https://stats.oarc.ucla.edu/stata/faq/how-can-i-do-mediation-analysis-with-a-categorical-iv-in-stata/
 
 *Does pathway mediate education?
 regress percentile_chg i.race_gp ib3.educ_gp i.pre_percentile
@@ -1557,6 +1579,7 @@ nlcom   (decile1: exp(2 * [lnsig_e]_cons)) ///
 // https://www.princeton.edu/~otorres/Multilevel101.pdf
 mixed percentile_chg ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 predict u*, reffects
+predict r_int, reffects
 bysort pre_percentile: generate groups=(_n==1) 
 list pre_percentile u1 if pre_percentile<=10 & groups
 predict yhat_fit, fitted
@@ -1602,6 +1625,28 @@ list pre_percentile u1 intercept if pre_percentile<=10 & groups
 
 
 */
+
+// attempting to figure out what all these postestimation things do
+mixed percentile_chg ib3.educ_gp || pre_percentile:
+
+predict r_int, reffects
+predict yhat
+predict yhat_fit, fitted
+gen intercept = _b[_cons] + r_int
+
+browse pre_percentile r_int yhat yhat_fit intercept
+
+mixed percentile_chg || pre_percentile:
+
+predict r_int_base, reffects
+predict yhat_base
+predict yhat_base_fit, fitted
+gen intercept_base = _b[_cons] + r_int_base
+
+browse pre_percentile r_int_base yhat_base yhat_base_fit intercept_base
+
+regress percentile_chg ib3.educ_gp i.pre_percentile
+margins pre_percentile // is this also similar?
 
 mixed percentile_chg ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 predict yhat_fit2, fitted

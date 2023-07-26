@@ -33,7 +33,9 @@ clear
 			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn rtanfcov ttanf_amt							/// /* PROGRAM USAGE */
 			ewelac_mnyn renroll eedgrade eedcred																/// /* ENROLLMENT */
 			echld_mnyn epayhelp elist eworkmore																	/// /* CHILD CARE */
-			
+			tval_ast thval_ast thval_bank thval_stmf thval_bond thval_rent thval_re thval_oth thval_ret			/// /* WEALTH & ASSETS */
+			thval_bus thval_home thval_veh thval_esav thnetworth tnetworth										///
+			tinc_ast thinc_ast thinc_bank thinc_bond thinc_stmf thinc_rent thinc_oth
 			
 	  gen year = 2012+`w'
       save "$tempdir/sipp14tpearn`w'", replace
@@ -562,4 +564,6 @@ save "$SIPP14keep/sipp14tpearn_all", replace
 * (from step 8) want examples of SSUIDs to investigate WHY there aren't all the person-months - do I have in main file and I lost along way, or were never there??
 	* 000418209316 (103) - only up to month 7, year 2014 - but that's nothing to do with partner, because partner left month 1...
 	* 000860215173 (201) - only up to month 2, year 2015 - partner left month 1
+	
+	// browse SSUID PNUM panelmonth thinc_ast
 

@@ -621,7 +621,8 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					numearner other_earner thincpovt2 pov_level start_marital_status 	///
 					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1  			///
 					tjb*_bwkly1 tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1			///
-					eeitc rtanfcov 														///
+					eeitc rtanfcov thinc_bank thinc_stmf thinc_bond thinc_rent 			///
+					thinc_oth thinc_ast 												///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
 					prebiochildren race educ race_sp educ_sp sex_sp tceb oldest_age 	///
 					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
@@ -701,3 +702,18 @@ label values st_tjb*_occ end_tjb*_occ occ
 gen wave=year-2012
 	
 save "$SIPP14keep/annual_bw_status.dta", replace
+
+// answer question about wealth-generation
+browse SSUID PNUM year thinc_ast
+
+gen anywealthincome=0
+replace anywealthincome=1 if thinc_ast>0 & thinc_ast!=.
+tab anywealthincome
+
+gen wealthincome_100=0
+replace wealthincome_100=1 if thinc_ast>=100 & thinc_ast!=.
+tab wealthincome_100
+
+gen wealthincome_1000=0
+replace wealthincome_1000=1 if thinc_ast>=1000 & thinc_ast!=.
+tab  wealthincome_1000
