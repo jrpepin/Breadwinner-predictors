@@ -694,6 +694,14 @@ forvalues x=1/3{
 	tabstat hh_income_raw if race_gp==`x', by(pathway) stats(mean p50)
 }
 
+forvalues x=1/3{
+	display "Educ = `x'"
+	tabstat percentile_chg if educ_gp==`x', by(pathway) stats(mean p50)
+	display "Race = `x'"
+	tabstat percentile_chg if race_gp==`x', by(pathway) stats(mean p50)
+}
+
+
 
 
 forvalues p=1/6{
@@ -1255,51 +1263,64 @@ mixed percentile_chg ib3.educ_gp i.pre_percentile || pre_percentile: , stddev
 mixed percentile_chg ib3.pathway || pre_percentile: , stddev
 
 *Education
-mixed percentile_chg ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
 
 *Race
-mixed percentile_chg i.race_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg i.race_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins race_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Pathway
-mixed percentile_chg ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins pathway
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 mixed percentile_chg ib2.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 
 *Race + Educ
-mixed percentile_chg i.race_gp ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg i.race_gp ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp
 margins race_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Race + Educ + Pathway
-mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp
 margins race_gp
 margins pathway
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-*Interactions
-mixed percentile_chg i.race_gp ib3.educ_gp##ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+*Interactions: Just Education
+mixed percentile_chg i.race_gp ib3.educ_gp##ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp#pathway, nofvlabel
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 contrast pathway@educ_gp, effects
 pwcompare educ_gp#pathway
 pwcompare educ_gp#pathway, nofvlabel
 
-mixed percentile_chg i.race_gp##ib3.pathway ib3.educ_gp || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg i.race_gp ib3.educ_gp##ib2.pathway || pre_percentile:  // okay so changing pathway reference group DOES matter
+outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+mixed percentile_chg i.race_gp ib3.pathway##ib3.educ_gp || pre_percentile:
+mixed percentile_chg i.race_gp ib3.pathway##ib1.educ_gp || pre_percentile:
+
+*Interactions: Just Race
+mixed percentile_chg i.race_gp##ib3.pathway ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins race_gp#pathway, nofvlabel
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.race_gp#ib3.pathway ib3.educ_gp#ib3.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+mixed percentile_chg i.race_gp##ib2.pathway ib3.educ_gp || pre_percentile: // okay so changing pathway reference group DOES matter
+outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+*Interactions: All
+mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.race_gp#ib3.pathway ib3.educ_gp#ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp#pathway, nofvlabel
 pwcompare educ_gp#pathway, nofvlabel
 margins race_gp#pathway, nofvlabel
 pwcompare race_gp#pathway, nofvlabel
+outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+mixed percentile_chg i.race_gp ib3.educ_gp ib2.pathway i.race_gp#ib2.pathway ib3.educ_gp#ib2.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Does education mediate race?
