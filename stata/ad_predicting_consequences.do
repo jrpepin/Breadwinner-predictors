@@ -608,11 +608,16 @@ tabstat thearn_adj, by(race) stats(mean p50)
 ******************************************************************************** 
 // log using "$logdir\impact_stats.log", replace
 * Table 1
-tabstat earnings_lag if earnings_lag > 0, stats(mean p50 sd semean)
+tabstat earnings_lag if earnings_lag > 0, stats(mean p50 sd semean) 
+tabstat earnings_lag if start_from_0==0, stats(mean p50 sd semean)
+tab start_from_0
 tabstat thearn_lag if thearn_lag > 0, stats(mean p50 sd semean)
+tabstat thearn_lag, stats(mean p50 sd semean)
 tab extended_hh
 sum avg_hhsize
-tab partnered_t
+// tab partnered_t
+// tab partnered_t1
+tab marital_status_t1
 tab relationship, m
 
 tabstat hh_income_raw, stats(mean p50)
@@ -658,6 +663,7 @@ tabstat hh_income_raw if hh_chg_value==0, by(pathway) stats(mean p50) // average
 tabstat hh_income_raw if hh_chg_value==1, by(pathway) stats(mean p50) // average increase
 
 tabstat hh_income_raw, by(educ_x_race) stats(mean p50)
+tabstat hh_income_topcode, by(educ_x_race) stats(mean p50)
 tabstat hh_income_chg_x, by(educ_x_race) stats(mean p50) // p50
 tabstat thearn_lag, by(educ_x_race) stats(mean p50)
 tabstat pre_percentile, by(educ_x_race) stats(mean p50)
@@ -1264,17 +1270,28 @@ mixed percentile_chg ib3.pathway || pre_percentile: , stddev
 
 *Education
 mixed percentile_chg ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+predict r_educ, reffects
+predict r_educ_se, reses
 margins educ_gp
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+mixed percentile_chg ib3.educ_gp || pre_percentile:
+mixed percentile_chg ib3.educ_gp i.pre_percentile || pre_percentile:
+predict r_educ_test, reffects
+regress percentile_chg ib3.educ_gp i.pre_percentile
 
 *Race
 mixed percentile_chg i.race_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins race_gp
+predict r_race, reffects
+predict r_race_se, reses
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Pathway
 mixed percentile_chg ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins pathway
+predict r_pathway, reffects
+predict r_pathway_se, reses
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 mixed percentile_chg ib2.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 
@@ -1282,6 +1299,8 @@ mixed percentile_chg ib2.pathway || pre_percentile: pre2 pre3 pre4 pre5 pre6 pre
 mixed percentile_chg i.race_gp ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
 margins educ_gp
 margins race_gp
+predict r_race_educ, reffects
+predict r_race_educ_se, reses
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 *Race + Educ + Pathway
@@ -1289,10 +1308,18 @@ mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway || pre_percentile: // pre
 margins educ_gp
 margins race_gp
 margins pathway
+predict r_race_educ_pathway, reffects
+predict r_race_educ_pathway_se, reses
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(M5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* Get random effects for above
+browse pre_percentile r_educ r_race r_pathway r_race_educ r_race_educ_pathway r_educ_se r_race_se r_pathway_se r_race_educ_se r_race_educ_pathway_se
+tabstat r_educ r_race r_pathway r_race_educ r_race_educ_pathway, by(pre_percentile)
+tabstat r_educ_se r_race_se r_pathway_se r_race_educ_se r_race_educ_pathway_se, by(pre_percentile)
 
 *Interactions: Just Education
 mixed percentile_chg i.race_gp ib3.educ_gp##ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+predict r_educ_int, reffects
 margins educ_gp#pathway, nofvlabel
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 contrast pathway@educ_gp, effects
@@ -1306,11 +1333,15 @@ mixed percentile_chg i.race_gp ib3.pathway##ib1.educ_gp || pre_percentile:
 
 *Interactions: Just Race
 mixed percentile_chg i.race_gp##ib3.pathway ib3.educ_gp || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
+predict r_race_int, reffects
 margins race_gp#pathway, nofvlabel
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 mixed percentile_chg i.race_gp##ib2.pathway ib3.educ_gp || pre_percentile: // okay so changing pathway reference group DOES matter
 outreg2 using "$results/heterogeneity_models_mlm.xls", stats(coef se pval) label ctitle(Int2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+browse pre_percentile r_educ_int r_race_int
+tabstat r_educ_int r_race_int, by(pre_percentile)
 
 *Interactions: All
 mixed percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.race_gp#ib3.pathway ib3.educ_gp#ib3.pathway || pre_percentile: // pre2 pre3 pre4 pre5 pre6 pre7 pre8 pre9 pre10
@@ -1906,6 +1937,9 @@ tab pathway if trans_bw60_alt2==0 & bw60lag==0
 
 
 // 
+tab start_from_0 if trans_bw60_alt2==1 & bw60lag==0
+tab start_from_0 if trans_bw60_alt2==0 & bw60lag==0
+
 sum earnings_lag if trans_bw60_alt2==1 & bw60lag==0 & earnings_lag!=0, detail
 sum earnings_lag if trans_bw60_alt2==0 & bw60lag==0 & earnings_lag!=0, detail
 
