@@ -1454,6 +1454,11 @@ outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) la
 margins educ_gp#pathway, nofvlabel
 margins race_gp#pathway, nofvlabel
 
+regress percentile_chg i.race_gp ib3.educ_gp ib3.pathway i.race_gp#ib3.pathway ib3.educ_gp#ib3.pathway i.pre_percentile
+outreg2 using "$results/heterogeneity_models_change.xls", stats(coef se pval) label ctitle(Int3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+margins educ_gp#pathway, nofvlabel
+margins race_gp#pathway, nofvlabel
+
 // separately for moms employed at t0 v. not
 regress percentile_chg ib3.educ_gp thearn_lag_ln
 regress percentile_chg ib3.educ_gp thearn_lag_ln if start_from_0==1 // mom not employed at t0
