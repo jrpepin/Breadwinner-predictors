@@ -1,7 +1,7 @@
 *-------------------------------------------------------------------------------
 * BREADWINNER PROJECT
-* measures and sample.do
-* Kelly Raley and Joanna Pepin
+* sipp14_child_support.do
+* Kimberly McErlean
 *-------------------------------------------------------------------------------
 di "$S_DATE"
 
@@ -428,7 +428,7 @@ tab earnings_deficit if paid_out_cs==1 &  esex==2
 tab totinc_deficit if paid_out_cs==1 &  esex==2
 tab hh_earn_deficit if paid_out_cs==1 &  esex==2
 
-tabstat inc_pct_earnings inc_pct_program inc_pct_other inc_pct_invest inc_pct_benefit if earnings_deficit==1 & esex==2, stats(mean p50) varwidth(30) column(statistics)
+tabstat inc_pct_earnings inc_pct_program inc_pct_other inc_pct_invest inc_pct_benefit if earnings_deficit==1 & esex==2, stats(mean p50) varwidth(30) column(statistics) // alt sources of earnings
 tabstat inc_pct_benefit ssincome_pct unemployment_pct veterans_pct workerscomp_pct if earnings_deficit==1 & esex==2, stats(mean p50) varwidth(30) column(statistics)
 
 * Dad
@@ -441,7 +441,7 @@ tabstat inc_pct_earnings inc_pct_program inc_pct_other inc_pct_invest inc_pct_be
 tabstat inc_pct_benefit ssincome_pct unemployment_pct veterans_pct workerscomp_pct if earnings_deficit==1 & esex==1, stats(mean p50) varwidth(30) column(statistics)
 
 
-save "$SIPP14keep/annual_finsupport.dta", replace
+save "$SIPP14keep/annual_finsupport2014.dta", replace
 
 // okay now need to aggregate at HH level, because this is currently PERSON-level. HH and year? or JUST HH?
 
@@ -470,8 +470,12 @@ gen mom_cs_pct = mom_cs_paid / total
 gen dad_earn_pct = dad_earnings / total
 gen dad_cs_pct = dad_cs_paid / total
 
-tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, stats(mean p50)
+tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, stats(mean p50) // this is what I used
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct if two_parent_hh==1, stats(mean p50)
+tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct if two_parent_hh==0, stats(mean p50)
+tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct if mom_bio==1 & dad_bio==0, stats(mean p50)
+tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct if mom_bio==0 & dad_bio==1, stats(mean p50)
 
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, by(mom_educ)
+tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, by(mom_race)
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, by(dad_educ)

@@ -162,12 +162,34 @@ egen avg_mo_hrs=rowmean(ejbhrs1 ejbhrs2)
 
 * also do a recode for reference of FT / PT
 replace eptwrk=. if eptwrk==-1
-
+	
+/* this is from a topical module I did not pull in
+	* type of schedule - Each person can have up to 7 jobs, so recoding all 7
+	label define jobtype 1 "Regular Day" 2 "Regular Night" 3 "Irregular" 4 "Other"
+	forvalues job=1/7{
+		recode ejb`job'_wsjob (1=1) (2/3=2) (4/6=3) (7=4), gen(jobtype_`job')
+		label values jobtype_`job' jobtype
+		drop ejb`job'_wsjob
+	}
+*/
 
 * Welfare use
 foreach var in rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf{
 replace `var' =0 if `var'==2
 }
+
+egen programs = rowtotal ( rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 )
+egen benefits = rowtotal ( rhnbrf rhcbrf rhmtrf )
+
+drop rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf
+
+* scalings weights to use before I combine with 2014
+summarize wpfinwgt
+local rescalefactor `r(N)'/`r(sum)'
+display `rescalefactor'
+gen scaled_weight = .
+replace scaled_weight = wpfinwgt*`rescalefactor'
+summarize scaled_weight
 
 save "$tempdir/sipp96tpearn_fullsamp", replace
 
