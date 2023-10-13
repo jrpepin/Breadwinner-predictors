@@ -161,8 +161,10 @@ tab trans_bw60_alt2 if bw60lag==0 & survey==2014 [aweight = wpfinwgt]
 tab mt_mom survey if bw60lag==0 [aweight = wpfinwgt], column
 tab mt_mom if bw60lag==0 & survey == 2014 [aweight = wpfinwgt]
 
+save "$tempdir/combined_for_decomp.dta", replace
+
 ********************************************************************************
-* Putting Equation 1 into Excel
+**# * Putting Equation 1 into Excel
 ********************************************************************************
 egen id = concat (SSUID PNUM)
 destring id, replace
@@ -927,7 +929,19 @@ forvalues s=1/2{
 save "$tempdir/combined_bw_equation.dta", replace // this is used in step ac, save here so don't need to run mom below (not nec anymore)
 
 ********************************************************************************
-* Second specification: "Mom" is reference category, rest are unique
+**# * Exploring rdecompose
+********************************************************************************
+import excel "T:\Research Projects\Breadwinner-predictors\data\equation.xlsx", sheet("Sheet1") firstrow
+
+rdecompose exit_rate	momup_rate	partnerdown_rate	momup_partnerdown_rate	other_rate	///
+exit_comp	momup_comp	partnerdown_comp	momup_partnerdown_comp	other_comp,	///
+group(year) func((exit_rate*exit_comp) + (momup_rate*momup_comp) + (partnerdown_rate*partnerdown_comp) + ///
+(momup_partnerdown_rate*momup_partnerdown_comp) + (other_rate*other_comp)) detail
+
+// okay the article (Li 2017) talks about bootstrapping. think i need to do it at individual level
+
+********************************************************************************
+**# * Second specification: "Mom" is reference category, rest are unique
 ********************************************************************************
 
 *Dt-l: mothers not breadwinning at t-1
@@ -1338,6 +1352,7 @@ save "$tempdir/combined_bw_equation.dta", replace
 
 *****************************
 // log using "$logdir/bw_updates_021522.log", replace
+**# Bookmark #4
 
 // investigations
 * how many moms who had a birth in the panel were breadwinners at the time of birth

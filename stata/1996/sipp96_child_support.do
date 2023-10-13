@@ -562,6 +562,8 @@ tabstat inc_pct_earnings inc_pct_program inc_pct_other inc_pct_invest inc_pct_be
 tabstat inc_pct_benefit ssincome_pct unemployment_pct veterans_pct workerscomp_pct if earnings_deficit==1 & esex==1, stats(mean p50) varwidth(30) column(statistics)
 
 save "$SIPP96keep/annual_finsupport1996.dta", replace
+**# Bookmark #1
+use "$SIPP96keep/annual_finsupport1996.dta", clear
 
 // okay now need to aggregate at HH level, because this is currently PERSON-level. HH and year? or JUST HH?
 
