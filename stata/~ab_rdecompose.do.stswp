@@ -106,7 +106,7 @@ bootstrap, reps(100) nodrop: mydecompose
 restore
 
 preserve
-keep if race==4 // Hispanic
+keep if race==4 // Hisp
 bootstrap, reps(100) nodrop: mydecompose
 restore
 

@@ -1438,9 +1438,55 @@ browse SSUID PNUM year firstyr years_in_sipp years_eligible years_bw always_bw n
 tab always_bw
 tab always_bw if mom_panel==.
 tab always_bw if mom_panel==1
+
+// browse SSUID PNUM year mom_panel firstbirth bw_at_birth bw60
+tab always_bw if mom_panel==1 & survey==1996 // this is OF any women who become mothers NOT those who became bws at panel
+tab always_bw if mom_panel==1 & survey==2014
+
+tab always_bw if bw_at_birth==1 
+tab always_bw if bw_at_birth==1 & survey==1996 // this is OF any women who become mothers NOT those who became bws at panel
+tab always_bw if bw_at_birth==1 & survey==2014
+
 tab always_bw if entered_bw==1
 tab survey always_bw if entered_bw==1, row
 tabstat years_in_sipp if entered_bw==1
+
+tab ever_bw60 always_bw, row // PYs not UNIQUES (39.90%)
+unique SSUID PNUM, by(ever_bw60)
+unique SSUID PNUM if ever_bw60, by(survey) // 4779 / 3595 / 8374 total
+unique SSUID PNUM if ever_bw60 & always_bw, by(survey) // 2036/ 1853 / 3889 total
+unique SSUID PNUM if ever_bw60 & trans_bw60_alt2==1, by(survey) // 1831 / 982 // 2813 total
+
+* Transitions OUT of BW
+sort SSUID PNUM year
+gen transition_bw=.
+replace transition_bw=0 if bw60==0 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // ensuring if mothers drop out of our sample, we account for non-consecutive years. consistently NOT BW
+replace transition_bw=1 if bw60==1 & bw60[_n-1]==1 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // consistently BW
+replace transition_bw=2 if bw60==0 & bw60[_n-1]==1 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // TRANSITION OUT
+replace transition_bw=3 if bw60==1 & bw60[_n-1]==0 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // TRANSITION IN
+
+label define transition_bw 0 "Not BW" 1 "Always BW" 2 "Transition Out" 3 "Transition In"
+label values transition_bw transition_bw
+
+tab transition_bw trans_bw60_alt2, m
+browse SSUID PNUM year bw60 trans_bw60_alt2 transition_bw
+tab transition_bw
+
+* how to get like, if transitioned IN, how many only lasted 1 year
+gen transition_out_bw=0
+replace transition_out_bw=1 if trans_bw60_alt2==1 & transition_bw[_n+1]==2 & year==(year[_n+1]-1) & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+browse SSUID PNUM year bw60 trans_bw60_alt2 transition_bw transition_out_bw
+
+tab trans_bw60_alt2 transition_out_bw, row
+tab trans_bw60_alt2 transition_out_bw if survey==1996, row // how many transition out next year
+tab trans_bw60_alt2 transition_out_bw if survey==2014, row // how many transition out next year
+
+* For those who became mothers in panel
+browse SSUID PNUM year bw60 trans_bw60_alt2 mom_panel firstbirth bw_at_birth transition_bw transition_out_bw 
+gen transition_out_mom=0
+replace transition_out_mom=1 if firstbirth==1 & bw60==1 & transition_bw[_n+1]==2 & year==(year[_n+1]-1) & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
+
+tab survey transition_out_mom if firstbirth==1 & bw60==1, row
 
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
