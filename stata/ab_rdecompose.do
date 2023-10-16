@@ -113,6 +113,234 @@ restore
 log close
 
 ********************************************************************************
+* AGGREGATE VIEWS
+********************************************************************************
+
+program mydecompose_temp, eclass
+
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		drop `var'_comp `var'_rate `var'_total
+		svy: mean `var' if bw60lag==0 & survey==1996
+		matrix `var'_comp = e(b)
+		gen `var'_comp = e(b)[1,1] if survey==1996
+		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==1996 & `var'==1
+		matrix `var'_rate = e(b)
+		gen `var'_rate = e(b)[1,1] if survey==1996
+	}
+
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		svy: mean `var' if bw60lag==0 & survey==2014
+		matrix `var'_comp = e(b)
+		replace `var'_comp = e(b)[1,1] if survey==2014
+		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==2014 & `var'==1
+		matrix `var'_rate = e(b)
+		replace `var'_rate = e(b)[1,1] if survey==2014
+	}
+	
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		gen `var'_total = `var'_rate * `var'_comp // to get aggregate pathway level
+	}
+	/*
+	gen pathway=0
+	replace pathway=1 if mt_mom==1
+	replace pathway=2 if ft_partner_down_mom==1
+	replace pathway=3 if ft_partner_down_only==1
+	replace pathway=4 if ft_partner_leave==1
+	replace pathway=5 if lt_other_changes==1
+	label define pathway 0 "None" 1 "Mom up" 2 "Mom up Partner Down" 3 "Partner Down" 4 "Partner Exit" 5 "Other HH"
+	label values pathway pathway
+	
+	gen pathway_trans=0
+	replace pathway_trans=1 if mt_mom==1 & bw60lag==0
+	replace pathway_trans=2 if ft_partner_down_mom==1 & bw60lag==0
+	replace pathway_trans=3 if ft_partner_down_only==1 & bw60lag==0
+	replace pathway_trans=4 if ft_partner_leave==1 & bw60lag==0
+	replace pathway_trans=5 if lt_other_changes==1 & bw60lag==0
+	label values pathway_trans pathway
+	
+	tab pathway trans_bw60_alt2 if bw60lag==0, row
+	gen transitioned=0
+	replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
+	// replace transitioned=. if trans_bw60_alt2==. // not eligible to transition
+	
+	gen sample=0
+	replace sample=1 if bw60lag==0
+	// replace sample=. if trans_bw60_alt2==. // not eligible to transition
+	tab pathway transitioned if sample==1
+	preserve
+	collapse (sum) sample transitioned if bw60lag==0, by(survey pathway)
+	// drop if pathway==0 - okay I think I need the none to get composition right
+	gen rate = transitioned / sample
+	
+	rdecompose sample rate, group(survey) transform(sample) sum(pathway) // func(sample*rate) it just keeps being too high of rates and it feels like composition is too high. is it because summing across years?
+	
+	restore
+	
+	preserve
+	collapse (sum) sample transitioned, by(survey)
+	gen rate = transitioned / sample
+	rdecompose sample rate, group(survey) transform(sample)
+*/
+
+	preserve
+	collapse (mean) mt_mom_total ft_partner_down_mom_total ft_partner_down_only_total ft_partner_leave_total lt_other_changes_total, by(survey) // to get aggregate pathway level
+	
+	rdecompose mt_mom_total ft_partner_down_mom_total ft_partner_down_only_total ft_partner_leave_total lt_other_changes_total, group(survey) ///
+	func(mt_mom_total + ft_partner_down_mom_total + ft_partner_down_only_total + ft_partner_leave_total + lt_other_changes_total)
+	
+	matrix b = e(b) * 100
+	ereturn post b //[1,10]
+
+//	rdecompose sample rate, group(survey) func(sample*rate)
+	restore
+end
+
+use "$tempdir/combined_for_decomp.dta", clear // created in ab
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	gen `var'_rate=. // have to do this for round 1 to get boostrap to work? Think was throwing errors every time I had to start the file over
+	gen `var'_comp=. 
+	gen `var'_total=.
+}
+
+log using "$logdir/bw_decomposition.log", append
+
+mydecompose_temp // test it
+bootstrap, reps(100) nodrop: mydecompose_temp
+
+// by education group
+preserve
+keep if educ==1 | educ==2 // HS or less
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+preserve
+keep if educ==3 // Some College
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+preserve
+keep if educ==4 // College
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+// by race/ ethnicity
+preserve
+keep if race==1 // White
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+preserve
+keep if race==2 // Black
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+preserve
+keep if race==3 // NH Asian
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+preserve
+keep if race==4 // Hispanic
+bootstrap, reps(100) nodrop: mydecompose_temp
+restore
+
+log close
+
+
+program mydecompose_total, eclass
+
+	preserve
+	collapse (sum) sample transitioned if bw60lag==0, by(survey pathway)
+	// drop if pathway==0 - okay I think I need the none to get composition right
+	gen rate = transitioned / sample
+	
+	rdecompose sample rate, group(survey) transform(sample) sum(pathway) // func(sample*rate) it just keeps being too high of rates and it feels like composition is too high. is it because summing across years?
+	
+	matrix b = e(b) * 100
+	ereturn post b //[1,10]
+
+//	rdecompose sample rate, group(survey) func(sample*rate)
+	restore
+
+end
+
+use "$tempdir/combined_for_decomp.dta", clear // created in ab
+
+	gen pathway=0
+	replace pathway=1 if mt_mom==1
+	replace pathway=2 if ft_partner_down_mom==1
+	replace pathway=3 if ft_partner_down_only==1
+	replace pathway=4 if ft_partner_leave==1
+	replace pathway=5 if lt_other_changes==1
+	label define pathway 0 "None" 1 "Mom up" 2 "Mom up Partner Down" 3 "Partner Down" 4 "Partner Exit" 5 "Other HH"
+	label values pathway pathway
+	
+/*
+	gen pathway_trans=0
+	replace pathway_trans=1 if mt_mom==1 & bw60lag==0
+	replace pathway_trans=2 if ft_partner_down_mom==1 & bw60lag==0
+	replace pathway_trans=3 if ft_partner_down_only==1 & bw60lag==0
+	replace pathway_trans=4 if ft_partner_leave==1 & bw60lag==0
+	replace pathway_trans=5 if lt_other_changes==1 & bw60lag==0
+	label values pathway_trans pathway
+*/
+	
+	gen transitioned=0
+	replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
+	// replace transitioned=. if trans_bw60_alt2==. // not eligible to transition
+	
+	gen sample=0
+	replace sample=1 if bw60lag==0
+	// replace sample=. if trans_bw60_alt2==. // not eligible to transition
+	// tab pathway transitioned if sample==1
+	
+log using "$logdir/bw_decomposition.log", append
+
+mydecompose_total
+bootstrap, reps(100) nodrop: mydecompose_total
+
+// by education group
+preserve
+keep if educ==1 | educ==2 // HS or less
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if educ==3 // Some College
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if educ==4 // College
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+// by race/ ethnicity
+preserve
+keep if race==1 // White
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if race==2 // Black
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if race==3 // NH Asian
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if race==4 // Hispanic
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+log close
+
+
+********************************************************************************
 * MISC. CHECKS
 ********************************************************************************
 // bootstrap, nowarn nodots reps(1000): mydecompose
