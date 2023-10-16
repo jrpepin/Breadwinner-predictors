@@ -1362,6 +1362,8 @@ browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom mom
 unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
 // or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298 -- is this because we only keep her if we have an observation the year prior? I think so
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 // 14.99%
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 19.37% - so this is in paper page 3
 tab bw60_mom if year==yrfirstbirth-1 & mom_panel==1 // year prior - 104, but we only have 468 records here - don't have year prior for all, so probably less useful
 
 * What was their partner status - single mom or had a partner they earned more than?
@@ -1403,10 +1405,42 @@ unique SSUID PNUM if survey==2014 & ever_bw60==1, by(end_partner_status)
 
 
 * who entered panel breadwinning
-browse SSUID PNUM year bw60 trans_bw60_alt2 bw60_mom earnings thearn_alt earnings_sp earnings_ratio mom_panel
+browse SSUID PNUM year firstyr bw60 trans_bw60_alt2 bw60_mom earnings thearn_alt earnings_sp earnings_ratio mom_panel firstbirth
 tab bw60_mom if year==firstyr & mom_panel==.
-tab survey bw60_mom if year==firstyr & mom_panel==.
+tab survey bw60_mom if year==firstyr & mom_panel==., row
 unique SSUID PNUM if year==firstyr & mom_panel==., by(bw60_mom)
+
+gen entered_bw=.
+replace entered_bw=1 if bw60==1 & year==firstyr
+bysort SSUID PNUM (entered_bw): replace entered_bw=entered_bw[1]
+replace entered_bw=0 if entered_bw==.
+browse SSUID PNUM year firstyr bw60 entered_bw
+
+tab entered_bw
+
+* BW whole time
+by SSUID PNUM: egen years_in_sipp = count(year)
+
+by SSUID PNUM: egen years_eligible = count(year) if bw60!=.
+bysort SSUID PNUM (years_eligible): replace years_eligible=years_eligible[1]
+
+by SSUID PNUM: egen years_bw = count(year) if bw60==1
+bysort SSUID PNUM (years_bw): replace years_bw=years_bw[1]
+replace years_bw=0 if years_bw==.
+
+gen always_bw = 0
+replace always_bw = 1 if years_bw==years_eligible
+
+sort SSUID PNUM year
+
+browse SSUID PNUM year firstyr years_in_sipp years_eligible years_bw always_bw nmos_bw60 bw60 trans_bw60_alt2 bw60_mom earnings thearn_alt earnings_sp earnings_ratio mom_panel firstbirth
+
+tab always_bw
+tab always_bw if mom_panel==.
+tab always_bw if mom_panel==1
+tab always_bw if entered_bw==1
+tab survey always_bw if entered_bw==1, row
+tabstat years_in_sipp if entered_bw==1
 
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
@@ -1451,6 +1485,16 @@ unique SSUID PNUM if mom_panel==1 & firstbirth==1 & survey_yr==2, by(end_partner
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth...so 231 moms total entered motherhood as breadwinners (70 in 1996; 161 in 2014)
 unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 
+gen bw_at_birth=.
+replace bw_at_birth=1 if bw60_mom==1 & firstbirth==1 & mom_panel==1
+bysort SSUID PNUM (bw_at_birth): replace bw_at_birth=bw_at_birth[1] // this flags moms who were BW at birth, puts the 1 for all their rows
+replace bw_at_birth=0 if bw_at_birth==.
+
+browse SSUID PNUM year mom_panel firstbirth bw60 bw60_mom bw_at_birth years_in_sipp years_bw always_bw
+
+tab bw_at_birth if mom_panel==1 & firstbirth==1
+tab always_bw if bw_at_birth==1
+
 	* 1996: % of all moms
 	// total moms= 12950, so 70/12950
 	
@@ -1460,7 +1504,10 @@ unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 
 	* 1996: % of those who become mom in SIPP
 	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 // 70 mothers entered motherhood as BW in 1996, out of a total of 467 moms who became a mom during panel (14.99%)
-
+	
+	* 1996: % of single moms who become mom in SIPP?
+	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 & end_partner_status==0 // 1196 correlate to what is on page 3 - 20.13% 
+	
 	* 2014: % of all moms
 	//total moms = 9746, so 161 / 9746
 	
@@ -1470,7 +1517,9 @@ unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
 	
 	* 2014: % of those who become mom in SIPP
 	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 161 mothers entered motherhood as BW in 2014, out of a total of 831 moms who became a mom during panel (19.37%)
-
+	
+	* 2014: % of single moms who become mom in SIPP?
+	tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 & end_partner_status==0 // 27.17% - this matches page 3 stat
 
 * % of single moms that are breadwinners
 unique SSUID PNUM if survey_yr==1, by(end_partner_status)
@@ -1482,5 +1531,7 @@ unique SSUID PNUM if survey_yr==2 & ever_bw60==1, by(end_partner_status)
 tab end_partner_status if survey_yr==1 & trans_bw60_alt2==1 & bw60lag==0 // bc want all transitions not uniques
 tab end_partner_status if survey_yr==2 & trans_bw60_alt2==1 & bw60lag==0 // bc want all transitions not uniques
 tab survey_yr trans_bw60_alt2 if bw60lag==0, row
+
+save "$tempdir/combined_bw_equation_desc.dta", replace
 	
 // log close

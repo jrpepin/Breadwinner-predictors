@@ -256,7 +256,7 @@ sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==2 & e
 putexcel G8=`r(p50)', nformat(###,###)
 
 sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & transitioned==1 [aweight=wpfinwgt], detail
-putexcel I8= `r(p50)', nformat(###,###)
+putexcel I8 = `r(p50)', nformat(###,###)
 sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & bw_at_birth==1 [aweight=wpfinwgt], detail
 putexcel J8=`r(p50)', nformat(###,###)
 sum earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID & survey_yr==1 & bw_at_birth==1 & always_bw==1 [aweight=wpfinwgt], detail
