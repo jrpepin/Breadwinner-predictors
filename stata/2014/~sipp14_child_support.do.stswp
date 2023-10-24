@@ -519,4 +519,4 @@ tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_
 
 tab survey two_parent_hh, row
 tab survey mom_race, row
-tab survey mom_educ, row
+tab survey mom_race, row

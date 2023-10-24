@@ -598,7 +598,7 @@ tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct if two_p
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, by(mom_educ)
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, by(dad_educ)
 
-save "$SIPP96keep/hh_finsupport1996.dta", replace
+save "$SIPP96keep/l_finsupport1996.dta", replace
 
 
 ********************************************************************************

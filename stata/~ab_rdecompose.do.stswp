@@ -320,7 +320,7 @@ terms of log odds and not in terms of probabilities or proportions
 oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1, by(survey) svy // this matches generally. the interaction is main thing
 oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1, by(survey) svy pooled // yes this gets rid of interaction
 
-oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1 & educ==4, by(survey) svy pooled // test for a subgroup
+oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1 & educ==4, by(survey) svy pooled // test for a sub
 	
 log using "$logdir/bw_decomposition.log", append
 
