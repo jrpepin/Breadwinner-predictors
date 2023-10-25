@@ -303,6 +303,8 @@ save "$tempdir/sipp14tpearn_finsupport_parents", replace
 // browse SSUID PNUM year panelmonth tpearn earnings tptotinc tptrninc tpothinc tpprpinc tpscininc tminc_amt thearn thtotinc
 // browse SSUID PNUM year panelmonth tpearn earnings tptotinc tpscininc tsssamt tsscamt tuc*amt tva*amt twcamt	
 
+browse SSUID PNUM year thearn thearn_alt rhpov thincpov // figure out poverty thresholds, how to annualize?
+
 ********************************************************************************
 **# Need to annualize before I can do calculations because some measures at different time units
 ********************************************************************************
@@ -311,9 +313,9 @@ gen end_ems = ems
 
 // Collapse the data by year to create annual measures
 collapse 	(sum) 	tpearn tcsamt taliamt earnings thearn thearn_alt thtotinc	///
-					tptotinc tptrninc tpothinc tpprpinc tpscininc				///
+					tptotinc tptrninc tpothinc tpprpinc tpscininc rhpov			///
 					tsssamt tsscamt tuc*amt tva*amt twcamt						///
-			(mean) 	tamountpaid esex tage_fb tminc_amt							///
+			(mean) 	tamountpaid esex tage_fb tminc_amt	thincpov				///
 			(max) 	any_kid_hh any_bio_kid num_kid eanykid tnumkids total_kids	///
 					tage race educ employ							 			///
 			(firstnm) 	st_ems													///
@@ -440,6 +442,8 @@ tab hh_earn_deficit if paid_out_cs==1 &  esex==1
 tabstat inc_pct_earnings inc_pct_program inc_pct_other inc_pct_invest inc_pct_benefit if earnings_deficit==1 & esex==1, stats(mean p50) varwidth(30) column(statistics)
 tabstat inc_pct_benefit ssincome_pct unemployment_pct veterans_pct workerscomp_pct if earnings_deficit==1 & esex==1, stats(mean p50) varwidth(30) column(statistics)
 
+gen pov_ratio_alt = thearn / rhpov // takes annualized num and denominator - compare to mean of ratio from months
+browse SSUID PNUM year thearn thearn_alt rhpov thincpov pov_ratio_alt // figure out poverty thresholds
 
 save "$SIPP14keep/annual_finsupport2014.dta", replace
 
@@ -449,6 +453,7 @@ collapse	(sum) 	mom_earnings mom_cs_paid dad_earnings dad_cs_paid 		///
 					mom_tot_inc mom_prog_inc mom_other_inc mom_invest_inc	///
 					mom_benef_inc dad_tot_inc dad_prog_inc dad_other_inc 	///
 					dad_invest_inc dad_benef_inc							///
+			(mean)	pov_ratio_alt thincpov thearn rhpov						///
 			(max) 	mom_educ mom_race dad_educ dad_race mom_bio dad_bio,	///
 			by(SSUID year)
 
@@ -486,6 +491,10 @@ gen survey=.
 replace survey=1 if inrange(year,1995,2000)
 replace survey=2 if inrange(year,2013,2016)
 
+browse SSUID year survey thearn rhpov pov_ratio_alt thincpov
+gen in_pov=0
+replace in_pov=1 if pov_ratio_alt <1
+
 save "$SIPP14keep/combined_finsupport.dta", replace
 
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, stats(mean p50) // this is what I used
@@ -505,6 +514,8 @@ egen total_earnings = rowtotal(mom_earnings dad_earnings)
 gen mom_pct_earn = mom_earnings / total_earnings
 gen dad_pct_earn = dad_earnings / total_earnings
 
+
+// more breakdowns
 tabstat mom_pct dad_pct mom_pct_earn dad_pct_earn, by(survey) 
 tabstat mom_pct dad_pct mom_pct_earn dad_pct_earn if two_parent_hh==1, by(survey) 
 tabstat mom_pct dad_pct mom_pct_earn dad_pct_earn if two_parent_hh==0, by(survey) 
@@ -517,6 +528,10 @@ tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_educ==3, by(survey)  // some college
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_educ==4, by(survey)  // college
 
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if in_pov==0, by(survey)  // not in poverty
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if in_pov==1, by(survey)  // in poverty
+
 tab survey two_parent_hh, row
 tab survey mom_race, row
 tab survey mom_educ, row
+tab survey in_pov, row

@@ -415,6 +415,12 @@ drop if year==had_birth_year
 
 save "$tempdir/sipp96_finsupport_parents", replace
 
+browse SSUID PNUM year monthcode thearn thearn_alt thpov
+// create vars to match 2014
+gen rhpov = thpov / 12 // currently annual
+gen thincpov = thearn / rhpov
+browse SSUID PNUM year monthcode thearn thearn_alt thpov rhpov thincpov
+
 ********************************************************************************
 * Annualize because some topical modules are at YEAR level, others are at wave, then actual data is by month
 ********************************************************************************
@@ -434,8 +440,8 @@ gen end_ems = ems
 collapse 	(sum) 	tpearn earnings thearn thearn_alt t28amt thtotinc		///
 					tptotinc tptrninc tpothinc tpprpinc tpscininc			///
 					t01amta t01amtk t05amt t07amt t08amt t10amt	t51amt		///
-					t50amt t56amt 											///
-			(mean) 	outside_amount_annual esex 								///
+					t50amt t56amt rhpov										///
+			(mean) 	outside_amount_annual esex 	thpov	thincpov			///
 			(max) 	rfnkids rfownkid rfoklt18 num_outside_child				///
 					tage race educ employ bio_parent support_outside_child	///
 			(firstnm) 	st_ems												///
@@ -561,6 +567,9 @@ tab hh_earn_deficit if paid_out_cs==1 &  esex==1
 tabstat inc_pct_earnings inc_pct_program inc_pct_other inc_pct_invest inc_pct_benefit if earnings_deficit==1 & esex==1, stats(mean p50) varwidth(30) column(statistics)
 tabstat inc_pct_benefit ssincome_pct unemployment_pct veterans_pct workerscomp_pct if earnings_deficit==1 & esex==1, stats(mean p50) varwidth(30) column(statistics)
 
+gen pov_ratio_alt = thearn / rhpov // takes annualized num and denominator - compare to mean of ratio from months
+browse SSUID PNUM year thearn thearn_alt thpov rhpov thincpov pov_ratio_alt // figure out poverty thresholds
+
 save "$SIPP96keep/annual_finsupport1996.dta", replace
 **# Bookmark #1
 use "$SIPP96keep/annual_finsupport1996.dta", clear
@@ -571,6 +580,7 @@ collapse	(sum) 	mom_earnings mom_cs_paid dad_earnings dad_cs_paid 		///
 					mom_tot_inc mom_prog_inc mom_other_inc mom_invest_inc	///
 					mom_benef_inc dad_tot_inc dad_prog_inc dad_other_inc 	///
 					dad_invest_inc dad_benef_inc							///
+			(mean)	pov_ratio_alt thincpov thearn rhpov						///
 			(max) 	mom_educ mom_race dad_educ dad_race mom_bio dad_bio,	///
 			by(SSUID year)
 
