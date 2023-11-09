@@ -1366,6 +1366,12 @@ tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 // 14.99%
 tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 19.37% - so this is in paper page 3
 tab bw60_mom if year==yrfirstbirth-1 & mom_panel==1 // year prior - 104, but we only have 468 records here - don't have year prior for all, so probably less useful
 
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 & race==1 
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 & race==1
+
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 & race==2
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 & race==2
+
 * What was their partner status - single mom or had a partner they earned more than?
 label define marital_status 1 "Married" 2 "Cohabiting" 3 "Widowed" 4 "Dissolved-Unpartnered" 5 "Never Married- Not partnered"
 label values st_marital_status end_marital_status marital_status

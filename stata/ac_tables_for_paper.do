@@ -675,6 +675,44 @@ forvalues w=1/10 {
 }
 */
 
+*** t-tests from 1996 to 2014
+// https://www.kaichen.work/?p=1095
+gen earnings_ratio_mis=earnings_ratio
+replace earnings_ratio_mis=0 if earnings_ratio==.
+
+median thearn_adj, by(survey)
+median thearn_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, by(survey)
+median earnings_adj if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, by(survey)
+median earnings_ratio_mis if year==(year[_n+1]-1) & SSUID[_n+1]==SSUID, by(survey)
+
+ttest race1, by(survey) // white
+ttest race2, by(survey) // black
+ttest race3, by(survey) // asian
+ttest race4, by(survey) // hispanic
+
+ttest educ1, by(survey)
+ttest educ2, by(survey)
+ttest educ3, by(survey)
+ttest educ4, by(survey)
+
+ttest marst1, by(survey) // married
+ttest marst2, by(survey) // cohab
+ttest marst3, by(survey) // single
+
+ttest ageb11, by(survey)
+ttest ageb12, by(survey)
+ttest ageb13, by(survey)
+ttest ageb14, by(survey)
+
+ttest status_b11, by(survey) // married
+ttest status_b12, by(survey) // not
+
+tab survey ft_partner_leave if trans_bw60_alt2==1 & bw60lag==0, row
+ttest ft_partner_leave if trans_bw60_alt2==1 & bw60lag==0, by(survey)
+ttest mt_mom if trans_bw60_alt2==1 & bw60lag==0, by(survey)
+ttest ft_partner_down_only if trans_bw60_alt2==1 & bw60lag==0, by(survey)
+ttest ft_partner_down_mom if trans_bw60_alt2==1 & bw60lag==0, by(survey)
+ttest lt_other_changes if trans_bw60_alt2==1 & bw60lag==0, by(survey)
 
 **# Table 2
 putexcel set "$results/Breadwinner_Predictor_Tables", sheet(Table2) modify
@@ -3613,6 +3651,7 @@ foreach var in inc_pov_bucket1 inc_pov_bucket2 inc_pov_bucket3 inc_pov_bucket4{
 	tab survey bw60, row // 25.42% to 27.56%
 	
 * Ratio of mother's earnings to partner earnings specifically
+egen couple_earnings = rowtotal(earnings earnings_sp)
 gen mom_part = earnings / earnings_sp if earnings_sp!=.
 sum mom_part, detail // 31.6%
 sum mom_part if marital_status_t1==1, detail // married: 30.6%
@@ -3622,6 +3661,10 @@ sum mom_part if survey==2014, detail // 31.6%
 sum earnings if earnings_sp!=. & survey==2014, detail // p50: 15608, mean: 26548
 sum earnings_sp if earnings_sp!=. & survey==2014, detail // p50: 44423, mean: 63367
 
+gen earnings_ratio_partner = earnings / couple_earnings
+
+// browse SSUID PNUM year earnings earnings_sp couple_earnings mom_part earnings_ratio_partner  
+
 * Total ratio by year
 gen earnings_ratio_mis=earnings_ratio
 replace earnings_ratio_mis=0 if earnings_ratio==.
@@ -3630,9 +3673,23 @@ tabstat earnings_ratio_mis, by(survey) stats(mean p50)
 * Mean: 37.4% to 38.4% P50: 30.1% to 30.9%
 tabstat earnings_ratio_mis if trans_bw60_alt2==1, by(survey) stats(mean p50)
 * Mean: 84.6% to 84.0% P50: 88.2% to 84.9%
+tabstat earnings_ratio_partner, by(survey) stats(mean p50)
+tabstat mom_part, by(survey) stats(mean p50)
 
 tabstat mom_part if survey==1996, by(educ_gp) stats(mean p50)
 tabstat mom_part if survey==2014, by(educ_gp) stats(mean p50)
+
+* ttest
+svyset [pweight=scaled_weight]
+tab survey trans_bw60_alt2 if bw60lag==0, row
+svy: tab survey trans_bw60_alt2 if bw60lag==0, row
+ttest trans_bw60_alt2 if bw60lag==0, by(survey)
+// svy: ttest trans_bw60_alt2 if bw60lag==0, by(survey)
+logit trans_bw60_alt2 if bw60lag==0
+logit trans_bw60_alt2 i.survey if bw60lag==0
+margins survey
+svy: logit trans_bw60_alt2 i.survey if bw60lag==0
+margins survey
 
 // eligible mothers
 tab survey_yr bw60
