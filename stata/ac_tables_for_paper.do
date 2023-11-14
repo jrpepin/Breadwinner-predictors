@@ -3679,6 +3679,12 @@ tabstat mom_part, by(survey) stats(mean p50)
 tabstat mom_part if survey==1996, by(educ_gp) stats(mean p50)
 tabstat mom_part if survey==2014, by(educ_gp) stats(mean p50)
 
+// to compare to child support exercise
+tabstat earnings_ratio_mis if race==3, by(survey) stats(mean p50) // okay yes, is also going down here
+tabstat mom_part if race==3, by(survey) stats(mean p50) // oh wow, really going down here
+tab survey trans_bw60_alt2 if race==3 & bw60lag==0, row // even though more becoming BW...
+tab survey bw60 if race==3, row // interesting...
+
 * ttest
 svyset [pweight=scaled_weight]
 tab survey trans_bw60_alt2 if bw60lag==0, row

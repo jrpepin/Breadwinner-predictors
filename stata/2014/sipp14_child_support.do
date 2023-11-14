@@ -30,7 +30,7 @@ clear
 			tpearn apearn tjb?_msum ajb?_msum tftotinc thtotinc rhpov rhpovt2 thincpov thincpovt2 				/// /* FINANCIAL   */
 			tptotinc tpprpinc tpscininc tsssamt tsscamt tuc*amt tva*amt twcamt									///
 			erace eorigin esex tage tage_fb eeduc tceb tcbyr* tyear_fb ems ems_ehc	empf						/// /* DEMOGRAPHIC */
-			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why									///
+			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why	ebornus	 ecitizen				///
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
 			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend ejb*_jborse rmwkwjb				///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
@@ -317,7 +317,7 @@ collapse 	(sum) 	tpearn tcsamt taliamt earnings thearn thearn_alt thtotinc	///
 					tsssamt tsscamt tuc*amt tva*amt twcamt						///
 			(mean) 	tamountpaid esex tage_fb tminc_amt	thincpov				///
 			(max) 	any_kid_hh any_bio_kid num_kid eanykid tnumkids total_kids	///
-					tage race educ employ							 			///
+					tage race educ employ ebornus ecitizen			 			///
 			(firstnm) 	st_ems													///
 			(lastnm) 	end_ems,												///
 			by(SSUID PNUM year)
@@ -338,9 +338,13 @@ replace dad_cs_paid = tcsamt if esex==2
 
 gen mom_educ=educ if esex==2 & any_bio_kid==1 // only consider "mom" if has bio kid in HH
 gen mom_race=race if esex==2 & any_bio_kid==1 // only consider "mom" if has bio kid in HH
+gen mom_born=ebornus if esex==2 & any_bio_kid==1 // only consider "mom" if has bio kid in HH
+gen mom_citizen=ecitizen if esex==2 & any_bio_kid==1 // only consider "mom" if has bio kid in HH
 
 gen dad_educ=educ if esex==1 & any_bio_kid==1
 gen dad_race=race if esex==1 & any_bio_kid==1
+gen dad_born=ebornus if esex==1 & any_bio_kid==1
+gen dad_citizen=ecitizen if esex==1 & any_bio_kid==1
 
 gen mom_bio=0
 replace mom_bio=1 if esex==2  & any_bio_kid==1
@@ -454,7 +458,8 @@ collapse	(sum) 	mom_earnings mom_cs_paid dad_earnings dad_cs_paid 		///
 					mom_benef_inc dad_tot_inc dad_prog_inc dad_other_inc 	///
 					dad_invest_inc dad_benef_inc							///
 			(mean)	pov_ratio_alt thincpov thearn rhpov						///
-			(max) 	mom_educ mom_race dad_educ dad_race mom_bio dad_bio,	///
+			(max) 	mom_educ mom_race dad_educ dad_race mom_bio dad_bio		///
+					mom_born mom_citizen dad_born dad_citizen,				///
 			by(SSUID year)
 
 label values mom_race dad_race race
@@ -496,6 +501,8 @@ gen in_pov=0
 replace in_pov=1 if pov_ratio_alt <1
 
 save "$SIPP14keep/combined_finsupport.dta", replace
+**# Data file
+
 
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct, stats(mean p50) // this is what I used
 tabstat mom_pct dad_pct mom_earn_pct mom_cs_pct dad_earn_pct dad_cs_pct if two_parent_hh==1, stats(mean p50)
@@ -517,12 +524,29 @@ gen dad_pct_earn = dad_earnings / total_earnings
 
 // more breakdowns
 tabstat mom_pct dad_pct mom_pct_earn dad_pct_earn, by(survey) 
-tabstat mom_pct dad_pct mom_pct_earn dad_pct_earn if two_parent_hh==1, by(survey) 
-tabstat mom_pct dad_pct mom_pct_earn dad_pct_earn if two_parent_hh==0, by(survey) 
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn, by(survey)
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if two_parent_hh==1, by(survey) 
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if two_parent_hh==0, by(survey) 
 
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_race==1, by(survey)  // white
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_race==2, by(survey)  // black
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_race==4, by(survey)  // hispanic
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_race==3, by(survey)  // asian
+
+// hmm concerned about trends for asians
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if dad_race==3, by(survey)  // asian
+tabstat mom_pct dad_pct if mom_race==3, by(survey) stats(mean p50)
+tab survey mom_race, row
+tab mom_race two_parent_hh if survey==1, row
+tab mom_race two_parent_hh if survey==2, row
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_race==3 & two_parent_hh==0, by(survey)  // asian
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_race==3 & two_parent_hh==1, by(survey)  // asian
+tab mom_race mom_born if survey==1, row
+tab mom_race mom_born if survey==2, row
+//
+
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_born==1, by(survey)  // native-born
+tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_born==2, by(survey)  // foreign-born
 
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if inlist(mom_educ,1,2), by(survey)  // hs or less
 tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_earn dad_pct_earn if mom_educ==3, by(survey)  // some college
@@ -534,4 +558,8 @@ tabstat mom_pct mom_earn_pct mom_cs_pct dad_pct dad_earn_pct dad_cs_pct mom_pct_
 tab survey two_parent_hh, row
 tab survey mom_race, row
 tab survey mom_educ, row
+tab survey mom_born if mom_born!=-1, row
 tab survey in_pov, row
+tab mom_race two_parent_hh, row
+tab mom_race two_parent_hh if survey==1, row
+tab mom_race two_parent_hh if survey==2, row

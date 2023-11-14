@@ -84,6 +84,7 @@ keep 	ssuid spanel swave wpfinwgt epppnum eentaid sinthhid shhadid eppintvw	/// 
 		emomlivh tfrinhh efblivnw elblivnw										///
 		exmar emarpth tfmyear tsmyear tlmyear ewidiv* 							/// /* MARRIAGE */
 		tfsyear tftyear tssyear tstyear	tlsyear tltyear							/// /* note: last used for last or ONLY, not first*/
+		ebrstate rcitiznt														/// to try to get immigrant status
 
 sort ssuid sinthhid eentaid epppnum swave
 		
@@ -296,6 +297,13 @@ label define race 1 "NH White" 2 "Black" 3 "NH Asian" 4 "Hispanic" 5 "Other"
 label values race race
 // drop erace eorigin
 
+* whether native- or foreign-born
+recode ebrstate (1/56=1)(60/555=2), gen(where_born)
+label define where_born 1 "US" 2 "Other Country"
+label values where_born where_born
+
+tab where_born rcitiznt, m
+
 * educational attainment: use EEDUC
 recode eeducate (31/38=1)(39=2)(40/43=3)(44/47=4)(-1=.), gen(educ)
 label define educ 1 "Less than HS" 2 "HS Diploma" 3 "Some College" 4 "College Plus"
@@ -444,6 +452,7 @@ collapse 	(sum) 	tpearn earnings thearn thearn_alt t28amt thtotinc		///
 			(mean) 	outside_amount_annual esex 	thpov	thincpov			///
 			(max) 	rfnkids rfownkid rfoklt18 num_outside_child				///
 					tage race educ employ bio_parent support_outside_child	///
+					where_born rcitiznt										///
 			(firstnm) 	st_ems												///
 			(lastnm) 	end_ems,											///
 			by(SSUID PNUM year)
@@ -462,11 +471,17 @@ gen dad_cs_paid=0
 replace dad_cs_paid = outside_amount_annual if esex==1 & outside_amount_annual!=.
 replace dad_cs_paid = t28amt if esex==2
 
+recode rcitiznt (1/2=1)(3=2), gen(citizen)
+
 gen mom_educ=educ if esex==2 & bio_parent==1 // only consider "mom" if has bio kid in HH
 gen mom_race=race if esex==2 & bio_parent==1 // only consider "mom" if has bio kid in HH
+gen mom_born=where_born if esex==2 & bio_parent==1 // only consider "mom" if has bio kid in HH
+gen mom_citizen=citizen if esex==2 & bio_parent==1 // only consider "mom" if has bio kid in HH
 
 gen dad_educ=educ if esex==1 & bio_parent==1
 gen dad_race=race if esex==1 & bio_parent==1
+gen dad_born=where_born if esex==1 & bio_parent==1
+gen dad_citizen=citizen if esex==1 & bio_parent==1 
 
 gen mom_bio=0
 replace mom_bio=1 if esex==2  & bio_parent==1
@@ -581,11 +596,13 @@ collapse	(sum) 	mom_earnings mom_cs_paid dad_earnings dad_cs_paid 		///
 					mom_benef_inc dad_tot_inc dad_prog_inc dad_other_inc 	///
 					dad_invest_inc dad_benef_inc							///
 			(mean)	pov_ratio_alt thincpov thearn rhpov						///
-			(max) 	mom_educ mom_race dad_educ dad_race mom_bio dad_bio,	///
+			(max) 	mom_educ mom_race dad_educ dad_race mom_bio dad_bio		///
+					mom_born mom_citizen dad_born dad_citizen,				///
 			by(SSUID year)
 
 label values mom_race dad_race race
 label values mom_educ dad_educ educ
+label values mom_born dad_born where_born
 
 gen two_parent_hh=0
 replace two_parent_hh=1 if mom_bio==1 & dad_bio==1
