@@ -35,7 +35,7 @@ fig1 <- ggplot(data_f1, aes(x = vals * prop,
              arrow = arrow(), color = "#C2C2C2", linewidth = .2) +
   geom_curve(x = 870, y = 1.45, xend = 910, yend = 1.05, 
              arrow = arrow(), color = "#C2C2C2", linewidth = .2, curvature = -0.2) +
-  scale_fill_manual(values = c("#E2E2E2", "#C2C2C2", "#8A8A8A", "#474747", "#F27575")) +
+  scale_fill_manual(values = c("#d6d6d6", "#C2C2C2", "#8A8A8A", "#474747", "#F27575")) +
   theme_minimal() +
   theme(legend.position     = "none",
         axis.text.x         = element_blank(),
@@ -52,7 +52,7 @@ fig1 <- ggplot(data_f1, aes(x = vals * prop,
        # subtitle = "by SIPP panel and pathway",
        x        = " ", 
        y        = " ") +
-  annotate("text", x = 780, y = 1.55, label = "Bars are scaled to the \naverage annual rate of transition", size = 8/.pt, color = "#C2C2C2") 
+  annotate("text", x = 760, y = 1.55, label = "Bars are scaled to the \naverage annual rate of transition", size = 8/.pt, color = "#8A8A8A") 
 
 fig1
 
@@ -62,7 +62,7 @@ ggsave(filename = file.path(figDir, "fig1.png"), fig1, width=6.5, height=3.5, un
 # FIGURE 2 #####################################################################
 
 ## Define color palette --------------------------------------------------------
-c_palette <- c("#EF4868", "#474747", "#8A8A8A", "#C2C2C2", "#E2E2E2")
+c_palette <- c("#EF4868", "#474747", "#8A8A8A", "#C2C2C2", "#d6d6d6")
 
 ### create function to color strip text
 strip_palette <- strip_themed(
