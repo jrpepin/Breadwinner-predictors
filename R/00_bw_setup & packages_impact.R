@@ -28,7 +28,6 @@ pacman::p_load(
   scales,     # percentages for ggplots axes
   colorspace, # color palettes of figures
   ggtext,
-  ggh4x,      # color text of facet strips
   conflicted
 )
 
@@ -45,7 +44,8 @@ conflict_prefer("remove", "base")
 projcode <- here()
 
 # Filepath to the directory where data is stored (NOT SHARED)
-dataDir <- file.path("C:/Users/Joanna/Box/Breadwinning/Predictor paper/Demography/Revisions")
+dataDir <- file.path("C:/Users/Joanna/Dropbox/Repositories/Breadwinner-predictors/output/data")
+
 
 # Filepath where you want produced figures to go (NOT SHARED)
 figDir  <- file.path(projcode, "output/results/figures")
@@ -56,9 +56,10 @@ figDir  <- file.path(projcode, "output/results/figures")
 #####################################################################################
 
 # Figure 1 data ---------------------------------------------------------------------
-data_f1 <- read_excel(file.path(dataDir, "Breadwinner_Predictor_Tables_Demography R&R.xlsx"), sheet = "Figure1")
+data_f1 <- read_excel(file.path(dataDir, "outcomes_mother_level.xlsx"), sheet = "mother-level")
 
 # Figure 2 data ---------------------------------------------------------------------
-data_f2  <- read_excel(file.path(dataDir, "Breadwinner_Predictor_Tables_Demography R&R.xlsx"), sheet = "Figure2")
+# data_f2  <- read_excel(file.path(dataDir, "impact_tables.xlsx"), sheet = "tab3")
+
 
 message("End of 00_bw_setup & packages") # Marks end of R Script
