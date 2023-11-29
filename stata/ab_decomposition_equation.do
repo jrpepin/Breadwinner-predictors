@@ -928,6 +928,11 @@ forvalues s=1/2{
 
 save "$tempdir/combined_bw_equation.dta", replace // this is used in step ac, save here so don't need to run mom below (not nec anymore)
 
+/*
+* The rdecompose part of this has been moved to its own code
+* The second specification part of this is no longer necessary; was exercise to show
+* that changing pathway reference group did not affect results
+
 ********************************************************************************
 **# * Exploring rdecompose
 ********************************************************************************
@@ -1349,10 +1354,13 @@ dyndoc "$bw_base_code/Predictor_Decomposition.md", saving($results/Predictor_Dec
 drop base_1 base_2
 
 save "$tempdir/combined_bw_equation.dta", replace
+*/
 
-*****************************
+********************************************************************************
+**# Exploratory analysis: temporary v. persistent breadwinning
+********************************************************************************
+
 // log using "$logdir/bw_updates_021522.log", replace
-**# Bookmark #4
 
 // investigations
 * how many moms who had a birth in the panel were breadwinners at the time of birth
