@@ -28,7 +28,7 @@ clear all
 set maxvar 5500
 
 // Run the setup script
-	do "00_setup_breadwinner_environment"
+//	do "00_setup_breadwinner_environment" - happens in master breadwinner file
 	
 ********************************************************************************
 * A2. DATA

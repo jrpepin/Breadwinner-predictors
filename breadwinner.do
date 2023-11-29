@@ -22,15 +22,19 @@ do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
 * D1. DECOMPOSITION ANALYSIS
 ********************************************************************************
 
-// Appends 2014 and 1996 files and executes analysis
-	log using "$logdir/combined_models.log", replace
-	do aa_combined_models.do
+// Appends 2014 and 1996 files 
+	log using "$logdir/combine_waves.log", replace
+	do aa_combine_waves.do
 	log close
 	
-
-// Appends 2014 and 1996 files and executes analysis
+// Creates necessary variables and equations for decomposition
 	log using "$logdir/decomposition_equation.log", replace
 	do ab_decomposition_equation.do
+	log close
+
+// Executes decomposition analysis
+	log using "$logdir/decomposition_analysis.log", replace
+	do ab_rdecompose.do
 	log close
 
 ********************************************************************************
