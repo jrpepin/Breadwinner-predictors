@@ -10,3 +10,4 @@ QA_sipp14.do
 output/
 x_*
 *.Rhistory
+*.stswp
