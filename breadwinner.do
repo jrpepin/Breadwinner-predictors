@@ -26,17 +26,20 @@ do "$SIPP2014_code/breadwinner-predictorsSIPP14.do"
 	log using "$logdir/combine_waves.log", replace
 	do aa_combine_waves.do
 	log close
+	clear
 	
 // Creates necessary variables and equations for decomposition
 	log using "$logdir/decomposition_equation.log", replace
 	do ab_decomposition_equation.do
 	log close
-
+	clear
+	
 // Executes decomposition analysis
 	log using "$logdir/decomposition_analysis.log", replace
 	do ab_rdecompose.do
 	log close
-
+	clear
+	
 ********************************************************************************
 * E1. TABLES FOR PAPER
 ********************************************************************************

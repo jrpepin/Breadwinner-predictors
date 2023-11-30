@@ -16,6 +16,16 @@ di "$S_DATE"
 
 use "$tempdir/combined_bw_equation_desc.dta", clear // created in step ab
 
+** Some new variables needed
+
+// Marital Status - December of prior year
+recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
+label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
+label values marital_status_t1 marr
+
+recode marital_status_t1 (1/2=1)(3=0), gen(partnered)
+recode partnered (0=1)(1=0), gen(single)
+
 ********************************************************************************
 ********************************************************************************
 * Creating tables for Demography paper
@@ -337,11 +347,6 @@ foreach var in educ1 educ2 educ3 educ4{
 		local ++i
 	}
 	
-
-* Marital Status - December of prior year
-recode last_marital_status (1=1) (2=2) (3/5=3), gen(marital_status_t1)
-label define marr 1 "Married" 2 "Cohabiting" 3 "Single"
-label values marital_status_t1 marr
 
 // for JG ask 10/10/22
 browse SSUID PNUM year earnings_adj thearn_adj bw60 bw50 earnings_ratio
@@ -1742,7 +1747,7 @@ forvalues r=1/4{
 	histogram hh_income_raw if hh_income_raw > -50000 & hh_income_raw <50000 & survey_yr==2, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("2014 Household income change upon transition to BW") xtitle("HH income change") // wait is this all years?! but needs to be just 2014???
 	graph export "$results/HH_Income_Change.png", as(png) name("Graph") replace
 	
-	recode hh_income_raw (-99999999/-50001=0)(-50000/-45000=-5
+	// uh oh something went wrong here: recode hh_income_raw (-99999999/-50001=0)(-50000/-45000=-5
 	
 	// all
 	histogram hh_income_raw_all if hh_income_raw_all > -50000 & hh_income_raw_all <50000, width(5000) addlabel addlabopts(yvarformat(%4.1f)) percent xlabel(-50000(10000)50000) title("Annual Household Income Change") xtitle("HH income change")
@@ -3124,9 +3129,6 @@ forvalues r=4/13{
 // tab marital_status_t1 if mt_mom==1 // 32% single
 // tab marital_status_t1 // 28% single
 
-recode marital_status_t1 (1/2=1)(3=0), gen(partnered)
-recode partnered (0=1)(1=0), gen(single)
-
 putexcel A16 = "Mothers only an increase in earnings: partner status breakdown"
 putexcel A17 = ("Partnered") A19 = ("Partnered")
 putexcel A18 = ("Single") A20 = ("Single")
@@ -3693,9 +3695,6 @@ gen earnings_ratio_partner = earnings / couple_earnings
 // browse SSUID PNUM year earnings earnings_sp couple_earnings mom_part earnings_ratio_partner  
 
 * Total ratio by year
-gen earnings_ratio_mis=earnings_ratio
-replace earnings_ratio_mis=0 if earnings_ratio==.
-
 tabstat earnings_ratio_mis, by(survey) stats(mean p50)
 * Mean: 37.4% to 38.4% P50: 30.1% to 30.9%
 tabstat earnings_ratio_mis if trans_bw60_alt2==1, by(survey) stats(mean p50)

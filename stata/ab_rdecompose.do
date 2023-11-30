@@ -20,6 +20,7 @@
 // bootstrap THIS:
 // rate = mean var if bwlag==0 & survey_yr=1996
 // comp = mean trans_bw60_alt2 if bw60lag==0 & survey_yr==`y' & `var'==1
+capture: program drop mydecompose
 
 program mydecompose, eclass
 // browse mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes
@@ -66,7 +67,7 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 	gen `var'_comp=. 
 }
 
-log using "$logdir/bw_decomposition.log", replace
+// log using "$logdir/bw_decomposition.log", replace
 
 mydecompose // test it
 bootstrap, reps(10) nodrop: mydecompose
@@ -110,7 +111,7 @@ keep if race==4 // Hispanic
 bootstrap, reps(100) nodrop: mydecompose
 restore
 
-log close
+// log close
 
 ********************************************************************************
 * AGGREGATE VIEWS
@@ -203,7 +204,7 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 	gen `var'_total=.
 }
 
-log using "$logdir/bw_decomposition.log", append
+// log using "$logdir/bw_decomposition.log", append
 
 mydecompose_temp // test it
 bootstrap, reps(100) nodrop: mydecompose_temp
@@ -245,7 +246,7 @@ keep if race==4 // Hispanic
 bootstrap, reps(100) nodrop: mydecompose_temp
 restore
 
-log close
+// log close
 
 
 program mydecompose_total, eclass
@@ -306,9 +307,6 @@ svy: logit transitioned i.pathway if sample==1 & survey==1996, or nocons // is t
 gen none=0
 replace none=1 if pathway==0
 
-oaxaca transitioned pathway if sample==1, by(survey) logit
-oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1, by(survey) logit noisily
-oaxaca transitioned normalize(none mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes) if sample==1, by(survey) logit svy relax // see Stata Journal article, the logit estimates don't nicely calculate the proportion
 /*
 You can also use oaxaca, for example, with binary outcome variables and employ a
 command such as logit to estimate the models. You have to understand, however,
@@ -316,13 +314,18 @@ that oaxaca will always apply the decomposition to the linear predictions from t
 models (based on the first equation if a model contains multiple equations). With
 logit models, for example, the decomposition computed by oaxaca is expressed in
 terms of log odds and not in terms of probabilities or proportions
-*/
+
+oaxaca transitioned pathway if sample==1, by(survey) logit
+oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1, by(survey) logit noisily
+oaxaca transitioned normalize(none mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes) if sample==1, by(survey) logit svy relax // see Stata Journal article, the logit estimates don't nicely calculate the proportion
+
+
 oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1, by(survey) svy // this matches generally. the interaction is main thing
 oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1, by(survey) svy pooled // yes this gets rid of interaction
 
 oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1 & educ==4, by(survey) svy pooled // test for a subgroup
-	
-log using "$logdir/bw_decomposition.log", append
+*/	
+// log using "$logdir/bw_decomposition.log", append
 
 mydecompose_total
 bootstrap, reps(100) nodrop: mydecompose_total
@@ -364,7 +367,7 @@ keep if race==4 // Hispanic
 bootstrap, reps(100) nodrop: mydecompose_total
 restore
 
-log close
+// log close
 
 
 ********************************************************************************
@@ -377,7 +380,7 @@ log close
 
 
 // to match
-import excel "T:\Research Projects\Breadwinner-predictors\data\equation.xlsx", sheet("Sheet1") firstrow
+import excel "T:\Research Projects\Breadwinner-predictors\data\equation.xlsx", sheet("Sheet1") firstrow clear
 
 rdecompose exit_rate	momup_rate	partnerdown_rate	momup_partnerdown_rate	other_rate	///
 exit_comp	momup_comp	partnerdown_comp	momup_partnerdown_comp	other_comp,	///

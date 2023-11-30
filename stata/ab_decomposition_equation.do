@@ -1453,7 +1453,16 @@ tab always_bw
 tab always_bw if mom_panel==.
 tab always_bw if mom_panel==1
 
-// browse SSUID PNUM year mom_panel firstbirth bw_at_birth bw60
+gen bw_at_birth=.
+replace bw_at_birth=1 if bw60_mom==1 & firstbirth==1 & mom_panel==1
+bysort SSUID PNUM (bw_at_birth): replace bw_at_birth=bw_at_birth[1] // this flags moms who were BW at birth, puts the 1 for all their rows
+replace bw_at_birth=0 if bw_at_birth==.
+
+browse SSUID PNUM year mom_panel firstbirth bw60 bw60_mom bw_at_birth years_in_sipp years_bw always_bw
+
+tab bw_at_birth if mom_panel==1 & firstbirth==1
+tab always_bw if bw_at_birth==1
+
 tab always_bw if mom_panel==1 & survey==1996 // this is OF any women who become mothers NOT those who became bws at panel
 tab always_bw if mom_panel==1 & survey==2014
 
@@ -1544,16 +1553,6 @@ unique SSUID PNUM if mom_panel==1 & firstbirth==1 & survey_yr==1, by(end_partner
 unique SSUID PNUM if mom_panel==1 & firstbirth==1 & survey_yr==2, by(end_partner_status) // by partner status
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth...so 231 moms total entered motherhood as breadwinners (70 in 1996; 161 in 2014)
 unique SSUID PNUM, by(ever_bw60) // 0=14346, 1=8350, total=22696
-
-gen bw_at_birth=.
-replace bw_at_birth=1 if bw60_mom==1 & firstbirth==1 & mom_panel==1
-bysort SSUID PNUM (bw_at_birth): replace bw_at_birth=bw_at_birth[1] // this flags moms who were BW at birth, puts the 1 for all their rows
-replace bw_at_birth=0 if bw_at_birth==.
-
-browse SSUID PNUM year mom_panel firstbirth bw60 bw60_mom bw_at_birth years_in_sipp years_bw always_bw
-
-tab bw_at_birth if mom_panel==1 & firstbirth==1
-tab always_bw if bw_at_birth==1
 
 	* 1996: % of all moms
 	// total moms= 12950, so 70/12950

@@ -169,6 +169,14 @@ foreach var in rcutyp20 rcutyp21 rcutyp24 rcutyp25 rcutyp27 rhnbrf rhcbrf rhmtrf
 replace `var' =0 if `var'==2
 }
 
+* scalings weights to use before I combine with 2014
+summarize wpfinwgt
+local rescalefactor `r(N)'/`r(sum)'
+display `rescalefactor'
+gen scaled_weight = .
+replace scaled_weight = wpfinwgt*`rescalefactor'
+summarize scaled_weight
+
 save "$tempdir/sipp96tpearn_fullsamp", replace
 
 
