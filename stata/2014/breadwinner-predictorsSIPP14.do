@@ -38,17 +38,20 @@ set maxvar 5500
     log using "$logdir/extract_and_format.log",	replace 
     do "$SIPP2014_code/01_sipp14_extract_and_format.do"
     log close
-
+	clear
+	
 // Merge the waves of data to create two datafiles (type 1 and type 2 records)
     log using "$logdir/merge_waves.log", replace
     do "$SIPP2014_code/02_sipp14_merge_waves.do"
     log close
+	clear
 	
 // Recode variables as needed to simplify
 	log using "$logdir/variable_recodes.log", replace
 	do "$SIPP2014_code/03_sipp14_variable_recodes.do"
 	log close
-
+	clear
+	
 ********************************************************************************
 * B1. DEMOGRAPHICS AND ANALYTIC SAMPLE
 ********************************************************************************
@@ -61,21 +64,25 @@ set maxvar 5500
     log using "$logdir/compute_relationships.log", replace
     do "$SIPP2014_code/04_sipp14_compute_relationships.do"
     log close
-
+	clear
+	
 // Create a monthly file with just household composition, includes type2 people
 	log using "$logdir/create_hhcomp.log", replace
 	do "$SIPP2014_code/05_sipp14_create_hhcomp.do"
 	log close
+	clear
 	
 // Create a monthly file with earnings & demographic measures. Create analytic sample.
 	log using "$logdir/measures_and_sample.log", replace
 	do "$SIPP2014_code/06_sipp14_measures_and_sample.do"
 	log close
+	clear
 	
 // Merging with HH characteristics to use for predictions
 	log using "$logdir/merging_hh_characteristics.log", replace
 	do "$SIPP2014_code/07_sipp14_merging_hh_characteristics.do"
 	log close
+	clear
 	
 ********************************************************************************
 * B2. BREADWINNER INDICATORS
@@ -86,15 +93,18 @@ set maxvar 5500
 	log using "$logdir/annualize.log", replace
 	do "$SIPP2014_code/08_sipp14_annualize.do"
 	log close
+	clear
 	
 // Create descriptive statistics of who transitions to BW
 	log using "$logdir/bw_descriptives.log", replace
 	do "$SIPP2014_code/09_sipp14_bw_descriptives.do"
 	log close
+	clear
 * 	do "$SIPP2014_code/09a_sipp14_bw_descriptives_matrix.do" // archived descriptives
 	
-
 // Create sample descriptive statistics
 	log using "$logdir/sample_descriptives.log", replace
 	do "$SIPP2014_code/10_sipp14_sample_descriptives.do"
 	log close
+	clear
+	

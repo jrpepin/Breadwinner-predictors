@@ -42,7 +42,7 @@ set maxvar 5500
     do "$SIPP1996_code/a_sipp96_extract_and_merge_for_HH.do"
     log close
 
-
+clear // stata keeps craashing, but it runs when I do it myself individually, going to see if this will help
 ********************************************************************************
 * B1. DEMOGRAPHICS AND ANALYTIC SAMPLE
 ********************************************************************************
@@ -55,26 +55,31 @@ set maxvar 5500
     log using "$logdir/compute_relationships96.log", replace
     do "$SIPP1996_code/b_sipp96_compute_relationships.do"
     log close
-
+	clear
+	
 // Create a monthly file with just household composition, includes type2 people
 	log using "$logdir/create_hhcomp96.log", replace
 	do "$SIPP1996_code/c_sipp96_create_hhcomp.do"
 	log close
+	clear
 	
 // Create the extract for mothers specifically to get ready for sample creation
 	log using "$logdir/extract_and_merge_for_moms96.log",	replace 
 	do "$SIPP1996_code/d_sipp96_extract_and_merge_for_moms.do"
 	log close
+	clear
 	
 // Create a monthly file with earnings & demographic measures. Create analytic sample.
 	log using "$logdir/measures_and_sample96.log", replace
 	do "$SIPP1996_code/e_sipp96_measures_and_sample.do"
 	log close
+	clear
 	
 // Merging with HH characteristics to use for predictions
 	log using "$logdir/merging_hh_characteristics96.log", replace
 	do "$SIPP1996_code/f_sipp96_merging_hh_characteristics.do"
 	log close
+	clear
 	
 ********************************************************************************
 * B2. BREADWINNER INDICATORS
@@ -85,9 +90,10 @@ set maxvar 5500
 	log using "$logdir/annualize96.log", replace
 	do "$SIPP1996_code/g_sipp96_annualize.do"
 	log close
-
+	clear
+	
 // Create descriptive statistics of who transitions to BW
 	log using "$logdir/bw_descriptives96.log", replace
 	do "$SIPP1996_code/h_sipp96_bw_descriptives.do"
 	log close
-
+	clear
