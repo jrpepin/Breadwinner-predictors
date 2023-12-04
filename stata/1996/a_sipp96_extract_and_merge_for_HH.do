@@ -266,4 +266,5 @@ label values pov_level pov_level
 // drop thincpov
 */
 
+compress
 save "$SIPP96keep/sipp96_hhdata.dta", replace

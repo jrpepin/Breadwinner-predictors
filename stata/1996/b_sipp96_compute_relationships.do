@@ -31,6 +31,7 @@ reshape wide PNUM errp,i(SSUID ERESIDENCEID panelmonth) j(person)
 
 	// https://www.stata.com/statalist/archive/2010-08/msg00825.html - want something like this but for MULTIPLE columns
 
+compress
 save "$tempdir/sipp96_hh_rel_wide.dta", replace
 
 use "$SIPP96keep/sipp96_hhdata.dta", clear	
@@ -320,4 +321,5 @@ sort SSUID ERESIDENCEID panelmonth from_num to_num
 
 keep if _merge==3 // rest are people who live alone
 
+compress
 save "$tempdir/s96_relationship_pairs_bymonth.dta", replace

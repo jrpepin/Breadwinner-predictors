@@ -33,6 +33,7 @@ replace mover=RMOVER if swave==1
 drop TMOVER RMOVER
 
 // allmonths14.dta is a long-form dataset including all the waves from SIPP2014
+compress
 save "$SIPP14keep/allmonths14.dta", replace
 
 tab MONTHCODE if PNUM==RFAMREFWT2

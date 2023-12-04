@@ -67,6 +67,7 @@ fre RREL
 rename PNUM from_num
 rename RREL_PNUM to_num
 
+compress
 save "$tempdir/rel_pairs_bymonth.dta", replace
 
 ********************************************************************************
@@ -224,4 +225,5 @@ label values relationship arel
 fre relationship
 fre relationship if to_num < 100
 
+compress
 save "$tempdir/relationship_pairs_bymonth.dta", replace

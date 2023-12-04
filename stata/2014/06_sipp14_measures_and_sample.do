@@ -556,7 +556,7 @@ restore
 // create output of sample size with restrictions
 dyndoc "$SIPP2014_code/sample_size_2014.md", saving($results/sample_size_2014.html) replace
 
-	
+compress
 save "$SIPP14keep/sipp14tpearn_all", replace
 
 // browse SSUID PNUM year monthcode if inlist(SSUID,"000418209316", "000860215173")

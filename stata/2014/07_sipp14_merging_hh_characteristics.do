@@ -24,6 +24,7 @@ reshape wide to_num relationship RREL to_sex from_age to_age pairtype from_sex f
 
 rename from_num PNUM
 
+compress
 save "$tempdir/relationship_details_wide", replace 
 
 * Final sample file:
@@ -47,6 +48,7 @@ tab hhsize if _merge==1 // confirming that the unmatched in master are all peopl
 
 drop from_* // just want to use the "to" attributes aka others in HH. Will use original file for respondent's characteristics. This will help simplify
 
+compress
 save "$SIPP14keep/sipp14tpearn_rel.dta", replace
 
 // union status recodes - compare these to using simplistic gain or lose partner / gain or lose spouse later on

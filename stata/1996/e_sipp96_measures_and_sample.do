@@ -466,4 +466,5 @@ dyndoc "$SIPP1996_code/sample_size_1996.md", saving($results/sample_size_1996.ht
 // drop yrfirstbirth
 // rename yrfirstbirth2 yrfirstbirth
 
+compress
 save "$SIPP96keep/sipp96tpearn_all", replace

@@ -177,5 +177,5 @@ recode why_nowork (1/3=1) (4=2) (5/6=3) (7=4) (8/9=5) (10=6) (11/12=7) (13=8), g
 label define whynowork 1 "Illness" 2 "Retired" 3 "Child related" 4 "In School" 5 "Involuntary" 6 "Voluntary" 7 "Other" 8 "Multiple reasons"
 label values whynowork whynowork
 
-
+compress
 save "$SIPP14keep/allmonths14_rec.dta", replace
