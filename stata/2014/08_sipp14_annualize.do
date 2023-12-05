@@ -649,7 +649,7 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 	gen 	firstbirth = (first_birth>0)
 	drop	first_birth
 
-// Create indicators for partner changes -- note to KM: revisit this, needs more categories (like differentiate spouse v. partner)
+// Create indicators for partner changes -- note to KM: revisit this, needs more categories (like differentiate spouse v. partner) - this is also from start to end, not monthly
 	gen 	gain_partner=0 				if !missing(start_spartner) & !missing(last_spartner)
 	replace gain_partner=1 				if start_spartner==0 		& last_spartner==1
 
@@ -717,3 +717,15 @@ tab wealthincome_100
 gen wealthincome_1000=0
 replace wealthincome_1000=1 if thinc_ast>=1000 & thinc_ast!=.
 tab  wealthincome_1000
+
+// partner transitions within year
+gen add_partner=0
+replace add_partner=1 if sing_coh==1 | sing_mar==1
+
+gen lose_partner=0
+replace lose_partner=1 if coh_diss==1 | marr_diss==1 | marr_wid==1
+
+gen multiple_partner_transitions=0
+replace multiple_partner_transitions=1 if add_partner==1 & lose_partner==1
+
+browse SSUID PNUM year add_partner lose_partner sing_coh  sing_mar  coh_mar  coh_diss  marr_diss  marr_wid marr_coh 
