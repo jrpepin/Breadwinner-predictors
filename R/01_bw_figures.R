@@ -14,9 +14,9 @@ data_f1 <- data_f1 %>%
 data_f1$year <- factor(data_f1$year, levels = c("2014", "1996"), ordered = FALSE)
 data_f1$path <- factor(data_f1$path, 
                        levels = c("Partner separation", 
-                                  "Mothers increased earnings",
+                                  "Mother increased earnings",
                                   "Partner lost earnings", 
-                                  "Mothers increased earnings & partner lost earnings",
+                                  "Mother increased earnings & partner lost earnings",
                                   "Other member exit or lost earnings"), 
                        ordered = FALSE)
 
@@ -79,11 +79,11 @@ data_f2$group <- factor(data_f2$group,
 
 data_f2$event <- factor(data_f2$event, 
                         levels = c("Partner separation",
-                                   "Mothers earnings increased", "Partners earnings decreased",
-                                   "Mothers earnings increased & partners earnings decreased",
+                                   "Mother increased earnings", "Partner lost earnings",
+                                   "Mother increased earnings & partner lost earnings",
                                    "Other member exit or earnings decreased"), ordered = FALSE)
 
-levels(data_f2$event)[levels(data_f2$event)=="Mothers earnings increased & partners earnings decreased"] <- "Mothers earnings increased & \npartners earnings decreased"
+levels(data_f2$event)[levels(data_f2$event)=="Mother increased earnings & partner lost earnings"] <- "Mother increased earnings & \npartner lost earnings"
 
 
 ## Create Figure  --------------------------------------------------------------
