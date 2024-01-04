@@ -18,14 +18,35 @@
 
 use "$tempdir/combined_for_decomp.dta", clear // created in ab
 
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	gen pathway=0
+	replace pathway=1 if mt_mom==1
+	replace pathway=2 if ft_partner_down_mom==1
+	replace pathway=3 if ft_partner_down_only==1
+	replace pathway=4 if ft_partner_leave==1
+	replace pathway=5 if lt_other_changes==1
+	label define pathway 0 "None" 1 "Mom up" 2 "Mom up Partner Down" 3 "Partner Down" 4 "Partner Exit" 5 "Other HH"
+	label values pathway pathway
+	
+	gen no=0
+	replace no=1 if pathway==0
+	
+	gen transitioned=0
+	replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
+	
+	gen sample=0
+	replace sample=1 if bw60lag==0
+	
+// pathway rate / composition breakdowns
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no{
 	gen `var'_rate=. // have to do this for round 1 to get boostrap to work? Think was throwing errors every time I had to start the file over
 	gen `var'_comp=. 
+	gen `var'_total=.
 }
 
 	
-	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-		drop `var'_comp `var'_rate
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no{
+		drop `var'_comp `var'_rate `var'_total
 		svy: mean `var' if bw60lag==0 & survey==1996
 		matrix `var'_comp = e(b)
 		gen `var'_comp = e(b)[1,1] if survey==1996
@@ -34,13 +55,17 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 		gen `var'_rate = e(b)[1,1] if survey==1996
 	}
 
-	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no{
 		svy: mean `var' if bw60lag==0 & survey==2014
 		matrix `var'_comp = e(b)
 		replace `var'_comp = e(b)[1,1] if survey==2014
 		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==2014 & `var'==1
 		matrix `var'_rate = e(b)
 		replace `var'_rate = e(b)[1,1] if survey==2014
+	}
+	
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no{
+		gen `var'_total = `var'_rate * `var'_comp // to get aggregate pathway level
 	}
 
 	preserve
@@ -51,10 +76,42 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 	
 	restore
 	
+// pathway totals
+	preserve
+
+	collapse (mean) mt_mom_total ft_partner_down_mom_total ft_partner_down_only_total ft_partner_leave_total lt_other_changes_total no_total, by(survey)
+	
+	rdecompose mt_mom_total ft_partner_down_mom_total ft_partner_down_only_total ft_partner_leave_total lt_other_changes_total no_total, group(survey) ///
+	func(mt_mom_total + ft_partner_down_mom_total + ft_partner_down_only_total + ft_partner_leave_total + lt_other_changes_total + no_total)
+	
+	restore
+
+// rate / composition totals - including "no pathway" as a line item
+	preserve
+
+	collapse (sum) sample transitioned if bw60lag==0, by(survey pathway)
+	
+	gen rate = transitioned / sample
+	
+	rdecompose sample rate, group(survey) transform(sample) sum(pathway)
+	
+	restore
+
+// excluding "no pathway"
+	preserve
+
+	collapse (sum) sample transitioned if bw60lag==0 & pathway!=0, by(survey pathway)
+	
+	gen rate = transitioned / sample
+
+	rdecompose sample rate, group(survey) transform(sample) sum(pathway)
+	
+	restore
+	
 *2. "Updated" estimates
 
 use "$tempdir/combined_for_decomp.dta", clear // created in ab
-	
+
 	gen pathway=0
 	replace pathway=1 if mt_mom==1
 	replace pathway=2 if ft_partner_down_mom==1
@@ -85,15 +142,16 @@ use "$tempdir/combined_for_decomp.dta", clear // created in ab
 	tab survey trans_bw60_alt2 if bw60lag==0 & any_event==1, row // this should also match kelly's calculations
 // but this isn't total rate, need to take the multiplication of both - so try rdecompose with just "any_event"? I am still confused to get the total pathways to add up - but is that because of the no event composition?
 	
+// pathway rate / composition breakdowns
 	
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no any_event{
 	gen `var'_rate_a=. // have to do this for round 1 to get boostrap to work? Think was throwing errors every time I had to start the file over
 	gen `var'_comp_all=.
 	gen `var'_comp_path=.
 }
 
 	
-	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no any_event{
 		drop `var'_comp_all `var'_comp_path `var'_rate_a
 		svy: mean `var' if bw60lag==0 & survey==1996
 		matrix `var'_comp_all = e(b)
@@ -106,7 +164,7 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 		gen `var'_rate_a = e(b)[1,1] if survey==1996
 	}
 
-	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no any_event{
 		svy: mean `var' if bw60lag==0 & survey==2014
 		matrix `var'_comp_all = e(b)
 		replace `var'_comp_all = e(b)[1,1] if survey==2014
@@ -128,6 +186,17 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 	rdecompose mt_mom_rate mt_mom_comp_all ft_partner_down_mom_rate ft_partner_down_mom_comp_all ft_partner_down_only_rate ft_partner_down_only_comp_all ft_partner_leave_rate ft_partner_leave_comp_all lt_other_changes_rate lt_other_changes_comp_all, ///
 	group(survey) func((mt_mom_rate + ft_partner_down_mom_rate + ft_partner_down_only_rate + ft_partner_leave_rate + lt_other_changes_rate) * (mt_mom_comp_all + ft_partner_down_mom_comp_all + ft_partner_down_only_comp_all + ft_partner_leave_comp_all + lt_other_changes_comp_all))
 	
+	restore
+	
+// pathway totals
+	* not sure if this can just be same as above
+
+// rate / composition totals
+	preserve
+	
+	collapse (mean) any_event_rate_a any_event_comp_all, by(survey)
+	
+	rdecompose any_event_rate_a any_event_comp_all, group(survey)
 	
 	restore
 
