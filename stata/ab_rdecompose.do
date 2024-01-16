@@ -201,7 +201,7 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 	restore
 
 ********************************************************************************
-**# CREATE PROGRAM ("Original" Estimates)
+**# CREATE PROGRAM ("Updated" Estimates)
 ********************************************************************************
 * Okay I think program FIRST, then do the data?
 * Okay, because I am creating variables, need to do data each time?! or craete the variables and only bootstrap the collapse? but that won't accomplish anything?
@@ -209,58 +209,142 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 // bootstrap THIS:
 // rate = mean var if bwlag==0 & survey_yr=1996
 // comp = mean trans_bw60_alt2 if bw60lag==0 & survey_yr==`y' & `var'==1
+
+** Pathway specific rate/ compositions
 capture: program drop mydecompose
 
 program mydecompose, eclass
-// browse mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes
 
-
-	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-		drop `var'_comp `var'_rate
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no any_event{
+		drop `var'_comp_all `var'_comp_path `var'_rate_a
 		svy: mean `var' if bw60lag==0 & survey==1996
-		matrix `var'_comp = e(b)
-		gen `var'_comp = e(b)[1,1] if survey==1996
+		matrix `var'_comp_all = e(b)
+		gen `var'_comp_all = e(b)[1,1] if survey==1996
+		svy: mean `var' if bw60lag==0 & survey==1996 & pathway!=0
+		matrix `var'_comp_path = e(b)
+		gen `var'_comp_path = e(b)[1,1] if survey==1996
 		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==1996 & `var'==1
-		matrix `var'_rate = e(b)
-		gen `var'_rate = e(b)[1,1] if survey==1996
+		matrix `var'_rate_a = e(b)
+		gen `var'_rate_a = e(b)[1,1] if survey==1996
 	}
 
-	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no any_event{
 		svy: mean `var' if bw60lag==0 & survey==2014
-		matrix `var'_comp = e(b)
-		replace `var'_comp = e(b)[1,1] if survey==2014
+		matrix `var'_comp_all = e(b)
+		replace `var'_comp_all = e(b)[1,1] if survey==2014
+		svy: mean `var' if bw60lag==0 & survey==2014 & pathway!=0
+		matrix `var'_comp_path = e(b)
+		replace `var'_comp_path = e(b)[1,1] if survey==2014
 		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==2014 & `var'==1
-		matrix `var'_rate = e(b)
-		replace `var'_rate = e(b)[1,1] if survey==2014
+		matrix `var'_rate_a = e(b)
+		replace `var'_rate_a = e(b)[1,1] if survey==2014
 	}
 
-	preserve
-	collapse (mean) mt_mom_rate mt_mom_comp ft_partner_down_mom_rate ft_partner_down_mom_comp ft_partner_down_only_rate ft_partner_down_only_comp ft_partner_leave_rate ft_partner_leave_comp lt_other_changes_rate lt_other_changes_comp, by(survey)
+// pathway-specific rate / composition elements
+preserve
 
-	rdecompose mt_mom_rate mt_mom_comp ft_partner_down_mom_rate ft_partner_down_mom_comp ft_partner_down_only_rate ft_partner_down_only_comp ft_partner_leave_rate ft_partner_leave_comp lt_other_changes_rate lt_other_changes_comp, ///
-	group(survey) func((mt_mom_rate*mt_mom_comp) + (ft_partner_down_mom_rate*ft_partner_down_mom_comp) + (ft_partner_down_only_rate*ft_partner_down_only_comp) + (ft_partner_leave_rate*ft_partner_leave_comp) + (lt_other_changes_rate*lt_other_changes_comp))
+	collapse (mean) mt_mom_rate_a mt_mom_comp_all mt_mom_comp_path ft_partner_down_mom_rate_a ft_partner_down_mom_comp_all ft_partner_down_mom_comp_path ft_partner_down_only_rate_a ft_partner_down_only_comp_all ft_partner_down_only_comp_path ft_partner_leave_rate_a ft_partner_leave_comp_all ft_partner_leave_comp_path lt_other_changes_rate_a lt_other_changes_comp_all lt_other_changes_comp_path, by(survey)
+	
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+	gen `var'_rate = `var'_comp_path * `var'_rate_a
+}
+	
+	rdecompose ft_partner_leave_comp_all mt_mom_comp_all ft_partner_down_only_comp_all ft_partner_down_mom_comp_all lt_other_changes_comp_all ft_partner_leave_rate mt_mom_rate  ft_partner_down_only_rate   ft_partner_down_mom_rate lt_other_changes_rate, ///
+	group(survey) func((mt_mom_rate + ft_partner_down_mom_rate + ft_partner_down_only_rate + ft_partner_leave_rate + lt_other_changes_rate) * (mt_mom_comp_all + ft_partner_down_mom_comp_all + ft_partner_down_only_comp_all + ft_partner_leave_comp_all + lt_other_changes_comp_all))
+
+	matrix a = e(b) * 100
+//	local a = e(b) * 100
+//	di `a'
+	ereturn post a //[1,10]
+
+restore
+
+/* when I try to bootstrap, not working to have in same program
+// rate / composition totals
+preserve
+
+	collapse (mean) any_event_rate_a any_event_comp_all, by(survey)
+	
+	rdecompose any_event_rate_a any_event_comp_all, group(survey)
 
 	matrix b = e(b) * 100
 	ereturn post b //[1,10]
+	
+restore
+*/
 
-	restore
 end
 
+** Total rate / composition
+capture: program drop mydecompose_total
+
+program mydecompose_total, eclass
+
+	drop any_event_comp any_event_rate
+	svy: mean any_event if bw60lag==0 & survey==1996
+	matrix any_event_comp = e(b)
+	gen any_event_comp = e(b)[1,1] if survey==1996
+	svy: mean trans_bw60_alt2 if bw60lag==0 & survey==1996 & any_event==1
+	matrix any_event_rate = e(b)
+	gen any_event_rate = e(b)[1,1] if survey==1996
+	
+	svy: mean any_event if bw60lag==0 & survey==2014
+	matrix any_event_comp = e(b)
+	replace any_event_comp = e(b)[1,1] if survey==2014
+	svy: mean trans_bw60_alt2 if bw60lag==0 & survey==2014 & any_event==1
+	matrix any_event_rate = e(b)
+	replace any_event_rate = e(b)[1,1] if survey==2014
+	
+// rate / composition totals
+preserve
+
+	collapse (mean) any_event_rate any_event_comp, by(survey)
+	
+	rdecompose any_event_rate any_event_comp, group(survey)
+
+	matrix b = e(b) * 100
+	ereturn post b //[1,10]
+	
+restore
+
+end
+
+
 ********************************************************************************
-* EXECUTE PROGRAM
+**# EXECUTE PROGRAMS
 ********************************************************************************
 use "$tempdir/combined_for_decomp.dta", clear // created in ab
 
-foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
-	gen `var'_rate=. // have to do this for round 1 to get boostrap to work? Think was throwing errors every time I had to start the file over
-	gen `var'_comp=. 
+gen pathway=0
+replace pathway=1 if mt_mom==1
+replace pathway=2 if ft_partner_down_mom==1
+replace pathway=3 if ft_partner_down_only==1
+replace pathway=4 if ft_partner_leave==1
+replace pathway=5 if lt_other_changes==1
+label define pathway 0 "None" 1 "Mom up" 2 "Mom up Partner Down" 3 "Partner Down" 4 "Partner Exit" 5 "Other HH"
+label values pathway pathway
+
+gen no=0
+replace no=1 if pathway==0
+	
+gen any_event=0
+replace any_event=1 if inrange(pathway,1,5)
+
+foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes no any_event{
+	gen `var'_rate_a=. // have to do this for round 1 to get boostrap to work? Think was throwing errors every time I had to start the file over
+	gen `var'_comp_all=.
+	gen `var'_comp_path=.
 }
+
+gen any_event_comp=.
+gen any_event_rate=.
 
 // log using "$logdir/bw_decomposition.log", replace
 
 mydecompose // test it
-bootstrap, reps(10) nodrop: mydecompose
-bootstrap, reps(100) nodrop: mydecompose
+bootstrap, reps(2) nodrop: mydecompose // just to figure it out
+bootstrap, reps(100) nodrop: mydecompose // to actually use
+// bootstrap, reps(10) nodrop: mydecompose
 // bootstrap, reps(1000) nodrop: mydecompose
 
 // by education group
@@ -302,8 +386,52 @@ restore
 
 // log close
 
+// log using "$logdir/bw_decomposition.log", append
+
+mydecompose_total
+bootstrap, reps(100) nodrop: mydecompose_total
+
+// by education group
+preserve
+keep if educ==1 | educ==2 // HS or less
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if educ==3 // Some College
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if educ==4 // College
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+// by race/ ethnicity
+preserve
+keep if race==1 // White
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if race==2 // Black
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if race==3 // NH Asian
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+preserve
+keep if race==4 // Hispanic
+bootstrap, reps(100) nodrop: mydecompose_total
+restore
+
+// log close
+
 ********************************************************************************
-* AGGREGATE VIEWS
+**# PATHWAY AGGREGATE VIEWS - still need to figure this out
 ********************************************************************************
 
 program mydecompose_temp, eclass
@@ -438,23 +566,6 @@ restore
 // log close
 
 
-program mydecompose_total, eclass
-
-	preserve
-	collapse (sum) sample transitioned if bw60lag==0, by(survey pathway)
-	// drop if pathway==0 - okay I think I need the none to get composition right
-	gen rate = transitioned / sample
-	
-	rdecompose sample rate, group(survey) transform(sample) sum(pathway) // func(sample*rate) it just keeps being too high of rates and it feels like composition is too high. is it because summing across years?
-	
-	matrix b = e(b) * 100
-	ereturn post b //[1,10]
-
-//	rdecompose sample rate, group(survey) func(sample*rate)
-	restore
-
-end
-
 use "$tempdir/combined_for_decomp.dta", clear // created in ab
 
 	gen pathway=0
@@ -514,53 +625,72 @@ oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_l
 
 oaxaca transitioned mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes if sample==1 & educ==4, by(survey) svy pooled // test for a subgroup
 */	
-// log using "$logdir/bw_decomposition.log", append
-
-mydecompose_total
-bootstrap, reps(100) nodrop: mydecompose_total
-
-// by education group
-preserve
-keep if educ==1 | educ==2 // HS or less
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-preserve
-keep if educ==3 // Some College
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-preserve
-keep if educ==4 // College
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-// by race/ ethnicity
-preserve
-keep if race==1 // White
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-preserve
-keep if race==2 // Black
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-preserve
-keep if race==3 // NH Asian
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-preserve
-keep if race==4 // Hispanic
-bootstrap, reps(100) nodrop: mydecompose_total
-restore
-
-// log close
-
 
 ********************************************************************************
-* MISC. CHECKS
+**# CREATE PROGRAMS ("Original" Estimates)
+********************************************************************************
+* Okay I think program FIRST, then do the data?
+* Okay, because I am creating variables, need to do data each time?! or craete the variables and only bootstrap the collapse? but that won't accomplish anything?
+
+// bootstrap THIS:
+// rate = mean var if bwlag==0 & survey_yr=1996
+// comp = mean trans_bw60_alt2 if bw60lag==0 & survey_yr==`y' & `var'==1
+capture: program drop mydecompose_orig
+
+program mydecompose_orig, eclass
+// browse mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes
+
+
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		drop `var'_comp `var'_rate
+		svy: mean `var' if bw60lag==0 & survey==1996
+		matrix `var'_comp = e(b)
+		gen `var'_comp = e(b)[1,1] if survey==1996
+		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==1996 & `var'==1
+		matrix `var'_rate = e(b)
+		gen `var'_rate = e(b)[1,1] if survey==1996
+	}
+
+	foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave lt_other_changes{
+		svy: mean `var' if bw60lag==0 & survey==2014
+		matrix `var'_comp = e(b)
+		replace `var'_comp = e(b)[1,1] if survey==2014
+		svy: mean trans_bw60_alt2 if bw60lag==0 & survey==2014 & `var'==1
+		matrix `var'_rate = e(b)
+		replace `var'_rate = e(b)[1,1] if survey==2014
+	}
+
+	preserve
+	collapse (mean) mt_mom_rate mt_mom_comp ft_partner_down_mom_rate ft_partner_down_mom_comp ft_partner_down_only_rate ft_partner_down_only_comp ft_partner_leave_rate ft_partner_leave_comp lt_other_changes_rate lt_other_changes_comp, by(survey)
+
+	rdecompose mt_mom_rate mt_mom_comp ft_partner_down_mom_rate ft_partner_down_mom_comp ft_partner_down_only_rate ft_partner_down_only_comp ft_partner_leave_rate ft_partner_leave_comp lt_other_changes_rate lt_other_changes_comp, ///
+	group(survey) func((mt_mom_rate*mt_mom_comp) + (ft_partner_down_mom_rate*ft_partner_down_mom_comp) + (ft_partner_down_only_rate*ft_partner_down_only_comp) + (ft_partner_leave_rate*ft_partner_leave_comp) + (lt_other_changes_rate*lt_other_changes_comp))
+
+	matrix b = e(b) * 100
+	ereturn post b //[1,10]
+
+	restore
+end
+
+program mydecompose_total, eclass
+
+	preserve
+	collapse (sum) sample transitioned if bw60lag==0, by(survey pathway)
+	// drop if pathway==0 - okay I think I need the none to get composition right
+	gen rate = transitioned / sample
+	
+	rdecompose sample rate, group(survey) transform(sample) sum(pathway) // func(sample*rate) it just keeps being too high of rates and it feels like composition is too high. is it because summing across years?
+	
+	matrix b = e(b) * 100
+	ereturn post b //[1,10]
+
+//	rdecompose sample rate, group(survey) func(sample*rate)
+	restore
+
+end
+
+********************************************************************************
+**# MISC. CHECKS
 ********************************************************************************
 // bootstrap, nowarn nodots reps(1000): mydecompose
 // bootstrap, reps(1000): mydecompose //  Error occurred when bootstrap executed mydecompose. insufficient observations to compute bootstrap standard errors. no results will be saved
