@@ -339,6 +339,7 @@ foreach var in mt_mom ft_partner_down_mom ft_partner_down_only ft_partner_leave 
 gen any_event_comp=.
 gen any_event_rate=.
 
+** Pathway specific rate/ composition
 // log using "$logdir/bw_decomposition.log", replace
 
 mydecompose // test it
@@ -386,9 +387,11 @@ restore
 
 // log close
 
+** Total rate / composition
 // log using "$logdir/bw_decomposition.log", append
 
 mydecompose_total
+bootstrap, reps(2) nodrop: mydecompose_total // just to figure it out
 bootstrap, reps(100) nodrop: mydecompose_total
 
 // by education group
