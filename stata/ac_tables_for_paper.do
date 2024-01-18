@@ -26,6 +26,10 @@ label values marital_status_t1 marr
 recode marital_status_t1 (1/2=1)(3=0), gen(partnered)
 recode partnered (0=1)(1=0), gen(single)
 
+// no pathway variable
+gen no_event=0
+replace no_event=1 if mt_mom==0 & ft_partner_down_mom==0 & ft_partner_down_only==0 & ft_partner_leave==0 & lt_other_changes==0
+
 ********************************************************************************
 ********************************************************************************
 * Creating tables for Demography paper
@@ -69,6 +73,13 @@ putexcel A27 = "Older than 30", txtindent(4)
 putexcel A28 = "Marital Status at first birth (time-invariant)"
 putexcel A29 = "Married", txtindent(4)
 putexcel A30 = "Never Married", txtindent(4)
+putexcel A31 = "Pathway into primary earning (among eligible mothers)"
+putexcel A32 = "Partner separation", txtindent(4)
+putexcel A33 = "Mother increased earnings", txtindent(4)
+putexcel A34 = "Partner lost earnings", txtindent(4)
+putexcel A35 = "Mother increased earnings & partner lost earnings", txtindent(4)
+putexcel A36 = "Other member exit | lost earnings", txtindent(4)
+putexcel A37 = "Did not experience any event", txtindent(4)
 
 putexcel F2 = "2014: Ever BW"
 putexcel G2 = "2014: Never BW"
@@ -465,6 +476,26 @@ foreach var in status_b11 status_b12{
 		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
+	
+* Pathway (just among eligible mothers)
+local colu "C D"
+local i=1
+
+foreach var in ft_partner_leave mt_mom ft_partner_down_only ft_partner_down_mom lt_other_changes no_event{
+
+			forvalues y=1/2{
+			local col: word `y' of `colu'
+			local row = `i'+36
+			svy: mean `var' if survey_yr==`y' & bw60lag==0
+			matrix `var'_`y' = e(b)
+			putexcel `col'`row' = matrix(`var'_`y'), nformat(#.##%)
+		}
+		
+		svy: mean `var' if bw60lag==0
+		matrix `var' = e(b)
+		putexcel B`row' = matrix(`var'), nformat(#.##%)		
+		local ++i
+}
 
 
 // Comparison to other mothers
@@ -723,6 +754,15 @@ ttest mt_mom if trans_bw60_alt2==1 & bw60lag==0, by(survey)
 ttest ft_partner_down_only if trans_bw60_alt2==1 & bw60lag==0, by(survey)
 ttest ft_partner_down_mom if trans_bw60_alt2==1 & bw60lag==0, by(survey)
 ttest lt_other_changes if trans_bw60_alt2==1 & bw60lag==0, by(survey)
+
+tab survey ft_partner_leave if bw60lag==0, row
+ttest ft_partner_leave if bw60lag==0, by(survey)
+ttest mt_mom if bw60lag==0, by(survey)
+ttest ft_partner_down_only if bw60lag==0, by(survey)
+ttest ft_partner_down_mom if bw60lag==0, by(survey)
+ttest lt_other_changes if bw60lag==0, by(survey)
+ttest no_event if bw60lag==0, by(survey)
+
 
 ********************************************************************************
 **# Table 2
