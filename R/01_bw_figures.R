@@ -17,7 +17,7 @@ data_f1$path <- factor(data_f1$path,
                                   "Mother increased earnings",
                                   "Partner lost earnings", 
                                   "Mother increased earnings & partner lost earnings",
-                                  "Other member exit or lost earnings"), 
+                                  "Other member exited or lost earnings"), 
                        ordered = FALSE)
 
 ## Create Figure  --------------------------------------------------------------
@@ -31,10 +31,10 @@ fig1 <- ggplot(data_f1, aes(x = vals * prop,
   geom_text(aes(x = vals * prop, y = year, label = sprintf("%1.0f%%", 1*vals)),
             position = position_stack(vjust = .5), vjust = 4, color = "white", fontface = "bold") +
   geom_text(aes(total, year, label = sprintf("%1.0f%%", 1*prop), fill = NULL), hjust = -.2) +
-  geom_curve(x = 710, y = 1.65, xend = 650, yend = 2,    
-             arrow = arrow(), color = "#C2C2C2", linewidth = .2) +
-  geom_curve(x = 870, y = 1.45, xend = 910, yend = 1.05, 
-             arrow = arrow(), color = "#C2C2C2", linewidth = .2, curvature = -0.2) +
+#  geom_curve(x = 710, y = 1.65, xend = 650, yend = 2,    
+#             arrow = arrow(), color = "#C2C2C2", linewidth = .2) +
+#  geom_curve(x = 870, y = 1.45, xend = 910, yend = 1.05, 
+#             arrow = arrow(), color = "#C2C2C2", linewidth = .2, curvature = -0.2) +
   scale_fill_manual(values = c("#d6d6d6", "#C2C2C2", "#8A8A8A", "#474747", "#F27575")) +
   theme_minimal() +
   theme(legend.position     = "none",
@@ -81,7 +81,7 @@ data_f2$event <- factor(data_f2$event,
                         levels = c("Partner separation",
                                    "Mother increased earnings", "Partner lost earnings",
                                    "Mother increased earnings & partner lost earnings",
-                                   "Other member exit or earnings decreased"), ordered = FALSE)
+                                   "Other member exited or earnings decreased"), ordered = FALSE)
 
 levels(data_f2$event)[levels(data_f2$event)=="Mother increased earnings & partner lost earnings"] <- "Mother increased earnings & \npartner lost earnings"
 
