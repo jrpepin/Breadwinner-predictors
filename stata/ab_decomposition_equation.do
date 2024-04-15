@@ -1469,12 +1469,22 @@ save "$tempdir/combined_bw_equation.dta", replace
 
 // log using "$logdir/bw_updates_021522.log", replace
 
+unique SSUID PNUM year, by(survey) // all
+unique SSUID PNUM year if bw60lag==0, by(survey) // all eligible mothers
+unique SSUID PNUM year if bw60lag==0 & transitioned==1, by(survey) // who transition
+unique SSUID PNUM if bw60lag==0 & transitioned==1, by(survey) // who transition - unqiue moms
+svy: mean transitioned if bw60lag==0, over(survey) // what is in paper
+mean transitioned if bw60lag==0, over(survey) // what the math will show
+ 
 // investigations
 * how many moms who had a birth in the panel were breadwinners at the time of birth
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_marital_status if mom_panel==1
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom mom_panel
 
 unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
+unique SSUID PNUM if mom_panel==1, by(survey)
+unique SSUID PNUM if firstbirth==1, by(survey) // but less had FIRST birth in panel
+
 // or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298 -- is this because we only keep her if we have an observation the year prior? I think so
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth
 tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 // 14.99%
@@ -1538,6 +1548,7 @@ replace entered_bw=0 if entered_bw==.
 browse SSUID PNUM year firstyr bw60 entered_bw
 
 tab entered_bw
+tab survey entered_bw, row
 
 * BW whole time
 by SSUID PNUM: egen years_in_sipp = count(year)
@@ -1559,16 +1570,30 @@ browse SSUID PNUM year firstyr years_in_sipp years_eligible years_bw always_bw n
 tab always_bw
 tab always_bw if mom_panel==.
 tab always_bw if mom_panel==1
+tab survey always_bw, row
+tab survey always_bw if entered_bw==1, row
+tab survey always_bw if mom_panel==1, row
 
 gen bw_at_birth=.
 replace bw_at_birth=1 if bw60_mom==1 & firstbirth==1 & mom_panel==1
 bysort SSUID PNUM (bw_at_birth): replace bw_at_birth=bw_at_birth[1] // this flags moms who were BW at birth, puts the 1 for all their rows
 replace bw_at_birth=0 if bw_at_birth==.
 
+gen first_birth_in_panel=.
+replace first_birth_in_panel=1 if firstbirth==1
+bysort SSUID PNUM (first_birth_in_panel): replace first_birth_in_panel=first_birth_in_panel[1] 
+
 browse SSUID PNUM year mom_panel firstbirth bw60 bw60_mom bw_at_birth years_in_sipp years_bw always_bw
 
 tab bw_at_birth if mom_panel==1 & firstbirth==1
+tab bw_at_birth if mom_panel==1
 tab always_bw if bw_at_birth==1
+tab survey always_bw if bw_at_birth==1, row
+tab survey always_bw if first_birth_in_panel==1, row
+
+unique SSUID PNUM if first_birth_in_panel==1, by(survey) // need to do uniques to work with math
+unique SSUID PNUM if first_birth_in_panel==1 & bw_at_birth==1, by(survey) // need to do uniques to work with math
+unique SSUID PNUM if first_birth_in_panel==1 & always_bw==1, by(survey) // need to do uniques to work with math
 
 tab always_bw if mom_panel==1 & survey==1996 // this is OF any women who become mothers NOT those who became bws at panel
 tab always_bw if mom_panel==1 & survey==2014
@@ -1587,6 +1612,16 @@ unique SSUID PNUM if ever_bw60, by(survey) // 4779 / 3595 / 8374 total
 unique SSUID PNUM if ever_bw60 & always_bw, by(survey) // 2036/ 1853 / 3889 total
 unique SSUID PNUM if ever_bw60 & trans_bw60_alt2==1, by(survey) // 1831 / 982 // 2813 total
 
+* average durations
+// average years eligible
+tabstat years_eligible, by(survey)
+tabstat years_eligible if sample==1, by(survey)
+tabstat years_eligible if ever_bw==0, by(survey) // those who never become
+
+// aveage years breadwinning if ever_bw
+tabstat years_bw, by(survey)
+tabstat years_bw if ever_bw60==1, by(survey)
+
 * Transitions OUT of BW
 sort SSUID PNUM year
 gen transition_bw=.
@@ -1601,15 +1636,17 @@ label values transition_bw transition_bw
 tab transition_bw trans_bw60_alt2, m
 browse SSUID PNUM year bw60 trans_bw60_alt2 transition_bw
 tab transition_bw
+tab survey transition_bw, row
+tab transitioned transition_bw, row
 
 * how to get like, if transitioned IN, how many only lasted 1 year
 gen transition_out_bw=0
 replace transition_out_bw=1 if trans_bw60_alt2==1 & transition_bw[_n+1]==2 & year==(year[_n+1]-1) & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 browse SSUID PNUM year bw60 trans_bw60_alt2 transition_bw transition_out_bw
 
-tab trans_bw60_alt2 transition_out_bw, row
-tab trans_bw60_alt2 transition_out_bw if survey==1996, row // how many transition out next year
-tab trans_bw60_alt2 transition_out_bw if survey==2014, row // how many transition out next year
+tab trans_bw60_alt2 transition_out_bw if bw60lag==0, row
+tab trans_bw60_alt2 transition_out_bw if survey==1996 & bw60lag==0, row // how many transition out next year
+tab trans_bw60_alt2 transition_out_bw if survey==2014 & bw60lag==0, row // how many transition out next year
 
 * For those who became mothers in panel
 browse SSUID PNUM year bw60 trans_bw60_alt2 mom_panel firstbirth bw_at_birth transition_bw transition_out_bw 
@@ -1620,6 +1657,18 @@ tab survey transition_out_mom if firstbirth==1 & bw60==1, row
 
 * occupations - end_occ_1 if survey==2014 // will use 1 as primary occupation
 browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom earnings thearn_alt earnings_sp earnings_ratio end_occ_code1 mom_panel
+
+* Get count of transitions by mother
+bysort SSUID PNUM: egen num_transitions = total(transitioned)
+
+sort SSUID PNUM year
+browse SSUID PNUM year transitioned num_transitions
+browse SSUID PNUM year transitioned num_transitions if num_transitions==2
+
+tab num_transitions, m
+unique SSUID PNUM, by(num_transitions)
+unique SSUID PNUM if survey==1996, by(num_transitions)
+unique SSUID PNUM if survey==2014, by(num_transitions)
 
 // occ codes
 * Can we get the top 10 occupations  in 2014 listed for moms who:
