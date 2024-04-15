@@ -3732,6 +3732,9 @@ sum earnings_sp if earnings_sp!=. & survey==2014, detail // p50: 44423, mean: 63
 
 gen earnings_ratio_partner = earnings / couple_earnings
 
+// gen earnings_ratio_mis=earnings_ratio
+// replace earnings_ratio_mis=0 if earnings_ratio==.
+
 // browse SSUID PNUM year earnings earnings_sp couple_earnings mom_part earnings_ratio_partner  
 
 * Total ratio by year
@@ -3746,10 +3749,42 @@ tabstat mom_part if survey==1996, by(educ_gp) stats(mean p50)
 tabstat mom_part if survey==2014, by(educ_gp) stats(mean p50)
 
 // to compare to child support exercise
+**Asian mothers (bc seeing dramatic decline)
 tabstat earnings_ratio_mis if race==3, by(survey) stats(mean p50) // okay yes, is also going down here
 tabstat mom_part if race==3, by(survey) stats(mean p50) // oh wow, really going down here
 tab survey trans_bw60_alt2 if race==3 & bw60lag==0, row // even though more becoming BW...
 tab survey bw60 if race==3, row // interesting...
+
+** partner status - can I validate my findings?
+browse survey earnings earnings_sp couple_earnings earnings_ratio_partner partnered
+
+tabstat earnings_ratio_partner if partnered==1, by(survey) stats(mean p50)
+tabstat earnings_ratio_partner if marital_status_t1==1, by(survey) stats(mean p50)
+tabstat earnings_ratio_partner if marital_status_t1==2, by(survey) stats(mean p50)
+tabstat earnings_ratio_partner if marital_status_t1==1 & status_b1==1, by(survey) stats(mean p50)
+tabstat earnings_ratio_partner if status_b1==1, by(survey) stats(mean p50)
+tabstat mom_part if partnered==1, by(survey) stats(mean p50)
+
+sum earnings_ratio_partner, detail
+
+gen partner_ratio_gp=.
+replace partner_ratio_gp=0 if earnings_ratio_partner==0
+replace partner_ratio_gp=1 if earnings_ratio_partner>0 & earnings_ratio_partner<=0.1
+replace partner_ratio_gp=2 if earnings_ratio_partner>0.1 & earnings_ratio_partner<=0.2
+replace partner_ratio_gp=3 if earnings_ratio_partner>0.2 & earnings_ratio_partner<=0.3
+replace partner_ratio_gp=4 if earnings_ratio_partner>0.3 & earnings_ratio_partner<=0.4
+replace partner_ratio_gp=5 if earnings_ratio_partner>0.4 & earnings_ratio_partner<=0.5
+replace partner_ratio_gp=6 if earnings_ratio_partner>0.5 & earnings_ratio_partner<=0.6
+replace partner_ratio_gp=7 if earnings_ratio_partner>0.6 & earnings_ratio_partner<=0.7
+replace partner_ratio_gp=8 if earnings_ratio_partner>0.7 & earnings_ratio_partner<=0.8
+replace partner_ratio_gp=9 if earnings_ratio_partner>0.8 & earnings_ratio_partner<=0.9
+replace partner_ratio_gp=10 if earnings_ratio_partner>0.9 & earnings_ratio_partner<=1
+
+label define partner_ratio_gp 0 "0%" 1 "1-10%" 2 "10-20%" 3 "20-30%" 4 "30-40%" 5 "40-50%" 6 "50-60%" 7 "60-70%" 8 "70-80%" 9 "80%-90%" 10 "90%-100%"
+label values partner_ratio_gp partner_ratio_gp
+
+tab partner_ratio_gp survey if partnered==1, col nofreq
+tab partner_ratio_gp survey if marital_status_t1==1, col nofreq
 
 * ttest
 svyset [pweight=scaled_weight]

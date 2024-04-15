@@ -944,6 +944,113 @@ group(year) func((exit_rate*exit_comp) + (momup_rate*momup_comp) + (partnerdown_
 (momup_partnerdown_rate*momup_partnerdown_comp) + (other_rate*other_comp)) detail
 
 // okay the article (Li 2017) talks about bootstrapping. think i need to do it at individual level
+*/
+
+********************************************************************************
+**# * Robustness to more detailed pathways
+********************************************************************************
+use "$tempdir/combined_bw_equation.dta", clear
+svyset [pweight = wpfinwgt]
+
+// For ease, let's first create a variable that is all pathways. 
+gen pathway=0
+replace pathway = 1 if ft_partner_leave==1 // partner left
+replace pathway = 2 if mt_mom==1 // mom up only
+replace pathway = 3 if ft_partner_down_only==1 // partner down only
+replace pathway = 4 if ft_partner_down_mom==1 // mom up, partner down
+replace pathway = 5 if lt_other_changes== 1 // other HH member
+
+label define pathway 0 "None" 1 "Partner Exit" 2 "MoM Up Only" 3 "Partner Down" 4 "Mom up Partner Down" 5 "Other HH"
+label values pathway pathway
+
+gen sample=0
+replace sample=1 if bw60lag==0
+
+gen transitioned=0
+replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
+
+tab pathway survey if sample==1, col
+svy: tab pathway survey if sample==1, col // first just want to validate this matches paper
+
+// relevant variables to use below
+tab earnup8_all // did mom's earnings go up
+inspect earn_change // actual earnings change - only above if above certain threshold of earnings change
+tab partner_lose // partner exit
+tab earndown8_sp_all // did spouses' earnings go down
+tab earn_lose // other earner (non-partner) left
+tab earndown8_hh_all // earnings down - everyone BUT mom
+tab earndown8_oth_all // earnings down - everyone but mom AND partner
+tab mom_gain_earn // this is mom went from $0 earnings to having earnings
+tab part_lose_earn // this is partner went from earnings to $0 - I think this is annual
+tab end_partner_earn // will let me know if partner earnings went down to 0 or something else - bc spouse earnings is annual, so we need to know if last month of year is $0, doesn't need to be annual down to $0?
+
+browse SSUID PNUM year pathway numearner earn_lose partner_lose earndown8_oth_all earndown8_hh_all earnings earnings_sp thearn_alt
+tab earn_lose earndown8_oth_all, row
+tab pathway earn_lose
+tab pathway earndown8_oth_all
+tab earn_lose earndown8_oth_all if pathway==5
+
+tab earndown8_sp_all earndown8_oth_all, row // what is overlap?
+gen overlap_partner_hh=0
+replace overlap_partner_hh=1 if earndown8_sp_all==1 & earndown8_oth_all==1
+tab pathway overlap_partner_hh, row // so currently largely in partner down and mom up partner down
+
+// okay think I need to create some variables also
+sort SSUID PNUM year
+gen earnings_lag = earnings[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+gen thearn_lag = thearn_alt[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+// browse SSUID PNUM year earnings earnings_lag thearn_alt thearn_lag
+
+gen start_from_0 = 0
+replace start_from_0=1 if earnings_lag==0
+tab start_from_0 mom_gain_earn
+
+gen partner_zero=0
+replace partner_zero=1 if end_partner_earn==0
+tab pathway partner_zero, row
+
+browse SSUID PNUM year pathway earnings earnings_sp end_partner_earn
+
+// detailed pathways to create - why do i feel like I did some of this before? does this need to happen monthly or can I do this here?
+
+gen pathway_detail=.
+replace pathway_detail=0 if pathway==0 // this will allow me to see if some still missing after this, aka I did not do this right
+replace pathway_detail = 1 if pathway==1 & earnup8_all==0 // Partner exit, her income did not change (within 8%)
+replace pathway_detail = 2 if pathway==1 & earnup8_all==1 // Partner exit, her income also went up (decide if need to split from $0 or not)
+replace pathway_detail = 3 if pathway==2 & start_from_0==1 // Mom's earnings up only, started from $0
+replace pathway_detail = 4 if pathway==2 & start_from_0==0 // Mom's earnings up only, already had earnings
+replace pathway_detail = 5 if pathway==3 & partner_zero==1 // Partner earnings down only, went to $0
+replace pathway_detail = 6 if pathway==3 & partner_zero==0 // Partner earnings down only, maintained some level of earnings
+replace pathway_detail = 7 if pathway==4 & start_from_0==1 & partner_zero==1 // Mom up, partner down - Mom from $0, partner to $0
+replace pathway_detail = 8 if pathway==4 & start_from_0==0 & partner_zero==1 // Mom up, partner down - Mom up, partner to $0
+replace pathway_detail = 9 if pathway==4 & start_from_0==1 & partner_zero==0 // Mom up, partner down - Mom from $0, partner down
+replace pathway_detail = 10 if pathway==4 & start_from_0==0 & partner_zero==0 // Mom up, partner down - Mom up, partner down
+replace pathway_detail = 11 if pathway==5 & earndown8_oth_all==1 & earn_lose==0 & earnup8_all==0 // Other HH member change, lost earnings (prio exit so exit has to be 0), no changes in mom's earnings
+replace pathway_detail = 12 if pathway==5 & earndown8_oth_all==1 & earn_lose==0 & earnup8_all==1 // Other HH member change, lost earnings, mom's earnings also went up
+replace pathway_detail = 13 if pathway==5 & earn_lose==1 & earnup8_all==0 // Other HH member change, exited HH, no changes in mom's earnings
+replace pathway_detail = 14 if pathway==5 & earn_lose==1 & earnup8_all==1 // Other HH member change, exited HH, mom's earnings also went up
+
+label define pathway_detail 0 "None" 1 "Exit, No Change" 2 "Exit, Mom Up" 3 "Mom Up, from $0" 4 "Mom Up" 5 "Partner Down, to $0" 6 "Partner Down" 7 "Mom Up from $0, Partner Down to $0" 8 "Mom Up, Partner to $0" 9 "Mom up from $0, Partner Down" 10 "Mom Up Partner Down" 11 "Other HH Lost, No Mom" 12 "Other HH Lost, Mom Up" 13 "Other HH Exit, No Mom" 14 "Other HH Exit, Mom up"
+label values pathway_detail pathway_detail
+
+tab pathway_detail, m // so no missing, so that is good
+tab pathway_detail pathway, m // validate that pathways are mapped to hero pathway i want
+
+// okay, I think this will be the most detailed / mutually exclusive
+gen pathway_detail_alt=pathway_detail
+replace pathway_detail_alt = 15 if earndown8_sp_all==1 & earndown8_oth_all==1 & earnup8_all==1 & pathway!=1 // Partner AND other HH member lost earnings, mom's earnings also went up // where is this currently classified?? I don't want to overwrite any of the above. These might need to be incidence? because I think are caputred above somewhere...do I want to take them out of above?? maybe create ANOTHER variable?? because this will then make the above mutually exclusive? because some of partner above I think are agnostic as to whether another hh member lost earnings. so this will reduce either 5 or 6 and put them here? yes, per above
+replace pathway_detail_alt = 16 if earndown8_sp_all==1 & earndown8_oth_all==1 & earnup8_all==0 & pathway!=1 // Partner AND other HH member lost earnings, no changes in mom's earnings
+
+label define pathway_detail_alt 0 "None" 1 "Exit, No Change" 2 "Exit, Mom Up" 3 "Mom Up, from $0" 4 "Mom Up" 5 "Partner Down, to $0" 6 "Partner Down" 7 "Mom Up from $0, Partner Down to $0" 8 "Mom Up, Partner to $0" 9 "Mom up from $0, Partner Down" 10 "Mom Up Partner Down" 11 "Other HH Lost, No Mom" 12 "Other HH Lost, Mom Up" 13 "Other HH Exit, No Mom" 14 "Other HH Exit, Mom up" 15 "Partner + HH Down, Mom Up" 16 "Partner + HH Down, No Mom"
+label values pathway_detail_alt pathway_detail_alt
+
+tab pathway_detail_alt, m
+tab pathway_detail_alt pathway, m
+
+//descriptives
+svy: tab pathway survey if sample==1, col // matches paper    
+svy: tab pathway_detail survey if sample==1, col  
+svy: tab pathway_detail_alt survey if sample==1, col 
 
 ********************************************************************************
 **# * Second specification: "Mom" is reference category, rest are unique
