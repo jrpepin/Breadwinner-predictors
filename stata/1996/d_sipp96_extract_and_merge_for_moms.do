@@ -24,11 +24,11 @@ clear
       use "$SIPP1996/sip96l`w'.dta"
    	keep	swave rhcalyr rhcalmn srefmon wpfinwgt ssuid epppnum ehrefper errp eentaid shhadid		/// /* TECHNICAL */
 			eppintvw rhchange epnmom etypmom epndad etypdad epnspous ehhnumpp						///
-			tpearn  tpmsum* apmsum* tftotinc thtotinc thpov 										/// /* FINANCIAL   */
+			tpearn  tpmsum* tbmsum* apmsum* tftotinc thtotinc thpov tprftb*							/// /* FINANCIAL   */
 			erace eorigin esex tage  eeducate   ems uentmain ulftmain								/// /* DEMOGRAPHIC */
 			rfnkids rfownkid rfoklt18																/// /* KIDS IN FAMILY */
 			tjbocc* ejbind* rmhrswk ejbhrs* eawop rmesr epdjbthn ejobcntr eptwrk eptresn			/// /* EMPLOYMENT & EARNINGS */
-			ersend* ersnowrk rpyper* epayhr* tpyrate* rwksperm rmwkwjb								///
+			ersend* ersnowrk rpyper* epayhr* tpyrate* rwksperm rmwkwjb eclwrk* ebuscntr  egrssb*	///
 			rcutyp27 rcutyp21 rcutyp25 rcutyp20 rcutyp24 rhnbrf rhcbrf rhmtrf efsyn epatyn ewicyn	/// /* PROGRAM USAGE */
 			renroll eenlevel  epatyp5 	edisabl edisprev											/// /* MISC (enrollment, child care, disability)*/
 			

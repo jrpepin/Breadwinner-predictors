@@ -1047,10 +1047,31 @@ label values pathway_detail_alt pathway_detail_alt
 tab pathway_detail_alt, m
 tab pathway_detail_alt pathway, m
 
+// actually using
+gen pathway_detail_v2 = pathway_detail_alt
+replace pathway_detail_v2 = 5 if inlist(pathway_detail_alt,5,6)
+replace pathway_detail_v2 = 7 if inlist(pathway_detail_alt,7,8,9,10)
+
+tab pathway_detail_v2, m
+
+label define pathway_detail_v2 0 "None" 1 "Exit, No Change" 2 "Exit, Mom Up" 3 "Mom Up, from $0" 4 "Mom Up" 5 "Partner Down only" 7 "Mom Up Partner Down only" 11 "Other HH Lost, No Mom" 12 "Other HH Lost, Mom Up" 13 "Other HH Exit, No Mom" 14 "Other HH Exit, Mom up" 15 "Partner + HH Down, Mom Up" 16 "Partner + HH Down, No Mom"
+label values pathway_detail_v2 pathway_detail_v2
+
 //descriptives
 svy: tab pathway survey if sample==1, col // matches paper    
 svy: tab pathway_detail survey if sample==1, col  
 svy: tab pathway_detail_alt survey if sample==1, col 
+svy: tab pathway_detail_v2 survey if sample==1, col 
+
+// then get rate
+svy: tab pathway transitioned if sample==1 & survey==1996, row // matches paper
+svy: tab pathway transitioned if sample==1 & survey==2014, row  // matches paper
+  
+svy: tab pathway_detail_v2 transitioned if sample==1 & survey==1996, row  
+svy: tab pathway_detail_v2 transitioned if sample==1 & survey==2014, row  
+
+svy: tab survey transitioned if sample==1 & inlist(pathway_detail_v2,11,13), row // other HH change, no mom change
+svy: tab survey transitioned if sample==1 & inlist(pathway_detail_v2,12,14), row // other HH change, mom earnings up
 
 ********************************************************************************
 **# * Second specification: "Mom" is reference category, rest are unique

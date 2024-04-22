@@ -27,8 +27,9 @@ clear
 			tyrcurrmarr tyrfirstmarr exmar eehc_why	?mover tehc_mvyr eehc_why									///
 			tjb*_occ tjb*_ind tmwkhrs enjflag rmesr rmnumjobs ejb*_bmonth ejb*_emonth ejb*_ptresn*				/// /* EMPLOYMENT */
 			ejb*_rsend ejb*_wsmnr enj_nowrk* ejb*_payhr* ejb*_wsjob ajb*_rsend ejb*_jborse rmwkwjb				///
+			ejb*_clwrk ejb*_bslryb																				///
 			tjb*_annsal* tjb*_hourly* tjb*_wkly* tjb*_bwkly* tjb*_mthly* tjb*_smthly* tjb*_other* 				/// /* EARNINGS */
-			tjb*_gamt* tjb*_msum tpearn																			///
+			tjb*_gamt* tjb*_msum tpearn tjb*_prftb																///
 			efindjob edisabl ejobcant rdis rdis_alt edisany														/// /* DISABILITY */
 			eeitc eenergy_asst ehouse_any rfsyn tgayn rtanfyn rwicyn rtanfcov ttanf_amt							/// /* PROGRAM USAGE */
 			ewelac_mnyn renroll eedgrade eedcred																/// /* ENROLLMENT */
@@ -90,15 +91,32 @@ drop tmover rmover
 	
 // Creating a measure of earnings solely based on wages and not profits and losses
 	egen earnings=rowtotal(tjb1_msum tjb2_msum tjb3_msum tjb4_msum tjb5_msum tjb6_msum tjb7_msum), missing
+	egen profits_annual=rowtotal(tjb1_prftb tjb2_prftb tjb3_prftb tjb4_prftb tjb5_prftb tjb6_prftb tjb7_prftb), missing
+	gen profits=profits_annual / 12
+	egen tpearn_calculated = rowtotal(earnings profits), missing
+	
+	browse tpearn earnings profits tpearn_calculated tjb1_prftb tjb2_prftb ejb1_jborse // 2 is self-employed
+	tabstat profits, by(ejb1_jborse)
 
 	// browse earnings tpearn
 	gen check_e=.
 	replace check_e=0 if earnings!=tpearn & tpearn!=.
 	replace check_e=1 if earnings==tpearn
 
-	tab check_e 
+	tab check_e, m
 	
-	tab ejb1_jborse check_e, m
+	gen check_e2=0
+	replace check_e2=1 if (tpearn_calculated - tpearn >=0) & (tpearn_calculated - tpearn <=100)  // within $100 either way
+	replace check_e2=1 if (tpearn_calculated - tpearn <=0) & (tpearn_calculated - tpearn >=-100)  // within $100 either way
+	replace check_e2=1 if tpearn_calculated==tpearn
+	replace check_e2=1 if tpearn_calculated==. & tpearn==.
+
+	tab check_e2, m // overall match quite good
+	
+	tab ejb1_jborse check_e2, m row // biggest discrepancies are in self-employed
+	// browse tjb1_prftb ejb1_jborse tjb1_msum tpearn
+	// browse tjb1_prftb ejb1_jborse tjb1_msum tpearn if ejb1_jborse==2
+	// tabstat tjb1_msum, by(ejb1_jborse) // still records earnings even if self-employed
     
 	egen thearn_alt = total(earnings), 	by(SSUID ERESIDENCEID swave monthcode) // how different is a HH measure based on earnings v. tpearn?
 	// browse tftotinc thtotinc thearn thearn_alt

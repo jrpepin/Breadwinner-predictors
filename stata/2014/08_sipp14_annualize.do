@@ -216,6 +216,7 @@ gen ratio = distro / distro14
 
 save "$tempdir/partner_distro_lookup.dta", replace
 
+**# Start here if don't need to change above
 //*Back to original and testing match
 
 use "$SIPP14keep/sipp14tpearn_rel", clear
@@ -615,19 +616,19 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					full_part full_no part_no part_full no_part no_full educ_change		///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp			///
 					no_full_sp educ_change_sp rmwkwjb weeks_employed_sp					///
-					program_income tanf_amount rtanfyn									///
+					program_income tanf_amount rtanfyn tpearn_calculated profits		///
 			(mean) 	spouse partner numtype2 wpfinwgt scaled_weight correction birth 	/// 
 					mom_panel avg_hhsize = hhsize avg_hrs=tmwkhrs avg_earn=earnings  	///
 					numearner other_earner thincpovt2 pov_level start_marital_status 	///
 					last_marital_status tjb*_annsal1 tjb*_hourly1 tjb*_wkly1  			///
 					tjb*_bwkly1 tjb*_mthly1 tjb*_smthly1 tjb*_other1 tjb*_gamt1			///
 					eeitc rtanfcov thinc_bank thinc_stmf thinc_bond thinc_rent 			///
-					thinc_oth thinc_ast 												///
+					thinc_oth thinc_ast profits_annual									///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
 					prebiochildren race educ race_sp educ_sp sex_sp tceb oldest_age 	///
 					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
 					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
-					yrfirstbirth														///
+					yrfirstbirth ejb*_jborse											///
 			(min) 	tage_fb durmom durmom_1st youngest_age first_wave					///
 					tpearn_mis tmwkhrs_mis earnings_mis									///
 					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///
@@ -729,3 +730,36 @@ gen multiple_partner_transitions=0
 replace multiple_partner_transitions=1 if add_partner==1 & lose_partner==1
 
 browse SSUID PNUM year add_partner lose_partner sing_coh  sing_mar  coh_mar  coh_diss  marr_diss  marr_wid marr_coh 
+
+// descriptive information about self-employment
+browse SSUID PNUM year tpearn earnings tpearn_calculated profits profits_annual ejb1_jborse ejb2_jborse ejb3_jborse ejb4_jborse ejb5_jborse ejb6_jborse ejb7_jborse
+
+	// new indicator of match (now that is annualized)
+	gen check_e=.
+	replace check_e=0 if earnings!=tpearn & tpearn!=.
+	replace check_e=1 if earnings==tpearn
+
+	tab check_e, m
+	
+	gen check_e2=0
+	replace check_e2=1 if (tpearn_calculated - tpearn >=0) & (tpearn_calculated - tpearn <=1000)  // within $1000 either way (now that annualized)
+	replace check_e2=1 if (tpearn_calculated - tpearn <=0) & (tpearn_calculated - tpearn >=-1000)  // within $1000 either way
+	replace check_e2=1 if tpearn_calculated==tpearn
+	replace check_e2=1 if tpearn_calculated==. & tpearn==.
+	replace check_e2=1 if tpearn_calculated==0 & tpearn==.
+
+	tab check_e2, m // so only 151 not within the right amount
+
+gen any_self_employment=0
+forvalues e=1/7{
+	replace any_self_employment=1 if ejb`e'_jborse==2
+}
+
+tab any_self_employment, m //6%
+tab any_self_employment check_e, row // basically 100% match for non-self employed
+
+gen only_profits=0
+replace only_profits=1 if (profits_annual>0 & profits_annual!=.) & (earnings==0 | earnings==.)
+
+tab only_profits, m
+tab any_self_employment only_profits, row

@@ -202,6 +202,7 @@ egen total_N=total(partner_lose)
 gen distro=partner_lose/total_N
 save "$tempdir/96_partner_distro.dta", replace
 
+**# Start here if don't need to edit above
 //*Back to original and testing match
 
 use "$SIPP96keep/sipp96tpearn_rel.dta", clear
@@ -550,13 +551,14 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 									/
 					resp_non first_birth partner_gain partner_lose rmwkwjb weeks_employed_sp				///
 					full_part full_no part_no part_full no_part no_full										///
 					full_part_sp full_no_sp part_no_sp part_full_sp no_part_sp no_full_sp					///
+					tpearn_calculated profits tpmsum1 tpmsum2 tbmsum1 tbmsum2 tprftb1 tprftb2				///
 			(mean) 	spouse partner wpfinwgt scaled_weight birth mom_panel 								 	///
 					avg_hhsize=hhsize start_marital_status last_marital_status avg_mo_hrs avg_mo_hrs_sp 	///
 					avg_earn=earnings numearner other_earner tpyrate1 tpyrate2 avg_wk_rate thpov			/// 		
 			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age				///
 					race educ race_sp educ_sp tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth  		///
 					 status_b1 minors_fy start_spartner last_spartner start_spouse last_spouse 				///
-					start_partner last_partner																///
+					start_partner last_partner eclwrk1 eclwrk2	ejobcntr ebuscntr							///
 			(min) 	durmom durmom_1st emomlivh youngest_age first_wave										///
 					tpearn_mis earnings_mis to_mis_tpearn* to_mis_earnings*									/// put emomlivh as min, bc min=yes and if at SOME PT in year, want here
 			(max) 	relationship* to_num* to_sex* to_age* to_race* to_educ*									/// other hh members char.
@@ -637,3 +639,38 @@ rename yrfirstbirth2 yrfirstbirth
 */
 	
 save "$SIPP96keep/sipp96_annual_bw_status.dta", replace
+
+// descriptive information about self-employment
+browse SSUID PNUM year ejobcntr ebuscntr tpearn earnings tpearn_calculated profits tpmsum1 tpmsum2 tbmsum1 tbmsum2 tprftb1 tprftb2 eclwrk1 eclwrk2
+browse SSUID PNUM year eclwrk1 tpmsum1 eclwrk2  tpmsum2 earnings profits if  eclwrk1==6 | eclwrk2==6 // is family worker self-emplyed?? do they have earnings?? profits??
+tabstat tpmsum1, by(eclwrk1) // so, some have earnings?
+
+	// new indicator of match (now that is annualized)
+	gen check_e=.
+	replace check_e=0 if earnings!=tpearn & tpearn!=.
+	replace check_e=1 if earnings==tpearn
+	tab check_e, m
+	
+	gen check_e2=0
+	replace check_e2=0 if tpearn_calculated!=tpearn & tpearn!=.
+	replace check_e2=1 if tpearn_calculated==tpearn
+	replace check_e2=1 if tpearn_calculated==0 & tpearn==.
+	tab check_e2, m // why isn't this matched as well. Okay, are profits not actually included? I am so confused?
+	tab check_e2 if ejobcntr!=-1 & ejobcntr!=0, m 
+
+gen any_self_employment=0
+replace any_self_employment = 1 if eclwrk1==6 | eclwrk2==6
+
+gen any_bus_owner=0
+replace any_bus_owner=1 if ebuscntr>0 & ebuscntr!=.
+
+tab any_self_employment, m // 1.72%
+tab any_self_employment check_e, row // basically 100% match for non-self employed
+tab any_bus_owner check_e, row // closer match for non-biz owners
+tab any_bus_owner check_e2, row // closer match for non-biz owners
+
+gen only_profits=0
+replace only_profits=1 if (profits>0 & profits!=.) & (earnings==0 | earnings==.)
+
+tab only_profits, m
+tab any_self_employment only_profits, row

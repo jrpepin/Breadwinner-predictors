@@ -33,14 +33,25 @@ browse SSUID PNUM panelmonth ehrefper errp erelat* eprlpn*
     egen thearn = total(tpearn), 	by(SSUID ERESIDENCEID swave monthcode)
 	
 // Creating a measure of earnings solely based on wages and not profits and losses
+
 	egen earnings=rowtotal(tpmsum1 tpmsum2), missing
+browse tpearn earnings tpmsum1 tpmsum2 tbmsum1 tbmsum2 tprftb1 tprftb2 ejobcntr ebuscntr 
+	egen profits=rowtotal(tbmsum1 tbmsum2), missing
+	egen tpearn_calculated = rowtotal(earnings profits), missing
+	
+	browse tpearn earnings profits tpearn_calculated tpmsum1 tpmsum2 tbmsum1 tbmsum2 eclwrk1 eclwrk2 // not sure any of these are self-employed. Maybe 6?
+	tabstat profits, by(eclwrk1)
 
 	// browse earnings tpearn
 	gen check_e=.
 	replace check_e=0 if earnings!=tpearn & tpearn!=.
 	replace check_e=1 if earnings==tpearn
-
-	tab check_e 
+	tab check_e, m
+	
+	gen check_e2=0
+	replace check_e2=0 if tpearn_calculated!=tpearn & tpearn!=.
+	replace check_e2=1 if tpearn_calculated==tpearn
+	tab check_e2, m // okay, so with profits added, essentially 100% match (99.5%)
 	
 	egen thearn_alt = total(earnings), 	by(SSUID ERESIDENCEID swave monthcode) // how different is a HH measure based on earnings v. tpearn?
 	// browse SSUID thearn thearn_alt
