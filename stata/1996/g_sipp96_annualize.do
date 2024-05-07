@@ -664,13 +664,19 @@ replace any_self_employment = 1 if eclwrk1==6 | eclwrk2==6
 gen any_bus_owner=0
 replace any_bus_owner=1 if ebuscntr>0 & ebuscntr!=.
 
+gen has_bus_income=0
+replace has_bus_income=1 if tbmsum1>0 | tbmsum2 > 0
+browse SSUID PNUM year ejobcntr ebuscntr tpearn earnings tpearn_calculated profits tbmsum1 tbmsum2 if has_bus_income==1
+
 tab any_self_employment, m // 1.72%
 tab any_self_employment check_e, row // basically 100% match for non-self employed
 tab any_bus_owner check_e, row // closer match for non-biz owners
 tab any_bus_owner check_e2, row // closer match for non-biz owners
+tab has_bus_income, m
 
 gen only_profits=0
 replace only_profits=1 if (profits>0 & profits!=.) & (earnings==0 | earnings==.)
 
 tab only_profits, m
 tab any_self_employment only_profits, row
+tab any_bus_owner only_profits, row

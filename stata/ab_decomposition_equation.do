@@ -1665,9 +1665,14 @@ gen transition_out_bw=0
 replace transition_out_bw=1 if trans_bw60_alt2==1 & transition_bw[_n+1]==2 & year==(year[_n+1]-1) & SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1]
 browse SSUID PNUM year bw60 trans_bw60_alt2 transition_bw transition_out_bw
 
+gen transition_out=0
+replace transition_out=1 if bw60==0 & bw60[_n-1]==1 & year==(year[_n-1]+1) & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] // this is all transitions out
+
 tab trans_bw60_alt2 transition_out_bw if bw60lag==0, row
 tab trans_bw60_alt2 transition_out_bw if survey==1996 & bw60lag==0, row // how many transition out next year
 tab trans_bw60_alt2 transition_out_bw if survey==2014 & bw60lag==0, row // how many transition out next year
+
+tab survey transition_out, row
 
 * For those who became mothers in panel
 browse SSUID PNUM year bw60 trans_bw60_alt2 mom_panel firstbirth bw_at_birth transition_bw transition_out_bw 
