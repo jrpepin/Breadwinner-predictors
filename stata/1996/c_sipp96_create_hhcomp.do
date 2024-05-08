@@ -36,6 +36,8 @@ gen minorchildren	=1 		if inrange(relationship, 20,24) & to_age < 18
 gen minorbiochildren=1 		if relationship==20 & to_age < 18
 gen preschoolchildren = 1 	if inrange(relationship, 20,24) & to_age<=5
 gen prebiochildren	=1		if relationship==20 & to_age<=5
+gen age3children = 1 		if inrange(relationship, 20,24) & to_age<3
+gen age3biochildren	=1		if relationship==20 & to_age<3
 
 // Create children's age variable
 gen childage		=to_age if allchildren==1 
@@ -57,7 +59,7 @@ gen siblings		=1		if inrange(relationship, 30, 34)
 // Every person gets a 1 to prep for collapse.
 gen hhsize			=1
 
-collapse (count) minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner hhsize parents grandparents grandchildren siblings (min) youngest_age=childage (max) oldest_age=childage, by(SSUID PNUM panelmonth)
+collapse (count) minorchildren minorbiochildren preschoolchildren prebiochildren age3children age3biochildren spouse partner hhsize parents grandparents grandchildren siblings (min) youngest_age=childage (max) oldest_age=childage (mean) all_ages=childage, by(SSUID PNUM panelmonth)
 
 * this file has one record per person living with PNUM. Need to add add one to hhsize for PNUM
 replace hhsize=hhsize+1

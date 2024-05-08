@@ -625,10 +625,10 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 				/// mo
 					eeitc rtanfcov thinc_bank thinc_stmf thinc_bond thinc_rent 			///
 					thinc_oth thinc_ast profits_annual									///
 			(max) 	minorchildren minorbiochildren preschoolchildren minors_fy			///
-					prebiochildren race educ race_sp educ_sp sex_sp tceb oldest_age 	///
-					ejb*_payhr1 start_spartner last_spartner start_spouse last_spouse	///
-					start_partner last_partner tage ageb1 status_b1 tcbyr_1-tcbyr_7		///
-					yrfirstbirth ejb*_jborse											///
+					prebiochildren age3children age3biochildren race educ race_sp 		///
+					educ_sp sex_sp tceb oldest_age all_ages	ejb*_payhr1 start_spartner	///
+					last_spartner start_spouse last_spouse start_partner last_partner 	///
+					tage ageb1 status_b1 tcbyr_1-tcbyr_7 yrfirstbirth ejb*_jborse		///
 			(min) 	tage_fb durmom durmom_1st youngest_age first_wave					///
 					tpearn_mis tmwkhrs_mis earnings_mis									///
 					to_mis_TPEARN* to_mis_TMWKHRS* to_mis_earnings*						///

@@ -555,7 +555,8 @@ collapse 	(count) monthsobserved=one  nmos_bw50=mbw50 nmos_bw60=mbw60 									/
 			(mean) 	spouse partner wpfinwgt scaled_weight birth mom_panel 								 	///
 					avg_hhsize=hhsize start_marital_status last_marital_status avg_mo_hrs avg_mo_hrs_sp 	///
 					avg_earn=earnings numearner other_earner tpyrate1 tpyrate2 avg_wk_rate thpov			/// 		
-			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren oldest_age				///
+			(max) 	minorchildren minorbiochildren preschoolchildren prebiochildren 						///
+					age3children age3biochildren all_ages oldest_age										///
 					race educ race_sp educ_sp tmomchl tage ageb1 ageb1_mon yrfirstbirth yrlastbirth  		///
 					 status_b1 minors_fy start_spartner last_spartner start_spouse last_spouse 				///
 					start_partner last_partner eclwrk1 eclwrk2	ejobcntr ebuscntr							///

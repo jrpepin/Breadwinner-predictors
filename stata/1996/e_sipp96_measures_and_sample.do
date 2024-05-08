@@ -374,7 +374,7 @@ tab person, m
 	* So, individuals living alone are not in the data.
 
 	// Make relationship variables equal to zero
-	local hhcompvars "minorchildren minorbiochildren preschoolchildren prebiochildren spouse partner parents grandparents grandchildren siblings"
+	local hhcompvars "minorchildren minorbiochildren preschoolchildren prebiochildren age3children age3biochildren spouse partner parents grandparents grandchildren siblings"
 
 	foreach var of local hhcompvars{
 		replace `var'=0 if _merge==1 & missing(`var') 
