@@ -1073,6 +1073,7 @@ svy: tab pathway_detail_v2 transitioned if sample==1 & survey==2014, row
 svy: tab survey transitioned if sample==1 & inlist(pathway_detail_v2,11,13), row // other HH change, no mom change
 svy: tab survey transitioned if sample==1 & inlist(pathway_detail_v2,12,14), row // other HH change, mom earnings up
 
+/*
 ********************************************************************************
 **# * Second specification: "Mom" is reference category, rest are unique
 ********************************************************************************
@@ -1482,6 +1483,7 @@ dyndoc "$bw_base_code/Predictor_Decomposition.md", saving($results/Predictor_Dec
 drop base_1 base_2
 
 save "$tempdir/combined_bw_equation.dta", replace
+*/
 */
 
 ********************************************************************************

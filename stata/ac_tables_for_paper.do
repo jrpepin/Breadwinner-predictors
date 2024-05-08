@@ -30,6 +30,16 @@ recode partnered (0=1)(1=0), gen(single)
 gen no_event=0
 replace no_event=1 if mt_mom==0 & ft_partner_down_mom==0 & ft_partner_down_only==0 & ft_partner_leave==0 & lt_other_changes==0
 
+// binary indicators for certain child variables
+gen any_pre3_child=0
+replace any_pre3_child=1 if age3biochildren > 0 & age3biochildren !=.
+
+gen any_pre5_child=0
+replace any_pre5_child=1 if prebiochildren > 0 & prebiochildren !=.
+
+mean all_ages youngest_age oldest_age minorbiochildren
+// tabstat minorbiochildren minorchildren st_minorchildren end_minorchildren
+
 ********************************************************************************
 ********************************************************************************
 * Creating tables for Demography paper
@@ -73,13 +83,20 @@ putexcel A27 = "Older than 30", txtindent(4)
 putexcel A28 = "Marital Status at first birth (time-invariant)"
 putexcel A29 = "Married", txtindent(4)
 putexcel A30 = "Never Married", txtindent(4)
-putexcel A31 = "Pathway into primary earning (among eligible mothers)"
-putexcel A32 = "Partner separation", txtindent(4)
-putexcel A33 = "Mother increased earnings", txtindent(4)
-putexcel A34 = "Partner lost earnings", txtindent(4)
-putexcel A35 = "Mother increased earnings & partner lost earnings", txtindent(4)
-putexcel A36 = "Other member exit | lost earnings", txtindent(4)
-putexcel A37 = "Did not experience any event", txtindent(4)
+putexcel A31 = "Children info (time-varying)"
+putexcel A32 = "Any child under age 3", txtindent(4)
+putexcel A33 = "Any child under age 5", txtindent(4)
+putexcel A34 = "Average age: oldest child", txtindent(4)
+putexcel A35 = "Average age: youngest child", txtindent(4)
+putexcel A36 = "Average age: all children", txtindent(4)
+putexcel A37 = "AAverage number of children", txtindent(4)
+putexcel A38 = "Pathway into primary earning (among eligible mothers)"
+putexcel A39 = "Partner separation", txtindent(4)
+putexcel A40 = "Mother increased earnings", txtindent(4)
+putexcel A41 = "Partner lost earnings", txtindent(4)
+putexcel A42 = "Mother increased earnings & partner lost earnings", txtindent(4)
+putexcel A43 = "Other member exit | lost earnings", txtindent(4)
+putexcel A44 = "Did not experience any event", txtindent(4)
 
 putexcel F2 = "2014: Ever BW"
 putexcel G2 = "2014: Never BW"
@@ -110,9 +127,9 @@ unique SSUID PNUM if survey_yr==2, by(ever_bw60)
 *Transitions
 gen eligible=(bw60lag==0)
 replace eligible=. if bw60lag==.
-gen transitioned=0
-replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
-replace transitioned=. if trans_bw60_alt2==.
+// gen transitioned=0
+// replace transitioned=1 if trans_bw60_alt2==1 & bw60lag==0
+// replace transitioned=. if trans_bw60_alt2==.
 // svy: tab eligible, obs
 // this is what it needs to match: svy: tab survey trans_bw60_alt2 if bw60lag==0, row
 
@@ -476,6 +493,34 @@ foreach var in status_b11 status_b12{
 		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
 		local ++i
 	}
+
+* Children info
+// test: svy: mean any_pre3_child any_pre5_child oldest_age youngest_age all_ages minorbiochildren
+
+local colu "C D"
+local i=1
+
+foreach var in any_pre3_child any_pre5_child oldest_age youngest_age all_ages minorbiochildren{
+		
+		forvalues y=1/2{
+			local col: word `y' of `colu'
+			local row = `i'+31
+			svy: mean `var' if survey_yr==`y'
+			matrix `var'_`y' = e(b)
+			putexcel `col'`row' = matrix(`var'_`y'), nformat(#.##%)
+		}
+		
+		svy: mean `var'
+		matrix `var' = e(b)
+		putexcel B`row' = matrix(`var'), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==1
+		matrix `var'_ever = e(b)
+		putexcel F`row' = matrix(`var'_ever), nformat(#.##%)
+		svy: mean `var' if survey_yr==2 & ever_bw60==0
+		matrix `var'_never = e(b)
+		putexcel G`row' = matrix(`var'_never), nformat(#.##%)
+		local ++i
+	}
 	
 * Pathway (just among eligible mothers)
 local colu "C D"
@@ -485,7 +530,7 @@ foreach var in ft_partner_leave mt_mom ft_partner_down_only ft_partner_down_mom 
 
 			forvalues y=1/2{
 			local col: word `y' of `colu'
-			local row = `i'+36
+			local row = `i'+38
 			svy: mean `var' if survey_yr==`y' & bw60lag==0
 			matrix `var'_`y' = e(b)
 			putexcel `col'`row' = matrix(`var'_`y'), nformat(#.##%)
@@ -675,6 +720,41 @@ foreach var in status_b11 status_b12{
 		local ++i
 }	
 
+* Child info
+local colu1 "I M"
+local colu2 "J N"
+local colu3 "K O"
+local colu4 "L P"
+local i=1
+
+foreach var in any_pre3_child any_pre5_child oldest_age youngest_age all_ages minorbiochildren{
+		
+		forvalues y=1/2{
+			local col1: word `y' of `colu1'
+			local col2: word `y' of `colu2'
+			local col3: word `y' of `colu3'
+			local col4: word `y' of `colu4'
+			local row = `i'+31
+			
+			svy: mean `var' if survey_yr==`y' & transitioned==1
+			matrix `var'_`y' = e(b)
+			putexcel `col1'`row' = matrix(`var'_`y'), nformat(#.##%)
+			
+			svy: mean `var' if survey_yr==`y' & bw_at_birth==1
+			matrix `var'_`y' = e(b)
+			putexcel `col2'`row' = matrix(`var'_`y'), nformat(#.##%)
+			
+			svy: mean `var' if survey_yr==`y' & bw_at_birth==1 & always_bw==1
+			matrix `var'_`y' = e(b)
+			putexcel `col3'`row' = matrix(`var'_`y'), nformat(#.##%)
+
+			svy: mean `var' if survey_yr==`y' & always_bw==1
+			matrix `var'_`y' = e(b)
+			putexcel `col4'`row' = matrix(`var'_`y'), nformat(#.##%)
+		}
+		local ++i
+}	
+
 /* Marital Status - change in year
 
 gen married = no_status_chg==1 & end_marital_status==1
@@ -747,6 +827,13 @@ ttest ageb14, by(survey)
 
 ttest status_b11, by(survey) // married
 ttest status_b12, by(survey) // not
+
+ttest any_pre3_child, by(survey) 
+ttest any_pre5_child, by(survey)
+ttest oldest_age, by(survey)
+ttest youngest_age, by(survey)
+ttest all_ages, by(survey)
+ttest minorbiochildren, by(survey)
 
 tab survey ft_partner_leave if trans_bw60_alt2==1 & bw60lag==0, row
 ttest ft_partner_leave if trans_bw60_alt2==1 & bw60lag==0, by(survey)
