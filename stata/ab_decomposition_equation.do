@@ -1507,12 +1507,33 @@ browse SSUID PNUM year bw60 trans_bw60_alt2 firstbirth yrfirstbirth bw60_mom mom
 unique SSUID PNUM if mom_panel==1 // 1887 moms became mom in the panel
 unique SSUID PNUM if mom_panel==1, by(survey)
 unique SSUID PNUM if firstbirth==1, by(survey) // but less had FIRST birth in panel
+// browse SSUID PNUM survey year mom_panel firstbirth yrfirstbirth bw60_mom
+tab mom_panel firstbirth
+
+gen observe_transition=0
+replace observe_transition=1 if firstbirth==1 & firstbirth[_n-1]==0 & SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==year[_n-1]+1
+
+// perhaps bc had birth but not living with kid? try this - minorbiochildren
+gen coreside_birth=0
+replace coreside_birth=1 if firstbirth==1 & minorbiochildren!=0
 
 // or do I use tab firstbirth since that should be the unique number of first births, since each mom only gets 1 first birth // but this is lower at 1,298 -- is this because we only keep her if we have an observation the year prior? I think so
 tab bw60_mom if firstbirth==1 & mom_panel==1 // 231 out of 1298 = 17.80% in YEAR of first birth
 tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 // 14.99%
 tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 // 19.37% - so this is in paper page 3
+tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 & yrfirstbirth!=2013 // okay so even if restrict to not those in 2013 (aka we didn't observe prior, still 19.57%)
+tab bw60_mom if observe_transition==1 & mom_panel==1 & survey==2014 // so even if I say we had to observe the transition, it'still 19.51%
+tab bw60_mom if coreside_birth==1 & mom_panel==1 & survey==2014 
 tab bw60_mom if year==yrfirstbirth-1 & mom_panel==1 // year prior - 104, but we only have 468 records here - don't have year prior for all, so probably less useful
+tab observe_transition
+tab coreside_birth if observe_transition==1
+tab bw60_mom if observe_transition==1 & coreside_birth==1
+tab durmom_1st if survey==2014 & year!=2013 // this 506 almost exactly matches theirs (503)
+sum bw60_mom if survey==2014 & year!=2013 & durmom_1st==0 // essentially what they did? okay but this is 19.56%. okay but they also said bwmom ONLY if coresiding so base stays 506 but they turned bw60_mom to 0 if not
+
+gen bw60_mom_adj=bw60_mom
+replace bw60_mom_adj=0 if minorchildren==0
+sum bw60_mom_adj if survey==2014 & year!=2013 & durmom_1st==0 
 
 tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==1996 & race==1 
 tab bw60_mom if firstbirth==1 & mom_panel==1 & survey==2014 & race==1
