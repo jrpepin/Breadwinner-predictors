@@ -42,10 +42,10 @@ conflict_prefer("remove", "base")
 # Set-up the Directories
 #####################################################################################
 # Filepath to this project's directory
-projcode <- here()
+projcode <- file.path("C:/Users/Joanna/Dropbox/Repositories/Breadwinner-predictors")
 
 # Filepath to the directory where data is stored (NOT SHARED)
-dataDir <- file.path("C:/Users/Joanna/Box/Breadwinning/Predictor paper/Demography/Revisions")
+dataDir <- file.path("C:/Users/Joanna/Box/Breadwinning/Predictor paper/Demography")
 
 # Filepath where you want produced figures to go (NOT SHARED)
 figDir  <- file.path(projcode, "output/results/figures")
