@@ -1073,6 +1073,31 @@ svy: tab pathway_detail_v2 transitioned if sample==1 & survey==2014, row
 svy: tab survey transitioned if sample==1 & inlist(pathway_detail_v2,11,13), row // other HH change, no mom change
 svy: tab survey transitioned if sample==1 & inlist(pathway_detail_v2,12,14), row // other HH change, mom earnings up
 
+********************************************************************************
+**# * Get lookup of mothers pathways
+********************************************************************************
+tab pathway survey, col
+tab pathway survey if bw60lag==0, col
+tab pathway survey if bw60lag==0 & trans_bw60_alt2==1, col
+
+browse SSUID PNUM survey year pathway
+unique SSUID PNUM year if bw60lag==0 & trans_bw60_alt2==1 & survey==2014, by(pathway)
+
+preserve
+keep SSUID PNUM year sample transitioned pathway
+
+gen pathway_fwd=.
+replace pathway_fwd=pathway[_n+1] if SSUID==SSUID[_n+1] & PNUM==PNUM[_n+1] & year==(year[_n+1]-1) 
+label values pathway_fwd pathway
+
+// gen pathway_lag=.
+// replace pathway_lag=pathway[_n-1] if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & year==(year[_n-1]+1)
+// label values pathway_lag pathway
+
+save "$tempdir/mom_pathway_lookup.dta", replace
+
+restore
+
 /*
 ********************************************************************************
 **# * Second specification: "Mom" is reference category, rest are unique

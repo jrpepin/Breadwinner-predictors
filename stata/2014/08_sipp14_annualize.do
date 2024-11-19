@@ -216,7 +216,9 @@ gen ratio = distro / distro14
 
 save "$tempdir/partner_distro_lookup.dta", replace
 
+********************************************************************************
 **# Start here if don't need to change above
+********************************************************************************
 //*Back to original and testing match
 
 use "$SIPP14keep/sipp14tpearn_rel", clear
@@ -303,6 +305,68 @@ forvalues n=1/22{
 	replace sex_sp=to_sex`n' if spart_num==`n'	
 }
 
+********************************************************************************
+**# Some exploration pre annualization
+********************************************************************************
+// add on pathway info (this is created in later step, so this really only works as an exploratory exercise)
+capture drop _merge
+merge m:1 SSUID PNUM year using "$tempdir/mom_pathway_lookup.dta"
+drop if _merge==2
+drop _merge
+
+unique SSUID PNUM year if sample==1 & transitioned==1, by(pathway)
+browse SSUID PNUM year sample transitioned pathway
+
+sort SSUID PNU year panelmonth
+browse SSUID PNUM year panelmonth pathway earnings earnings_sp ft_pt ft_pt_sp full_part full_no part_full no_full part_no no_part full_part_sp full_no_sp part_full_sp no_full_sp part_no_sp no_part_sp 
+
+browse SSUID PNUM year panelmonth pathway earnings earnings_sp ft_pt ft_pt_sp if pathway==4 | pathway_fwd==4 // do most of the changes happen in year OF transition or year prio?
+
+// change in earnings within year
+gen earnings_z = earnings
+replace earnings_z = 0 if earnings==.
+
+by SSUID PNUM (panelmonth), sort: gen earn_change = ((earnings_z -earnings_z[_n-1])/earnings_z [_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+by SSUID PNUM (panelmonth), sort: gen earn_change_raw = (earnings_z -earnings_z[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+
+gen earnings_z_sp = earnings_sp
+replace earnings_z_sp = 0 if earnings_sp==.
+
+by SSUID PNUM (panelmonth), sort: gen earn_change_sp = ((earnings_z_sp -earnings_z_sp[_n-1])/earnings_z_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+by SSUID PNUM (panelmonth), sort: gen earn_change_raw_sp = (earnings_z_sp -earnings_z_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
+
+sort SSUID PNUM year panelmonth
+gen month_path4=.
+replace month_path4=monthcode if pathway==4
+replace month_path4=monthcode-12 if pathway_fwd==4
+
+browse SSUID PNUM year panelmonth monthcode month_path4 pathway pathway_fwd earnings earn_change_raw earnings_sp earn_change_raw_sp sample transitioned if pathway==4 | pathway_fwd==4 // do most of the changes happen in year OF transition or year prio? AND it probably matters whether or not she becomes BW. bc right now, they are in mom up, partner down, even if it doesn't make moms' earnings surpass partners'
+
+// trends by month
+preserve
+
+collapse (mean) earnings earnings_sp if pathway==4 | pathway_fwd==4 & transitioned==1 & sample==1, by(month_path4)
+// collapse (mean) earnings earnings_sp if pathway==4 & transitioned==1 & sample==1, by(monthcode)
+
+twoway (line earnings month_path4) (line earnings_sp month_path4), legend(position(6) rows(1))
+twoway (line earnings month_path4) (line earnings_sp month_path4, yaxis(2))
+twoway (qfit earnings panelmonth) (qfit earnings_sp panelmonth)
+
+restore
+
+preserve
+
+collapse (p50) earnings earnings_sp if pathway==4, by(monthcode)
+
+twoway (line earnings monthcode) (line earnings_sp monthcode)
+twoway (line earnings monthcode) (line earnings_sp monthcode, yaxis(2))
+twoway (lfit earnings monthcode) (lfit earnings_sp monthcode)
+
+restore
+
+********************************************************************************
+* Old exploration
+********************************************************************************
 /* exploration
 browse SSUID PNUM year monthcode panelmonth partner_lose
 tab monthcode partner_lose, column
@@ -549,7 +613,12 @@ browse SSUID PNUM year timing_left who_max_earn hh_earn_max earnings thearn_alt 
 restore
 */
 
-	// Create a combined spouse & partner indicator
+	
+********************************************************************************
+**# Create annual measures
+********************************************************************************
+
+// Create a combined spouse & partner indicator
 *	gen 	spartner=1 	if spouse==1 | partner==1
 *	replace spartner=0 	if spouse==0 & partner==0
 	
@@ -568,9 +637,6 @@ restore
 // Create basic indictor to identify months observed when data is collapsed
 	gen one=1
 	
-********************************************************************************
-* Create annual measures
-********************************************************************************
 // Creating variables to prep for annualizing
 
 foreach var of varlist employ ft_pt ems_ehc rmnumjobs marital_status occ_code* tjb*_occ{ 
