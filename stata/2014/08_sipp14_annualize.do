@@ -335,25 +335,47 @@ replace earnings_z_sp = 0 if earnings_sp==.
 by SSUID PNUM (panelmonth), sort: gen earn_change_sp = ((earnings_z_sp -earnings_z_sp[_n-1])/earnings_z_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
 by SSUID PNUM (panelmonth), sort: gen earn_change_raw_sp = (earnings_z_sp -earnings_z_sp[_n-1]) if SSUID==SSUID[_n-1] & PNUM==PNUM[_n-1] & panelmonth==panelmonth[_n-1]+1
 
+gen mom_gain_50 = .
+replace mom_gain_50 = 0 if earn_change < 0.50000
+replace mom_gain_50 = 1 if earn_change >= 0.50000 & earn_change!=.
+
+gen sp_lost_50 = .
+replace sp_lost_50 = 0 if earn_change_sp > -0.50000  & earn_change_sp!=.
+replace sp_lost_50 = 1 if earn_change_sp <= -0.50000
+
 sort SSUID PNUM year panelmonth
 gen month_path4=.
 replace month_path4=monthcode if pathway==4
 replace month_path4=monthcode-12 if pathway_fwd==4
 
-browse SSUID PNUM year panelmonth monthcode month_path4 pathway pathway_fwd earnings earn_change_raw earnings_sp earn_change_raw_sp sample transitioned if pathway==4 | pathway_fwd==4 // do most of the changes happen in year OF transition or year prio? AND it probably matters whether or not she becomes BW. bc right now, they are in mom up, partner down, even if it doesn't make moms' earnings surpass partners'
+browse SSUID PNUM year panelmonth monthcode month_path4 pathway pathway_fwd earnings earn_change mom_gain_50 earn_change_raw earnings_sp earn_change_sp  sp_lost_50 earn_change_raw_sp sample transitioned if pathway==4 | pathway_fwd==4 // do most of the changes happen in year OF transition or year prio? AND it probably matters whether or not she becomes BW. bc right now, they are in mom up, partner down, even if it doesn't make moms' earnings surpass partners'
 
-// trends by month
+// trends by month - just transitioners
 preserve
 
-collapse (mean) earnings earnings_sp if pathway==4 | pathway_fwd==4 & transitioned==1 & sample==1, by(month_path4)
+collapse (mean) earnings earnings_sp earn_change earn_change_raw earn_change_sp earn_change_raw_sp if pathway==4 | pathway_fwd==4 & transitioned==1 & sample==1, by(month_path4)
 // collapse (mean) earnings earnings_sp if pathway==4 & transitioned==1 & sample==1, by(monthcode)
 
-twoway (line earnings month_path4) (line earnings_sp month_path4), legend(position(6) rows(1))
+twoway (line earnings month_path4) (line earnings_sp month_path4), legend(position(6) rows(1) label(1 "Mom") label(2 "Partner")) xtitle("months relative to pathway") ytitle("mean monthly earnings") title("mothers who transitioned to BW as a result of pathway")
+twoway (line earn_change_raw month_path4) (line earn_change_raw_sp month_path4), legend(position(6) rows(1) label(1 "Mom") label(2 "Partner")) xtitle("months relative to pathway") ytitle("month-over-month earnings change") title("mothers who transitioned to BW as a result of pathway")
+twoway (line earn_change month_path4) (line earn_change_sp month_path4), legend(position(6) rows(1))
 twoway (line earnings month_path4) (line earnings_sp month_path4, yaxis(2))
 twoway (qfit earnings panelmonth) (qfit earnings_sp panelmonth)
 
 restore
 
+// all in sample
+preserve
+
+collapse (mean) earnings earnings_sp earn_change earn_change_raw earn_change_sp earn_change_raw_sp if pathway==4 | pathway_fwd==4 & sample==1, by(month_path4)
+// collapse (mean) earnings earnings_sp if pathway==4 & transitioned==1 & sample==1, by(monthcode)
+
+twoway (line earnings month_path4) (line earnings_sp month_path4), legend(position(6) rows(1) label(1 "Mom") label(2 "Partner")) xtitle("months relative to pathway") ytitle("mean monthly earnings") title("all eligible mothers who experienced pathway")
+twoway (line earn_change_raw month_path4) (line earn_change_raw_sp month_path4), legend(position(6) rows(1) label(1 "Mom") label(2 "Partner")) xtitle("months relative to pathway") ytitle("month-over-month earnings change") title("all eligible mothers who experienced pathway")
+
+restore
+
+// median
 preserve
 
 collapse (p50) earnings earnings_sp if pathway==4, by(monthcode)
