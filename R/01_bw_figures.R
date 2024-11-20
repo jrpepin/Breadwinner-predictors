@@ -39,7 +39,7 @@ fig1 <- ggplot(data_f1, aes(x = vals * prop,
   theme_minimal() +
   theme(legend.position     = "none",
         axis.text.x         = element_blank(),
-        axis.text.y         = element_text(face="bold", size = 8),
+        axis.text.y         = element_text(face="bold", size = 11),
         panel.grid.major    = element_blank(), 
         panel.grid.minor    = element_blank(),
         plot.title.position = "plot",
@@ -52,11 +52,12 @@ fig1 <- ggplot(data_f1, aes(x = vals * prop,
        # subtitle = "by SIPP panel and pathway",
        x        = " ", 
        y        = " ") +
-  annotate("text", x = 760, y = 1.55, label = "Bars are scaled to the \naverage annual rate of transition", size = 8/.pt, color = "#8A8A8A") 
+  annotate("text", x = 760, y = 1.55, label = "Bar totals and scale indicate the \naverage annual rate of transition", size = 8/.pt, color = "black") 
 
 fig1
 
 ggsave(filename = file.path(figDir, "fig1.png"), fig1, width=6.5, height=3.5, units="in", dpi=300, bg = 'white')
+ggsave(filename = file.path(figDir, "fig1.pdf"), fig1, width=6.5, height=3.5, units="in", dpi=300, bg = 'white', device = "pdf")
 
 
 # FIGURE 2 #####################################################################
@@ -67,14 +68,16 @@ c_palette <- c("#EF4868", "#474747", "#8A8A8A", "#C2C2C2", "#d6d6d6")
 ### create function to color strip text
 strip_palette <- strip_themed(
   # Vertical strips
-  text_y = elem_list_text(colour = c(c_palette),
-                          by_layer_y = FALSE))
+  text_y = elem_list_text(
+    colour = c("#474747"),
+#    colour = c(c_palette), # to color plot
+    by_layer_y = FALSE))
 
 ## Wrangle the data ------------------------------------------------------------
 
 data_f2$group <- factor(data_f2$group, 
                         levels = c("Hispanic", "NH Asian", "Black", "NH White", "  ",
-                                   "College Plus", "Some College",  "HS Degree or Less", " ",
+                                   "College Plus", "Some College",  "HS Diploma or Less", " ",
                                    "Total"), ordered = FALSE)
 
 data_f2$event <- factor(data_f2$event, 
@@ -84,17 +87,18 @@ data_f2$event <- factor(data_f2$event,
                                    "Other member exited or earnings decreased"), ordered = FALSE)
 
 levels(data_f2$event)[levels(data_f2$event)=="Mother increased earnings & partner lost earnings"] <- "Mother increased earnings & \npartner lost earnings"
-
+levels(data_f2$event)[levels(data_f2$event)=="Other member exited or earnings decreased"] <- "Other member exited or \nearnings decreased"
 
 ## Create Figure  --------------------------------------------------------------
-fig2 <- ggplot(data_f2, aes(x=group, y=vals)) +
-  geom_segment( aes(x=group, xend=group, y=0, yend=vals), color="#474747") +
-  geom_point( aes(color=event), size=3) +
+fig2 <- ggplot(data_f2, aes(x=group, y=vals*100)) +
+  geom_segment( aes(x=group, xend=group, y=0, yend=vals*100), color="#474747") +
+#  geom_point( aes(color=event), size=3) +
+  geom_point( color="#474747", size=3) +
   geom_hline(yintercept = 0) +
   ggh4x::facet_grid2(rows   = vars(event), switch = "y", strip = strip_palette) +
+# facet_grid(rows   = vars(event), switch = "y") +
   coord_flip() +
-  scale_color_manual(values = c(c_palette)) +
-  scale_y_continuous(labels = scales::percent_format(scale = 100)) +
+#  scale_color_manual(values = c(c_palette)) +
   scale_x_discrete(drop=FALSE) +
   theme_minimal() +
   theme(
@@ -105,12 +109,14 @@ fig2 <- ggplot(data_f2, aes(x=group, y=vals)) +
     legend.position     = "none",
     strip.placement     = "outside",
     strip.text.y.left   = element_markdown(angle = 0, face = "bold"),
+    axis.title.y        = element_markdown(face = "bold"), 
     plot.title.position = "plot") +
   labs(# title = "Total amount of the growth in maternal primary-earning explained",
     # subtitle = "by each pathway and disaggregated by demographic group",
     x    = " ", 
-    y    = "% explained") 
+    y    = "% Explained") 
 
 fig2
 
 ggsave(filename = file.path(figDir, "fig2.png"), fig2, width=6, height=9, units="in", dpi=300, bg = 'white')
+ggsave(filename = file.path(figDir, "fig2.pdf"), fig2, width=6, height=9, units="in", dpi=300, bg = 'white', device = "pdf")
